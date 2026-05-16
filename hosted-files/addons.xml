@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<addons>
+<addon id="repository.blacklanturn"
+       name="BlackLanturn Repository"
+       version="1.0.0"
+       provider-name="RockyB239">
+    <extension point="xbmc.addon.repository"
+               name="BlackLanturn Repository">
+        <info compressed="false">https://rockyb239.github.io/blacklanturn/addons.xml</info>
+        <checksum>https://rockyb239.github.io/blacklanturn/addons.xml.md5</checksum>
+        <datadir zip="true">https://rockyb239.github.io/blacklanturn/</datadir>
+    </extension>
+    <extension point="xbmc.addon.metadata">
+        <summary lang="en_US">BlackLanturn Kodi Repository</summary>
+        <description lang="en_US">Repository for the BlackLanturn Installer and related Kodi build tools.</description>
+        <disclaimer lang="en_US">Private repository for BlackLanturn Kodi build deployment.</disclaimer>
+        <platform>all</platform>
+        <assets>
+            <icon>icon.png</icon>
+        </assets>
+    </extension>
+</addon>
+<addon id="plugin.program.blacklanturninstaller"
+       name="BlackLanturn Installer"
+       version="1.0.0"
+       provider-name="RockyB239">
+    <requires>
+        <import addon="xbmc.python" version="3.0.0"/>
+    </requires>
+    <extension point="xbmc.python.pluginsource"
+               library="default.py">
+        <provides>executable</provides>
+    </extension>
+    <extension point="xbmc.addon.metadata">
+        <summary lang="en_US">BlackLanturn Build Installer</summary>
+        <description lang="en_US">Installs and manages BlackLanturn Kodi builds.</description>
+        <disclaimer lang="en_US">Private BlackLanturn build installer.</disclaimer>
+        <platform>all</platform>
+        <assets>
+            <icon>icon.png</icon>
+        </assets>
+    </extension>
+</addon>
+</addons>
