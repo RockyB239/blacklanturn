@@ -1,13 +1,15 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <addon id="repository.blacklanturn"
        name="BlackLanturn Repository"
-       version="1.0.0"
+       version="1.0.1"
        provider-name="RockyB239">
     <extension point="xbmc.addon.repository"
                name="BlackLanturn Repository">
-        <info compressed="false">https://rockyb239.github.io/blacklanturn/addons.xml</info>
-        <checksum>https://rockyb239.github.io/blacklanturn/addons.xml.md5</checksum>
-        <datadir zip="true">https://rockyb239.github.io/blacklanturn/</datadir>
+        <dir minversion="21.0.0">
+            <info compressed="false">https://rockyb239.github.io/blacklanturn/addons.xml</info>
+            <checksum>https://rockyb239.github.io/blacklanturn/addons.xml.md5</checksum>
+            <datadir zip="true">https://rockyb239.github.io/blacklanturn/</datadir>
+        </dir>
     </extension>
     <extension point="xbmc.addon.metadata">
         <summary lang="en_US">BlackLanturn Kodi Repository</summary>
