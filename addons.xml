@@ -2,7 +2,7 @@
 <addons>
 <addon id="repository.blacklanturn"
        name="BlackLanturn Repository"
-       version="1.0.4"
+       version="1.0.5"
        provider-name="RockyB239">
     <extension point="xbmc.addon.repository"
                name="BlackLanturn Repository">
