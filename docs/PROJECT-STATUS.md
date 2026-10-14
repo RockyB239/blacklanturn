@@ -4,7 +4,7 @@ Kodi 21.3 Omega remains the target. BlackLanturn Repository and the OpenWizard-b
 
 ## Hosting and editions
 
-GitHub Pages hosts repository metadata, Installer 1.0.8, setup guidance and the new catalog at `hosted-files/builds-v2.txt`. GitHub Release `v1.1.0` hosts exactly two clean payload assets:
+GitHub Pages hosts repository metadata, Installer 1.0.9, setup guidance and the new catalog at `hosted-files/builds-v2.txt`. GitHub Release `v1.1.0` hosts exactly two clean payload assets:
 
 - General: Fire TV/Android, derived from the existing Fire Stick edition, with its tested YouTube fix and lower-memory defaults.
 - Apple TV & Mac: Mac baseline shared skin/controller, with platform-native components retained. Apple TV quality was not reduced.
@@ -24,3 +24,5 @@ Full clean ZIP installation on the personal Apple TV or Fire Stick was not perfo
 ## Recovery
 
 Previous clean editions are archived locally before cloud retirement. Private device recovery/preferences remain access-restricted and excluded from publication. Repository rollback is available through Git history; restore old payload links only when their corresponding verified downloads are available again.
+
+Installer 1.0.9 corrects combined Apple TV & Mac card naming and removes the old Apple Silicon-only subtitle; the 1.0.8 native safeguard and immutable build payloads are unchanged.
