@@ -1,0 +1,31 @@
+BlackLanturn 1.1.1 • Kodi 21.3 Omega
+
+Install BlackLanturn Installer 1.0.8 or newer. Choose the matching edition:
+• General: Fire TV / Android. Fire TV Stick 4K Max second generation is the tested device. Other Android hardware has not been device-tested.
+• Apple TV & Mac: compatible signed Apple TV Kodi 21.3 app, or macOS Kodi 21.3. Apple TV 4K third generation and Apple Silicon Mac were tested. This ZIP does not install or sign Kodi itself.
+
+The installer checks the download and native playback components before cleanup. Existing compatible components and their preferences are kept. If Kodi asks to install InputStream Adaptive, approve its official Kodi repository installation. If setup is canceled or a required component is unavailable, the existing build is kept. An existing incompatible native version must be updated in Kodi before retrying. No native binaries from another device are included.
+
+Getting started
+1. Open BlackLanturn Settings → Integrations and authorize Trakt in TMDbHelper for rows/watchlists.
+2. Authorize Trakt in Umbrella for playback progress. These are the two Trakt integrations in the clean build; the separate Kodi Trakt service and THE CREW are not included.
+3. In Umbrella settings, connect your own supported debrid service, such as TorBox or AllDebrid. Enable/configure CocoScrapers if needed. Choose Auto Play or Source Select in an episode’s options → Set default player.
+4. Configure YouTube with your own account/API setup using the add-on’s settings and its official setup help. This build contains no personal YouTube keys or logins. Keep InputStream Adaptive and MPEG-DASH enabled for the included preview fix. Preview preference is initially manual; enable automatic previews in BlackLanturn after YouTube works.
+5. MDBList/rating credentials are optional and must be your own. No personal credentials are bundled.
+
+Navigation
+Select an episode to play directly. Use its options for details, playback choices, watched status and default player. My Stuff puts device-local Saved items first, followed by Trakt lists. Season cards favor season posters; episode cards retain landscape thumbnails. International uses non-US production country and includes English-language international productions.
+
+Next Up
+The image-first overlay uses available credit markers, with a 60-second remaining-time fallback. Markers are source-dependent and are not guaranteed. Play now advances to the next episode. Stop watching clears the queue and stops playback. Back/dismiss closes the overlay while the normal next-episode queue remains active.
+
+Validation limits
+Targeted native updates and playback/navigation were tested. Complete ZIP fresh installs were not performed on the personal Fire Stick or Apple TV. The portable native-dependency installation flow has behavioral tests; wider Android/Intel Mac devices are not claimed as tested. No Apple TV screenshot acceptance is claimed.
+
+Recovery
+The installer’s backup/restore tools can save a private recovery copy before installing. Keep backups on local/off-device storage when device space is limited. Public payloads are clean and cannot restore personal credentials; reconnect services after a fresh install.
+
+Release 1.1.1
+Controller 0.1.41 adds recoverable startup failure handling, bounded session-only browsing cache and Movies & Shows global search. Installer 1.0.9 includes the tested Apple TV & Mac labels. The skin remains 0.1.38. Existing edition-specific quality and YouTube defaults are preserved. Bedroom SDR-only source preferences are not distributed; owners choose source formats appropriate to their display. No live-device account settings were used to create this release.
+
+Validation for this update: targeted device tests of startup and cache on Mac, Apple TV and Fire Stick; combined search native-tested on Mac with regression tests. Search was not separately native-tested on Apple TV/Fire Stick. This release does not claim a new full clean install on those devices.
