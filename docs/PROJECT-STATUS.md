@@ -4,12 +4,12 @@ Kodi 21.3 Omega remains the target. BlackLanturn Repository and the OpenWizard-b
 
 ## Hosting and editions
 
-GitHub Pages hosts repository metadata, Installer 1.0.11, setup guidance and the new catalog at `hosted-files/builds-v2.txt`. GitHub Release `v1.1.4` hosts exactly two current clean payload assets:
+GitHub Pages hosts repository metadata, Installer 1.0.12, setup guidance and the new catalog at `hosted-files/builds-v2.txt`. GitHub Release `v1.1.5` hosts exactly two current clean payload assets:
 
 - General: Fire TV/Android, derived from the existing Fire Stick edition, with its tested YouTube fix and lower-memory defaults.
 - Apple TV & Mac: Mac baseline shared skin/controller, with platform-native components retained. Apple TV quality was not reduced.
 
-The old `hosted-files/builds.txt` remains upgrade metadata for older installers. Its old edition names and versions are retained, but payload links are retired. Update the installer to 1.0.11 before using the current packages. Never put the new payload URLs in the legacy catalog: older installers lack native-component preservation.
+The old `hosted-files/builds.txt` remains upgrade metadata for older installers. Its old edition names and versions are retained, but payload links are retired. Update the installer to 1.0.12 before using the current packages. Never put the new payload URLs in the legacy catalog: older installers lack native-component preservation.
 
 ## Install safeguard
 
@@ -67,6 +67,6 @@ The new regression failed on the old timeout behavior and passed after correctio
 
 Controller 0.1.73 promotes the native-tested search/preloading overlay with lifecycle ownership and monotonic generation fixes; the 0.1.71 retry safety is retained. Installer 1.0.12 carries the exact 471-file Helper manifest with empty-cache-1/search-batch-1 and retains per-addon auto-update protection. Both clean editions package the maintained source and explicit playback, watch, artwork and buffer defaults. The rejected 0.1.70 progressive experiment remains excluded.
 
-Source checks: 480 controller tests, 119 installer tests and fresh12-case native cache regression passed. Both1.1.5 packages passed exact-source and compatibility verification. Native three-device rollout and live release acceptance are recorded after deployment; source preparation alone is not an installed or published acceptance claim.
+Source checks: 480 controller tests, 119 installer tests and fresh12-case native cache regression passed. Both1.1.5 packages passed exact-source and compatibility verification. Native acceptance and independent restart/source/preservation audits passed on Fire Stick, Mac and Apple TV. See RELEASE_1_1_5_VALIDATION.md for exact scope, crash diagnosis and limits.
 
-The October17native crash reproduction identified a direct diagnostic artwork-label getter during row replacement. Maintained native probes now marshal coherent metadata snapshots through the GUI thread; controller0.1.73 also dispatches its label reads and rechecks row/preview ownership after waits. See RELEASE_1_1_5_HOLD.md for the current native acceptance gate.
+The October17native crash reproduction identified a direct diagnostic artwork-label getter during row replacement. Maintained native probes now marshal coherent metadata snapshots through the GUI thread; controller0.1.73 also dispatches its label reads and rechecks row/preview ownership after waits. The native hold is lifted; see RELEASE_1_1_5_VALIDATION.md for evidence and limits.
