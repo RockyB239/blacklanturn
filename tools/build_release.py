@@ -1,4 +1,4 @@
-"""Reproducible 1.1.3 release from verified clean baselines, never live profiles."""
+"""Reproducible 1.1.4 release from verified clean baselines, never live profiles."""
 import argparse,ast,hashlib,importlib.util,json,re,sys,xml.etree.ElementTree as ET,zipfile
 from pathlib import Path
 ROOT=Path(__file__).resolve().parents[1]
@@ -27,7 +27,7 @@ def build(baselines,output):
   data.update({prefix+n:d for n,d in installer.items()})
   controller_root=ROOT/'controller-source/addon'
   controller={str(p.relative_to(controller_root)):p.read_bytes() for p in controller_root.rglob('*') if p.is_file() and '__pycache__' not in p.parts and p.suffix!='.pyc'}
-  expected_controller=json.loads((ROOT/'controller-source/manifest67.json').read_text())['files']
+  expected_controller=json.loads((ROOT/'controller-source/manifest71.json').read_text())['files']
   assert {n:sha(raw) for n,raw in controller.items()}==expected_controller,'Validated controller changed'
   cp='addons/script.blacklanturn.preview/'
   data={n:raw for n,raw in data.items() if not n.startswith(cp)}
@@ -45,10 +45,22 @@ def build(baselines,output):
   hp='userdata/addon_data/plugin.video.themoviedb.helper/settings.xml'
   helper_settings=ET.fromstring(data[hp]);quality=next(n for n in helper_settings if n.get('id')=='artwork_quality');quality.attrib.pop('default',None);quality.text='1'
   data[hp]=ET.tostring(helper_settings,encoding='utf-8',xml_declaration=True)
-  marker=json.loads(data['userdata/blacklanturn-build.json']);marker.update(schema=2,build_version='1.1.3',helper_patch='empty-cache-1',installer_min_version='1.0.11',controller_version='0.1.67',helper_search_patch='search-empty-1')
+  def apply_settings(path,values):
+   root=ET.fromstring(data[path])
+   for key,value in values.items():
+    node=next((n for n in root if n.get('id')==key),None)
+    if node is None:node=ET.SubElement(root,'setting',id=key)
+    node.attrib.pop('default',None);node.attrib.pop('value',None);node.text=value
+   data[path]=ET.tostring(root,encoding='utf-8',xml_declaration=True)
+  up='userdata/addon_data/plugin.video.umbrella/settings.xml'
+  yp='userdata/addon_data/plugin.video.youtube/settings.xml'
+  apply_settings(up,{'provider.external.enabled':'true','external_provider.module':'script.module.cocoscrapers','external_provider.name':'cocoscrapers'})
+  apply_settings(yp,{'kodion.mpd.stream.select':'1','kodion.video.stream.select':'1'})
+  apply_settings(hp,{'trakt_watchedindicators':'true'})
+  marker=json.loads(data['userdata/blacklanturn-build.json']);marker.update(schema=2,build_version='1.1.4',helper_patch='empty-cache-1',installer_min_version='1.0.11',controller_version='0.1.71',helper_search_patch='search-empty-1')
   data['userdata/blacklanturn-build.json']=json.dumps(marker,indent=2).encode()
-  data['userdata/BlackLanturn-README.txt']=(before['userdata/BlackLanturn-README.txt'].decode()+'\n\nRelease 1.1.3: validated controller 0.1.67 navigation/search/playback improvements, exact managed Helper search-empty repair, and Installer 1.0.11 authorization-only preservation. Requires Installer 1.0.11. Experimental controllers 0.1.69 and 0.1.70 are excluded. Includes the tested 64MB fixed4x video cache and High artwork defaults. For a clean account-only install, enable Clean install: keep only selected accounts and the desired Keep Trakt/Debrid/Login choices. Native playback components remain device-specific.\n').encode()
-  allowed={n for n in set(before)|set(data) if n.startswith((prefix,cp))}|{'userdata/blacklanturn-build.json','userdata/BlackLanturn-README.txt','userdata/guisettings.xml',hp,target}
+  data['userdata/BlackLanturn-README.txt']=(before['userdata/BlackLanturn-README.txt'].decode()+'\n\nRelease 1.1.4: controller 0.1.71 with preview retry-race correction and restored Cocoscrapers/automatic-preview defaults, exact managed Helper search-empty repair, and Installer 1.0.11 authorization-only preservation. Requires Installer 1.0.11. Experimental controllers 0.1.69 and 0.1.70 are excluded. Includes the tested 64MB fixed4x video cache and High artwork defaults. For a clean account-only install, enable Clean install: keep only selected accounts and the desired Keep Trakt/Debrid/Login choices. Native playback components remain device-specific.\n').encode()
+  allowed={n for n in set(before)|set(data) if n.startswith((prefix,cp))}|{'userdata/blacklanturn-build.json','userdata/BlackLanturn-README.txt','userdata/guisettings.xml',hp,up,yp,target}
   changed={n for n in set(before)|set(data) if before.get(n)!=data.get(n)};assert changed<=allowed
   for n,raw in data.items():
    assert n.startswith(('addons/','userdata/')) and '..' not in n.split('/')
@@ -57,17 +69,17 @@ def build(baselines,output):
    assert not raw.startswith((b'\x7fELF',b'\xcf\xfa\xed\xfe',b'\xfe\xed\xfa\xcf',b'MZ'))
    if n.endswith('/addon.xml'):ET.fromstring(raw)
    if n.endswith('.py') and n!=prefix+'resources/libs/zipfile.py':ast.parse(raw,n)
-   if n.startswith('userdata/') and n not in ('userdata/blacklanturn-build.json','userdata/BlackLanturn-README.txt','userdata/guisettings.xml',hp):assert raw==before[n],'Userdata changed'
+   if n.startswith('userdata/') and n not in ('userdata/blacklanturn-build.json','userdata/BlackLanturn-README.txt','userdata/guisettings.xml',hp,up,yp):assert raw==before[n],'Userdata changed'
   addons={n.split('/')[1]:ET.fromstring(raw) for n,raw in data.items() if n.startswith('addons/') and n.endswith('/addon.xml')}
   system={'xbmc.python','xbmc.gui','xbmc.json','xbmc.addon','kodi.resource','script.module.pil','script.module.pycryptodome','inputstream.adaptive'}
   for aid,addon in addons.items():
    for dep in addon.findall('./requires/import'):
     if dep.get('optional')=='true':continue
     assert dep.get('addon') in addons or dep.get('addon') in system,(aid,dep.get('addon'))
-  out=output/f'BlackLanturn-{edition}-Kodi21-1.1.3.zip';zipwrite(out,data)
+  out=output/f'BlackLanturn-{edition}-Kodi21-1.1.4.zip';zipwrite(out,data)
   with zipfile.ZipFile(out) as z:managed.verify_archive(z)
   files={n:sha(d) for n,d in sorted(data.items())}
-  report={'file':out.name,'sha256':sha(out.read_bytes()),'bytes':out.stat().st_size,'files':len(data),'changed_paths':sorted(changed),'helper':'6.17.9 + empty-cache-1 + search-empty-1','installer':'1.0.11','schema':2,'settings_and_rows':'clean 1.1.2 plus exact 64MB/4x buffer and High artwork defaults','native_binaries':0}
+  report={'file':out.name,'sha256':sha(out.read_bytes()),'bytes':out.stat().st_size,'files':len(data),'changed_paths':sorted(changed),'helper':'6.17.9 + empty-cache-1 + search-empty-1','installer':'1.0.11','schema':2,'settings_and_rows':'clean 1.1.2 plus exact playback-provider, automatic-preview, watch-indicator, 64MB/4x buffer and High artwork defaults','native_binaries':0}
   (output/(edition+'-package.json')).write_text(json.dumps(report,indent=2));(output/(edition+'-manifest.json')).write_text(json.dumps(files,indent=2));print(json.dumps(report),flush=True)
 if __name__=='__main__':
  p=argparse.ArgumentParser();p.add_argument('--baselines',type=Path,required=True);p.add_argument('--output',type=Path,required=True);a=p.parse_args();build(a.baselines,a.output)

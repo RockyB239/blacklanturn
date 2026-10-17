@@ -1,10 +1,10 @@
-# BlackLanturn distribution — 1.1.3
+# BlackLanturn distribution — 1.1.4
 
 Kodi 21.3 Omega remains the target. BlackLanturn Repository and the OpenWizard-based BlackLanturn Installer retain their existing identities.
 
 ## Hosting and editions
 
-GitHub Pages hosts repository metadata, Installer 1.0.11, setup guidance and the new catalog at `hosted-files/builds-v2.txt`. GitHub Release `v1.1.3` hosts exactly two clean payload assets:
+GitHub Pages hosts repository metadata, Installer 1.0.11, setup guidance and the new catalog at `hosted-files/builds-v2.txt`. GitHub Release `v1.1.4` hosts exactly two current clean payload assets:
 
 - General: Fire TV/Android, derived from the existing Fire Stick edition, with its tested YouTube fix and lower-memory defaults.
 - Apple TV & Mac: Mac baseline shared skin/controller, with platform-native components retained. Apple TV quality was not reduced.
@@ -53,3 +53,12 @@ Release v1.1.3 is published. Both anonymous payload downloads passed full hash/C
 A full personal Fire Stick installation through the published Installer 1.0.11 completed on 2026-10-17. The downloaded payload and all 36 packaged addon source manifests matched; the only additional physical addon was the required device-native inputstream.adaptive. After restarting Kodi, all selected authorization fields/files were unchanged, controller 0.1.67 and Helper source hashes matched, High artwork and the 64MB/400/4/131072 buffer defaults were active, and the existing addon database passed integrity_check with Helper automatic updates disabled. The separately approved Fire SDR/decoder compatibility choices were retained on that device only.
 
 Acceptance limits: Home recommendations populated; an empty A24 collection search returned a successful empty directory; the TMDb weekly TV route populated. The configured Trakt Trending routes returned HTTP 429 during acceptance, and the failure-cache guard logged that the failed request would not be cached. This remains a provider limitation; clean installation does not prove that those rows or all watched markers currently load. A generated 720p H264 clip advanced normally after a slow initial HTTP stat/open. First clean startup and uncached A24 search did not establish a speed improvement. Full personal Apple TV clean installation and universal device/remote-stream reliability remain untested.
+
+
+## Release 1.1.4 — missing functional defaults and preview retry race
+
+Real use after the 1.1.3 clean install exposed acceptance gaps. Sparse sanitized preferences omitted Umbrella's enabled/assigned Cocoscrapers integration, YouTube's automatic stream selection and Helper's enabled Trakt watched indicators. Preserving accounts alone did not restore these required build defaults. Both reproducible payloads now set these noncredential defaults explicitly, and package verification rejects their absence. Edition quality limits, player choices, buffer defaults and account isolation remain unchanged.
+
+Controller 0.1.71 fixes a separate evidenced race. The previous preview fallback launched a second candidate after 12 seconds while the first YouTube resolver remained active. The first resolver later opened its stream; Kodi logged MediaCodec InstanceGuard locked and failed codec creation. Slow resolution now cannot dispatch another candidate; fallback follows a terminal playback error. The rejected progressive-results work is excluded.
+
+The new regression failed on the old timeout behavior and passed after correction; all 435 controller tests passed. The Fire Stick's actual Umbrella loader changed from zero to four providers. The Hill House preview remained embedded, advanced normally and stopped on navigation. The normal movie Play button opened Game Night in 3840x2160 HEVC with DTS-HD MA 5.1; it advanced and returned to browsing after stopping. This verifies targeted repair of the known clean-installed profile, not a second full 1.1.4 wipe, universal source reliability, all watched markers, or a browsing-speed improvement. Recovery and deferred experiments remain private and intact.

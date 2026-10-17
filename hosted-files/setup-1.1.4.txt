@@ -1,0 +1,33 @@
+BlackLanturn 1.1.4 - Kodi 21.3 Omega
+
+Update to BlackLanturn Installer 1.0.11 before installing. Open Add-ons > My add-ons > Program add-ons > BlackLanturn Installer > Versions if Kodi still offers an earlier installer; refresh BlackLanturn Repository first if needed.
+
+Choose General for Fire TV / Android, or Apple TV & Mac for the matching Kodi 21.3 platform. Native playback components are checked before cleanup and kept for the device. No foreign native binaries, device registry, or personal credentials are in these ZIPs.
+
+Clean install with accounts only
+1. Open BlackLanturn Installer Settings > Install Settings.
+2. Turn on "Clean install: keep only selected accounts".
+3. Leave Keep My Trakt Data, Keep My Debrid Data, and Keep My Login Data enabled for the authorizations you want to retain.
+4. Open the installer Builds catalog, choose your edition, and choose Install. Confirm the download/install prompt. The account-only option overrides other Keep Settings choices: old preferences, favorites, sources, repositories, and addon whitelist are reset.
+5. Wait for download verification, playback preflight, cleanup and extraction. Confirm the completion message to close Kodi, then start Kodi again.
+
+Accounts are restored only for addons actually included in the selected build. Umbrella, Helper, ResolveURL, YouTube and separate script.trakt credentials are supported when those addons are present. The separate Trakt service is not included in these clean editions. Account files and selected credential keys are retained without copying unrelated addon preferences or cached artwork/history. An interrupted install retains a pending private account backup for the matching retry; do not delete it or choose a different edition/preservation selection before completing recovery.
+
+Included playback and artwork defaults
+- Tested video cache: 64 MB, fixed 4x read factor (400), buffer mode 4, chunk size 131072. Controlled interruption trials passed on Fire Stick, Mac and Apple TV; this does not guarantee every remote source avoids buffering.
+- Cocoscrapers is enabled and assigned as the Umbrella provider module. YouTube automatically selects its preview stream without a chooser. Helper watched indicators are enabled for authorized Trakt accounts.
+- High artwork quality in both editions. Artwork is fetched through the normal provider path.
+- Existing Next Up controls, default player choices, platform-specific YouTube fixes, MPEG-DASH/InputStream preview support, and edition-specific quality limits remain included.
+- Automatic cache/package/thumbnail maintenance stays off; manual maintenance remains available.
+- TV-specific HDR/Dolby Vision filters and decoder choices are device compatibility decisions. They are not imposed globally on all downloaders.
+
+The original skin remains 0.1.38. Controller 0.1.71 retains the prior navigation, paging, watch-refresh and search work and corrects the preview retry race: slow resolution alone cannot start a competing trailer. Retries follow a terminal playback error. Experiments 0.1.69 and 0.1.70 are excluded. Helper 6.17.9 includes empty-cache-1 and search-empty-1, with a full reviewed source manifest. Its automatic updates remain disabled for this addon; reviewed changes arrive through build updates. Explicit manual replacement or re-enabling its auto-update opts out.
+
+New installation: authorize Trakt in Helper for lists and in Umbrella for playback progress. Connect your own supported debrid service and optional rating services. Configure your own YouTube account/API details if not preserved. No personal credentials are distributed. The playback options let you choose Auto Play or Source Select; preview preference starts manual.
+
+Recovery and validation
+Keep a verified private off-device recovery copy before cleanup. Earlier 1.1.2 release assets remain available. The installer stops before cleanup if download/platform/native-component/account preservation preflight fails. A failed extraction/restoration must be retried with its retained account snapshot. Native binary files and Kodi's existing addon registry are retained; other old setup components are not part of the account-only migration.
+
+This release passed automated controller and installer checks and an isolated native full installer workflow. A full Fire Stick install through the published installer verified the exact addon manifests, unchanged selected accounts after restart, playback/artwork defaults and protected Helper rule. Only the packaged addons and required device-native inputstream.adaptive remained. Home recommendations and the TMDb weekly TV route populated; empty collection search completed correctly. Trakt Trending returned HTTP 429 during acceptance, so its current availability and all watched markers are not claimed. A generated H264 clip played after a slow initial open. The clean install did not establish a loading-speed improvement. No full Apple TV clean installation or universal device/latency guarantee is claimed.
+
+1.1.4 correction: the 1.1.3 clean payload omitted required provider and automatic-preview settings. Native Fire Stick validation found zero source modules before correction and four afterward. The corrected Hill House preview stayed embedded, advanced normally and stopped on navigation. The normal movie Play button started 3840x2160 HEVC and returned to browsing after stopping. The package is checked for these defaults before publication. This is a targeted correction on the clean-installed Fire profile, not a second full wipe or a claim that every source or row is available or fast.

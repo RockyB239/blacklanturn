@@ -249,8 +249,8 @@ def preview_candidates(primary, videos, metadata=None, preferred_language='en'):
     return [record['url'] for record in sorted(records.values(),key=rank)]
 
 class PreviewAttempts:
-    def __init__(self,candidates,timeout=12):
-        self.candidates=candidates;self.timeout=timeout;self.index=-1
+    def __init__(self,candidates):
+        self.candidates=candidates;self.index=-1
         self.requested=0;self.started=False;self.finished=False
     def start(self,now):
         self.index+=1;self.requested=now;self.started=False
@@ -261,6 +261,7 @@ class PreviewAttempts:
         if error:return self.start(now)
         if playing:self.started=True;return None
         if self.started:self.finished=True;return None
-        if now-self.requested>=self.timeout:return self.start(now)
+        # A resolving plugin can open its stream later even after Player.Stop.
+        # Only a terminal playback error permits another candidate.
         return None
     def cancel(self):self.finished=True
