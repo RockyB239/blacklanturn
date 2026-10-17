@@ -20,7 +20,8 @@ def run(root,mode,addon_root=None):
   load('tmdbhelper.lib.items.directories.lists_default',root/'candidate/lists_default.py')
   load('tmdbhelper.lib.items.directories.trakt.lists_standard',root/'candidate/lists_trakt.py')
  import tmdbhelper.lib.items.directories.lists_default as loaded_parser
- if addon_root:assert str(Path(loaded_parser.__file__).resolve()).startswith(str(addon.resolve())+'/'), 'Wrong helper loaded'
+ if addon_root and not str(Path(loaded_parser.__file__).resolve()).startswith(str(addon.resolve())+'/'):
+  raise RuntimeError('Wrong helper loaded')
  from tmdbhelper.lib.items.directories.lists_default import ListProperties,ItemCache
  from tmdbhelper.lib.items.directories.tmdb.lists_standard import ListStandardProperties
  from tmdbhelper.lib.items.directories.trakt.lists_standard import ListTraktStandardProperties

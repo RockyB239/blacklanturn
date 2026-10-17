@@ -6,6 +6,7 @@ SOURCE=ROOT/'installer-source/plugin.program.blacklanturninstaller'
 def verify(folder):
  receipt=json.loads((ROOT/'compatibility/helper-empty-cache/native-verification.json').read_text())
  approved=json.loads((SOURCE/'resources/managed-helper.json').read_text())
+ assert receipt.get('source_origin_verified') is True
  assert receipt['passed'] and receipt['tests']==12 and receipt['failures']==receipt['errors']==0
  assert receipt['source_version']==approved['upstream_version'] and receipt['source_files']==approved['files'],'New Helper requires fresh native regression evidence'
  spec=importlib.util.spec_from_file_location('managed',SOURCE/'resources/libs/managed_addons.py');m=importlib.util.module_from_spec(spec);spec.loader.exec_module(m)

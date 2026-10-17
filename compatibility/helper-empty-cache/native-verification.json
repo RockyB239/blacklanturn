@@ -5,7 +5,7 @@
   "failures": 0,
   "errors": 0,
   "passed": true,
-  "output": "test_http_errors_never_cache (test_cache.run.<locals>.Tests.test_http_errors_never_cache) ... ok\ntest_invalid_json_retries (test_cache.run.<locals>.Tests.test_invalid_json_retries) ... ok\ntest_partial_tmdb_page_failure_does_not_cache (test_cache.run.<locals>.Tests.test_partial_tmdb_page_failure_does_not_cache) ... ok\ntest_successful_empty_lists_cache (test_cache.run.<locals>.Tests.test_successful_empty_lists_cache) ... ok\ntest_successful_lists_cache_and_keep_pagination (test_cache.run.<locals>.Tests.test_successful_lists_cache_and_keep_pagination) ... ok\ntest_tmdb_error_object_retries (test_cache.run.<locals>.Tests.test_tmdb_error_object_retries) ... ok\ntest_tmdb_missing_response_retries (test_cache.run.<locals>.Tests.test_tmdb_missing_response_retries) ... ok\ntest_tmdb_null_results_retries (test_cache.run.<locals>.Tests.test_tmdb_null_results_retries) ... ok\ntest_trakt_error_object_retries (test_cache.run.<locals>.Tests.test_trakt_error_object_retries) ... ok\ntest_trakt_missing_response_retries (test_cache.run.<locals>.Tests.test_trakt_missing_response_retries) ... ok\ntest_trakt_null_json_retries (test_cache.run.<locals>.Tests.test_trakt_null_json_retries) ... ok\ntest_transport_exception_retries (test_cache.run.<locals>.Tests.test_transport_exception_retries) ... ok\n\n----------------------------------------------------------------------\nRan 12 tests in 10.282s\n\nOK\n",
+  "output": "test_http_errors_never_cache (test_cache.run.<locals>.Tests.test_http_errors_never_cache) ... ok\ntest_invalid_json_retries (test_cache.run.<locals>.Tests.test_invalid_json_retries) ... ok\ntest_partial_tmdb_page_failure_does_not_cache (test_cache.run.<locals>.Tests.test_partial_tmdb_page_failure_does_not_cache) ... ok\ntest_successful_empty_lists_cache (test_cache.run.<locals>.Tests.test_successful_empty_lists_cache) ... ok\ntest_successful_lists_cache_and_keep_pagination (test_cache.run.<locals>.Tests.test_successful_lists_cache_and_keep_pagination) ... ok\ntest_tmdb_error_object_retries (test_cache.run.<locals>.Tests.test_tmdb_error_object_retries) ... ok\ntest_tmdb_missing_response_retries (test_cache.run.<locals>.Tests.test_tmdb_missing_response_retries) ... ok\ntest_tmdb_null_results_retries (test_cache.run.<locals>.Tests.test_tmdb_null_results_retries) ... ok\ntest_trakt_error_object_retries (test_cache.run.<locals>.Tests.test_trakt_error_object_retries) ... ok\ntest_trakt_missing_response_retries (test_cache.run.<locals>.Tests.test_trakt_missing_response_retries) ... ok\ntest_trakt_null_json_retries (test_cache.run.<locals>.Tests.test_trakt_null_json_retries) ... ok\ntest_transport_exception_retries (test_cache.run.<locals>.Tests.test_transport_exception_retries) ... ok\n\n----------------------------------------------------------------------\nRan 12 tests in 11.249s\n\nOK\n",
   "source_files": {
     "fanart.jpg": "5f71505f0a4a2165525877dccb66271263e199253d1c14ff2d544432da6ecb11",
     "LICENSE.txt": "3972dc9744f6499f0f9b2dbf76696f2ae7ad8af9b23dde66d6af86c9dfb36986",
@@ -479,7 +479,9 @@
     "resources/tmdbhelper/lib/sync/trakt/datasync.py": "7eb83a7e9554509bd2665d8c57ba6a36e209d78a555b1dd0294fda6ee3b98d05",
     "resources/modules/tmdbhelper_lib/__init__.py": "07bcfc59ce9ff7bed2c5e42b9cc4d11a2cb947e88856b8b0f727dd108cf02276"
   },
-  "device": "Fire Stick Kodi 21.3",
+  "device": "Fire Stick Kodi21.3",
   "validated_at": "2026-10-17",
-  "scope": "isolated exact source, existing failure-cache suite; native empty-search acceptance recorded separately"
+  "source_origin_verified": true,
+  "optimized_native_guards": "explicit checks, active under -OO",
+  "scope": "native real cache parser suite; empty-search path covered by seven controller tests and later clean-device acceptance"
 }
