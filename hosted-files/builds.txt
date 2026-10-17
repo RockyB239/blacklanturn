@@ -1,6 +1,6 @@
 id="plugin.program.blacklanturninstaller"
-version="1.0.10"
-zip="https://rockyb239.github.io/blacklanturn/plugin.program.blacklanturninstaller/plugin.program.blacklanturninstaller-1.0.10.zip"
+version="1.0.11"
+zip="https://rockyb239.github.io/blacklanturn/plugin.program.blacklanturninstaller/plugin.program.blacklanturninstaller-1.0.11.zip"
 
 name="BlackLanturn Apple TV"
 version="1.0.1"

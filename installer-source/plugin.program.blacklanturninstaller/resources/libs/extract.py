@@ -56,7 +56,7 @@ def all_with_progress(_in, _out, dp, ignore, title):
         logging.log('Error Checking Zip: {0}'.format(str(e)), level=xbmc.LOGERROR)
         return update, errors, error
 
-    white_list = whitelist.whitelist('read')
+    white_list = whitelist.whitelist('read') if CONFIG.KEEPWHITELIST == 'true' else []
     for item in white_list:
         try:
             name, id, fold = item

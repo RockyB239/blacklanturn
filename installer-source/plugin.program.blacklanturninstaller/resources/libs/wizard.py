@@ -96,6 +96,7 @@ class Wizard:
                                            yeslabel='[B][COLOR springgreen]Yes, Install[/COLOR][/B]')
         if yes_pressed:
             CONFIG.clear_setting('build')
+            CONFIG.set_setting('authorizationsrestored', 'false')
             buildzip = check.check_build(name, 'url')
             zipname = name.replace('\\', '').replace('/', '').replace(':', '').replace('*', '').replace('?', '').replace('"', '').replace('<', '').replace('>', '').replace('|', '')
 
@@ -131,6 +132,12 @@ class Wizard:
                 return
 
             protected_helper = (prepared.get('policy') or {}).get('schema') == 2
+            auth_only = protected_helper and CONFIG.get_setting('authonlyclean') == 'true'
+            if auth_only:
+                for option in ('KEEPFAVS', 'KEEPSOURCES', 'KEEPPROFILES', 'KEEPPLAYERCORE',
+                               'KEEPADVANCED', 'KEEPGUISETTINGS', 'KEEPREPOS', 'KEEPSUPER',
+                               'KEEPWHITELIST'):
+                    setattr(CONFIG, option, 'false')
             if protected_helper:
                 from resources.libs import managed_addons
                 try:
@@ -141,15 +148,41 @@ class Wizard:
                     self.dialog.ok(CONFIG.ADDONTITLE, str(exc))
                     return
 
-            install.wipe()
+            if protected_helper:
+                from resources.libs import authorizations
+                categories = {category for category, enabled in (
+                    ('trakt', CONFIG.KEEPTRAKT), ('debrid', CONFIG.KEEPDEBRID),
+                    ('login', CONFIG.KEEPLOGIN)) if enabled == 'true'}
+                try:
+                    account_backup = os.path.join(CONFIG.PLUGIN_DATA, 'authorizations.json')
+                    pending_accounts = os.path.join(CONFIG.PLUGIN_DATA, 'authorizations.pending.json')
+                    accounts = authorizations.prepare(CONFIG.HOME, prepared['addon_ids'], categories, pending_accounts)
+                except authorizations.AuthorizationError as exc:
+                    self.dialogProgress.close()
+                    self.dialog.ok(CONFIG.ADDONTITLE, str(exc))
+                    return
 
-            skin.look_and_feel_data('save')
+            if install.wipe(accounts_prepared=protected_helper, auth_only=auth_only) is False:
+                self.dialogProgress.close()
+                return
+
+            if not auth_only:
+                skin.look_and_feel_data('save')
             
             title = '[COLOR {0}][B]Installing:[/B][/COLOR] [COLOR {1}]{2} v{3}[/COLOR]'.format(CONFIG.COLOR2, CONFIG.COLOR1, name, check.check_build(name, 'version'))
             self.dialogProgress.update(0, '{}\n\nPlease Wait'.format(title))
             percent, errors, error = extract.all(lib, CONFIG.HOME, title=title)
             
             skin.skin_to_default('Build Install')
+
+            if protected_helper and int(float(percent)) == 100 and int(float(errors)) == 0:
+                try:
+                    authorizations.restore(CONFIG.HOME, accounts, prepared['addon_ids'])
+                    authorizations.commit(pending_accounts, account_backup)
+                except authorizations.AuthorizationError as exc:
+                    self.dialogProgress.close()
+                    self.dialog.ok(CONFIG.ADDONTITLE, str(exc))
+                    return
 
             if protected_helper:
                 if int(float(percent)) != 100 or int(float(errors)) != 0:
@@ -174,8 +207,9 @@ class Wizard:
                 CONFIG.set_setting('latestversion', check.check_build(name, 'version'))
                 CONFIG.set_setting('nextbuildcheck', tools.get_date(days=CONFIG.UPDATECHECK, formatted=True))
                 CONFIG.set_setting('installed', 'true')
-                CONFIG.set_setting('extract', percent)
-                CONFIG.set_setting('errors', errors)
+                CONFIG.set_setting('authorizationsrestored', 'true' if protected_helper else 'false')
+                CONFIG.set_setting('extract', str(percent))
+                CONFIG.set_setting('errors', str(errors))
                 logging.log('INSTALLED {0}: [ERRORS:{1}]'.format(percent, errors))
 
                 try:

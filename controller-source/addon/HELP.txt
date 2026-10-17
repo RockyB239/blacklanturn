@@ -1,0 +1,57 @@
+BLACKLANTURN
+
+Filtered discovery rows
+Regular discovery pages fill up to 20 eligible titles after anime filtering. Next continues from the exact remaining title; Previous returns to the prior page and selection. The final page can be shorter when no further eligible titles remain. Search, saved titles and the dedicated Animation & Anime section retain intentional access.
+
+Browsing with a remote
+Press Left from the first card to expand the sidebar. Use Up/Down to select a destination and OK to open it. Press Right to return to cards. Back returns through the current page or closes a dialog. Large filmography, related-title and episode cards keep their captions when the hero scrolls out of view.
+
+Search
+Recent successful search categories are reused within the existing short-lived session cache. Remembering a search term keeps unrelated browsing caches available. Changing configuration, account settings or refreshing watched status still clears affected caches.
+Choose Search at the top of the sidebar. Enter a title, person or collection name. Use the strip above the cards to choose Movies, Shows, People or Collections. Select a person to browse their filmography, or a collection to browse its movies. Back returns to the same results and selected card. Search is supplied by TMDbHelper; it does not search every installed add-on. The last term is saved on this device. Settings → Help → Clear saved search removes it.
+
+Episodes and playback
+Open Details → All episodes to choose a season, including Specials when supplied. Episode numbers and titles remain beneath their cards. Runtime and air date appear when the integration supplies them. Resume uses the selected episode's saved position; the actual playback integration must also support resume. After Stop, BlackLanturn returns to the browsing location.
+
+Next episode
+The branded popup uses Umbrella's existing continuation feature. Play now skips ahead using Umbrella's action. Stop watching stops playback and clears Umbrella's queue. Dismiss closes the popup; it does not cancel the next episode. Back also dismisses it. Countdown expiry follows the action selected in Umbrella settings. Other playback integrations may supply their own popup. Settings → Accounts & integrations → Playback & provider accounts opens Umbrella; its Playback / PlayNext options control the timing and default action. The skin does not change those preferences.
+
+My Stuff and Trakt
+My Stuff saves bookmarks on this device. Trakt pages and title actions are supplied by TMDbHelper and your configured Trakt account. Highlight a title, then use C, the remote context-menu key or right-click to open title actions. Watched, unwatched and progress updates depend on the integration and service. A failed refresh should retain the last known status. Avoid repeatedly refreshing a rate-limited service.
+
+Creator credits and collections
+Open a title's actions → Discover collections & creator credits. A collection search uses the supplied collection name or the title as a starting term. Creator credits use the integration's supplied director/writer names and person IDs; if those names are unavailable, the picker shows crew credits. This does not guarantee every title has a collection or complete credits.
+
+Accounts and integrations
+Open Settings → Accounts & integrations. Discovery, Trakt & metadata opens TMDbHelper settings. Playback & provider accounts opens Umbrella settings. YouTube previews opens the YouTube add-on settings. Use each add-on's supported account setup screens. Integration status reports installed/enabled versions and current failed lists; it does not verify subscriptions or account authorization. No credentials are included in these preview packages.
+
+Previews
+Settings → Previews selects Automatic or Manual and the delay before automatic playback. The normal delay is five seconds. Details uses a manual Preview button. Failed candidates try alternatives when available. Some trailers may be unavailable, restricted or blocked; artwork remains visible if none works. YouTube sign-in and personal API configuration are managed by the YouTube add-on.
+
+Unavailable or empty lists
+A list that returns no titles is shown as empty. A list that fails to load is shown as unavailable. Open the context menu and choose Retry unavailable lists for one retry, or open integration settings. Check whether the same list works in its add-on. Empty results do not by themselves mean an account is disconnected. Loading placeholders are not selectable media.
+
+Time, date and weather
+Settings → Appearance → Time, date & weather controls each line independently. Weather uses the Kodi weather service and selected location. A missing weather reading does not block browsing. All Kodi settings remain available through Settings → Kodi settings.
+
+Recovery
+Settings → Help → Return to previous skin switches back to the saved skin in the live preview installation. If the custom page cannot open, the skin's Home screen offers Kodi settings and Return to previous skin. Kodi Settings → Interface → Skin also allows selecting the previous skin. Do not use Fresh Install to troubleshoot the skin; that installation mode erases profile data.
+
+Preview status
+This is a development preview. Automated checks verify routes, controls and packaging. Native display, remote input, service synchronization and end-of-episode playback still require device testing.
+
+BROWSING SHORTCUTS (0.1.44)
+In Movies or Shows, open Options and choose “Choose genre…” from any title row.
+Cancel leaves your current page and selected title in place.
+When a row has a previous provider page, its first card is “Previous”;
+“Next” stays at the end. The remote Back button still works.
+Regular discovery rows exclude anime identified by animation and Japanese
+origin metadata. Other animation remains available. Missing metadata is not
+used to hide titles. Animation pages, direct searches, local saves, watchlists
+and Continue Watching retain intentional access.
+
+SEARCH AND PREVIEW SETUP (0.1.45)
+Search opens All with exact names and franchise matches first. Use Movies, Shows, People, Studios or Collections to narrow it. Actor cards open filmographies; studio and collection cards open their titles. Search categories remain available while rows load or fail. Previous title details and actions clear when changing categories. Provider errors retain Retry instead of being reported as proven empty results.
+The Preview button and automatic previews are available when YouTube is enabled and its three personal API values are present. YouTube setup remains in Settings. This checks configuration, not account validity or availability of every trailer.
+
+0.1.67: All search overlaps two full-metadata provider lookup lanes with cancellation and exact category cache ownership. Requires the separately hash-guarded TMDbHelper 6.17.9 empty-search overlay (lists_search.py) recorded in work/search-first-2026-10-16/manifest67.json. Revalidate the overlay after a provider update. Fire Stick and published assets are unchanged.

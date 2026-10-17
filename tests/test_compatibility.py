@@ -135,6 +135,11 @@ class CompatibilityTests(unittest.TestCase):
         env={'os':os,'xbmcvfs':types.SimpleNamespace(translatePath=lambda p:str(Path(cfg.HOME)/p.removeprefix('special://').strip('/')))}
         exec(compile(ast.Module(body=[init],type_ignores=[]),'config.py','exec'),env);env['init_paths'](cfg)
         cfg.HOME=str(self.root/'profile');cfg.ADDONS=str(Path(cfg.HOME)/'addons')
+        cfg.USERDATA=str(Path(cfg.HOME)/'userdata');cfg.ADDON_DATA=str(Path(cfg.USERDATA)/'addon_data');cfg.PLUGIN_DATA=str(Path(cfg.ADDON_DATA)/cfg.ADDON_ID);cfg.DATABASE=str(Path(cfg.USERDATA)/'Database')
+        cfg.get_setting=lambda key:'false'
+        def typed_set_setting(key,value):
+            if not isinstance(value,str):raise TypeError('Kodi setSetting requires text')
+        cfg.set_setting=typed_set_setting
         wt=ast.parse((ROOT/'install.py').read_text());fn=next(n for n in wt.body if isinstance(n,ast.FunctionDef) and n.name=='wipe')
         wipe_env={'CONFIG':cfg,'xbmcgui':modules['xbmcgui'],'os':os,'glob':__import__('glob'),'shutil':shutil}
         exec(compile(ast.Module(body=[fn],type_ignores=[]),'install.py','exec'),wipe_env)

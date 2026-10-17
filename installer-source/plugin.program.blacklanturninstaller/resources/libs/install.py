@@ -34,30 +34,31 @@ from resources.libs.common.config import CONFIG
 ###########################
 
 
-def wipe():
+def wipe(accounts_prepared=False, auth_only=False):
     from resources.libs import db
     from resources.libs.common import logging
     from resources.libs import skin
     from resources.libs.common import tools
     from resources.libs import update
 
-    if CONFIG.KEEPTRAKT == 'true':
-        from resources.libs import traktit
+    if not accounts_prepared:
+        if CONFIG.KEEPTRAKT == 'true':
+            from resources.libs import traktit
 
-        traktit.auto_update('all')
-        CONFIG.set_setting('traktnextsave', str(tools.get_date(days=3, formatted=True)))
-    if CONFIG.KEEPDEBRID == 'true':
-        from resources.libs import debridit
+            traktit.auto_update('all')
+            CONFIG.set_setting('traktnextsave', str(tools.get_date(days=3, formatted=True)))
+        if CONFIG.KEEPDEBRID == 'true':
+            from resources.libs import debridit
 
-        debridit.auto_update('all')
-        CONFIG.set_setting('debridnextsave', str(tools.get_date(days=3, formatted=True)))
-    if CONFIG.KEEPLOGIN == 'true':
-        from resources.libs import loginit
+            debridit.auto_update('all')
+            CONFIG.set_setting('debridnextsave', str(tools.get_date(days=3, formatted=True)))
+        if CONFIG.KEEPLOGIN == 'true':
+            from resources.libs import loginit
 
-        loginit.auto_update('all')
-        CONFIG.set_setting('loginnextsave', str(tools.get_date(days=3, formatted=True)))
+            loginit.auto_update('all')
+            CONFIG.set_setting('loginnextsave', str(tools.get_date(days=3, formatted=True)))
 
-    exclude_dirs = CONFIG.EXCLUDES
+    exclude_dirs = list(CONFIG.EXCLUDES)
     exclude_dirs.append('My_Builds')
     
     progress_dialog = xbmcgui.DialogProgress()
@@ -103,12 +104,13 @@ def wipe():
                     exclude_dirs.append(fold)
 
     for item in CONFIG.DEPENDENCIES:
-        exclude_dirs.append(item)
+        if not auth_only or item in ('inputstream.adaptive', 'script.module.pil'):
+            exclude_dirs.append(item)
 
     progress_dialog.update(0, "[COLOR {0}]Clearing out files and folders:".format(CONFIG.COLOR2))
     latestAddonDB = db.latest_db('Addons')
     for root, dirs, files in os.walk(xbmcPath, topdown=True):
-        dirs[:] = [d for d in dirs if d not in exclude_dirs]
+        dirs[:] = [d for d in dirs if d not in exclude_dirs or (auth_only and os.path.normpath(root) == os.path.normpath(CONFIG.ADDON_DATA) and d in ('inputstream.adaptive', 'script.module.pil'))]
         for name in files:
             del_file += 1
             fold = root.replace('/', '\\').split('\\')
@@ -153,7 +155,7 @@ def wipe():
                                "[COLOR {0}]Fresh Start Cancelled[/COLOR]".format(CONFIG.COLOR2))
             return False
     for root, dirs, files in os.walk(xbmcPath, topdown=True):
-        dirs[:] = [d for d in dirs if d not in exclude_dirs]
+        dirs[:] = [d for d in dirs if d not in exclude_dirs or (auth_only and os.path.normpath(root) == os.path.normpath(CONFIG.ADDON_DATA) and d in ('inputstream.adaptive', 'script.module.pil'))]
         for name in dirs:
             progress_dialog.update(
             100,

@@ -282,7 +282,7 @@
     "resources/tmdbhelper/lib/items/directories/tmdb/lists_nextup.py": "503facaab54a328ec576326fad2dcf96993fb2fb6639aa58b3038acb46df6d67",
     "resources/tmdbhelper/lib/items/directories/tmdb/lists_random.py": "07707aea98b4ab5faaa9d93f09aa13a57b47f5c6277fe7232fb07693e33ec450",
     "resources/tmdbhelper/lib/items/directories/tmdb/lists_related.py": "db6116984ad9b9b21c56aa2442524526896584d5cbd91ceb2c1ba034d8856435",
-    "resources/tmdbhelper/lib/items/directories/tmdb/lists_search.py": "27f4d284eab62bfdfb414c6945f84dcbf86affa3e58277ddb5a6d370b4330996",
+    "resources/tmdbhelper/lib/items/directories/tmdb/lists_search.py": "6c6708f7f04ceaf0959281b606824eed8fdd0c9cbfc35bcc95f4901ef22d2b82",
     "resources/tmdbhelper/lib/items/directories/tmdb/lists_seasons.py": "b911c1f9bd39b400a0903f44a4a63113315e49d9f381142879b998ded7bb9e0a",
     "resources/tmdbhelper/lib/items/directories/tmdb/lists_standard.py": "cc012b7b82fbd3d07a9d900ebdb62d3b79e07cd66266fb144958106f47d4f242",
     "resources/tmdbhelper/lib/items/directories/tmdb/lists_view_db.py": "a1eaccc144b8848009a8f2fcc96d18d94a47b3acea0c3ad9dc5779b1db1376ae",
@@ -475,5 +475,6 @@
     "resources/tmdbhelper/lib/window/event_loop.py": "61385bc62fb212d268cfc3539f04480ee9bf7fdf9e69b852676664e3789f74a2",
     "resources/tmdbhelper/lib/window/manager.py": "8ad0ab16166c8740151022c2f97ce4b394031432972e73f866fd18a859a2ac70",
     "resources/tmdbhelper/lib/window/recommendations.py": "74e365277a2c9cbcdf490341ecb4b37c36806d9c0a38beeb35dbace2f9e26bea"
-  }
+  },
+  "search_patch": "search-empty-1"
 }

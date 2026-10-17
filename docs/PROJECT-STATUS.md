@@ -40,3 +40,12 @@ Both clean editions now include Helper 6.17.9 with empty-cache-1 and Installer 1
 Helper is verified against a complete reviewed file manifest and protected with Kodi’s per-addon update rule before cleanup and after extraction. UpdateLocalAddons refreshes the in-memory rule. Future Helper versions must pass the native failure-cache suite and installer/package checks before a BlackLanturn build release distributes them. No background patching service or invented high version is used. Explicit manual Helper replacement or opting back into its automatic updates bypasses protection. See HELPER-UPDATE-POLICY.md for the maintained process.
 
 New validation: 12 native packaged-Helper regression tests on Fire Stick; Kodi addon-info confirmed Auto-update off; real isolated Mac OpenWizard preflight/cleanup/extraction retained 80 native files and healthy registry with enabled protected Helper. Installer and packaging checks also passed. Fresh full personal Fire Stick/Apple TV installs are not claimed. Previous 1.1.1 assets remain for recovery; no personal settings enter these payloads.
+
+
+## Release 1.1.3
+
+Both clean editions are assembled from verified 1.1.2 payloads plus exact validated controller 0.1.67 (301 files), its mandatory Helper search-empty-1 overlay, and Installer 1.0.11. The rejected 0.1.69/0.1.70 work is excluded. The explicitly accepted 64MB/fixed400/buffermode4/chunk131072 playback settings and High artwork defaults are now packaged. Hardware-specific SDR/decoder choices are not global defaults.
+
+Installer authorization-only clean mode retains only selected known credentials for addons in the chosen build, clears optional preference/content preservation, resets native playback preferences while retaining the required platform-native binaries, and removes unused Python modules. The existing default preservation mode remains available. Native safeguards and the managed Helper rule remain. Pending account snapshots survive retries; legacy non-managed build preservation follows the prior path. Installer release details and clean-install instructions are in hosted-files/setup-1.1.3.txt.
+
+Release and personal Fire acceptance receipts must be checked before claiming publication or installation complete.

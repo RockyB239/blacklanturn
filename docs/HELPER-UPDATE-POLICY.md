@@ -25,3 +25,6 @@ This protects ordinary automatic and bulk updates. An owner can deliberately byp
 ## Recovery
 
 Retain previous release assets and Git commits. Restore prior catalog/installer metadata only with a verified corresponding download. Do not remove the Helper update rule as part of an ordinary rollback to a version still needing this fix. The per-addon setting can be explicitly reversed in Kodi: Add-ons > My add-ons > Video add-ons > TMDb Helper > Auto-update. That opts the installation out of BlackLanturn's reviewed Helper policy.
+
+
+Release 1.1.3 adds the reviewed search-empty-1 overlay to the exact Helper manifest. It finishes only coherent successful empty searches; errors/cancellations/internal handle -1 remain errors or the original path. Controller source/tests and the provider overlay are maintained in this repository. Installer 1.0.11 is required: 1.0.10 rejects the changed full Helper manifest before cleanup. Fresh native failure-cache evidence for the complete source is recorded; the seven search-completion tests and device search checks cover the added path separately.
