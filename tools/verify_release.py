@@ -20,6 +20,8 @@ def verify_youtube_acceptance(receipt,manifest):
  visual=receipt['visual_verification']
  assert visual['forced_missing_primary_thumbnail_visible'] and visual['independent_selection_outline_visible'] and visual['other_visible_video_thumbnails_loaded']
  assert visual['youtube_title_unclipped'] and visual['description_initial_visible_lines']>=4 and visual['description_scroll_delay_ms']==7000
+ assert visual['navigation_folder_cards_fitted'] and visual['navigation_focus_matches_background'] and visual['navigation_no_stretched_hero']
+ tiles=a['youtube_navigation_tiles'];assert tiles['tested']==2 and tiles['separate_folder_art'] and tiles['no_stretched_hero'] and tiles['no_preview_playback']
  preview=a['automatic_preview']
  assert preview['exact_selected_video'] and preview['windowed'] and preview['local_history_reporting'] is False and preview['remote_history_reporting'] is False and preview['end_seconds']==30
  p=receipt['settings_and_authorizations']

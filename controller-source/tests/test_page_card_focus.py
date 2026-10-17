@@ -6,6 +6,7 @@ ROOT=Path(__file__).parents[1]/'addon'
 
 def visible(condition,kind,focus):
     condition=re.sub(r'String.IsEqual\(ListItem.Property\(cardArtKind\),(\w+)\)',lambda m:str(kind==m[1]),condition)
+    condition=condition.replace('String.IsEqual(ListItem.Property(youtubeFolder),true)','False')
     condition=re.sub(r'Control.HasFocus\((\d+)\)',lambda m:str(focus==int(m[1])),condition)
     return eval(condition.replace('[','(').replace(']',')').replace('!',' not ').replace('+',' and ').replace('|',' or ').strip(),{'__builtins__':{}},{}) if condition else True
 

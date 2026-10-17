@@ -108,6 +108,9 @@ def media_item(data):
     if selected_art['kind']=='square':art['square']=selected_art['image']
     if data.get('_page_control') and selected_art['kind']=='text':selected_art['kind']='paging'
     li.setProperty('pageControl',data.get('_page_control',''))
+    youtube_folder=is_youtube(data) and data.get('filetype')=='directory' and not data.get('_page_control')
+    li.setProperty('youtubeFolder','true' if youtube_folder else 'false')
+    if youtube_folder:art['youtubefolder']=selected_art['image'] or 'video-addons.png'
     li.setProperty('cardArtKind',selected_art['kind'])
     li.setArt(art)
     info={k:data[k] for k in ['title','plot','year','rating','genre','mpaa','director','studio','season','episode','tvshowtitle','playcount'] if k in data}
@@ -961,7 +964,7 @@ class LiveReview(YouTubeBrowser,xbmcgui.WindowXML):
             self.getControl(105).controlRight(self.getControl(103 if self.mode=='details' else 106 if show_identity(item) and not self.episode_browser_context else 105))
             self.display_ratings([] if discovery or is_youtube(item) else rating_badges(item));self.setProperty('plot',item.get('plot') or ('Browse movies and shows from this studio.' if entity_kind(item)=='company' else 'Browse the titles in this collection.' if entity_kind(item)=='collection' else ''))
             if is_youtube(item):
-                self.setProperty('hero',art.get('thumb') or item.get('thumbnail') or art.get('fanart',''))
+                self.setProperty('hero','' if item.get('filetype')=='directory' else art.get('thumb') or item.get('thumbnail') or art.get('fanart',''))
                 self.setProperty('meta',youtube_caption(item));self.setProperty('technicalMeta','');self.setProperty('titleLogo','');self.setProperty('browsable','true' if item.get('filetype')=='directory' else 'false')
                 self.getControl(101).setLabel('Open' if item.get('filetype')=='directory' else 'Resume' if watch_state(item)['state']=='progress' else 'Play')
                 self.getControl(1250).reset();self.getControl(1251).reset();self.getControl(1252).reset();self.getControl(1254).reset()

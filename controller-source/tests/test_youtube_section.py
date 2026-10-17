@@ -70,4 +70,15 @@ class YouTubeSection(unittest.TestCase):
   self.assertEqual(local[1]['path'],'plugin://plugin.video.youtube/kodion/watch_later/list/')
   self.assertEqual(local[2]['path'],'plugin://plugin.video.youtube/kodion/playback_history/list/')
 
+
+
+ def test_youtube_navigation_tiles_keep_folder_art_separate_from_video_thumbnails(self):
+  from native_list_fixture import media_functions
+  render=media_functions()['media_item']
+  folder={'file':'plugin://plugin.video.youtube/special/my_subscriptions/shorts/','filetype':'directory','label':'Shorts','art':{'thumb':'shorts.png'}}
+  video={'file':'plugin://plugin.video.youtube/play/?video_id=Abc_123-Xyz','filetype':'file','label':'A video','art':{'thumb':'video.jpg'}}
+  before=copy.deepcopy(folder);tile=render(folder)
+  self.assertEqual(tile.properties.get('youtubeFolder'),'true');self.assertEqual(tile.art.get('youtubefolder'),'shorts.png');self.assertEqual(tile.path,folder['file']);self.assertEqual(folder,before)
+  self.assertEqual(render(video).properties.get('youtubeFolder'),'false')
+
 if __name__=='__main__':unittest.main()
