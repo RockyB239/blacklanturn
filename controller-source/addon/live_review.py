@@ -964,6 +964,7 @@ class LiveReview(YouTubeBrowser,xbmcgui.WindowXML):
                 self.setProperty('hero',art.get('thumb') or item.get('thumbnail') or art.get('fanart',''))
                 self.setProperty('meta',youtube_caption(item));self.setProperty('technicalMeta','');self.setProperty('titleLogo','');self.setProperty('browsable','true' if item.get('filetype')=='directory' else 'false')
                 self.getControl(101).setLabel('Open' if item.get('filetype')=='directory' else 'Resume' if watch_state(item)['state']=='progress' else 'Play')
+                self.getControl(1250).reset();self.getControl(1251).reset();self.getControl(1252).reset();self.getControl(1254).reset()
             if discovery:
                 self.setProperty('meta',search_caption(item));self.setProperty('technicalMeta','');self.setProperty('watchMeta','');self.setProperty('watchState','')
             self.getControl(250).reset()
