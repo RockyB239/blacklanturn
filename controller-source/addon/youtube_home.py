@@ -3,6 +3,7 @@ import hashlib,re
 from copy import deepcopy
 from urllib.parse import urlencode
 from youtube_core import BASE
+MAX_GROUPS=16
 
 def _text(value):
     if not isinstance(value,dict):return ''
@@ -38,7 +39,7 @@ def parse_shelves(payload):
                 items.append({'kind':'youtube#video','id':ident,'_partial':True,'snippet':{'title':_text(meta.get('title',{})),'thumbnails':thumb}})
             if label and items:
                 rows.append({'label':label,'items':items})
-            if len(rows)>=8:return rows
+            if len(rows)>=MAX_GROUPS:return rows
     return rows
 
 def local_rows(shelves,items):
@@ -50,3 +51,14 @@ def local_rows(shelves,items):
         rows.append({'label':shelf['label'],'path':BASE+'/special/recommendations?'+urlencode({'bl_shelf':key}),'local_items':videos})
     return rows
 
+def merge_shelves(previous,incoming):
+    result=deepcopy(previous);by_label={row['label'].casefold():row for row in result}
+    for row in incoming:
+        key=row['label'].casefold()
+        if key in by_label:
+            existing=by_label[key];seen={item['id'] for item in existing['items']}
+            existing['items'].extend(deepcopy(item) for item in row['items'] if item['id'] not in seen)
+            existing['items']=existing['items'][:50]
+        elif len(result)<MAX_GROUPS:
+            added=deepcopy(row);result.append(added);by_label[key]=added
+    return result

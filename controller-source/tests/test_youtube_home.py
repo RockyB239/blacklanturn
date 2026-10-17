@@ -26,6 +26,10 @@ class AdaptiveHome(unittest.TestCase):
   metadata={'Abc_123-Xyz':{'snippet':{'thumbnails':{'high':{'url':'padded.jpg','width':480,'height':360},'medium':{'url':'medium.jpg','width':320,'height':180},'maxres':{'url':'wide.jpg','width':1280,'height':720}}}}}
   result=fit_cards([item],metadata)[0]
   self.assertEqual(result['art']['thumb'],'wide.jpg');self.assertEqual(result['file'],before['file']);self.assertEqual(result['resume'],before['resume']);self.assertEqual(result['playcount'],1);self.assertEqual(item,before)
+ def test_repeated_labels_merge_videos_without_duplicate_category_rows(self):
+  previous=[{'label':'Science','items':[{'id':'Abc_123-Xyz'}]}]
+  result=home.merge_shelves(previous,[{'label':'Science','items':[{'id':'Abc_123-Xyz'},{'id':'Def_123-Xyz'}]},{'label':'New interest','items':[{'id':'Ghi_123-Xyz'}]}])
+  self.assertEqual([x['label'] for x in result],['Science','New interest']);self.assertEqual([x['id'] for x in result[0]['items']],['Abc_123-Xyz','Def_123-Xyz']);self.assertEqual(len(previous[0]['items']),1)
  def test_rows_preserve_provider_full_play_urls_without_preview_flags(self):
   payload=response(shelf('Your interest',['Abc_123-Xyz']))
   items={'Abc_123-Xyz':{'file':'plugin://plugin.video.youtube/play/?video_id=Abc_123-Xyz','filetype':'file','title':'A video'}}

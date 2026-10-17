@@ -3,12 +3,12 @@
 This is its regular YouTube video Home for TV clients, not YouTube TV and not
 YouTube.com's browser feed. Browser Home requires separate cookie authentication.
 """
-import sys,threading,atexit
+import sys,threading,atexit,time
 from contextlib import contextmanager
 from types import SimpleNamespace
 from pathlib import Path
 from youtube_core import video_id
-from youtube_home import parse_shelves,section_continuation,local_rows
+from youtube_home import parse_shelves,section_continuation,local_rows,merge_shelves,MAX_GROUPS
 from youtube_artwork import cached_fit_cards
 
 _lock=threading.RLock()
@@ -93,19 +93,29 @@ def load_home_rows(current=lambda:True):
         return _load_home(runtime,client,current)
 
 def _load_home(runtime,client,current):
+    # Main recommendations/subscriptions resolve independently. Broader interest
+    # groups use this bounded background request and never gate those rows.
     raw=client.get_browse_items(browse_id='FEwhat_to_watch',client='tv',do_auth=True,json_path=None)
     if not current():return []
-    shelves=parse_shelves(raw);more=section_continuation(raw)
-    if more and len(shelves)<8:
-        raw=client.get_browse_items(browse_id='FEwhat_to_watch',client='tv',do_auth=True,json_path=None,page_token=more['continuation'],click_tracking=more.get('clickTrackingParams'),visitor=client.json_traverse(raw,('responseContext','visitorData')))
+    shelves=merge_shelves([],parse_shelves(raw));seen=set();deadline=time.monotonic()+15
+    for _ in range(5):
+        more=section_continuation(raw);token=more.get('continuation')
+        if not token or token in seen or len(shelves)>=MAX_GROUPS or time.monotonic()>=deadline:break
         if not current():return []
-        shelves+=parse_shelves(raw)
-    # Keep YouTube's interest labels and order. Resolve metadata/watch state using
-    # the same provider pipeline as its normal lists, without incognito flags.
-    unique={x['id']:x for shelf in shelves[:8] for x in shelf['items']}
+        seen.add(token)
+        try:
+            raw=client.get_browse_items(browse_id='FEwhat_to_watch',client='tv',do_auth=True,json_path=None,page_token=token,click_tracking=more.get('clickTrackingParams'),visitor=client.json_traverse(raw,('responseContext','visitorData')))
+        except Exception:break # Keep earlier real groups on a later-page failure.
+        if not current():return []
+        shelves=merge_shelves(shelves,parse_shelves(raw))
+    unique={x['id']:x for shelf in shelves for x in shelf['items']}
     if not unique:return []
-    items=_resolve(runtime,unique,current)
-    return local_rows(shelves[:8],{video_id(x):x for x in items})
+    # The native converter's page size must not truncate the later shelves.
+    items=[];entries=list(unique.items())
+    for start in range(0,len(entries),40):
+        if not current():return []
+        items.extend(_resolve(runtime,dict(entries[start:start+40]),current))
+    return local_rows(shelves,{video_id(x):x for x in items})
 
 def refresh_watch_items(files,current=lambda:True):
     from copy import deepcopy

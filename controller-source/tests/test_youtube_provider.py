@@ -29,3 +29,23 @@ class RuntimeLifecycle(unittest.TestCase):
   fresh=[{'file':files[0]['file'],'title':'Changed title','art':{'thumb':'changed.jpg'},'playcount':1,'resume':{'position':75,'total':100}}]
   with patch.object(provider,'_session',session),patch.object(provider,'_resolve',return_value=fresh):result=provider.refresh_watch_items(files)
   self.assertEqual([x['file'] for x in result],[x['file'] for x in files]);self.assertEqual(result[0]['art'],files[0]['art']);self.assertEqual(result[0]['title'],'Original title');self.assertEqual(result[0]['resume']['position'],75);self.assertEqual(files[0]['playcount'],0)
+
+class AdaptiveDepth(unittest.TestCase):
+ def test_follows_additional_pages_and_resolves_all_categories_in_bounded_batches(self):
+  from test_youtube_home import response,shelf
+  pages=[response(shelf('Recommended',['Abc_123-Xyz']))]
+  for n in range(1,6):pages.append(response(shelf('Interest '+str(n),[str(n)+'bc_123-Xyz'])))
+  for n,page in enumerate(pages):
+   section=page['contents']['tvBrowseRenderer']['content']['tvSurfaceContentRenderer']['content']['sectionListRenderer']
+   section['continuations']=[{'nextContinuationData':{'continuation':'token-'+str(n)}}] if n<5 else []
+  client=SimpleNamespace(get_browse_items=__import__('unittest.mock',fromlist=['Mock']).Mock(side_effect=pages),json_traverse=lambda *a:None)
+  def resolve(runtime,unique,current):return [{'file':'plugin://plugin.video.youtube/play/?video_id='+i} for i in unique]
+  with patch.object(provider,'_resolve',side_effect=resolve):rows=provider._load_home(object(),client,lambda:True)
+  self.assertEqual(len(rows),6);self.assertEqual(client.get_browse_items.call_count,6)
+ def test_repeated_continuation_does_not_loop_and_late_failure_keeps_first_groups(self):
+  from test_youtube_home import response,shelf
+  page=response(shelf('A real interest',['Abc_123-Xyz']))
+  client=SimpleNamespace(get_browse_items=__import__('unittest.mock',fromlist=['Mock']).Mock(side_effect=[page,RuntimeError('temporary service failure')]),json_traverse=lambda *a:None)
+  def resolve(runtime,unique,current):return [{'file':'plugin://plugin.video.youtube/play/?video_id='+i} for i in unique]
+  with patch.object(provider,'_resolve',side_effect=resolve):rows=provider._load_home(object(),client,lambda:True)
+  self.assertEqual(len(rows),1)

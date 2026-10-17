@@ -8,7 +8,7 @@
     "icon.png": "8d6f8e8722cdba29799325f3563ad03da83f41d73289576b608a4d38b31a5fcb",
     "addon.xml": "19e73e79fd977992aa9724ab2ad02fc2b2ad2998adff4f26b79ebbed49b5b73c",
     "youtube_browser.py": "429f42cfe6b29435297cc1221486f4d41ba303df653e07be4674716aedf2afd5",
-    "youtube_home.py": "63846f834f24a6a9b7878d1438c20bc97baa3d65496b9aae713b908f4a393cc9",
+    "youtube_home.py": "239003117a1c3aaac14f88c52abfce6039ccf95edeb4ef727bb23e245b597354",
     "live_runtime.py": "0718368d7ceccb9381c2a9b4e9e91f5a17571c6f8c2083415cd86d36dc90fa9d",
     "navigation_core.py": "f7bd80bf3fa31c446667690cc5b14f48a52fae1fad0b8500149d2f17aa78b4b9",
     "public_rows.py": "ad09c4cd3a6e286c9bac55c7e99e9d913a6baac34b31b8bbadfba766dfc45b0e",
@@ -38,7 +38,7 @@
     "HELP.txt": "2689fc1109ede35e90a25cd57a44640e6d94f87715efe9ce7c142d63e042a6a8",
     "watch_metadata.py": "092b5f54df2244f187b5817860d4a6a7000ce2fee3add825163d1c36dc02c4bb",
     "playback_runtime.py": "e4a871f83b056147cc19f74715f71dadf57f4d9c2e235fd588f103e709725193",
-    "youtube_provider.py": "42f154bc44d10cb87031ea9b6632238b09a8f5153482bee17101307763a2bc91",
+    "youtube_provider.py": "f5a0346681bd31ef61830ae28613cb2de41ec42415a17f4ebe628851cedecee9",
     "playback_core.py": "d3dc8ff16638af136d65924971c6e0404f6c7f694ffdfa6a632091addad65051",
     "icon_picker.py": "57e8bee4bd73c4e3b9f0f50448d0f7847f08c998c7924b137b68d80acff0a9fd",
     "resources/skins/Default/1080i/GenrePicker.xml": "67525ea5601bf0325fe870c181d739e68d4af57bfd2eb03b4de18f7f2398d21a",
@@ -343,13 +343,24 @@
     "channel_navigation_and_back_preserved_position": true,
     "youtube_watch_refresh_preserves_category_art_and_order": true,
     "adaptive_home": {
-      "groups": 4,
+      "groups": 15,
       "labels_match_provider": true,
       "video_counts": [
         5,
         5,
+        2,
         5,
-        5
+        5,
+        5,
+        5,
+        5,
+        4,
+        5,
+        5,
+        5,
+        5,
+        5,
+        4
       ],
       "normal_full_play_urls": true,
       "exact_youtube_com_home": false
@@ -371,13 +382,13 @@
       "remote_history_reporting": false,
       "end_seconds": 30
     },
-    "preview_stop_on_selection_seconds": 0.208,
+    "preview_stop_on_selection_seconds": 0.211,
     "preview_navigation_cancels_playback": true,
     "local_watch_history_unchanged": true,
     "in_memory_preferences_unchanged": true
   },
   "visual_verification": {
-    "attempt": 15,
+    "attempt": 17,
     "platform": "macOS Kodi 21.3",
     "observed_with": "native Kodi screenshot through CUA",
     "forced_missing_primary_thumbnail_visible": true,
