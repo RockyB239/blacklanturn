@@ -1,15 +1,15 @@
-# BlackLanturn distribution — 1.1.2
+# BlackLanturn distribution — 1.1.3
 
 Kodi 21.3 Omega remains the target. BlackLanturn Repository and the OpenWizard-based BlackLanturn Installer retain their existing identities.
 
 ## Hosting and editions
 
-GitHub Pages hosts repository metadata, Installer 1.0.10, setup guidance and the new catalog at `hosted-files/builds-v2.txt`. GitHub Release `v1.1.2` hosts exactly two clean payload assets:
+GitHub Pages hosts repository metadata, Installer 1.0.11, setup guidance and the new catalog at `hosted-files/builds-v2.txt`. GitHub Release `v1.1.3` hosts exactly two clean payload assets:
 
 - General: Fire TV/Android, derived from the existing Fire Stick edition, with its tested YouTube fix and lower-memory defaults.
 - Apple TV & Mac: Mac baseline shared skin/controller, with platform-native components retained. Apple TV quality was not reduced.
 
-The old `hosted-files/builds.txt` remains upgrade metadata for older installers. Its old edition names and versions are retained, but payload links are retired. Update the installer to 1.0.10 before using the new packages. Never put the new payload URLs in the legacy catalog: older installers lack native-component preservation.
+The old `hosted-files/builds.txt` remains upgrade metadata for older installers. Its old edition names and versions are retained, but payload links are retired. Update the installer to 1.0.11 before using the current packages. Never put the new payload URLs in the legacy catalog: older installers lack native-component preservation.
 
 ## Install safeguard
 
@@ -48,4 +48,8 @@ Both clean editions are assembled from verified 1.1.2 payloads plus exact valida
 
 Installer authorization-only clean mode retains only selected known credentials for addons in the chosen build, clears optional preference/content preservation, resets native playback preferences while retaining the required platform-native binaries, and removes unused Python modules. The existing default preservation mode remains available. Native safeguards and the managed Helper rule remain. Pending account snapshots survive retries; legacy non-managed build preservation follows the prior path. Installer release details and clean-install instructions are in hosted-files/setup-1.1.3.txt.
 
-Release and personal Fire acceptance receipts must be checked before claiming publication or installation complete.
+Release v1.1.3 is published. Both anonymous payload downloads passed full hash/CRC/file-manifest verification, and the live Pages catalog, metadata and Installer 1.0.11 ZIP matched the release source. The maintained source and packaging checks passed CI. The final native OpenWizard isolation test and 12 packaged-Helper failure-cache checks passed.
+
+A full personal Fire Stick installation through the published Installer 1.0.11 completed on 2026-10-17. The downloaded payload and all 36 packaged addon source manifests matched; the only additional physical addon was the required device-native inputstream.adaptive. After restarting Kodi, all selected authorization fields/files were unchanged, controller 0.1.67 and Helper source hashes matched, High artwork and the 64MB/400/4/131072 buffer defaults were active, and the existing addon database passed integrity_check with Helper automatic updates disabled. The separately approved Fire SDR/decoder compatibility choices were retained on that device only.
+
+Acceptance limits: Home recommendations populated; an empty A24 collection search returned a successful empty directory; the TMDb weekly TV route populated. The configured Trakt Trending routes returned HTTP 429 during acceptance, and the failure-cache guard logged that the failed request would not be cached. This remains a provider limitation; clean installation does not prove that those rows or all watched markers currently load. A generated 720p H264 clip advanced normally after a slow initial HTTP stat/open. First clean startup and uncached A24 search did not establish a speed improvement. Full personal Apple TV clean installation and universal device/remote-stream reliability remain untested.
