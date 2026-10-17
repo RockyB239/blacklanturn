@@ -1,0 +1,27 @@
+{
+  "success": true,
+  "preflight": "passed",
+  "extraction": {
+    "percent": 100,
+    "errors": 0
+  },
+  "helper_update_rules": [
+    [
+      1
+    ]
+  ],
+  "database_integrity": "ok",
+  "native_files_preserved": 80,
+  "helper": {
+    "id": 1,
+    "jsonrpc": "2.0",
+    "result": {
+      "addon": {
+        "addonid": "plugin.video.themoviedb.helper",
+        "enabled": true,
+        "type": "xbmc.python.pluginsource",
+        "version": "6.17.9"
+      }
+    }
+  }
+}

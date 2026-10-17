@@ -1,0 +1,21 @@
+<?xml version='1.0' encoding='utf-8'?>
+<addon id="plugin.program.blacklanturninstaller" name="BlackLanturn Installer" version="1.0.10" provider-name="BlackLanturn">
+    <requires>
+        <import addon="xbmc.python" version="3.0.1" />
+        <import addon="script.module.requests" />
+        <import addon="script.module.six" />
+    </requires>
+    <extension point="xbmc.python.pluginsource" library="default.py">
+        <provides>executable</provides>
+    </extension>
+    <extension point="xbmc.addon.metadata">
+        <summary lang="en">BlackLanturn Build Installer</summary>
+        <description lang="en">BlackLanturn Installer provides build installation, maintenance, backups, and system management for BlackLanturn Kodi distributions.</description>
+        <platform>all</platform>
+        <license>GPL-3.0</license>
+        <assets>
+            <icon>icon.png</icon>
+            <fanart>fanart.png</fanart>
+        </assets>
+    </extension>
+</addon>

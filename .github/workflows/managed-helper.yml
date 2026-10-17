@@ -1,0 +1,24 @@
+name: Managed Helper release checks
+on: [push, pull_request, workflow_dispatch]
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Installer and update protection tests
+        run: python -m unittest discover -s tests -v
+      - name: Download immutable clean baselines
+        run: |
+          mkdir -p baselines
+          for edition in General Apple-TV-Mac; do
+            curl --fail --location --retry 3 "https://github.com/RockyB239/blacklanturn/releases/download/v1.1.1/BlackLanturn-${edition}-Kodi21-1.1.1.zip" -o "baselines/BlackLanturn-${edition}-Kodi21-1.1.1.zip"
+          done
+      - name: Rebuild and verify protected editions
+        run: |
+          python tools/build_release.py --baselines baselines --output artifacts
+          python tools/verify_release.py artifacts

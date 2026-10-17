@@ -1,0 +1,20 @@
+{
+    "presets": [
+        {
+            "name": "Enable All Artwork",
+            "section": false,
+            "url": "http://",
+            "icon": "",
+            "fanart": "",
+            "description": "This preset adds all of the available arttypes, to be used with library scrapers which collect their own artwork. Only has any effect on Kodi 18+."
+        },
+        {
+            "name": "Cache & Network Presets",
+            "section": true,
+            "url": "http://",
+            "icon": "",
+            "fanart": "",
+            "description": "All presets related to caching, network, and buffering."
+        }
+    ]
+}
