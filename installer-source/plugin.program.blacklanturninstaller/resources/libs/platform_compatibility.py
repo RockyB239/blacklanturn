@@ -58,9 +58,9 @@ def prepare(path, kodi):
                 if archive.getinfo(POLICY_PATH).file_size > 32768:
                     raise CompatibilityError('The package compatibility information is invalid.')
                 policy = json.loads(archive.read(POLICY_PATH))
-                if not isinstance(policy,dict) or policy.get('schema') not in (1, 2) or policy.get('kodi_major') != 21 or policy.get('edition') not in ('apple','general'):
+                if not isinstance(policy,dict) or policy.get('schema') not in (1, 2, 3) or policy.get('kodi_major') != 21 or policy.get('edition') not in ('apple','general'):
                     raise CompatibilityError('This build package is not supported by this installer.')
-                if policy['schema'] == 2:
+                if policy['schema'] in (2, 3):
                     from resources.libs import managed_addons
                     if policy.get('helper_patch') != 'empty-cache-1':
                         raise CompatibilityError('Update BlackLanturn Installer before installing this build.')
@@ -68,6 +68,14 @@ def prepare(path, kodi):
                         managed_addons.verify_archive(archive)
                     except managed_addons.ProtectionError as exc:
                         raise CompatibilityError(str(exc)) from exc
+                    if policy['schema'] == 3:
+                        from resources.libs import build_preferences
+                        if policy.get('preferences_policy') != 'playback-trakt-1' or policy.get('installer_min_version') != '1.0.13':
+                            raise CompatibilityError('Update BlackLanturn Installer before installing this build.')
+                        try:
+                            build_preferences.verify_archive(archive)
+                        except build_preferences.PreferenceError as exc:
+                            raise CompatibilityError(str(exc)) from exc
                 for name in names:
                     parts=PurePosixPath(name).parts
                     if (len(parts)>1 and parts[0]=='addons' and parts[1] in NATIVE_ADDONS) or (len(parts)>2 and parts[:2]==('userdata','addon_data') and parts[2] in NATIVE_ADDONS) or (parts[:2]==('userdata','Database') and parts[-1].startswith('Addons') and parts[-1].endswith('.db')) or name.endswith(('.so','.dylib','.dll')):

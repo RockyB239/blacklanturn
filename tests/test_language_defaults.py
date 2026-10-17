@@ -1,11 +1,14 @@
-import io,sys,unittest,zipfile
+import io,sys,unittest,zipfile,xml.etree.ElementTree as E
 from pathlib import Path
 sys.path.insert(0,str(Path(__file__).parents[1]/'tools'))
 from verify_release import verify_playback_defaults
 class LanguageDefaults(unittest.TestCase):
  def archive(self,audio='default',subtitle='forced_only'):
   data={'userdata/guisettings.xml':'<settings><setting id="locale.audiolanguage">'+audio+'</setting><setting id="locale.subtitlelanguage">'+subtitle+'</setting></settings>'}
-  for aid,settings in {'plugin.video.umbrella':{'provider.external.enabled':'true','external_provider.module':'script.module.cocoscrapers','external_provider.name':'cocoscrapers'},'plugin.video.youtube':{'kodion.mpd.stream.select':'1','kodion.video.stream.select':'1'},'plugin.video.themoviedb.helper':{'trakt_watchedindicators':'true'}}.items():data['userdata/addon_data/'+aid+'/settings.xml']='<settings>'+''.join('<setting id="'+k+'">'+v+'</setting>' for k,v in settings.items())+'</settings>'
+  for aid,settings in {'plugin.video.umbrella':{'provider.external.enabled':'true','external_provider.module':'script.module.cocoscrapers','external_provider.name':'cocoscrapers','indicators.alt':'1','indicators':'Trakt','scrobble.source':'1','scrobble':'Trakt'},'plugin.video.youtube':{'kodion.mpd.stream.select':'1','kodion.video.stream.select':'1'},'plugin.video.themoviedb.helper':{'trakt_watchedindicators':'true','sync_source_watched':'Trakt','sync_source_playback':'Trakt','trakt_scrobbling':'true'}}.items():data['userdata/addon_data/'+aid+'/settings.xml']='<settings>'+''.join('<setting id="'+k+'">'+v+'</setting>' for k,v in settings.items())+'</settings>'
+  for aid in ['plugin.video.umbrella','plugin.video.themoviedb.helper']:
+   fields=[n.get('id') for n in E.fromstring(data['userdata/addon_data/'+aid+'/settings.xml'])]
+   data['addons/'+aid+'/resources/settings.xml']='<settings>'+''.join('<setting id="'+k+'"/>' for k in fields)+'</settings>'
   buf=io.BytesIO()
   with zipfile.ZipFile(buf,'w') as z:
    for k,v in data.items():z.writestr(k,v)

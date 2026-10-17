@@ -21,6 +21,8 @@ import xbmc
 import xbmcgui
 
 import sys
+import os
+from resources.libs import settings_store
 try:  # Python 3
     import zipfile
 except ImportError:  # Python 2
@@ -132,7 +134,13 @@ def all_with_progress(_in, _out, dp, ignore, title):
             logging.log("Skipping: {0}".format(item.filename))
         else:
             try:
-                zin.extract(item, _out)
+                destination = os.path.join(_out, *file)
+                # tvOS XML lives in Kodi's native preferences store. A normal
+                # extracted file can be ignored even when its bytes look right.
+                if file[0] == 'userdata' and not item.is_dir() and settings_store.virtual_xml(destination):
+                    settings_store.write(destination, zin.read(item))
+                else:
+                    zin.extract(item, _out)
             except Exception as e:
                 errormsg = "[COLOR {0}]File:[/COLOR] [COLOR {1}]{2}[/COLOR]\n".format(CONFIG.COLOR2,
                                                                                       CONFIG.COLOR1,

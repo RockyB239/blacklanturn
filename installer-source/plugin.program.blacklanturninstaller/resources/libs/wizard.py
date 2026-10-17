@@ -131,7 +131,8 @@ class Wizard:
                 self.dialog.ok(CONFIG.ADDONTITLE, str(exc))
                 return
 
-            protected_helper = (prepared.get('policy') or {}).get('schema') == 2
+            protected_helper = (prepared.get('policy') or {}).get('schema') in (2, 3)
+            protected_preferences = (prepared.get('policy') or {}).get('schema') == 3
             auth_only = protected_helper and CONFIG.get_setting('authonlyclean') == 'true'
             if auth_only:
                 for option in ('KEEPFAVS', 'KEEPSOURCES', 'KEEPPROFILES', 'KEEPPLAYERCORE',
@@ -157,6 +158,13 @@ class Wizard:
                     account_backup = os.path.join(CONFIG.PLUGIN_DATA, 'authorizations.json')
                     pending_accounts = os.path.join(CONFIG.PLUGIN_DATA, 'authorizations.pending.json')
                     accounts = authorizations.prepare(CONFIG.HOME, prepared['addon_ids'], categories, pending_accounts)
+                    if protected_preferences:
+                        from resources.libs import build_preferences
+                        try:
+                            accounts = build_preferences.prepare(CONFIG.HOME, accounts, prepared['addon_ids'], auth_only=auth_only)
+                            authorizations.save(pending_accounts, accounts)
+                        except build_preferences.PreferenceError as exc:
+                            raise authorizations.AuthorizationError(str(exc)) from exc
                 except authorizations.AuthorizationError as exc:
                     self.dialogProgress.close()
                     self.dialog.ok(CONFIG.ADDONTITLE, str(exc))
@@ -178,6 +186,11 @@ class Wizard:
             if protected_helper and int(float(percent)) == 100 and int(float(errors)) == 0:
                 try:
                     authorizations.restore(CONFIG.HOME, accounts, prepared['addon_ids'])
+                    if protected_preferences:
+                        try:
+                            build_preferences.restore(CONFIG.HOME, accounts, prepared['addon_ids'])
+                        except build_preferences.PreferenceError as exc:
+                            raise authorizations.AuthorizationError(str(exc)) from exc
                     authorizations.commit(pending_accounts, account_backup)
                 except authorizations.AuthorizationError as exc:
                     self.dialogProgress.close()

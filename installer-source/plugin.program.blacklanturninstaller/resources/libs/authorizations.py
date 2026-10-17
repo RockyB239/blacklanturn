@@ -7,6 +7,7 @@ import json
 import os
 from pathlib import Path
 import xml.etree.ElementTree as E
+from resources.libs import settings_store as store
 
 MAX_BYTES = 4 * 1024 * 1024
 class AuthorizationError(Exception):
@@ -27,9 +28,7 @@ KEYS = {
 FILES = {'addon_data/plugin.video.youtube/'+n for n in ('access_manager.json','api_keys.json')}
 
 def _read(path):
-    if path.is_symlink() or path.stat().st_size > MAX_BYTES:
-        raise AuthorizationError('Account data could not be read safely. Your current build has been kept.')
-    return path.read_text(encoding='utf-8')
+    return store.read(path).decode('utf-8')
 
 def _allowed(aid, categories):
     return {k for category, keys in KEYS.get(aid, {}).items() if category in categories for k in keys.split()}
@@ -41,7 +40,7 @@ def capture(home, addon_ids, categories):
         for aid in sorted(set(addon_ids) & set(KEYS)):
             allowed = _allowed(aid, categories)
             path = profile / 'addon_data' / aid / 'settings.xml'
-            if allowed and path.exists():
+            if allowed and store.exists(path):
                 root = E.fromstring(_read(path))
                 values = {e.get('id'): e.text if e.text is not None else e.get('value', '') for e in root if e.get('id') in allowed}
                 if values:
@@ -49,7 +48,7 @@ def capture(home, addon_ids, categories):
         if 'login' in categories and 'plugin.video.youtube' in addon_ids:
             for name in sorted(FILES):
                 path = profile / name
-                if path.exists():
+                if store.exists(path):
                     raw = _read(path)
                     if not isinstance(json.loads(raw), dict):
                         raise ValueError('Invalid account JSON')
@@ -63,16 +62,13 @@ def capture(home, addon_ids, categories):
 def save(path, snapshot):
     path = Path(path)
     path.parent.mkdir(parents=True, exist_ok=True)
-    temp = path.with_suffix('.pending')
     try:
-        with temp.open('w', encoding='utf-8') as stream:
-            os.chmod(temp, 0o600)
-            json.dump(snapshot, stream)
-        temp.replace(path)
+        store.write(path,json.dumps(snapshot).encode('utf-8'))
         if load(path) != snapshot:
             raise ValueError('Account snapshot verification failed')
     except (OSError, ValueError) as exc:
         raise AuthorizationError('Account backup failed. Your current build has been kept.') from exc
+
 
 def load(path):
     try:
@@ -89,7 +85,7 @@ def restore(home, snapshot, addon_ids):
         profile = Path(home) / 'userdata'
         for aid, values in snapshot['settings'].items():
             path = profile / 'addon_data' / aid / 'settings.xml'
-            root = E.fromstring(_read(path)) if path.exists() else E.Element('settings', version='2')
+            root = E.fromstring(_read(path)) if store.exists(path) else E.Element('settings', version='2')
             for key, value in sorted(values.items()):
                 entry = next((e for e in root if e.get('id') == key), None)
                 if entry is None:
@@ -97,21 +93,13 @@ def restore(home, snapshot, addon_ids):
                 entry.attrib.pop('default', None)
                 entry.attrib.pop('value', None)
                 entry.text = value
-            path.parent.mkdir(parents=True, exist_ok=True)
-            temp = path.with_suffix('.pending')
-            E.ElementTree(root).write(temp, encoding='utf-8', xml_declaration=True)
-            os.chmod(temp, 0o600)
-            temp.replace(path)
+            store.write(path,E.tostring(root,encoding='utf-8',xml_declaration=True))
             actual = {e.get('id'): e.text or '' for e in E.fromstring(_read(path))}
             if any(actual.get(k) != v for k, v in values.items()):
                 raise ValueError('Account verification failed')
         for name, raw in snapshot['files'].items():
             path = profile / name
-            path.parent.mkdir(parents=True, exist_ok=True)
-            temp = path.with_suffix('.pending')
-            temp.write_text(raw, encoding='utf-8')
-            os.chmod(temp, 0o600)
-            temp.replace(path)
+            store.write(path,raw.encode('utf-8'))
             if _read(path) != raw:
                 raise ValueError('Account file verification failed')
     except (OSError, ValueError, TypeError, E.ParseError) as exc:

@@ -1,0 +1,29 @@
+BlackLanturn 1.1.7 - Kodi 21.3 Omega
+
+Update BlackLanturn Installer to 1.0.13 through the BlackLanturn Repository, then use the Builds catalog. Choose General for Fire TV / Android or Apple TV & Mac for compatible Kodi 21.3 installations. Kodi installation/signing is separate.
+
+Included update
+Installer 1.0.13 packages and verifies the actual playback and Trakt settings used by Kodi, TMDb Helper and Umbrella. Both editions default to audio following Kodi's interface language and forced-only subtitles. Helper uses Trakt for incoming watched indicators and resume progress, with scrobbling enabled. Umbrella uses its current indicators.alt=1 and scrobble.source=1 selectors with matching Trakt labels. Personal credentials are never included; authorize your own accounts after a completely new installation.
+
+Standard updates save and restore stored language/tracking choices even if Kodi marks them default, without requiring whole-guisettings preservation. Deliberate provider/disabled choices remain yours. Missing fields receive build defaults. Account-only clean installs reset these preferences to build defaults and retain selected known authorizations. Interrupted installs reuse the original pending account/preference snapshot and require its original clean/update mode. Native tvOS XML is read, written and verified through Kodi's native VFS instead of ignored physical shadow files. Cleanup now includes native XML visible in existing userdata directories and installed-addon settings.xml even after their cache-directory eviction. Wholly orphaned XML in evicted directories cannot be exhaustively enumerated; full Apple TV clean-store cleanup is not certified.
+
+The schema-3 payload refuses installation by older installers before cleanup. Update the Installer first. Controller 0.1.74 and the reviewed 471-file Helper remain unchanged. Existing Help, preview matching, repaired search/preloading and preview retry safety are retained.
+
+TMDb Helper 6.17.9 includes empty-cache-1 and search-batch-1 (including successful-empty-search handling). Installer 1.0.13 verifies the complete reviewed Helper source before cleanup and preserves its Kodi per-addon auto-update protection. Reviewed future updates arrive through BlackLanturn releases. Deliberately replacing Helper or re-enabling its upstream auto-update opts out of this compatibility guarantee.
+
+Preserving an existing setup
+Keep a verified private recovery copy first. In Installer Settings > Install Settings, leave "Clean install: keep only selected accounts" off when retaining existing preferences. Select the relevant Keep options, including "Keep My guisettings.xml" for existing Kodi playback settings, "Keep My AdvancedSettings.xml", and Keep My Trakt/Debrid/Login Data. Check all intended preservation options before installing. Native playback components stay device-specific. Account-only clean mode intentionally resets other preferences; choose it only for a requested clean install.
+
+Clean defaults included in both editions
+- Cocoscrapers assigned and enabled for Umbrella playback.
+- Automatic YouTube stream selection and enabled Helper watched indicators for authorized accounts.
+- High artwork quality; tested 64MB/fixed400/buffermode4/chunk131072 video buffer defaults.
+- Audio follows the current Kodi interface language (Kodi audio language "default"); subtitles use "forced_only". This does not independently detect the tvOS operating-system language.
+- Existing player/Next Up controls, MPEG-DASH previews and edition-specific quality limits.
+- Automatic cache/package/thumbnail cleanup remains off.
+HDR/Dolby Vision filters, decoder choices and other hardware compatibility settings are not imposed globally on new downloaders. Preserve device-specific choices when updating an existing setup.
+
+Validation and recovery
+The new preference/account policy is tested through actual OpenWizard cleanup/extraction in a disposable native Mac profile, unit/integration checks, and bounded native Apple TV storage tests. Exact source/package verification is required before release. Existing three-device controller acceptance belongs to unchanged release 1.1.6 software; this installer change does not prove a new complete personal-device clean install or outbound scrobbling. See docs/RELEASE_1_1_7_VALIDATION.md for exact evidence and limits.
+
+Both editions are reproducibly built from clean verified baselines with the same tested controller/helper software, exact manifests, mandatory playback defaults and wrapped Installer. Personal authorizations, device databases and foreign native binaries are excluded. Use your own supported Trakt, debrid and optional rating/YouTube authorizations. Prior release assets and private recovery remain available for rollback.

@@ -1,0 +1,18 @@
+{
+  "guisettings.xml": {
+    "locale.audiolanguage": "default",
+    "locale.subtitlelanguage": "forced_only"
+  },
+  "addon_data/plugin.video.themoviedb.helper/settings.xml": {
+    "trakt_watchedindicators": "true",
+    "sync_source_watched": "Trakt",
+    "sync_source_playback": "Trakt",
+    "trakt_scrobbling": "true"
+  },
+  "addon_data/plugin.video.umbrella/settings.xml": {
+    "indicators.alt": "1",
+    "indicators": "Trakt",
+    "scrobble.source": "1",
+    "scrobble": "Trakt"
+  }
+}

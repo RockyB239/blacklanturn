@@ -1,15 +1,15 @@
-# BlackLanturn distribution — 1.1.6
+# BlackLanturn distribution — 1.1.7
 
 Kodi 21.3 Omega remains the target. BlackLanturn Repository and the OpenWizard-based BlackLanturn Installer retain their existing identities.
 
 ## Hosting and editions
 
-GitHub Pages hosts repository metadata, Installer 1.0.12, setup guidance and the new catalog at `hosted-files/builds-v2.txt`. GitHub Release `v1.1.6` hosts exactly two current clean payload assets:
+GitHub Pages hosts repository metadata, Installer 1.0.13, setup guidance and the new catalog at `hosted-files/builds-v2.txt`. GitHub Release `v1.1.7` hosts exactly two current clean payload assets:
 
 - General: Fire TV/Android, derived from the existing Fire Stick edition, with its tested YouTube fix and lower-memory defaults.
 - Apple TV & Mac: Mac baseline shared skin/controller, with platform-native components retained. Apple TV quality was not reduced.
 
-The old `hosted-files/builds.txt` remains upgrade metadata for older installers. Its old edition names and versions are retained, but payload links are retired. Update the installer to 1.0.12 before using the current packages. Never put the new payload URLs in the legacy catalog: older installers lack native-component preservation.
+The old `hosted-files/builds.txt` remains upgrade metadata for older installers. Its old edition names and versions are retained, but payload links are retired. Update the installer to 1.0.13 before using the current packages. Never put the new payload URLs in the legacy catalog: older installers lack native-component preservation.
 
 ## Install safeguard
 
@@ -75,3 +75,8 @@ The October17native crash reproduction identified a direct diagnostic artwork-la
 ## Release 1.1.6 — Apple TV follow-up
 
 Controller 0.1.74 fixes Help UTF-8 decoding, updates preview-language descriptions from saved preferences, and checks public YouTube titles against selected-title aliases before approving previews. Clean builds default to Kodi-interface audio language and forced-only subtitles. The requested Apple TV preference correction separately enables incoming Helper watched/progress metadata and persists the two language choices, preserving all other persisted userdata settings. Installer remains 1.0.12 and the managed Helper manifest is unchanged. All three devices passed the same native acceptance and restart/source/preservation audits, Fire Stick first. Focused Apple Help, language-choice persistence/labels, real wrong-series rejection, 20 watched identities and one resume-point comparison passed. Source checks: 523 controller, 122 installer/release and 10 maintained native-probe tests. Both reproducible packages passed exact-source and clean-default checks. See RELEASE_1_1_6_VALIDATION.md for evidence, acceptance limits and recovery.
+
+
+## Release 1.1.7 — durable playback/Trakt install policy
+
+Installer1.0.13 and schema3 packages explicitly validate all ten playback/Trakt defaults, preserve stored choices during standard updates, restore selected accounts on account-only clean, and retain the original pending snapshot across retries. Kodi default=true flags do not erase deliberate saved choices. Native tvOS XML uses authoritative VFS storage with readback instead of ordinary-file existence checks; cleanup includes native XML visible in existing userdata directories and installed-addon settings.xml after cache-directory eviction. Wholly orphaned native XML in evicted directories remains an acceptance limit. Controller0.1.74 and the reviewed Helper source/protection are unchanged. Native disposable Mac standard/KeepGUI/account-only-clean installer workflows passed, preserving80native files and selected accounts. Native Apple owned storage/capture/cleanup probes passed without a real-profile wipe. Source checks:189installer,523controller,10native-probe. See RELEASE_1_1_7_VALIDATION.md for live-device caveats, package hashes, evidence and recovery.

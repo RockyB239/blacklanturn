@@ -1,6 +1,8 @@
 import ast,importlib.util,json,tempfile,unittest,xml.etree.ElementTree as E
 from pathlib import Path
 ROOT=Path(__file__).resolve().parents[1]/'installer-source/plugin.program.blacklanturninstaller/resources/libs'
+import sys
+sys.path.insert(0,str(ROOT.parents[1]))
 class AuthorizationPreservation(unittest.TestCase):
  def setUp(self):
   self.tmp=tempfile.TemporaryDirectory();self.addCleanup(self.tmp.cleanup);self.home=Path(self.tmp.name)
@@ -63,6 +65,23 @@ class AuthorizationPreservation(unittest.TestCase):
  def test_restore_skip_flag_is_only_set_with_successful_install(self):
   s=(ROOT/'wizard.py').read_text();self.assertIn("CONFIG.set_setting('authorizationsrestored', 'false')",s)
   self.assertLess(s.index("CONFIG.set_setting('installed', 'true')"),s.index("CONFIG.set_setting('authorizationsrestored', 'true' if protected_helper else 'false')"))
+
+ def test_native_virtual_account_xml_is_captured_and_restored(self):
+  from unittest.mock import patch
+  import types
+  path=self.home/'userdata/addon_data/plugin.video.themoviedb.helper/settings.xml';key=str(path);store={key:b'<settings><setting id="trakt_token">original-private-token</setting><setting id="trakt_watchedindicators">true</setting></settings>'}
+  class File:
+   def __init__(self,path,mode=None):self.path=path
+   def size(self):return len(store[self.path])
+   def readBytes(self):return store[self.path]
+   def write(self,text):store[self.path]=text.encode();return True
+   def close(self):pass
+  fake=types.SimpleNamespace(exists=lambda p:p in store,File=File,mkdirs=lambda p:True,delete=lambda p:store.pop(p,None))
+  # The module must support native VFS-backed settings; ordinary Path.exists is false.
+  io=getattr(self.m,'store',None);self.assertIsNotNone(io,'Account preservation ignores virtual XML')
+  with patch.object(io,'xbmcvfs',fake):
+   snap=self.m.capture(self.home,['plugin.video.themoviedb.helper'],{'trakt'});self.assertEqual(snap['settings']['plugin.video.themoviedb.helper']['trakt_token'],'original-private-token')
+   store[key]=b'<settings><setting id="trakt_watchedindicators">true</setting></settings>';self.m.restore(self.home,snap,['plugin.video.themoviedb.helper']);values={n.get('id'):n.text for n in E.fromstring(store[key])};self.assertEqual(values['trakt_token'],'original-private-token');self.assertEqual(values['trakt_watchedindicators'],'true')
 
 from test_compatibility import CompatibilityTests,Kodi
 from unittest.mock import patch

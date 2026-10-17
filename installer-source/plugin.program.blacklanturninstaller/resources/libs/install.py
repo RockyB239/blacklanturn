@@ -107,6 +107,28 @@ def wipe(accounts_prepared=False, auth_only=False):
         if not auth_only or item in ('inputstream.adaptive', 'script.module.pil'):
             exclude_dirs.append(item)
 
+    # Enumerate native-only tvOS XML while its physical directory tree exists.
+    # Honor the same excludes and root-file preserve options as ordinary cleanup.
+    from resources.libs import settings_store
+    keep_xml = {name for name, enabled in (
+        ('sources.xml', CONFIG.KEEPSOURCES), ('favourites.xml', CONFIG.KEEPFAVS),
+        ('profiles.xml', CONFIG.KEEPPROFILES), ('playercorefactory.xml', CONFIG.KEEPPLAYERCORE),
+        ('guisettings.xml', CONFIG.KEEPGUISETTINGS), ('advancedsettings.xml', CONFIG.KEEPADVANCED)
+    ) if enabled == 'true'}
+    try:
+        for path in settings_store.native_userdata_xml(CONFIG.HOME):
+            parts = path.relative_to(os.path.join(CONFIG.HOME, 'userdata')).parts
+            excluded = any(part in exclude_dirs for part in parts[:-1])
+            if auth_only and len(parts) > 2 and parts[0] == 'addon_data' and parts[1] in ('inputstream.adaptive', 'script.module.pil'):
+                excluded = False
+            if excluded or (len(parts) == 1 and parts[0] in keep_xml) or parts[-1] in CONFIG.LOGFILES:
+                continue
+            settings_store.delete(path)
+    except (OSError, ValueError):
+        progress_dialog.close()
+        xbmcgui.Dialog().ok(CONFIG.ADDONTITLE, 'Native settings cleanup failed. Keep the pending account backup and retry this installation.')
+        return False
+
     progress_dialog.update(0, "[COLOR {0}]Clearing out files and folders:".format(CONFIG.COLOR2))
     latestAddonDB = db.latest_db('Addons')
     for root, dirs, files in os.walk(xbmcPath, topdown=True):
