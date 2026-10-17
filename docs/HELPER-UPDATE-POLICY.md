@@ -28,3 +28,7 @@ Retain previous release assets and Git commits. Restore prior catalog/installer 
 
 
 Release 1.1.3 adds the reviewed search-empty-1 overlay to the exact Helper manifest. It finishes only coherent successful empty searches; errors/cancellations/internal handle -1 remain errors or the original path. Controller source/tests and the provider overlay are maintained in this repository. Installer 1.0.11 is required: 1.0.10 rejects the changed full Helper manifest before cleanup. Fresh native failure-cache evidence for the complete source is recorded; the seven search-completion tests and device search checks cover the added path separately.
+
+## Release 1.1.5: repaired batched search
+
+Installer 1.0.12 now verifies Helper 6.17.9 with empty-cache-1/search-batch-1. The reviewed search overlay retains successful empty-search validation and batches related search categories in one provider invocation while preserving full artwork and authenticated watched/resume data. Controller 0.1.72 adds the reviewed page preloader and initialization-ownership repair and retains 0.1.71 preview safety. The full 471-file manifest and fresh native 12-case failure-cache receipt must agree. Old installers reject this changed Helper tree before cleanup. Existing unrelated update rules and profile settings are preserved. Future release tooling reads the maintained .72 source and exact manifest, so a normal rebuild cannot silently fall back to the removed experiment or unpatched Helper.

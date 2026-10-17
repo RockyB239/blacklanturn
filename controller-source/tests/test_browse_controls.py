@@ -97,7 +97,7 @@ class ControllerControls(unittest.TestCase):
             title=item(1,['Animation'])
             if 'country' in params['properties']:title['country']=['Japan']
             return {'result':{'files':[title]}}
-        ns.update(parse_qs=parse_qs,time=time,valid_source=valid_source,catalogue_category=lambda _:None,rpc=rpc,directory_items=directory_items,urlsplit=urlsplit,event=lambda *a,**kw:None)
+        ns.update(DIRECTORY_GATE=__import__('threading').BoundedSemaphore(2),parse_qs=parse_qs,time=time,valid_source=valid_source,catalogue_category=lambda _:None,rpc=rpc,directory_items=directory_items,urlsplit=urlsplit,event=lambda *a,**kw:None)
         files=extract(ROOT/'live_review.py','get_list',ns)('plugin://plugin.video.themoviedb.helper/?info=popular&tmdb_type=tv')
         with tempfile.TemporaryDirectory() as folder:self.assertEqual(m.AnimeMetadata(folder).without_anime(files),[])
     def test_actual_row_renderer_filters_only_discovery_and_keeps_the_raw_cache(self):

@@ -1,4 +1,4 @@
-# BlackLanturn distribution — 1.1.4
+# BlackLanturn distribution — 1.1.5
 
 Kodi 21.3 Omega remains the target. BlackLanturn Repository and the OpenWizard-based BlackLanturn Installer retain their existing identities.
 
@@ -62,3 +62,9 @@ Real use after the 1.1.3 clean install exposed acceptance gaps. Sparse sanitized
 Controller 0.1.71 fixes a separate evidenced race. The previous preview fallback launched a second candidate after 12 seconds while the first YouTube resolver remained active. The first resolver later opened its stream; Kodi logged MediaCodec InstanceGuard locked and failed codec creation. Slow resolution now cannot dispatch another candidate; fallback follows a terminal playback error. The rejected progressive-results work is excluded.
 
 The new regression failed on the old timeout behavior and passed after correction; all 435 controller tests passed. The Fire Stick's actual Umbrella loader changed from zero to four providers. The Hill House preview remained embedded, advanced normally and stopped on navigation. The normal movie Play button opened Game Night in 3840x2160 HEVC with DTS-HD MA 5.1; it advanced and returned to browsing after stopping. This verifies targeted repair of the known clean-installed profile, not a second full 1.1.4 wipe, universal source reliability, all watched markers, or a browsing-speed improvement. Recovery and deferred experiments remain private and intact.
+
+## Release 1.1.5 — repaired search and preloading
+
+Controller 0.1.72 promotes the native-tested search/preloading overlay with lifecycle ownership and monotonic generation fixes; preview safety remains byte-identical to 0.1.71. Installer 1.0.12 carries the exact 471-file Helper manifest with empty-cache-1/search-batch-1 and retains per-addon auto-update protection. Both clean editions package the maintained source and explicit playback, watch, artwork and buffer defaults. The rejected 0.1.70 progressive experiment remains excluded.
+
+Source checks: 474 controller tests, 119 installer tests and fresh12-case native cache regression passed. Both1.1.5 packages passed exact-source and compatibility verification. Native three-device rollout and live release acceptance are recorded after deployment; source preparation alone is not an installed or published acceptance claim.

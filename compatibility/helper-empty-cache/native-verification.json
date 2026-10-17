@@ -5,7 +5,7 @@
   "failures": 0,
   "errors": 0,
   "passed": true,
-  "output": "test_http_errors_never_cache (test_cache.run.<locals>.Tests.test_http_errors_never_cache) ... ok\ntest_invalid_json_retries (test_cache.run.<locals>.Tests.test_invalid_json_retries) ... ok\ntest_partial_tmdb_page_failure_does_not_cache (test_cache.run.<locals>.Tests.test_partial_tmdb_page_failure_does_not_cache) ... ok\ntest_successful_empty_lists_cache (test_cache.run.<locals>.Tests.test_successful_empty_lists_cache) ... ok\ntest_successful_lists_cache_and_keep_pagination (test_cache.run.<locals>.Tests.test_successful_lists_cache_and_keep_pagination) ... ok\ntest_tmdb_error_object_retries (test_cache.run.<locals>.Tests.test_tmdb_error_object_retries) ... ok\ntest_tmdb_missing_response_retries (test_cache.run.<locals>.Tests.test_tmdb_missing_response_retries) ... ok\ntest_tmdb_null_results_retries (test_cache.run.<locals>.Tests.test_tmdb_null_results_retries) ... ok\ntest_trakt_error_object_retries (test_cache.run.<locals>.Tests.test_trakt_error_object_retries) ... ok\ntest_trakt_missing_response_retries (test_cache.run.<locals>.Tests.test_trakt_missing_response_retries) ... ok\ntest_trakt_null_json_retries (test_cache.run.<locals>.Tests.test_trakt_null_json_retries) ... ok\ntest_transport_exception_retries (test_cache.run.<locals>.Tests.test_transport_exception_retries) ... ok\n\n----------------------------------------------------------------------\nRan 12 tests in 11.249s\n\nOK\n",
+  "output": "test_http_errors_never_cache (test_cache.run.<locals>.Tests.test_http_errors_never_cache) ... ok\ntest_invalid_json_retries (test_cache.run.<locals>.Tests.test_invalid_json_retries) ... ok\ntest_partial_tmdb_page_failure_does_not_cache (test_cache.run.<locals>.Tests.test_partial_tmdb_page_failure_does_not_cache) ... ok\ntest_successful_empty_lists_cache (test_cache.run.<locals>.Tests.test_successful_empty_lists_cache) ... ok\ntest_successful_lists_cache_and_keep_pagination (test_cache.run.<locals>.Tests.test_successful_lists_cache_and_keep_pagination) ... ok\ntest_tmdb_error_object_retries (test_cache.run.<locals>.Tests.test_tmdb_error_object_retries) ... ok\ntest_tmdb_missing_response_retries (test_cache.run.<locals>.Tests.test_tmdb_missing_response_retries) ... ok\ntest_tmdb_null_results_retries (test_cache.run.<locals>.Tests.test_tmdb_null_results_retries) ... ok\ntest_trakt_error_object_retries (test_cache.run.<locals>.Tests.test_trakt_error_object_retries) ... ok\ntest_trakt_missing_response_retries (test_cache.run.<locals>.Tests.test_trakt_missing_response_retries) ... ok\ntest_trakt_null_json_retries (test_cache.run.<locals>.Tests.test_trakt_null_json_retries) ... ok\ntest_transport_exception_retries (test_cache.run.<locals>.Tests.test_transport_exception_retries) ... ok\n\n----------------------------------------------------------------------\nRan 12 tests in 7.476s\n\nOK\n",
   "source_files": {
     "fanart.jpg": "5f71505f0a4a2165525877dccb66271263e199253d1c14ff2d544432da6ecb11",
     "LICENSE.txt": "3972dc9744f6499f0f9b2dbf76696f2ae7ad8af9b23dde66d6af86c9dfb36986",
@@ -319,7 +319,7 @@
     "resources/tmdbhelper/lib/items/directories/tmdb/lists_allitems.py": "691e40b29f7dbb645e3c42946ce90e27745e92f0228f97c22c32084707117da6",
     "resources/tmdbhelper/lib/items/directories/tmdb/lists_discover.py": "b4c53a8ea4067a208ae77db27bfe00b615dcfba9903a649c516706a3eccc2c2a",
     "resources/tmdbhelper/lib/items/directories/tmdb/lists_authenticated.py": "adc2934a53da1bb76cb4d197578bb0328ea41e01cc6db1abb090daa4ff911e80",
-    "resources/tmdbhelper/lib/items/directories/tmdb/lists_search.py": "6c6708f7f04ceaf0959281b606824eed8fdd0c9cbfc35bcc95f4901ef22d2b82",
+    "resources/tmdbhelper/lib/items/directories/tmdb/lists_search.py": "3cc1c1165fd57b233b868fb35e4ceca1cf2449a85a44fb5b9f04cde4b6ae2862",
     "resources/tmdbhelper/lib/items/directories/tmdb/lists_gemini.py": "65095dff1e3c12003c7710698acb5132b225fd9a0220997a2385bc27af701b93",
     "resources/tmdbhelper/lib/items/directories/tmdb/lists_related.py": "db6116984ad9b9b21c56aa2442524526896584d5cbd91ceb2c1ba034d8856435",
     "resources/tmdbhelper/lib/items/directories/tmdb/lists_standard.py": "cc012b7b82fbd3d07a9d900ebdb62d3b79e07cd66266fb144958106f47d4f242",
@@ -483,5 +483,5 @@
   "validated_at": "2026-10-17",
   "source_origin_verified": true,
   "optimized_native_guards": "explicit checks, active under -OO",
-  "scope": "native real cache parser suite; empty-search path covered by seven controller tests and later clean-device acceptance"
+  "scope": "native real cache/parser suite on exact managed source; batched-search and lifecycle paths covered by maintained controller tests and three-device acceptance"
 }

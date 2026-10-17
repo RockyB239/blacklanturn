@@ -1,5 +1,5 @@
 """Temporary live Kodi integration review. Uses provider directories, not a scraped catalogue."""
-import json,time,threading,traceback,ssl,copy
+import json,time,threading,traceback,ssl,copy,hashlib
 from urllib.request import urlopen,Request
 from pathlib import Path
 from urllib.parse import urlencode,urlsplit,parse_qs
@@ -14,6 +14,7 @@ from player_preferences import player_choices,player_path,default_setting
 from search_ui import SEARCH_KINDS,search_sources,discovery_result,best_matches,load_best_matches,clear_search_selection,entity_kind,search_caption
 from preview_setup import configured as preview_configured
 from watch_metadata import hydrate_watch_metadata
+from page_ahead import PageAhead,eligible as page_ahead_eligible
 from row_feedback import trim_row_cache,row_message,provider_page_label,RowResultCache
 from public_rows import PublicRowSnapshots,snapshot_scope,public_path,helper_settings_identity
 from backend_ui import BackendSettings,LoadingPreview
@@ -52,7 +53,7 @@ def get_list(path):
     start=time.monotonic()
     query=parse_qs(urlsplit(path).query)
     if urlsplit(path).netloc=='plugin.video.themoviedb.helper' and query.get('info')==['blacklanturn_search_matches']:
-        return load_best_matches(query.get('query',[''])[0],get_list,workers=2)
+        return load_best_matches(query.get('query',[''])[0],get_list,workers=2,batch_provider=get_list)
     category=catalogue_category(path)
     if category:
         content='video' if category=='video' else 'executable'
@@ -62,7 +63,7 @@ def get_list(path):
     result=rpc('Files.GetDirectory',{'directory':path,'media':'video','properties':PROPERTIES})
     if 'error' in result:event('directory_rpc_error',message=result['error'].get('message'))
     files=directory_items(result)
-    if query.get('info')==['search'] and query.get('query'):
+    if query.get('info')==['search'] and query.get('query') and query.get('blacklanturn_all')!=['1']:
         files=best_matches(query['query'][0],files,limit=80)+[x for x in files if not entity_kind(x)]
     if query.get('info')==['search']:
         for item in files:item['_search_kind']=entity_kind(item)
@@ -110,22 +111,30 @@ class PreviewPlayer(xbmc.Player):
 
 class LiveReview(xbmcgui.WindowXML):
     def onInit(self):
+        # Kodi may initialize this object again with recreated native controls.
+        # Retire its old setup/monitor before any native initialization can wait.
+        lifetime=object();self.window_lifetime=lifetime
+        self.generation=getattr(self,'generation',-1)+1
+        self.input_generation=getattr(self,'input_generation',-1)+1
+        self.preview_generation=getattr(self,'preview_generation',-1)+1
         skin=xbmc.getSkinDir()
         if getattr(self,'owner_skin',skin)!=skin:
             self.alive=False
             if getattr(self,'owned_preview',False):self.stop_preview()
             self.close();return
         self.owner_skin=skin
+        self.batch_search_enabled=True
+        self.page_ahead=PageAhead()
         self.preview_renderer=PreviewRendererGuard(rpc,STORE/'preview-renderer-recovery.json',xbmc.getCondVisibility('System.Platform.Android'))
         self.restore_preview_renderer()
         self.setProperty('captionRows','false')
         self.setProperty('episodeBrowser','false')
         self.alive=True;self.mode='home';self.section='Home';self.nav=False;self.mouse=False
         self.nav_state_lock=threading.RLock();self.nav_focus_intent=None;self.nav_revision=0;self.nav_width_requested=82;self.nav_width_applied=None
-        self.input_generation=0;self.preview_input_generation=0
+        self.preview_input_generation=self.input_generation
         self.preview_dispatch_lock=threading.RLock();self.preview_dispatched=False
-        self.player=PreviewPlayer();self.preview_attempts=None;self.preview_generation=0;self.preview_cache={};self.browse_sources=[];self.owned_preview=False;self.preview_mode='manual';self.dwell=time.monotonic();self.preview_key=None
-        self.hover=HoverScroll();self.generation=0;self.focus_key=None;self.selected=None;self.last_row=0;self.rows=[[],[]];self.paths=['',''];self.histories=[PageHistory(),PageHistory()];self.return_focus=900
+        self.player=PreviewPlayer();self.preview_attempts=None;self.preview_cache={};self.browse_sources=[];self.owned_preview=False;self.preview_mode='manual';self.dwell=time.monotonic();self.preview_key=None
+        self.hover=HoverScroll();self.focus_key=None;self.selected=None;self.last_row=0;self.rows=[[],[]];self.paths=['',''];self.histories=[PageHistory(),PageHistory()];self.return_focus=900
         self.anime_metadata=AnimeMetadata(PROFILE/'addon_data/plugin.video.themoviedb.helper')
         self.cast_people=[];self.person_context=None;self.episode_browser_context=None;self.preview_requested_at=0;self.preview_playing=False
         self.season_sources=[];self.season_title='';self.season_position=0
@@ -161,9 +170,9 @@ class LiveReview(xbmcgui.WindowXML):
         self.preview_mode=self.config.get('PreviewMode','manual');self.setProperty('previewMode',self.preview_mode)
         self.refresh_navigation();self.apply_status()
         self.initialize_startup_focus()
-        threading.Thread(target=self.start,name='BlackLanturnLiveSetup',daemon=True).start()
-        threading.Thread(target=self.monitor,name='BlackLanturnLiveFocus',daemon=True).start()
-        if resume and resume.get('origin')!='sidebar':threading.Thread(target=self.resume_settings,name='BlackLanturnSettingsReturn',daemon=True).start()
+        threading.Thread(target=lambda:self.start(lifetime),name='BlackLanturnLiveSetup',daemon=True).start()
+        threading.Thread(target=lambda:self.monitor(lifetime),name='BlackLanturnLiveFocus',daemon=True).start()
+        if resume and resume.get('origin')!='sidebar':threading.Thread(target=lambda:self.resume_settings(lifetime),name='BlackLanturnSettingsReturn',daemon=True).start()
         event('live_opened')
     def initialize_startup_focus(self):
         # Only a new browsing session starts neutral. Settings and playback
@@ -171,30 +180,42 @@ class LiveReview(xbmcgui.WindowXML):
         self.startup_idle=not (getattr(self,'resume_backend',None) or getattr(self,'resume_playback',None))
         self.setProperty('startupIdle','true' if self.startup_idle else 'false')
         self.setFocusId(5 if self.startup_idle else 900)
-    def resume_settings(self):
-        self.settings()
-        if self.alive:self.set_nav(False,pending_focus=True);self.setFocusId(900 if self.rows[0] else 101)
+    def resume_settings(self,lifetime=None):
+        if lifetime is None:lifetime=getattr(self,'window_lifetime',None)
+        def current():return self.alive and lifetime is getattr(self,'window_lifetime',None)
+        if not current():return
+        self.settings(lifetime)
+        if current():self.set_nav(False,pending_focus=True);self.setFocusId(900 if self.rows[0] else 101)
     def save(self,invalidate=True):
         temp=STORE/'rows.tmp';temp.write_text(json.dumps(self.config,indent=2));temp.replace(STORE/'rows.json')
         if invalidate:
             self.invalidate_row_results()
             if getattr(self,'alive',False):self.restart_pending_rows()
-    def start(self):
+    def start(self,lifetime=None):
+        if lifetime is None:lifetime=getattr(self,'window_lifetime',None)
+        def current():return getattr(self,'alive',True) and lifetime is getattr(self,'window_lifetime',None)
+        if not current():return
         try:
             if getattr(self,'resume_backend',None) and self.resume_backend.get('browse_state'):
                 self.restore_browse(self.resume_backend['browse_state']);return
             playback_resume=getattr(self,'resume_playback',None)
             if playback_resume:
-                self.restore_browse(playback_resume);self.refresh_watch_status(sync=True,browse_state=playback_resume);return
+                self.restore_browse(playback_resume)
+                if current():self.refresh_watch_status(sync=True,browse_state=playback_resume)
+                return
             self.setProperty('loadingStatus','Preparing your integrations…')
             if not getattr(self,'resume_backend',None):initialize_addons()
+            if not current():return
             self.setProperty('loadingStatus','Loading your home…');self.load_section()
+            if not current():return
             resume=getattr(self,'resume_backend',None)
             if resume and resume.get('origin')=='sidebar' and resume.get('active_page'):
                 route=resolve_destination({'kind':'page','page_id':resume['active_page']},self.config,self.section)
                 if route:self.load_navigation_page(route)
+            if not current():return
             if resume and resume.get('origin')=='sidebar':self.pending_sidebar_return=True;self.restore_sidebar_focus()
         except Exception as exc:
+            if not current():return
             self.finish_loading('setup_failed')
             self.setProperty('notice','Integration setup failed. Open Home to retry, or check integrations in Settings.')
             event('setup_error',error=str(exc))
@@ -471,7 +492,7 @@ class LiveReview(xbmcgui.WindowXML):
         files=snapshots.get(path) if snapshots is not None else None
         if files is not None and filtered and needs_fill(path,files,metadata.without_anime):return None,False
         return files,files is not None
-    def fill_discovery_page(self,path,files,current,refresh=False):
+    def fill_discovery_page(self,path,files,current,refresh=False,publish=True):
         metadata=getattr(self,'anime_metadata',None)
         if metadata is None or not path.startswith(TMDB) or not should_exclude_anime(self,path):return files
         cache=self.result_cache;revision=cache.revision;key='filtered-v1:'+path
@@ -488,7 +509,7 @@ class LiveReview(xbmcgui.WindowXML):
         if upstream_path(provider_path(path))!=provider_path(path):files=fetch(provider_path(path))
         filled=fill_page(path,files,fetch,metadata.without_anime,current=current)
         if current():cache.put(key,filled,revision=revision)
-        self.publish_cache_stats()
+        if publish:self.publish_cache_stats()
         return filled
     def cached_provider_list(self,path,revision,current):
         """Reuse successful exact search subroutes within the existing cache budget."""
@@ -497,7 +518,7 @@ class LiveReview(xbmcgui.WindowXML):
         if files is None:
             files=get_list(path)
             if not current() or cache.revision!=revision:raise PageCancelled('Search navigation changed')
-            cache.put(path,files,revision=revision)
+            cache.put(path,files,revision=revision,ttl=30 if parse_qs(urlsplit(path).query).get('info',[''])[0].startswith('trakt') else 120)
         return files
     def cached_row_items(self,definition,expected_revision=None,owner_current=lambda:True):
         path=definition.get('path','')
@@ -516,13 +537,16 @@ class LiveReview(xbmcgui.WindowXML):
         if files is None:
             params=parse_qs(urlsplit(path).query)
             if params.get('info')==['blacklanturn_search_matches']:
-                files=load_best_matches(params.get('query',[''])[0],lambda part:self.cached_provider_list(part,revision,current),current,workers=2)
+                files=load_best_matches(params.get('query',[''])[0],lambda part:self.cached_provider_list(part,revision,current),current,workers=2,batch_provider=get_list if getattr(self,'batch_search_enabled',False) else None,cache=cache,revision=revision)
             else:files=get_list(provider_path(path))
-            if self.configure_row_snapshots():self.restart_pending_rows()
-            # Personal rows stay session-only; late work cannot repopulate either cache.
-            info=parse_qs(urlsplit(path).query).get('info',[''])[0]
-            cache.put(path,files,revision=revision,ttl=30 if info.startswith('trakt') else 120)
-            if revision==cache.revision and snapshots is not None and snapshots is getattr(self,'snapshot_cache',None):snapshots.put(path,files,revision=snapshot_revision)
+            with self.preview_dispatch_lock:
+                if not current():raise PageCancelled('Row navigation changed')
+                if self.configure_row_snapshots():self.restart_pending_rows()
+                if not current():raise PageCancelled('Row configuration changed')
+                # Personal rows stay session-only; late work cannot repopulate either cache.
+                info=parse_qs(urlsplit(path).query).get('info',[''])[0]
+                cache.put(path,files,revision=revision,ttl=30 if info.startswith('trakt') else 120)
+                if revision==cache.revision and snapshots is not None and snapshots is getattr(self,'snapshot_cache',None):snapshots.put(path,files,revision=snapshot_revision)
         self.publish_cache_stats()
         return self.fill_discovery_page(path,files,current,refresh=definition.get('_snapshot_refresh',False))
     def apply_refreshed_row(self,n,files,label):
@@ -729,6 +753,40 @@ class LiveReview(xbmcgui.WindowXML):
                 if acquired:self.list_lock.release()
                 self.prefetch_busy=False
         threading.Thread(target=work,name='BlackLanturnPublicRowTrial',daemon=True).start()
+    def page_files(self,path,current,revision):
+        """Shared foreground/lookahead path, including logical filtered pages."""
+        if not current():raise PageCancelled('Page navigation changed')
+        cache=self.result_cache;metadata=getattr(self,'anime_metadata',None)
+        filtered=metadata is not None and path.startswith(TMDB) and should_exclude_anime(self,path)
+        files=cache.get(('filtered-v1:' if filtered else '')+path)
+        if files is not None and filtered and needs_fill(path,files,metadata.without_anime,positioned=True):files=None
+        if files is None:
+            if filtered and upstream_path(provider_path(path))!=provider_path(path):files=[]
+            else:files=self.cached_provider_list(provider_path(path),revision,current)
+            if filtered:files=self.fill_discovery_page(path,files,current,publish=False)
+        if not current():raise PageCancelled('Page navigation changed')
+        return files
+    def prefetch_next_page(self):
+        ahead=getattr(self,'page_ahead',None)
+        if ahead is None or not self.alive or self.mode!='home' or not all(self.window_ready):return
+        if self.nav or self.settings_open or self.actions_open or self.owned_preview or self.player.isPlaying():return
+        if getattr(self,'row_window_busy',False) or getattr(self,'loading_paths',{}) or self.getProperty('loading')=='true':return
+        if xbmcgui.getCurrentWindowDialogId() not in (0,9999) or self.getFocusId() not in (900,901):return
+        if time.monotonic()-self.dwell<.4:return
+        n=self.getFocusId()-900;rows=self.rows[n];origin=self.paths[n]
+        position=self.getControl(900+n).getSelectedPosition()
+        if position<max(0,len(rows)-9):return
+        target=next((x.get('file','') for x in rows if x.get('_page_control')=='next'),None)
+        if not target or not page_ahead_eligible(target):return
+        generation=self.generation;revision=self.result_cache.revision
+        key=(generation,revision,target)
+        def current():
+            return (self.alive and self.generation==generation and self.result_cache.revision==revision
+                    and self.rows[n] is rows and self.paths[n]==origin and not self.player.isPlaying())
+        def fetch():
+            start=time.monotonic();self.page_files(target,current,revision)
+            if current():event('next_page_prepared',seconds=round(time.monotonic()-start,3),generation=generation,revision=revision,target_sha256=hashlib.sha256(target.encode()).hexdigest())
+        ahead.start(key,fetch,current)
     def row_navigation(self):
         with self.preview_dispatch_lock:
             self.getControl(900).controlUp(self.getControl(900 if self.row_offset>0 else (600 if self.browse_sources or self.episode_browser_context or getattr(self,'search_state',None) else 101)))
@@ -942,14 +1000,19 @@ class LiveReview(xbmcgui.WindowXML):
         def work():
             try:
                 if not current():return
-                params=parse_qs(urlsplit(path).query)
-                metadata=getattr(self,'anime_metadata',None)
-                filtered=metadata is not None and path.startswith(TMDB) and should_exclude_anime(self,path)
-                files=self.result_cache.get('filtered-v1:'+path) if filtered else None
-                if files is not None and needs_fill(path,files,metadata.without_anime,positioned=True):files=None
-                if files is None:
-                    files=[] if filtered and upstream_path(provider_path(path))!=provider_path(path) else load_best_matches(params.get('query',[''])[0],lambda part:self.cached_provider_list(part,revision,current),current,workers=2) if params.get('info')==['blacklanturn_search_matches'] else get_list(provider_path(path))
-                    if filtered:files=self.fill_discovery_page(path,files,current)
+                ahead=getattr(self,'page_ahead',None)
+                if ahead is not None and page_ahead_eligible(path):
+                    ahead.wait((generation,revision,path),current)
+                    files=self.page_files(path,current,revision)
+                else:
+                    params=parse_qs(urlsplit(path).query)
+                    metadata=getattr(self,'anime_metadata',None)
+                    filtered=metadata is not None and path.startswith(TMDB) and should_exclude_anime(self,path)
+                    files=self.result_cache.get('filtered-v1:'+path) if filtered else None
+                    if files is not None and needs_fill(path,files,metadata.without_anime,positioned=True):files=None
+                    if files is None:
+                        files=[] if filtered and upstream_path(provider_path(path))!=provider_path(path) else load_best_matches(params.get('query',[''])[0],lambda part:self.cached_provider_list(part,revision,current),current,workers=2,batch_provider=get_list if getattr(self,'batch_search_enabled',False) else None,cache=cache,revision=revision) if params.get('info')==['blacklanturn_search_matches'] else get_list(provider_path(path))
+                        if filtered:files=self.fill_discovery_page(path,files,current)
                 with self.preview_dispatch_lock:
                     if current():
                         if not back:self.histories[n].push(previous,previous_position)
@@ -991,29 +1054,39 @@ class LiveReview(xbmcgui.WindowXML):
         state['properties']={key:self.getProperty(key) for key in ('eyebrow','captionRows','scroll','browseFilters','row0','row1','episodeBrowser','searchBrowser','page','rowState0','rowState1','rowMessage0','rowMessage1','heroCompact','addonBrowser','genreChooser','filmographyBrowser')}
         return copy.deepcopy(state)
     def restore_browse(self,state):
+        lifetime=getattr(self,'window_lifetime',None)
+        def current():return self.alive and lifetime is getattr(self,'window_lifetime',None)
+        if not current():return
         self.generation+=1;self.path_tokens={};self.row_window_busy=False
         self.loading_paths={}
         for key,value in state.items():
             if key not in ('positions','focus','properties','snapshot_rows','window_ready'):setattr(self,key,copy.deepcopy(value))
         self.refresh_navigation()
+        if not current():return
         if self.episode_browser_context:self.populate_seasons()
         elif getattr(self,'search_state',None):self.populate_search()
         else:self.load_browse_sources()
+        if not current():return
         if self.active_page and self.section not in ('Movies','Shows') and not self.episode_browser_context and not getattr(self,'search_state',None):
             for n,source in enumerate(self.browse_sources,1):
                 if source['id']==self.active_page:self.getControl(600).selectItem(n);break
         for key,value in state['properties'].items():self.setProperty(key,value)
         for n in range(2):
+            if not current():return
             self.getControl(900+n).setHeight(344 if state['properties']['captionRows']=='true' else 276)
+            if not current():return
             self.apply_row(n,state['rows'][n],state.get('row_labels',{}).get(n,state['properties']['row'+str(n)]),state['positions'][n],update_selected=False)
+        if not current():return
         self.row_states=copy.deepcopy(state.get('row_states',{}))
         self.snapshot_rows=copy.deepcopy(state.get('snapshot_rows',{}));self.window_ready=list(state.get('window_ready',[True,True]))
         for key,value in state['properties'].items():self.setProperty(key,value)
         if state['mode']=='details':
             self.details(state['selected'],cast_position=state.get('cast_position'));self.return_focus=state['return_focus']
         elif state['selected']:self.update(state['selected'])
+        if not current():return
         focus=state['focus'] if state['focus'] in (101,102,103,105,106,600,900,901) else 101 if self.mode=='details' else 900+self.last_row
         self.setFocusId(focus);self.focus_key=None
+        if not current():return
         self.restart_pending_rows()
         event('browse_restored',section=self.section,page=self.active_page,mode=self.mode,offset=self.row_offset,positions=state['positions'])
     def refresh_watch_status(self,sync=False,browse_state=None):
@@ -1160,6 +1233,7 @@ class LiveReview(xbmcgui.WindowXML):
             self.getControl(cid).setEnabled(enabled)
     def details(self,item,cast_position=None):
         if not item:return
+        lifetime=getattr(self,'window_lifetime',None)
         discovery=discovery_result(item)
         if discovery:self.open_discovery(discovery);return
         self.setProperty('captionRows','false')
@@ -1171,24 +1245,29 @@ class LiveReview(xbmcgui.WindowXML):
         self.getControl(106).controlDown(self.getControl(3000));self.getControl(106).controlLeft(self.getControl(103))
         self.getControl(3000).reset();self.getControl(3100).reset();self.related=[];self.setFocusId(101)
         source_key=item.get('file');self.setProperty('notice','Loading details…')
+        def current():return self.alive and lifetime is getattr(self,'window_lifetime',None) and self.mode=='details' and (self.selected or {}).get('file')==source_key
         def work():
             try:
+                if not current():return
                 params=title_details_params(item);kind=params.pop('tmdb_type');identity=params.get('tmdb_id')
                 detail=item
                 if identity:
                     found=get_list(tmdb('details',kind,**params))
                     if found:detail=merge_title_details(item,found[0])
-                if self.mode!='details' or not self.alive or self.selected.get('file')!=source_key:return
+                if not current():return
                 self.update(detail)
+                if not current():return
                 cast=[];self.cast_people=[]
                 people=get_list(tmdb('cast',kind,tmdb_id=identity)) if identity else []
+                if not current():return
                 roles={p.get('name',''):p.get('role','') for p in detail.get('cast',[])}
                 for person in people:
+                    if not current():return
                     name=person.get('title') or person.get('label','')
                     if not person_identity(person.get('file','')):continue
                     art=person.get('art',{})
                     li=xbmcgui.ListItem(label=name,label2=roles.get(name,''));li.setArt({'poster':art.get('poster') or art.get('thumb') or person.get('thumbnail','')});cast.append(li);self.cast_people.append(person)
-                if self.mode!='details' or not self.alive or self.selected.get('file')!=source_key:return
+                if not current():return
                 self.getControl(3000).addItems(cast)
                 if cast_position is not None and cast:
                     self.getControl(3000).selectItem(min(cast_position,len(cast)-1));self.setFocusId(3000)
@@ -1196,9 +1275,10 @@ class LiveReview(xbmcgui.WindowXML):
                 event('details_loaded',cast=len(cast),rating=bool(rating_line(detail)))
                 if identity:
                     related=get_list(tmdb('similar',kind,tmdb_id=identity))
-                    if self.mode=='details' and self.alive and self.selected.get('file')==source_key:
+                    if current():
                         self.related=related;self.getControl(3100).addItems([media_item(d) for d in related])
-            except Exception as exc:event('details_error',error=str(exc));self.setProperty('notice','Available title details shown; additional metadata unavailable')
+            except Exception as exc:
+                if current():event('details_error',error=str(exc));self.setProperty('notice','Available title details shown; additional metadata unavailable')
         threading.Thread(target=work,name='BlackLanturnLiveDetails',daemon=True).start()
     def browse_all_episodes(self):
         item=self.selected or {};identity=show_identity(item)
@@ -1483,15 +1563,20 @@ class LiveReview(xbmcgui.WindowXML):
                 self.config['RatingSources']=list(sources);self.save();position=target
             else:position=choice
         if self.selected:self.update(self.selected)
-    def settings(self):
+    def settings(self,lifetime=None):
+        if lifetime is None:lifetime=getattr(self,'window_lifetime',None)
+        def current():return self.alive and lifetime is getattr(self,'window_lifetime',None)
+        if not current():return
         self.settings_open=True;category,row=self.backend_position
         try:
-            while self.alive:
+            while current():
                 dialog=BackendSettings('BackendSettings.xml',str(ROOT),'Default','1080i')
                 dialog.config=self.config;dialog.preview_mode=self.preview_mode;dialog.category=category;dialog.row=row
                 dialog.initial_focus=self.backend_focus
-                dialog.handler=self.run_setting
-                dialog.doModal();action=dialog.result;category,row=dialog.category,dialog.row
+                dialog.handler=lambda action:self.run_setting(action) if current() else None
+                dialog.doModal()
+                if not current():return
+                action=dialog.result;category,row=dialog.category,dialog.row
                 self.backend_position=(category,row);del dialog
                 if action is None:return
                 event('backend_action',action=action)
@@ -1502,7 +1587,8 @@ class LiveReview(xbmcgui.WindowXML):
                     self.run_setting(action);continue
                 self.backend_focus=200
                 self.run_setting(action)
-        finally:self.settings_open=False
+        finally:
+            if lifetime is getattr(self,'window_lifetime',None):self.settings_open=False
     def run_setting(self,action):
         event('backend_action',action=action)
         if action.startswith('addon:'):
@@ -1545,44 +1631,58 @@ class LiveReview(xbmcgui.WindowXML):
         elif action=='recovery':
             from live_recovery import return_to_previous_skin
             self.finish();return_to_previous_skin()
-    def monitor(self):
+    def monitor(self,lifetime=None):
+        if lifetime is None:lifetime=getattr(self,'window_lifetime',None)
+        def current():return self.alive and lifetime is getattr(self,'window_lifetime',None)
         caption_checked=0
-        while self.alive and not xbmc.Monitor().abortRequested():
+        while current() and not xbmc.Monitor().abortRequested():
             try:
-                if xbmc.getSkinDir()!=self.owner_skin:self.alive=False;return
+                if not current():return
+                skin=xbmc.getSkinDir()
+                if not current():return
+                if skin!=self.owner_skin:self.alive=False;return
                 if self.settings_open or self.actions_open:
                     time.sleep(.08);continue
                 self.apply_nav_width()
+                if not current():return
                 pending=getattr(self,'search_row_step',None)
                 if pending and (pending['generation']!=self.generation or pending['epoch']!=getattr(self,'input_generation',0)):self.search_row_step=None
                 if getattr(self,'loading_paths',{}) or getattr(self,'search_row_step',None) or self.getProperty('loading')=='true':
                     time.sleep(.08);continue
                 if time.monotonic()-caption_checked>=1:
                     width=xbmc.getInfoLabel('System.ScreenWidth');height=xbmc.getInfoLabel('System.ScreenHeight')
+                    if not current():return
                     fit=str(caption_fit_step(width,height))
                     if self.getProperty('captionFitStep')!=fit:
                         self.setProperty('captionFitStep',fit)
                         event('caption_fit',width=width,height=height,step=fit)
                     caption_checked=time.monotonic()
                 focus=self.getFocusId();key=(focus,self.getControl(focus).getSelectedPosition()) if focus in (900,901,3100) else (focus,0)
+                if not current():return
                 if getattr(self,'startup_idle',False) and focus!=5:
                     self.startup_idle=False;self.setProperty('startupIdle','false')
                     event('startup_browsing_entered',focus=focus)
                 compact='true' if self.mode=='home' and (getattr(self,'fixed_hero',False) or self.row_offset>0 or self.getProperty('captionRows')=='true') else 'false'
                 if self.getProperty('heroCompact')!=compact:self.setProperty('heroCompact',compact)
                 self.sync_nav_focus(focus)
+                if not current():return
                 if key!=self.focus_key:
                     self.focus_key=key
                     if focus in (900,901):
                         self.last_row=focus-900;self.return_focus=focus;self.setProperty('scroll',('creditShows' if focus==901 else 'credits') if self.getProperty('captionRows')=='true' else ('down' if focus==901 else 'top'));item=self.chosen(focus)
-                        if item:self.stop_preview();self.update(item)
+                        if item:
+                            self.stop_preview()
+                            if not current():return
+                            self.update(item)
                     elif focus in (3000,3100):self.setProperty('scroll','down' if focus==3000 else 'related')
                     # Hovering a visible button must not move it away before the
                     # click arrives. Directional navigation still reveals the hero.
                     elif focus in (101,102,103,105,106,600) and not self.mouse:self.setProperty('scroll','top')
                 arrow=self.hover.tick(time.monotonic(),focus,self.mouse)
                 if arrow is not None:self.arrow(arrow)
+                if not current():return
                 if getattr(self,'previews_ready',True) and not getattr(self,'startup_idle',False) and self.preview_mode=='auto' and self.mode=='home' and not self.episode_browser_context and not self.nav and focus in (900,901) and self.selected and self.rating_identity(self.selected) and time.monotonic()-self.dwell>=self.config.get('PreviewDelay',5) and self.preview_key!=self.selected.get('file'):self.preview(automatic=True)
+                if getattr(self,'page_ahead',None) is not None:self.prefetch_next_page()
                 if getattr(self,'prefetch_trial',False):self.prefetch_next_row()
                 if not self.nav and time.monotonic()-self.dwell>=1.2:self.selected_ratings()
                 attempts=self.preview_attempts;preview_token=self.preview_generation
@@ -1595,11 +1695,16 @@ class LiveReview(xbmcgui.WindowXML):
                         event('preview_fallback',attempt=attempts.index+1,reason='playback_error' if failed else 'start_timeout')
                         self.play_preview_candidate(next_url,preview_token,attempts)
                     elif playing and not self.preview_playing:
-                        self.preview_viewmode=rpc('Player.GetViewMode').get('result',{'viewmode':'normal'})
+                        viewmode=rpc('Player.GetViewMode').get('result',{'viewmode':'normal'})
+                        if not current():return
+                        self.preview_viewmode=viewmode
                         stream=rpc('Player.GetProperties',{'playerid':1,'properties':['currentvideostream']}).get('result',{}).get('currentvideostream',{})
+                        if not current():return
                         aspect=rpc('XBMC.GetInfoLabels',{'labels':['VideoPlayer.VideoAspect']}).get('result',{}).get('VideoPlayer.VideoAspect','')
+                        if not current():return
                         fit=preview_fill_viewmode(stream,aspect,self.getProperty('heroCompact')=='true' and self.mode=='home')
                         result=rpc('Player.SetViewMode',{'viewmode':fit})
+                        if not current():return
                         self.preview_playing=True;self.setProperty('preview','playing');self.setProperty('notice','')
                         self.start_preview_bar_scan(stream,aspect,fit)
                         event('trailer_playing',total=self.player.getTotalTime(),hero_fill=result.get('result')=='OK',preview_fit=fit,attempt=attempts.index+1)
@@ -1609,7 +1714,8 @@ class LiveReview(xbmcgui.WindowXML):
                         self.setProperty('notice','Preview ended' if self.preview_playing else 'No working preview available; artwork retained')
                         event('trailer_finished',played=self.preview_playing)
                     elif playing and self.preview_playing:self.sample_preview_bar_scan()
-            except RuntimeError:pass
+            except RuntimeError:
+                if not current():return
             time.sleep(.08)
     def arrow(self,cid):
         if cid in (700,701):

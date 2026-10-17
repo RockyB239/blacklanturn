@@ -125,6 +125,11 @@ class ListSearch(ListStandard):
         if items or self.handle < 0 or not self.list_properties.query:
             return items
 
+        self.validate_empty_search()
+        self.trakt_playdata.pre_sync_join()
+        self.finish_container()
+
+    def validate_empty_search(self):
         # BlackLanturn: the base container returns before endOfDirectory for
         # empty items. Verify the raw response before completing an empty
         # search, since the item cache also collapses failed requests to [].
@@ -140,7 +145,46 @@ class ListSearch(ListStandard):
                      and ((total == 0 and pages <= 1) or (total > 0 and pages > 0 and page > pages)))
         if not valid:
             raise RuntimeError('Search did not return a valid empty result')
-        self.trakt_playdata.pre_sync_join()
+
+    def get_tmdb_id(self):
+        # Search consumes query/type/page, never a resolved single-title ID.
+        return
+
+    def get_batch_items(self):
+        """One interpreter; native full metadata and sync for each component."""
+        items, status = [], []
+        for kind in ('both', 'company', 'collection', 'movie'):
+            params = {k: v for k, v in self.params.items() if k != 'blacklanturn_all'}
+            params['tmdb_type'] = kind
+            child = ListSearch(-1, urlencode(params), **params)
+            try:
+                try:
+                    part = child.get_directory(items_only=True)
+                    if part is None:
+                        child.validate_empty_search()
+                    # Native add_items discards excluded finalizer entries.
+                    part = [item for item in (part or []) if item]
+                finally:
+                    child.trakt_playdata.pre_sync_join()
+            except Exception:
+                status.append((kind, -1))
+                continue
+            items.extend(part)
+            status.append((kind, len(part)))
+        return items, status
+
+    def get_directory(self, items_only=False, build_items=True):
+        if self.params.get('blacklanturn_all') != '1' or self.handle < 0:
+            return super().get_directory(items_only, build_items)
+        from xbmcgui import ListItem
+        from xbmcplugin import addDirectoryItem
+        items, status = self.get_batch_items()
+        # Finalized children must not be hydrated a second time by the parent.
+        self.add_items(items)
+        marker = 'blacklanturn://search-status?' + urlencode(dict(version=2, **dict(status)))
+        addDirectoryItem(self.handle, marker, ListItem(label='Search status'), False)
+        self.plugin_category = 'Search'
+        self.container_content = 'videos'
         self.finish_container()
 
     def configure_list_properties(self, list_properties):

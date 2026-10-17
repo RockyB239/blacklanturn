@@ -9,7 +9,7 @@ class Base:
 class ProviderEmpty(unittest.TestCase):
  def state(self,response=EMPTY,items=None):
   node=next(n for n in ast.parse(P.read_text()).body if isinstance(n,ast.ClassDef) and n.name=='ListSearch')
-  methods=[n for n in node.body if isinstance(n,ast.FunctionDef) and n.name=='get_directory_items']
+  methods=[n for n in node.body if isinstance(n,ast.FunctionDef) and n.name in ('get_directory_items','validate_empty_search')]
   self.assertTrue(methods,'Provider must finish only verified empty search directories')
   cls=ast.ClassDef(name='Patched',bases=[ast.Name(id='Base',ctx=ast.Load())],keywords=[],body=methods,decorator_list=[])
   ns={'Base':Base};exec(compile(ast.fix_missing_locations(ast.Module(body=[cls],type_ignores=[])),str(P),'exec'),ns)

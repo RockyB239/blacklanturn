@@ -27,8 +27,8 @@ class RowResultCache:
             self.hits+=1;self.entries.move_to_end(key)
             return deepcopy(self.entries[key][2])
 
-    def put(self,key,files,revision=None,ttl=None):
-        if not files or len(files)>80:return False
+    def put(self,key,files,revision=None,ttl=None,allow_empty=False):
+        if files is None or (not files and not allow_empty) or len(files)>80:return False
         try:
             saved=deepcopy(files)
             size=len(json.dumps(saved,ensure_ascii=False).encode('utf-8'))

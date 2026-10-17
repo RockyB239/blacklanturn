@@ -41,7 +41,62 @@ def best_matches(query,files,limit=40):
         return match,-votes,-quality,index
     return [item for _,item in sorted(enumerate(unique.values()),key=rank)][:limit]
 
-def load_best_matches(query,provider,should_continue=lambda:True,workers=1):
+def batch_components(files):
+    """Reject unknown protocol versions before accepting any cache component."""
+    markers=[i for i,x in enumerate(files) if x.get('file','').startswith('blacklanturn://search-status')]
+    if markers != [len(files)-1]:return None
+    q=parse_qs(urlsplit(files[-1]['file']).query)
+    version=q.get('version')
+    kinds=('both','company','collection') if version==['1'] else ('both','company','collection','movie') if version==['2'] else ()
+    if not kinds or set(q)!=set(('version',)+kinds):return None
+    counts=[]
+    for kind in kinds:
+        values=q[kind]
+        if len(values)!=1 or not re.fullmatch(r'-1|0|[1-9][0-9]{0,3}',values[0]):return None
+        counts.append(int(values[0]))
+    if sum(max(0,n) for n in counts)!=len(files)-1:return None
+    parts={};offset=0
+    for kind,count in zip(kinds,counts):
+        if count<0:parts[kind]=None;continue
+        part=files[offset:offset+count];offset+=count
+        for item in part:
+            entity=entity_kind(item)
+            params=parse_qs(urlsplit(item.get('file','')).query)
+            if entity not in (('movie','tv','person') if kind=='both' else (kind,)):
+                if params.get('info')!=['search'] or params.get('tmdb_type')!=[kind] or 'page' not in params:return None
+        parts[kind]=part
+    return parts
+
+def load_batch_matches(query,provider,current,cache=None,revision=None):
+    if not current():raise ValueError('Search cancelled')
+    try:parts=batch_components(provider(route('search','both',query=query,blacklanturn_all='1')))
+    except Exception:parts=None
+    if not current() or (cache is not None and revision!=cache.revision):raise ValueError('Search cancelled')
+    if parts is None:return None  # Upstream overlay unavailable: native fallback.
+    combined=[];failed=False
+    for kind,part in parts.items():
+        if part is None:
+            if kind!='movie':failed=True
+            continue
+        # Preserve each category's original ranking and native Next card before
+        # global ranking/truncation; never cache a failed category as empty.
+        part=best_matches(query,part,limit=80)+[x for x in part if not entity_kind(x)]
+        if not current():raise ValueError('Search cancelled')
+        if cache is not None:cache.put(route('search',kind,query=query),part,revision=revision,allow_empty=not part,ttl=30 if not part else None)
+        # Movies is the second initial row, not another source for All ranking.
+        if kind!='movie':combined.extend(part)
+    result=best_matches(query,combined)
+    if not result and failed:raise ValueError('Search could not return results')
+    return result
+
+def load_best_matches(query,provider,should_continue=lambda:True,workers=1,batch_provider=None,cache=None,revision=None):
+    if batch_provider is not None:
+        exact=[cache.get(route('search',k,query=query)) for k in ('both','company','collection')] if cache is not None else []
+        if exact and all(x is not None for x in exact):
+            if not should_continue():raise ValueError('Search cancelled')
+            return best_matches(query,[item for part in exact for item in part])
+        result=load_batch_matches(query,batch_provider,should_continue,cache,revision)
+        if result is not None:return result
     def fetch(kinds):
         files=[];failed=False
         for kind in kinds:
