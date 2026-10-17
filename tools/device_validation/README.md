@@ -13,3 +13,13 @@ python -m unittest discover -s tools/device_validation -p 'test_*.py'
 ```
 
 Successful short runs prove only the reported workload, never universal absence of native crashes or full provider playback. Use a fresh per-run identity and retain exact script/source manifests with the native receipt.
+
+## tvOS virtual XML safety
+
+Use `native_storage.listdir(vfs, directory)` for native settings directory listings and `native_storage.read_xml(vfs, path)` for read-only XML diagnostics. A local directory passed to `xbmcvfs.listdir` without its trailing slash can omit tvOS XML and cache it as missing. A later XML read can return zero bytes even while `xbmcvfs.exists` returns true. Never interpret that result as permission to initialize, reset or replace an existing settings file. The safe reader primes the correctly terminated directory and rejects unreadable/invalid XML without writing it.
+
+Kodi runs optimized Python. Use explicit conditions or `native_storage.require`; do not use `assert` for native validation or for operations with side effects.
+
+For the maintained Apple TV regression, stage `native_storage.py` and `native_storage_probe.py` together under an existing idle-device entrypoint/rows recovery guard. Run the probe as a separate script interpreter. Its deliberately unsafe listing is confined to a UUID-owned fake settings directory. Never substitute an actual addon profile or the userdata root. Real GUI, Helper and Umbrella XML is only read and checked unchanged. Keep a private full-profile recovery snapshot and compare all persisted userdata entries on the host as well. The probe is specific to the reproduced Kodi21.3 tvOS behavior; rejection on a different platform is not evidence of a new reset.
+
+This guard fixes the maintained diagnostic path. It does not patch Kodi itself or guarantee safety for unrelated addons that issue unsafe listings. See [the incident analysis](../../docs/TVOS-SETTINGS-CACHE-INCIDENT.md).
