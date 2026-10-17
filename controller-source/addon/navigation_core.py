@@ -8,10 +8,10 @@ ICON_CHOICES=[('home', 'Home'), ('tv', 'Shows'), ('movies', 'Movies'), ('bookmar
 RETIRED_ICONS={'crime','western-horse','western-tumbleweed'}
 ICON_CHOICES += [('crime-handcuffs','Crime — handcuffs'),('slashers','Slashers')]
 KODI_DESTINATIONS=[('tvchannels','Live TV'),('tvguide','TV guide'),('tvrecordings','TV recordings'),('radiochannels','Radio'),('music','Music'),('pictures','Pictures'),('games','Games'),('favouritesbrowser','Kodi favourites'),('addonbrowser','Add-ons'),('weather','Weather'),('filemanager','File manager')]
-SECTIONS=('Home','Shows','Movies','My Stuff','Add-ons')
+SECTIONS=('Home','Shows','Movies','My Stuff','Add-ons','YouTube')
 
-def sidebar_items(config):
-    return [{'id':'search','label':'Search','icon':'search','fixed_action':'search'}]+visible_navigation(config)+[{'id':'settings','label':'Settings','icon':'settings','fixed_action':'settings'}]
+def sidebar_items(config,youtube_connected=False):
+    return [{'id':'search','label':'Search','icon':'search','fixed_action':'search'}]+visible_navigation(config,youtube_connected)+[{'id':'settings','label':'Settings','icon':'settings','fixed_action':'settings'}]
 
 def sidebar_layout(count):
     total=count+2;row_height=96 if total<=9 else 80
@@ -39,13 +39,16 @@ def migrate_navigation(config):
     result['NavigationSchema']=1
     return result
 
-def visible_navigation(config):
+def visible_navigation(config,youtube_connected=False):
     items=[]
     for entry in config.get('Sidebar',[]):
         if not isinstance(entry,dict) or not entry.get('enabled',True):continue
+        if entry.get('destination',{}).get('section')=='YouTube' and not youtube_connected:continue
         item=deepcopy(entry)
         if item.get('icon') not in dict(ICON_CHOICES) and item.get('icon') not in RETIRED_ICONS:item['icon']='bookmark'
         items.append(item)
+    if youtube_connected and not any(x.get('destination',{}).get('section')=='YouTube' for x in config.get('Sidebar',[]) if isinstance(x,dict)):
+        items.append({'id':'youtube','label':'YouTube','icon':'youtube','enabled':True,'destination':{'kind':'section','section':'YouTube'}})
     return items
 
 def resolve_destination(destination,config,section='Movies'):

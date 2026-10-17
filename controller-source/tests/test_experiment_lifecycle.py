@@ -22,6 +22,7 @@ from live_core import PageHistory, valid_source, PreviewAttempts, title_details_
 from row_feedback import RowResultCache, provider_page_label, row_message
 from filtered_pages import provider_path
 from preview_identity import TitleVerifier
+from youtube_core import preview_path,video_id,automatic_preview,is_youtube,resume_allowed
 
 
 class ExperimentLifecycle(unittest.TestCase):
@@ -45,7 +46,7 @@ class ExperimentLifecycle(unittest.TestCase):
         namespace = {
             'threading': SimpleNamespace(Thread=QueuedThread, RLock=threading.RLock,
                                          Lock=threading.Lock),
-            'time': time, 'copy': copy,
+            'time': time, 'copy': copy,'youtube_preview_path':preview_path,'youtube_video_id':video_id,'automatic_preview':automatic_preview,'is_youtube':is_youtube,'youtube_resume_allowed':resume_allowed,
             'json': __import__('json'),
             'xbmc': SimpleNamespace(getSkinDir=lambda: 'skin.blacklanturn.preview',
                                     getCondVisibility=lambda condition: False,
@@ -89,6 +90,7 @@ class ExperimentLifecycle(unittest.TestCase):
             setProperty=lambda key, value: props.__setitem__(key, value),
             getProperty=lambda key: props.get(key, ''),
             restore_preview_renderer=lambda: None, refresh_preview_setup=lambda: None,
+            refresh_youtube_connection=lambda **k:None,
             configure_row_snapshots=lambda: False,
             refresh_navigation=lambda: effects.append('recreate_navigation'),
             apply_status=lambda: None, initialize_startup_focus=lambda: None,

@@ -1,4 +1,4 @@
-# BlackLanturn distribution — 1.1.7
+# BlackLanturn distribution — 1.1.8
 
 Kodi 21.3 Omega remains the target. BlackLanturn Repository and the OpenWizard-based BlackLanturn Installer retain their existing identities.
 
@@ -85,3 +85,8 @@ Installer1.0.13 and schema3 packages explicitly validate all ten playback/Trakt 
 ## Apple TV diagnostic storage correction — October 17, 2026
 
 A slashless directory listing in an earlier diagnostic reproduced a Kodi 21.3 tvOS cache bug: virtual XML exists but reads as empty until its parent is listed with the trailing slash. This can cause addon settings to load as defaults before a later save. Maintained diagnostics now normalize directory URLs and validate XML without resetting unreadable files; explicit checks execute under optimized Kodi Python. Native owned-only regression passed, all 21 persisted Apple TV userdata entries remained unchanged after restart, and the same Trakt account returned HTTP 200. The build payloads and runtime addons remain unchanged. The underlying Kodi bug and unrelated callers remain outside this diagnostic fix. See TVOS-SETTINGS-CACHE-INCIDENT.md for the reproduced mechanism, evidence and limits.
+
+
+## Release 1.1.8 — signed-in YouTube browser
+
+Controller 0.1.75 adds account-aware YouTube Home, Search, Subscriptions, Library and Channels in the existing skin, automatic sidebar visibility, exact-video history-safe previews, an independent preview toggle, real adaptive account-interest rows, 16:9 thumbnail fallback and independent card focus. Exact YouTube.com browser Home is not exposed by the existing login. Native Mac acceptance passed on the exact source; playback/settings/authorization grants were preserved. Both clean editions package the tested source through Installer 1.0.14. The existing schema-3 playback/Trakt policy and managed Helper remain unchanged. Fire Stick/Apple TV personal devices were not updated or newly feature-certified. See RELEASE_1_1_8_VALIDATION.md and hosted-files/setup-1.1.8.txt for evidence, limits and recovery.

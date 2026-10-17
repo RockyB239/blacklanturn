@@ -9,11 +9,19 @@ sys.path.insert(0,str(ROOT))
 from live_core import row_items
 def methods(names,extra=None):
     cls=next(n for n in ast.parse((ROOT/'live_review.py').read_text()).body if isinstance(n,ast.ClassDef) and n.name=='LiveReview')
-    ns=dict(extra or {},row_items=row_items)
+    from youtube_core import automatic_preview,video_id
+    ns=dict(extra or {},row_items=row_items,automatic_preview=automatic_preview,youtube_video_id=video_id)
     exec(compile(ast.Module(body=[n for n in cls.body if isinstance(n,ast.FunctionDef) and n.name in names],type_ignores=[]),'live_review.py','exec'),ns)
     if "show_row_window" in names:
         from cache_fixture import with_cache
         ns["show_row_window"]=with_cache(ns["show_row_window"],ns)
+    if "monitor" in ns:
+        original=ns['monitor']
+        def monitor(window,*args,**kwargs):
+            window.refresh_youtube_connection=lambda **k:None
+            if not hasattr(window,'section'):window.section='Home'
+            return original(window,*args,**kwargs)
+        ns['monitor']=monitor
     return ns
 
 class StartupFocus(unittest.TestCase):

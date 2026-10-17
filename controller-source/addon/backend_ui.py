@@ -16,6 +16,7 @@ class BackendSettings(xbmcgui.WindowXMLDialog):
   control=self.getControl(200);control.reset()
   items=[]
   for action,title,help in rows:
+   if action=='youtube_previews':help='Current mode: '+('Automatic' if self.config.get('YouTubePreviews',True) else 'Manual')
    if action=='preview_mode':help='Current mode: '+('Automatic' if self.config.get('PreviewMode',self.preview_mode)=='auto' else 'Manual')
    elif action=='preview_delay':help='Current delay: '+str(self.config.get('PreviewDelay',5))+' seconds'
    elif action=='preview_language':help='Current preference: '+('English first, other languages as fallback' if self.config.get('PreviewLanguage','en')=='en' else 'Provider order')

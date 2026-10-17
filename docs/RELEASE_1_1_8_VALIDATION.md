@@ -1,0 +1,33 @@
+# Release 1.1.8 acceptance
+
+Controller 0.1.75 adds a signed-in YouTube section to the existing BlackLanturn browser. Both clean editions contain the maintained source and exact manifest75.json. Installer 1.0.14 publishes the updated catalog/payloads; its account/preference implementation is unchanged from 1.0.13. Schema 3, playback-trakt-1, Installer policy minimum 1.0.13, managed Helper source/update protection, native exclusions and playback defaults remain intact.
+
+## Native Mac acceptance
+
+The exact 308-file controller was deployed in the existing idle Mac Kodi 21.3 profile after private settings/account/controller recovery copies. The final source tree matched the installed tree byte-for-byte, including the self-restored diagnostic entrypoint. The sanitized exact-source receipt is controller-source/youtube-native-verification.json; release verification rejects source drift or missing required checks.
+
+- 50 recommendations and 50 subscription video IDs matched the signed-in provider's own feed routes.
+- Sidebar connected, disconnected, reconnected and transient-read states passed. Disconnection was simulated through an in-memory account reader; real credentials were never removed, edited or revoked.
+- Home, Search, Subscriptions, Library and Channels populated; channel navigation and Back retained position. Account-disconnected playback return rejected private captured rows.
+- The independent YouTube toggle prevented automatic playback. Re-enabling it played the exact highlighted video in the existing preview area, with a 30-second end marker and both local/remote history reporting disabled in YouTube's player metadata. Selection change stopped playback in 0.208 seconds. Local watch-history database contents remained unchanged.
+- The Home request preserved four real account-specific interest shelves with five videos each in the final run. Labels and video membership matched the provider response; no fixed category-search queries were substituted. Shelf groups are regular YouTube video recommendations through the existing signed-in client, not the exact YouTube.com browser Home order/topic chips. A WEB-client feasibility request with existing OAuth returned HTTP 400 INVALID_ARGUMENT; the installed add-on does not enable WEB authorization. No browser cookies or extra account session were read or distributed.
+- YouTube cards use unpadded 16:9 thumbnails with titles/channel/runtime below. Advertised fhd/uhd thumbnail URLs returned 404 for affected examples; standard max-resolution URLs worked. Normal directory artwork no longer opens a provider context/database for each row. Native visual inspection deliberately broke a selected card primary URL and confirmed its per-video fallback image and independent turquoise selection ring. Other visible video images loaded without the former padded card bars.
+- Native watched refresh resolved only the category's existing video IDs and preserved artwork, full-play URLs, order and retained membership. YouTube refresh skips Helper/Trakt synchronization. Native provider contexts are bounded by account, serialized, refreshed through the settings API and retired through owned native storage cleanup. Regression checks cover account/window changes during disk reads, retirement and refresh.
+- All 27 backed-up settings/account files remained exact or semantically equivalent. Differences were XML ordering, normal uptime/peripheral timestamps and YouTube access-token renewal; selected accounts, authorization grants and playback/add-on setting values remained unchanged. Refreshed access tokens were retained.
+
+## Review and regression coverage
+
+Review found and corrected account-private snapshots surviving account changes and account-refresh work completing after its window retired. Regression tests exercise actual controller methods and paused lifetime boundaries. Reauthorization in the same account slot changes the opaque identity fingerprint. Local-only and custom playlist selections follow the provider's native routes. Normal Play retains the original URL; preview-only flags do not leak into full playback.
+
+The controller suite passes 554 tests; 191 installer/release checks and 16 maintained native-probe checks also pass. Both payloads passed exact-source, protected-preference and wrapped-installer verification. Deterministic package checks, deterministic package verification, private-value publication scan, anonymous asset verification and live Pages/CI verification are recorded with the release completion evidence. No package is generated from the live Mac profile.
+
+## Limits and recovery
+
+Native feature acceptance is Mac-only. Fire Stick and Apple TV personal installations were not updated by this task, and full clean installation of this new payload on those devices is not certified. Remote watch-history reporting was checked in provider player metadata and code; it was not separately queried through a remote history API. No watched full video was created merely to test playback. A live subscription equality check differed on one earlier run; two subsequent complete runs matched 50 current video IDs for both feeds. No deterministic feed-order defect was reproduced. Unavailable/restricted videos, service quotas and broader YouTube account variants remain service-dependent. A saved refresh grant establishes connection visibility; it cannot guarantee a valid remote response. Fresh Kodi launches without a readable account do not inherit another launch's visibility state.
+
+Previous immutable releases and repository history remain available. Mac private controller/settings recovery was retained outside the distribution. Restore only the controller for a feature rollback; keep current authorizations and device playback settings. For a full distribution rollback use its matching prior Installer/catalog/package and the existing preservation procedure. Do not overwrite newer tokens with stale recovery tokens or remove the Helper update rule.
+
+## Accepted payloads
+
+- BlackLanturn-General-Kodi21-1.1.8.zip: fb78c6aa8164e80cd7d6486f4c4ffa6168ab5a97bcdaf74844e5d6117f13ead1 (90855835 bytes).
+- BlackLanturn-Apple-TV-Mac-Kodi21-1.1.8.zip: f8d47b5e7df7a052076190f30edb1b689eccb9b1616ad92a66e88bde723d1afb (91671473 bytes).

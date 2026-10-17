@@ -70,6 +70,10 @@ def card_artwork(item):
     if query.get('info')==['discover'] and query.get('with_companies',[''])[0].isdigit():
         logo=art.get('thumb') or art.get('icon') or item.get('thumbnail','')
         if logo:return {'image':logo,'kind':'square'}
+    source=urlsplit(item.get('file',''))
+    if source.netloc=='plugin.video.youtube':
+        image=art.get('thumb') or item.get('thumbnail')
+        if image:return {'image':image,'kind':'square' if source.path.startswith('/channel/') else 'landscape'}
     # Season directories expose episode counts; they are not episode thumbnails.
     season_folder=(item.get('filetype')=='directory' and
                    query.get('info',[''])[0]=='episodes' and

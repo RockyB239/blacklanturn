@@ -8,7 +8,8 @@ SETTINGS_GROUPS=[
  ('Previews','Set how previews behave while you browse.',[
   ('preview_mode','Automatic previews','Switch between automatic and manual previews.'),
   ('preview_delay','Preview delay','Wait before starting a preview on a selected title.'),
-  ('preview_language','Preview language','Prefer English and dubbed previews; retain other-language fallbacks.')]),
+  ('preview_language','Preview language','Prefer English and dubbed previews; retain other-language fallbacks.'),
+  ('youtube_previews','YouTube automatic previews','Preview the highlighted YouTube video without changing watch history.')]),
  ('Ratings','Choose your scores and their order below the description.',[
   ('ratings','Rating sources','Show or hide critic and audience scores.'),
   ('rating_order','Rating order','Move enabled scores left or right.')]),
@@ -16,7 +17,7 @@ SETTINGS_GROUPS=[
   ('integration_status','Integration status','Availability, versions and failed lists; account setup remains in each add-on.'),
   ('addon:plugin.video.themoviedb.helper','Discovery, Trakt & metadata','TMDbHelper account, list and metadata settings.'),
   ('addon:plugin.video.umbrella','Playback & provider accounts','Umbrella account, source and playback settings.'),
-  ('addon:plugin.video.youtube','YouTube previews','YouTube account and preview playback settings.')]),
+  ('addon:plugin.video.youtube','YouTube account & previews','Connect YouTube for its sidebar section, personal feeds and previews.')]),
  ('Kodi settings','All Kodi controls remain available.',[
   ('kodi:settings','All Kodi settings','Open the complete Kodi settings screen.'),
   ('kodi:PlayerSettings','Player','Video, audio, subtitles and playback preferences.'),

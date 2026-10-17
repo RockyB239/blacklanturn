@@ -9,6 +9,8 @@ from playback_core import resume_options
 ROOT=Path(__file__).parents[1]/'addon'
 def extract(path, name, namespace, class_name=None):
     namespace.setdefault("time",time)
+    from youtube_core import video_id,preview_path,is_youtube,caption,automatic_preview,resume_allowed
+    for key,value in {'youtube_video_id':video_id,'youtube_preview_path':preview_path,'is_youtube':is_youtube,'youtube_caption':caption,'automatic_preview':automatic_preview,'youtube_resume_allowed':resume_allowed}.items():namespace.setdefault(key,value)
     nodes=ast.parse(path.read_text()).body
     if class_name:nodes=next(n for n in nodes if isinstance(n,ast.ClassDef) and n.name==class_name).body
     method=next(n for n in nodes if isinstance(n,ast.FunctionDef) and n.name==name)
@@ -22,7 +24,13 @@ def extract(path, name, namespace, class_name=None):
             if not hasattr(window,"preview_dispatch_lock"):window.preview_dispatch_lock=threading.RLock()
             return method(window,*args,**kwargs)
         return initialized
-    return namespace[name]
+    method=namespace[name]
+    if class_name=="LiveReview" and name in ("onInit","monitor","run_setting"):
+        def account_boundary(window,*args,**kwargs):
+            if not hasattr(window,"refresh_youtube_connection"):window.refresh_youtube_connection=lambda **k:None
+            return method(window,*args,**kwargs)
+        return account_boundary
+    return method
 
 class WindowLifecycle(unittest.TestCase):
     def test_foreign_skin_reinitialization_closes_before_touching_native_controls(self):
