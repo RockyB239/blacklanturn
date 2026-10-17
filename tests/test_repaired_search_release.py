@@ -5,11 +5,11 @@ ROOT=Path(__file__).resolve().parents[1]
 class RepairedRelease(unittest.TestCase):
  def test_controller_has_reviewed_repair_and_preview_safety(self):
   addon=ROOT/'controller-source/addon'
-  self.assertEqual(ET.parse(addon/'addon.xml').getroot().get('version'),'0.1.73')
-  self.assertEqual(hashlib.sha256((addon/'live_review.py').read_bytes()).hexdigest(),'81cc5ab7b331f99fd93d892b681d21b7dae01b473af771c7d2e365b7786b505e')
+  self.assertEqual(ET.parse(addon/'addon.xml').getroot().get('version'),'0.1.74')
+  self.assertEqual(hashlib.sha256((addon/'live_review.py').read_bytes()).hexdigest(),'c0f2e8c95f6803f4a872d7d219592df86edf364d91c0bbe664e409634c27f41f')
   self.assertTrue((addon/'page_ahead.py').is_file())
-  manifest=json.loads((ROOT/'controller-source/manifest73.json').read_text())
-  self.assertEqual(manifest['controller'],'0.1.73')
+  manifest=json.loads((ROOT/'controller-source/manifest74.json').read_text())
+  self.assertEqual(manifest['controller'],'0.1.74')
   self.assertEqual(manifest['files'],{str(p.relative_to(addon)):hashlib.sha256(p.read_bytes()).hexdigest() for p in addon.rglob('*') if p.is_file() and '__pycache__' not in p.parts and p.suffix not in ('.pyc','.pyo')})
  def test_managed_provider_and_installer_require_repaired_payload(self):
   source=ROOT/'installer-source/plugin.program.blacklanturninstaller'

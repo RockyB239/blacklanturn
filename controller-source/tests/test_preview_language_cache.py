@@ -23,3 +23,18 @@ class PreviewLanguageCache(unittest.TestCase):
   import preview_language
   self.assertEqual(preview_language.cached_video_metadata(Path('/nonexistent'),('tv',"70523' OR 1=1")),{})
 if __name__=='__main__':unittest.main()
+
+class PreviewTitleAliases(unittest.TestCase):
+ def test_reads_only_selected_identity_aliases_without_writes(self):
+  import preview_language
+  fn=getattr(preview_language,'cached_title_aliases',None);self.assertIsNotNone(fn)
+  with tempfile.TemporaryDirectory() as tmp:
+   db=Path(tmp)/'database_07/ItemDetails.db';db.parent.mkdir()
+   with sqlite3.connect(db) as c:
+    c.execute('CREATE TABLE tvshow(id TEXT,title TEXT,originaltitle TEXT)');c.executemany('INSERT INTO tvshow VALUES(?,?,?)',[('tv.1','Money Heist','La casa de papel'),('tv.2','Another title','Wrong alias')])
+   before=db.read_bytes();self.assertEqual(fn(Path(tmp),('tv','1')),['Money Heist','La casa de papel']);self.assertEqual(db.read_bytes(),before)
+ def test_missing_schema_and_invalid_identity_return_no_alias(self):
+  import preview_language
+  fn=getattr(preview_language,'cached_title_aliases',None);self.assertIsNotNone(fn)
+  with tempfile.TemporaryDirectory() as tmp:
+   self.assertEqual(fn(Path(tmp),('tv','missing')),[]);self.assertEqual(fn(Path(tmp),('tv','1')),[])

@@ -4,6 +4,9 @@ from pathlib import Path
 ROOT=Path(__file__).resolve().parents[1]
 SOURCE=ROOT/'installer-source/plugin.program.blacklanturninstaller'
 def verify_playback_defaults(z):
+ gui={n.get('id'):n.text or '' for n in ET.fromstring(z.read('userdata/guisettings.xml'))}
+ assert gui.get('locale.audiolanguage')=='default','Build audio language must follow the interface language'
+ assert gui.get('locale.subtitlelanguage')=='forced_only','Build subtitle preference must be forced only'
  def settings(aid):
   return {n.get('id'):n.text or '' for n in ET.fromstring(z.read('userdata/addon_data/'+aid+'/settings.xml'))}
  umbrella=settings('plugin.video.umbrella');youtube=settings('plugin.video.youtube');helper=settings('plugin.video.themoviedb.helper')
@@ -27,15 +30,15 @@ def verify(folder):
   expected_installer={'plugin.program.blacklanturninstaller/'+str(p.relative_to(SOURCE)):p.read_bytes() for p in SOURCE.rglob('*') if p.is_file() and '__pycache__' not in p.parts and not p.name.endswith(('.pyc','.DS_Store'))}
   assert installer==expected_installer,'Installer ZIP differs from reviewed source'
  for ed in ('General','Apple-TV-Mac'):
-  with zipfile.ZipFile(folder/f'BlackLanturn-{ed}-Kodi21-1.1.5.zip') as z:
+  with zipfile.ZipFile(folder/f'BlackLanturn-{ed}-Kodi21-1.1.6.zip') as z:
    assert z.testzip() is None;m.verify_archive(z);verify_playback_defaults(z)
    p=json.loads(z.read('userdata/blacklanturn-build.json'))
    assert p['schema']==2 and p['helper_patch']=='empty-cache-1' and p['installer_min_version']=='1.0.12'
-   assert p['controller_version']=='0.1.73' and p['helper_search_patch']=='search-batch-1'
+   assert p['controller_version']=='0.1.74' and p['helper_search_patch']=='search-batch-1'
    gui={n.get('id'):n.text for n in ET.fromstring(z.read('userdata/guisettings.xml'))}
    assert {k:gui[k] for k in ('filecache.memorysize','filecache.readfactor','filecache.buffermode','filecache.chunksize')}=={'filecache.memorysize':'64','filecache.readfactor':'400','filecache.buffermode':'4','filecache.chunksize':'131072'}
    assert next(n.text for n in ET.fromstring(z.read('userdata/addon_data/plugin.video.themoviedb.helper/settings.xml')) if n.get('id')=='artwork_quality')=='1'
-   expected=json.loads((ROOT/'controller-source/manifest73.json').read_text())['files']
+   expected=json.loads((ROOT/'controller-source/manifest74.json').read_text())['files']
    actual={n[len('addons/script.blacklanturn.preview/'):]:hashlib.sha256(z.read(n)).hexdigest() for n in z.namelist() if n.startswith('addons/script.blacklanturn.preview/')}
    assert actual==expected
    for n,d in installer.items():assert z.read('addons/'+n)==d,'Installer mismatch'

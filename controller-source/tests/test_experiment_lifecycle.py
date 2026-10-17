@@ -21,6 +21,7 @@ sys.path.insert(0, str(SOURCE.parent))
 from live_core import PageHistory, valid_source, PreviewAttempts, title_details_params, merge_title_details, person_identity, show_identity
 from row_feedback import RowResultCache, provider_page_label, row_message
 from filtered_pages import provider_path
+from preview_identity import TitleVerifier
 
 
 class ExperimentLifecycle(unittest.TestCase):
@@ -63,6 +64,10 @@ class ExperimentLifecycle(unittest.TestCase):
             'page_ahead_eligible': lambda path: False,
             'get_list': lambda path: [{'file': path + '/title'}],
             'PreviewAttempts': PreviewAttempts,
+            'TitleVerifier': TitleVerifier,
+            'cached_title_aliases':lambda *a:[],
+            'xbmcvfs':SimpleNamespace(translatePath=lambda _:folder),
+            'Path':Path,
             'preview_candidates': lambda trailer, videos, **kwargs: [trailer],
             'discovery_result': lambda item: None, 'show_identity': show_identity,
             'title_details_params': title_details_params, 'merge_title_details': merge_title_details,

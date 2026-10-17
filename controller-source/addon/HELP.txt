@@ -59,3 +59,9 @@ The Preview button and automatic previews are available when YouTube is enabled 
 Release 0.1.72: reviewed batched search and next-page preloading with initialization ownership and monotonic request generations. Retains 0.1.71 preview safety, artwork and watched metadata.
 
 Release 0.1.73: GUI-thread label dispatch for caption, focus and decoder reads; recheck row and preview ownership after waits. Artwork selection, watched data and playback preferences remain unchanged.
+
+Preview accuracy
+Preview candidates are checked against the actual public YouTube title before playback. Explicit title or series mismatches and unavailable verification retain artwork. Exact selected-title aliases support localized/original names. This does not verify spoken language, publisher authenticity or a particular season. Public-title reads use a bounded cache; navigation cancels obsolete requests.
+
+Playback language and watched status
+Clean build defaults follow Kodi’s current interface language for audio and select forced-only subtitles. File streams must provide valid language and forced flags. Existing profiles keep their preferences during software-only updates unless a correction was specifically requested. Helper’s watched-indicator option must be enabled for both incoming Trakt watched counts and cloud resume points. Use title Options > Refresh watched status after changes made elsewhere; successful outgoing scrobbling is separate.

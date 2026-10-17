@@ -23,3 +23,20 @@ def cached_video_metadata(helper_profile,identity):
                 return {key:{'name':name or '', 'language':language or '', 'type':kind or ''} for key,name,language,kind in rows if key}
         except (OSError,sqlite3.Error):continue
     return {}
+
+def cached_title_aliases(helper_profile,identity):
+    """Read localized/original names only for the exact selected public title."""
+    if not identity or len(identity)!=2 or identity[0] not in ('movie','tv') or not str(identity[1]).isdigit():return []
+    table='tvshow' if identity[0]=='tv' else 'movie'
+    directories=sorted((p for p in Path(helper_profile).glob('database_*') if re.fullmatch(r'database_\d+',p.name)),key=lambda p:int(p.name.split('_')[-1]),reverse=True)
+    for folder in directories:
+        db=folder/'ItemDetails.db'
+        if not db.is_file():continue
+        try:
+            with sqlite3.connect(db.resolve().as_uri()+'?mode=ro',uri=True,timeout=.25) as connection:
+                columns={r[1] for r in connection.execute('PRAGMA table_info('+table+')')}
+                if not {'id','title','originaltitle'}<=columns:continue
+                row=connection.execute('SELECT title,originaltitle FROM '+table+' WHERE id=?',(identity[0]+'.'+str(identity[1]),)).fetchone()
+                return list(dict.fromkeys(value for value in (row or ()) if isinstance(value,str) and value.strip()))
+        except (OSError,sqlite3.Error):continue
+    return []

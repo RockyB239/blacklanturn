@@ -22,7 +22,8 @@ from icon_picker import choose_icon
 from genre_picker import choose_genre
 from browse_controls import AnimeMetadata,can_choose_genre,should_exclude_anime,page_cards
 from filtered_pages import provider_path,upstream_path,logical_files,needs_fill,fill_page,PageCancelled
-from preview_language import cached_video_metadata
+from preview_language import cached_video_metadata,cached_title_aliases
+from preview_identity import TitleVerifier
 from preview_geometry import preview_fill_viewmode,preview_display_aspect,PreviewRendererGuard
 from preview_bars import PreviewBarScan,PreviewFramingCache,top_aligned_viewmode,framing_key
 from live_core import caption_fit_step,my_stuff_rows,row_items
@@ -141,7 +142,7 @@ class LiveReview(xbmcgui.WindowXML):
         self.nav_state_lock=threading.RLock();self.nav_focus_intent=None;self.nav_revision=0;self.nav_width_requested=82;self.nav_width_applied=None
         self.preview_input_generation=self.input_generation
         self.preview_dispatch_lock=threading.RLock();self.preview_dispatched=False
-        self.player=PreviewPlayer();self.preview_attempts=None;self.preview_cache={};self.browse_sources=[];self.owned_preview=False;self.preview_mode='manual';self.dwell=time.monotonic();self.preview_key=None
+        self.player=PreviewPlayer();self.preview_attempts=None;self.preview_cache={};self.preview_title_verifier=TitleVerifier();self.browse_sources=[];self.owned_preview=False;self.preview_mode='manual';self.dwell=time.monotonic();self.preview_key=None
         self.hover=HoverScroll();self.focus_key=None;self.selected=None;self.last_row=0;self.rows=[[],[]];self.paths=['',''];self.histories=[PageHistory(),PageHistory()];self.return_focus=900
         self.anime_metadata=AnimeMetadata(PROFILE/'addon_data/plugin.video.themoviedb.helper')
         self.cast_people=[];self.person_context=None;self.episode_browser_context=None;self.preview_requested_at=0;self.preview_playing=False
@@ -1389,16 +1390,32 @@ class LiveReview(xbmcgui.WindowXML):
         self.setProperty('preview','loading');self.setProperty('notice','Finding previews…')
         def work():
             identity=self.rating_identity(item);key=item.get('file')
-            candidates=self.preview_cache.get(key)
+            names=('showtitle',) if item.get('showtitle') else ('title','originaltitle')
+            aliases=tuple(dict.fromkeys(str(item[k]) for k in names if item.get(k))) or (item.get('label',''),)
+            helper_profile=Path(xbmcvfs.translatePath('special://profile/'))/'addon_data/plugin.video.themoviedb.helper'
+            if identity:aliases=tuple(dict.fromkeys(aliases+tuple(cached_title_aliases(helper_profile,identity))))
+            language=self.config.get('PreviewLanguage','en');cache_key=(key,identity,language,aliases,'verified-title-1')
+            def current():return self.alive and not self.nav and token==self.preview_generation and self.owned_preview and getattr(self,'input_generation',0)==input_generation and (self.selected or {}).get('file')==key
+            if not current():return
+            cached=self.preview_cache.get(cache_key)
+            candidates=cached[1] if cached and time.monotonic()-cached[0]<300 else None
             if candidates is None:
                 videos=[]
                 if identity:
                     try:videos=get_list(tmdb('videos',identity[0],tmdb_id=identity[1]))
                     except Exception:event('preview_candidates_unavailable')
-                metadata=cached_video_metadata(Path(xbmcvfs.translatePath('special://profile/'))/'addon_data/plugin.video.themoviedb.helper',identity) if identity else {}
-                candidates=preview_candidates(item.get('trailer',''),videos,metadata=metadata,preferred_language=self.config.get('PreviewLanguage','en'));self.preview_cache[key]=candidates
+                if not current():return
+                metadata=cached_video_metadata(helper_profile,identity) if identity else {}
+                ranked=preview_candidates(item.get('trailer',''),videos,metadata=metadata,preferred_language=language)
+                candidates=self.preview_title_verifier.filter(ranked,aliases,valid=current)
+                if not current():return
+                if candidates:
+                    self.preview_cache[cache_key]=(time.monotonic(),candidates)
+                    while len(self.preview_cache)>128:self.preview_cache.pop(next(iter(self.preview_cache)))
+                else:self.preview_cache.pop(cache_key,None)
+                event('preview_identity_screened',candidates=len(ranked),approved=len(candidates))
             with self.preview_dispatch_lock:
-                if not self.alive or token!=self.preview_generation or not self.owned_preview or getattr(self,'input_generation',0)!=input_generation:return
+                if not current():return
                 attempts=PreviewAttempts(candidates);url=attempts.start(time.monotonic());self.preview_attempts=attempts
             event('preview_candidates_loaded',count=len(candidates))
             self.play_preview_candidate(url,token,attempts)
@@ -1632,7 +1649,7 @@ class LiveReview(xbmcgui.WindowXML):
             self.setProperty('previewMode',self.preview_mode);self.config['PreviewMode']=self.preview_mode;self.save()
         elif action=='integration_status':self.integration_status()
         elif action=='help':
-            xbmcgui.Dialog().textviewer('BlackLanturn · Help',(ROOT/'HELP.txt').read_text())
+            xbmcgui.Dialog().textviewer('BlackLanturn · Help',(ROOT/'HELP.txt').read_text(encoding='utf-8'))
         elif action=='clear_search':
             self.config.pop('SearchQuery',None);self.save()
             self.setProperty('notice','Saved search cleared on this device')
