@@ -3,7 +3,7 @@ BlackLanturn 1.1.5 - Kodi 21.3 Omega
 Update BlackLanturn Installer to 1.0.12 through the BlackLanturn Repository, then use the Builds catalog. Choose General for Fire TV / Android or Apple TV & Mac for compatible Kodi 21.3 installations. Kodi installation/signing is separate.
 
 Included update
-Controller 0.1.72 includes the reviewed batched-search and next-page-preloading repair. Initialization ownership and monotonic request generations reject obsolete work after the interface reopens. Preview retry safety from 0.1.71, artwork selection, native watch/resume metadata and the original skin 0.1.38 are retained. Rejected 0.1.70 progressive result delivery is excluded.
+Controller 0.1.73 includes the reviewed batched-search and next-page-preloading repair. Initialization ownership and monotonic request generations reject obsolete work after the interface reopens. Preview retry safety from 0.1.71, artwork selection, native watch/resume metadata and the original skin 0.1.38 are retained. Rejected 0.1.70 progressive result delivery is excluded.
 
 TMDb Helper 6.17.9 includes empty-cache-1 and search-batch-1 (including successful-empty-search handling). Installer 1.0.12 verifies the complete reviewed Helper source before cleanup and preserves its Kodi per-addon auto-update protection. Reviewed future updates arrive through BlackLanturn releases. Deliberately replacing Helper or re-enabling its upstream auto-update opts out of this compatibility guarantee.
 

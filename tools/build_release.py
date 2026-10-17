@@ -27,7 +27,7 @@ def build(baselines,output):
   data.update({prefix+n:d for n,d in installer.items()})
   controller_root=ROOT/'controller-source/addon'
   controller={str(p.relative_to(controller_root)):p.read_bytes() for p in controller_root.rglob('*') if p.is_file() and '__pycache__' not in p.parts and p.suffix!='.pyc'}
-  expected_controller=json.loads((ROOT/'controller-source/manifest72.json').read_text())['files']
+  expected_controller=json.loads((ROOT/'controller-source/manifest73.json').read_text())['files']
   assert {n:sha(raw) for n,raw in controller.items()}==expected_controller,'Validated controller changed'
   cp='addons/script.blacklanturn.preview/'
   data={n:raw for n,raw in data.items() if not n.startswith(cp)}
@@ -57,9 +57,9 @@ def build(baselines,output):
   apply_settings(up,{'provider.external.enabled':'true','external_provider.module':'script.module.cocoscrapers','external_provider.name':'cocoscrapers'})
   apply_settings(yp,{'kodion.mpd.stream.select':'1','kodion.video.stream.select':'1'})
   apply_settings(hp,{'trakt_watchedindicators':'true'})
-  marker=json.loads(data['userdata/blacklanturn-build.json']);marker.update(schema=2,build_version='1.1.5',helper_patch='empty-cache-1',installer_min_version='1.0.12',controller_version='0.1.72',helper_search_patch='search-batch-1')
+  marker=json.loads(data['userdata/blacklanturn-build.json']);marker.update(schema=2,build_version='1.1.5',helper_patch='empty-cache-1',installer_min_version='1.0.12',controller_version='0.1.73',helper_search_patch='search-batch-1')
   data['userdata/blacklanturn-build.json']=json.dumps(marker,indent=2).encode()
-  data['userdata/BlackLanturn-README.txt']=(before['userdata/BlackLanturn-README.txt'].decode()+'\n\nRelease 1.1.5: controller 0.1.72 with repaired search/preloading, retained preview safety and Cocoscrapers/automatic-preview defaults, exact managed Helper search-empty repair, and Installer 1.0.12 authorization-only preservation. Requires Installer 1.0.12. Reviewed batched search, next-page preloading and lifecycle ownership repair are included. Rejected 0.1.70 progressive delivery is excluded. Includes the tested 64MB fixed4x video cache and High artwork defaults. For a clean account-only install, enable Clean install: keep only selected accounts and the desired Keep Trakt/Debrid/Login choices. Native playback components remain device-specific.\n').encode()
+  data['userdata/BlackLanturn-README.txt']=(before['userdata/BlackLanturn-README.txt'].decode()+'\n\nRelease 1.1.5: controller 0.1.73 with repaired search/preloading, retained preview safety and Cocoscrapers/automatic-preview defaults, exact managed Helper search-empty repair, and Installer 1.0.12 authorization-only preservation. Requires Installer 1.0.12. Reviewed batched search, next-page preloading and lifecycle ownership repair are included. Rejected 0.1.70 progressive delivery is excluded. Includes the tested 64MB fixed4x video cache and High artwork defaults. For a clean account-only install, enable Clean install: keep only selected accounts and the desired Keep Trakt/Debrid/Login choices. Native playback components remain device-specific.\n').encode()
   allowed={n for n in set(before)|set(data) if n.startswith((prefix,cp))}|{'userdata/blacklanturn-build.json','userdata/BlackLanturn-README.txt','userdata/guisettings.xml',hp,up,yp,target}
   changed={n for n in set(before)|set(data) if before.get(n)!=data.get(n)};assert changed<=allowed
   for n,raw in data.items():

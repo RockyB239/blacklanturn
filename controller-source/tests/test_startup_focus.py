@@ -42,6 +42,7 @@ class StartupFocus(unittest.TestCase):
         clock=[100.0];focus=[5];props={};played=[]
         def sleep(_):s.alive=False
         ns=methods(['monitor'],{'time':SimpleNamespace(monotonic=lambda:clock[0],sleep=sleep),
+            'gui_labels':lambda labels:{label:1920 for label in labels},
             'xbmc':SimpleNamespace(getSkinDir=lambda:'skin.blacklanturn.preview',Monitor=lambda:SimpleNamespace(abortRequested=lambda:False),getInfoLabel=lambda _:1920),
             'caption_fit_step':lambda *a:0,'event':lambda *a,**k:None})
         control=SimpleNamespace(getSelectedPosition=lambda:0)

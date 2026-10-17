@@ -73,6 +73,7 @@ class ExperimentLifecycle(unittest.TestCase):
                      'PageHistory', 'AnimeMetadata', 'PreviewFramingCache', 'RowResultCache'):
             namespace[name] = lambda *a, **k: SimpleNamespace()
         namespace.update(PageHistory=PageHistory, RowResultCache=RowResultCache)
+        namespace['gui_labels']=lambda keys:{key:namespace['xbmc'].getInfoLabel(key) for key in keys}
         cls = next(node for node in ast.parse(SOURCE.read_text()).body
                    if isinstance(node, ast.ClassDef) and node.name == 'LiveReview')
         methods = [node for node in cls.body if isinstance(node, ast.FunctionDef)

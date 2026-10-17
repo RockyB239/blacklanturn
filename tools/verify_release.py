@@ -31,11 +31,11 @@ def verify(folder):
    assert z.testzip() is None;m.verify_archive(z);verify_playback_defaults(z)
    p=json.loads(z.read('userdata/blacklanturn-build.json'))
    assert p['schema']==2 and p['helper_patch']=='empty-cache-1' and p['installer_min_version']=='1.0.12'
-   assert p['controller_version']=='0.1.72' and p['helper_search_patch']=='search-batch-1'
+   assert p['controller_version']=='0.1.73' and p['helper_search_patch']=='search-batch-1'
    gui={n.get('id'):n.text for n in ET.fromstring(z.read('userdata/guisettings.xml'))}
    assert {k:gui[k] for k in ('filecache.memorysize','filecache.readfactor','filecache.buffermode','filecache.chunksize')}=={'filecache.memorysize':'64','filecache.readfactor':'400','filecache.buffermode':'4','filecache.chunksize':'131072'}
    assert next(n.text for n in ET.fromstring(z.read('userdata/addon_data/plugin.video.themoviedb.helper/settings.xml')) if n.get('id')=='artwork_quality')=='1'
-   expected=json.loads((ROOT/'controller-source/manifest72.json').read_text())['files']
+   expected=json.loads((ROOT/'controller-source/manifest73.json').read_text())['files']
    actual={n[len('addons/script.blacklanturn.preview/'):]:hashlib.sha256(z.read(n)).hexdigest() for n in z.namelist() if n.startswith('addons/script.blacklanturn.preview/')}
    assert actual==expected
    for n,d in installer.items():assert z.read('addons/'+n)==d,'Installer mismatch'

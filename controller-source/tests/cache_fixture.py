@@ -21,6 +21,7 @@ def bind(state,namespace):
     if 'xbmc' not in namespace:namespace['xbmc']=__import__('types').SimpleNamespace()
     if not hasattr(namespace['xbmc'],'getInfoLabel'):namespace['xbmc'].getInfoLabel=lambda _:str(state.getFocusId()) if hasattr(state,'getFocusId') else ''
     ns['xbmc']=namespace['xbmc']
+    ns['gui_labels']=lambda labels:{label:namespace['xbmc'].getInfoLabel(label) for label in labels}
     ns['load_best_matches']=load_best_matches
     if not hasattr(state,'result_cache'):state.result_cache=RowResultCache()
     for name in NAMES:setattr(state,name,MethodType(ns[name],state))

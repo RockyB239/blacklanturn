@@ -65,6 +65,8 @@ The new regression failed on the old timeout behavior and passed after correctio
 
 ## Release 1.1.5 — repaired search and preloading
 
-Controller 0.1.72 promotes the native-tested search/preloading overlay with lifecycle ownership and monotonic generation fixes; preview safety remains byte-identical to 0.1.71. Installer 1.0.12 carries the exact 471-file Helper manifest with empty-cache-1/search-batch-1 and retains per-addon auto-update protection. Both clean editions package the maintained source and explicit playback, watch, artwork and buffer defaults. The rejected 0.1.70 progressive experiment remains excluded.
+Controller 0.1.73 promotes the native-tested search/preloading overlay with lifecycle ownership and monotonic generation fixes; the 0.1.71 retry safety is retained. Installer 1.0.12 carries the exact 471-file Helper manifest with empty-cache-1/search-batch-1 and retains per-addon auto-update protection. Both clean editions package the maintained source and explicit playback, watch, artwork and buffer defaults. The rejected 0.1.70 progressive experiment remains excluded.
 
-Source checks: 474 controller tests, 119 installer tests and fresh12-case native cache regression passed. Both1.1.5 packages passed exact-source and compatibility verification. Native three-device rollout and live release acceptance are recorded after deployment; source preparation alone is not an installed or published acceptance claim.
+Source checks: 480 controller tests, 119 installer tests and fresh12-case native cache regression passed. Both1.1.5 packages passed exact-source and compatibility verification. Native three-device rollout and live release acceptance are recorded after deployment; source preparation alone is not an installed or published acceptance claim.
+
+The October17native crash reproduction identified a direct diagnostic artwork-label getter during row replacement. Maintained native probes now marshal coherent metadata snapshots through the GUI thread; controller0.1.73 also dispatches its label reads and rechecks row/preview ownership after waits. See RELEASE_1_1_5_HOLD.md for the current native acceptance gate.

@@ -41,6 +41,14 @@ DEFAULT_RATINGS=[x[0] for x in RATING_OPTIONS[:4]]
 def rpc(method,params=None):
     return json.loads(xbmc.executeJSONRPC(json.dumps({'jsonrpc':'2.0','id':1,'method':method,'params':params or {}})))
 
+def gui_labels(labels):
+    # Kodi's direct Python getter reads native GUI objects on the caller's
+    # thread. JSON-RPC dispatches these reads through TMSG_GUI_INFOLABEL.
+    response=rpc('XBMC.GetInfoLabels',{'labels':list(labels)})
+    if 'error' in response:raise RuntimeError('GUI labels unavailable')
+    result=response.get('result',{})
+    return {label:result.get(label,'') for label in labels}
+
 def event(name,**fields):
     with (EVIDENCE/'live-runtime.jsonl').open('a') as f:f.write(json.dumps({'event':name,'time':time.time(),**fields})+'\n')
 
@@ -258,17 +266,19 @@ class LiveReview(xbmcgui.WindowXML):
         if cached is not None:self.apply_preview_bar_alignment(cached,True)
         else:self.preview_bar_scan=PreviewBarScan(xbmc.RenderCapture,compact,time.monotonic())
     def apply_preview_bar_alignment(self,fraction,cached=False):
-        token,compact,aspect,fit,key=self.preview_bar_context
-        if token!=self.preview_generation or not self.owned_preview or not self.player.isPlayingVideo():return
-        decoder=xbmc.getInfoLabel('Player.Process(videodecoder)').lower()
-        adjusted=top_aligned_viewmode(fit,fraction,aspect,compact,flipped=decoder.startswith('amc-') and '(s)' not in decoder)
-        if fraction:
-            result=rpc('Player.SetViewMode',{'viewmode':adjusted})
-            if result.get('result')!='OK':return
-        if not cached:
-            try:self.preview_framing_cache.put(key,fraction)
-            except OSError:event('preview_framing_cache_unavailable')
-        event('preview_top_alignment',fraction=round(fraction,5),adjusted=bool(fraction),cached=cached,viewmode=adjusted)
+        with self.preview_dispatch_lock:
+            token,compact,aspect,fit,key=self.preview_bar_context
+            if token!=self.preview_generation or not self.owned_preview or not self.player.isPlayingVideo():return
+            decoder=gui_labels(['Player.Process(videodecoder)'])['Player.Process(videodecoder)'].lower()
+            if token!=self.preview_generation or not self.owned_preview or not self.player.isPlayingVideo():return
+            adjusted=top_aligned_viewmode(fit,fraction,aspect,compact,flipped=decoder.startswith('amc-') and '(s)' not in decoder)
+            if fraction:
+                result=rpc('Player.SetViewMode',{'viewmode':adjusted})
+                if result.get('result')!='OK':return
+            if not cached:
+                try:self.preview_framing_cache.put(key,fraction)
+                except OSError:event('preview_framing_cache_unavailable')
+            event('preview_top_alignment',fraction=round(fraction,5),adjusted=bool(fraction),cached=cached,viewmode=adjusted)
     def sample_preview_bar_scan(self):
         scan=self.preview_bar_scan
         if not scan:return
@@ -693,7 +703,7 @@ class LiveReview(xbmcgui.WindowXML):
                                 if definition.get('_failed_page'):
                                     retained=definition['_failed_page'];self.failed_paths[n]=retained['request'];self.row_states[n]='error'
                                     self.setProperty('rowState'+str(n),'ready' if files else 'error');self.setProperty('rowMessage'+str(n),retained['message'])
-                                if not definition.get('_snapshot_refresh') and focus_slot==n and files and not getattr(self,'startup_idle',False) and int(xbmc.getInfoLabel('System.CurrentControlId') or '0') in (0,900,901):self.setFocusId(900+n)
+                                if not definition.get('_snapshot_refresh') and focus_slot==n and files and not getattr(self,'startup_idle',False) and int(gui_labels(['System.CurrentControlId'])['System.CurrentControlId'] or '0') in (0,900,901) and current(n,definition):self.setFocusId(900+n)
                     except Exception as exc:
                         with self.preview_dispatch_lock:
                             if current(n,definition):
@@ -1650,7 +1660,8 @@ class LiveReview(xbmcgui.WindowXML):
                 if getattr(self,'loading_paths',{}) or getattr(self,'search_row_step',None) or self.getProperty('loading')=='true':
                     time.sleep(.08);continue
                 if time.monotonic()-caption_checked>=1:
-                    width=xbmc.getInfoLabel('System.ScreenWidth');height=xbmc.getInfoLabel('System.ScreenHeight')
+                    screen=gui_labels(['System.ScreenWidth','System.ScreenHeight'])
+                    width=screen['System.ScreenWidth'];height=screen['System.ScreenHeight']
                     if not current():return
                     fit=str(caption_fit_step(width,height))
                     if self.getProperty('captionFitStep')!=fit:

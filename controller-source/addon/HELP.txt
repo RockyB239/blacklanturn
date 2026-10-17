@@ -57,3 +57,5 @@ The Preview button and automatic previews are available when YouTube is enabled 
 0.1.67: All search overlaps two full-metadata provider lookup lanes with cancellation and exact category cache ownership. Requires the separately hash-guarded TMDbHelper 6.17.9 empty-search overlay (lists_search.py) recorded in work/search-first-2026-10-16/manifest67.json. Revalidate the overlay after a provider update. Fire Stick and published assets are unchanged.
 
 Release 0.1.72: reviewed batched search and next-page preloading with initialization ownership and monotonic request generations. Retains 0.1.71 preview safety, artwork and watched metadata.
+
+Release 0.1.73: GUI-thread label dispatch for caption, focus and decoder reads; recheck row and preview ownership after waits. Artwork selection, watched data and playback preferences remain unchanged.
