@@ -10,7 +10,7 @@
     "youtube_browser.py": "429f42cfe6b29435297cc1221486f4d41ba303df653e07be4674716aedf2afd5",
     "youtube_home.py": "239003117a1c3aaac14f88c52abfce6039ccf95edeb4ef727bb23e245b597354",
     "live_runtime.py": "0718368d7ceccb9381c2a9b4e9e91f5a17571c6f8c2083415cd86d36dc90fa9d",
-    "navigation_core.py": "f7bd80bf3fa31c446667690cc5b14f48a52fae1fad0b8500149d2f17aa78b4b9",
+    "navigation_core.py": "71ba26705343753a8a45849f766c9e74677c62efb4216bdf61b47e0fbe4f6a0e",
     "public_rows.py": "ad09c4cd3a6e286c9bac55c7e99e9d913a6baac34b31b8bbadfba766dfc45b0e",
     "player_preferences.py": "d759caaef3b1914a5e85fe897515dd3b674cdd8c28afe6b5425e382dad7f7fb0",
     "page_ahead.py": "e5b4a5d0a8c276d8245e6f8cb28ead7872e5c774ff84b44132a13860befe0c0d",
@@ -316,17 +316,20 @@
     "passed": true,
     "history_databases": 1,
     "connected_sidebar_visible": true,
+    "youtube_sidebar_after_movies_before_my_stuff": true,
     "transient_failure_retains_sidebar": true,
     "disconnected_sidebar_hidden_with_simulated_account_state": true,
     "reconnected_sidebar_visible": true,
     "feeds": {
       "recommendations": {
         "video_ids_matched": 50,
-        "same_as_signed_in_addon": true
+        "same_as_signed_in_addon": true,
+        "comparison": "same native response snapshot"
       },
       "subscriptions": {
         "video_ids_matched": 50,
-        "same_as_signed_in_addon": true
+        "same_as_signed_in_addon": true,
+        "comparison": "same native response snapshot"
       }
     },
     "disconnected_playback_return_rejects_private_snapshot": true,
@@ -349,17 +352,17 @@
         5,
         5,
         5,
-        5,
-        4,
-        5,
+        3,
         5,
         5,
-        5,
-        4,
         5,
         5,
         5,
         4,
+        4,
+        5,
+        5,
+        5,
         5
       ],
       "normal_full_play_urls": true,
@@ -388,7 +391,7 @@
       "remote_history_reporting": false,
       "end_seconds": 30
     },
-    "preview_stop_on_selection_seconds": 0.208,
+    "preview_stop_on_selection_seconds": 0.677,
     "preview_navigation_cancels_playback": true,
     "local_watch_history_unchanged": true,
     "in_memory_preferences_unchanged": true

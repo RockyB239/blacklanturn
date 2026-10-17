@@ -8,7 +8,7 @@ def verify_youtube_acceptance(receipt,manifest):
  assert receipt['controller']==manifest['controller']=='0.1.75'
  assert receipt['files']==manifest['files'],'YouTube source differs from native-tested controller'
  a=receipt['acceptance'];assert a['passed']
- for key in ('connected_sidebar_visible','transient_failure_retains_sidebar','disconnected_sidebar_hidden_with_simulated_account_state','reconnected_sidebar_visible','disconnected_playback_return_rejects_private_snapshot','subscriptions_tab_loaded','library_tab_loaded','channels_tab_loaded','youtube_search_loaded','independent_preview_toggle_disabled_playback','preview_navigation_cancels_playback','local_watch_history_unchanged','in_memory_preferences_unchanged'):
+ for key in ('connected_sidebar_visible','youtube_sidebar_after_movies_before_my_stuff','transient_failure_retains_sidebar','disconnected_sidebar_hidden_with_simulated_account_state','reconnected_sidebar_visible','disconnected_playback_return_rejects_private_snapshot','subscriptions_tab_loaded','library_tab_loaded','channels_tab_loaded','youtube_search_loaded','independent_preview_toggle_disabled_playback','preview_navigation_cancels_playback','local_watch_history_unchanged','in_memory_preferences_unchanged'):
   assert a.get(key) is True,'Missing Mac acceptance: '+key
  for feed in ('recommendations','subscriptions'):
   assert a['feeds'][feed]['same_as_signed_in_addon'] and a['feeds'][feed]['video_ids_matched']>0

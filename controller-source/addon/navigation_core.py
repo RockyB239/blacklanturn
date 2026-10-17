@@ -8,7 +8,7 @@ ICON_CHOICES=[('home', 'Home'), ('tv', 'Shows'), ('movies', 'Movies'), ('bookmar
 RETIRED_ICONS={'crime','western-horse','western-tumbleweed'}
 ICON_CHOICES += [('crime-handcuffs','Crime — handcuffs'),('slashers','Slashers')]
 KODI_DESTINATIONS=[('tvchannels','Live TV'),('tvguide','TV guide'),('tvrecordings','TV recordings'),('radiochannels','Radio'),('music','Music'),('pictures','Pictures'),('games','Games'),('favouritesbrowser','Kodi favourites'),('addonbrowser','Add-ons'),('weather','Weather'),('filemanager','File manager')]
-SECTIONS=('Home','Shows','Movies','My Stuff','Add-ons','YouTube')
+SECTIONS=('Home','Shows','Movies','YouTube','My Stuff','Add-ons')
 
 def sidebar_items(config,youtube_connected=False):
     return [{'id':'search','label':'Search','icon':'search','fixed_action':'search'}]+visible_navigation(config,youtube_connected)+[{'id':'settings','label':'Settings','icon':'settings','fixed_action':'settings'}]
@@ -48,7 +48,9 @@ def visible_navigation(config,youtube_connected=False):
         if item.get('icon') not in dict(ICON_CHOICES) and item.get('icon') not in RETIRED_ICONS:item['icon']='bookmark'
         items.append(item)
     if youtube_connected and not any(x.get('destination',{}).get('section')=='YouTube' for x in config.get('Sidebar',[]) if isinstance(x,dict)):
-        items.append({'id':'youtube','label':'YouTube','icon':'youtube','enabled':True,'destination':{'kind':'section','section':'YouTube'}})
+        movie=next((n for n,item in enumerate(items) if item.get('destination',{}).get('section')=='Movies'),None)
+        saved=next((n for n,item in enumerate(items) if item.get('destination',{}).get('section')=='My Stuff'),len(items))
+        items.insert(movie+1 if movie is not None else saved,{'id':'youtube','label':'YouTube','icon':'youtube','enabled':True,'destination':{'kind':'section','section':'YouTube'}})
     return items
 
 def resolve_destination(destination,config,section='Movies'):

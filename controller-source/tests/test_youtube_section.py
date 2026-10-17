@@ -31,6 +31,8 @@ class YouTubeSection(unittest.TestCase):
   config=navigation_core.migrate_navigation({'PreviewDelay':8,'Saved':[{'file':'private'}]});before=copy.deepcopy(config)
   self.assertNotIn('youtube',[x['id'] for x in navigation_core.sidebar_items(config)])
   self.assertIn('youtube',[x['id'] for x in navigation_core.sidebar_items(config,youtube_connected=True)])
+  sections=[x.get('destination',{}).get('section') for x in navigation_core.sidebar_items(config,youtube_connected=True)]
+  self.assertEqual(sections.index('YouTube'),sections.index('Movies')+1);self.assertLess(sections.index('YouTube'),sections.index('My Stuff'))
   self.assertEqual(config,before)
   config['Sidebar'].append({'id':'yt-custom','label':'Videos','icon':'youtube','destination':{'kind':'section','section':'YouTube'}})
   self.assertEqual(sum(x.get('destination',{}).get('section')=='YouTube' for x in navigation_core.sidebar_items(config,youtube_connected=True)),1)
