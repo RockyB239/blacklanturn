@@ -1,0 +1,114 @@
+{
+  "controller": "0.1.80",
+  "status": "development-candidate-three-device-validated",
+  "manifest": "manifest80.json",
+  "source_files": 310,
+  "candidate_zip_sha256": "2066865c899629744a846de5723e2a3d08293ab9506e58a9ae1cd29c671f340e",
+  "root_causes": [
+    "Some native adaptive category shelves end after five items and have no next cursor.",
+    "YouTube native timed preview stop blocked decoder cleanup before artwork return.",
+    "Fullscreen quality was capped at720p; H264-only stream preferences also excluded higher quality VP9 alternatives.",
+    "Native decoder startup can briefly expose invalid presentation timestamps, causing a naive duration check to end a preview early."
+  ],
+  "changes": [
+    "Continue native cursors first, then related videos seeded by up to six original shelf video choices.",
+    "Keep bounded row windows, cursor ownership, artwork, watched state, and refresh behavior.",
+    "Controller-owned45-second preview, one-second visual fade, early artwork reveal, invalid timestamp guard, and bounded stall handling.",
+    "Independent preview cap720p H264; fullscreen uses automatic quality with4K ceiling and VP9 eligible."
+  ],
+  "tests": {
+    "controller": 622,
+    "installer_release": 193,
+    "device_validation": 16,
+    "diff_check": "passed"
+  },
+  "independent_review": "Approved; additional invalid-startup-timestamp regressions passed red-green and received a fresh read-only review.",
+  "distribution": "Installed candidate80 on Fire Stick, Mac, and Apple TV. Published build1.1.9 and Installer1.0.15 remain pinned to controller76; no publication performed.",
+  "devices": {
+    "fire_stick": {
+      "passed": true,
+      "lower_rows_checked": 10,
+      "continuation_batches": 30,
+      "preview_media_seconds": 45.088,
+      "preview_playing_wall_seconds": 46.4,
+      "fade_to_idle_seconds": 1.34,
+      "largest_probe_sample_gap_seconds": 0.84,
+      "preview_max_height": 720,
+      "preview_codecs": [
+        "h264"
+      ],
+      "fullscreen_selected_streams": [
+        {
+          "width": 1920,
+          "height": 1080,
+          "codec": "vp9"
+        }
+      ],
+      "fullscreen_automatic_ceiling": 2160,
+      "fullscreen_automatic_stream": true,
+      "same_hover_did_not_restart": true
+    },
+    "mac": {
+      "passed": true,
+      "lower_rows_checked": 7,
+      "continuation_batches": 21,
+      "preview_media_seconds": 44.981,
+      "preview_playing_wall_seconds": 46.24,
+      "fade_to_idle_seconds": 1.16,
+      "largest_probe_sample_gap_seconds": 0.19,
+      "preview_max_height": 480,
+      "preview_codecs": [
+        "h264"
+      ],
+      "fullscreen_selected_streams": [
+        {
+          "width": 2560,
+          "height": 1440,
+          "codec": "vp9"
+        }
+      ],
+      "fullscreen_automatic_ceiling": 2160,
+      "fullscreen_automatic_stream": true,
+      "same_hover_did_not_restart": true
+    },
+    "apple_tv": {
+      "passed": true,
+      "lower_rows_checked": 9,
+      "continuation_batches": 27,
+      "preview_media_seconds": 45.239,
+      "preview_playing_wall_seconds": 46.26,
+      "fade_to_idle_seconds": 1.25,
+      "largest_probe_sample_gap_seconds": 0.16,
+      "preview_max_height": 720,
+      "preview_codecs": [
+        "h264"
+      ],
+      "fullscreen_selected_streams": [
+        {
+          "width": 3840,
+          "height": 2160,
+          "codec": "vp9"
+        }
+      ],
+      "fullscreen_automatic_ceiling": 2160,
+      "fullscreen_automatic_stream": true,
+      "same_hover_did_not_restart": true
+    }
+  },
+  "preservation": {
+    "source_exact_all_three": true,
+    "diagnostic_entrypoint_hooks_absent": true,
+    "fire_protected_files": 13,
+    "mac_protected_files": 27,
+    "apple_protected_files": 24,
+    "apple_persisted_preference_entries": 21,
+    "only_intentional_preference_changes": "Three YouTube quality settings: automatic selection,4K ceiling, append VP9 eligibility. Existing codec flags,HDR,decoder,language,subtitle,and other playback choices retained.",
+    "mac_native_runtime_changes": "Expired TMDbHelper Trakt token renewed by native code; HTTP200 confirms same account as preserved Umbrella authorization. Native installer advanced next log-cleaning date.",
+    "authorization_accounts_preserved": true,
+    "fire_and_apple_owned_test_staging_removed": true,
+    "private_recovery_zips_crc_verified": 25
+  },
+  "provider_limits": "Two earlier native continuation responses entered Retry. Fresh signed-in Home runs passed, including Start a Music Mix on Apple TV; recovery of those exact prior opaque server cursors was not established. Genuine server failures still require Retry or Refresh. Related continuation stays adaptive but extends beyond the exact original shelf and can eventually exhaust all seeds.",
+  "quality_limits": "Measured automatic choices were1080p Fire,1440p Mac,and2160p Apple TV on the same NASA public4K video. These are short opening checks, not a sustained4K throughput or frame-drop benchmark. Apple TV used ff-vp9.",
+  "quality_test_source": "https://science.gsfc.nasa.gov/690/multimedia.html"
+}

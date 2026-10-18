@@ -126,6 +126,25 @@ def load_shelf_page(cursor,current=lambda:True):
         entries,more=parse_horizontal(raw,cursor.get('visitor'))
         return _resolve_entries(runtime,entries,current),more
 
+def load_related_page(cursor,current=lambda:True):
+    if not current():raise RuntimeError('YouTube request retired')
+    seeds=cursor['related_seeds'];index=cursor.get('seed_index',0)
+    if not 0<=index<len(seeds):raise ValueError('Invalid related shelf cursor')
+    with _session(current) as runtime:
+        client=runtime.provider.get_client(runtime.context)
+        raw=client.get_related_videos(video_id=seeds[index],page_token=cursor.get('page_token'),
+                                     click_tracking=cursor.get('click_tracking'),visitor=cursor.get('visitor'))
+        if not current():raise RuntimeError('YouTube request retired')
+        if raw=={}:raw={'items':[]} # Native fallback clients exhausted this seed.
+        if not isinstance(raw,dict) or not isinstance(raw.get('items'),list):raise RuntimeError('Related videos unavailable')
+        files=_resolve_entries(runtime,raw['items'][:100],current)
+        token=raw.get('nextPageToken')
+        if token and token!=cursor.get('page_token'):
+            more=dict(cursor,page_token=token,click_tracking=raw.get('clickTracking'),visitor=raw.get('visitorData'))
+        elif index+1<len(seeds):more={'related_seeds':list(seeds),'seed_index':index+1}
+        else:more=None
+        return files,more
+
 def _load_home(runtime,client,current):
     # Main recommendations/subscriptions resolve independently. Broader interest
     # groups use this bounded background request and never gate those rows.
@@ -170,6 +189,13 @@ class _PreviewSettings:
     def __getattr__(self,name):return getattr(self.base,name)
     def default_player_web_urls(self):return False
     def default_player_fallback(self):return False
+    def mpd_video_qualities(self,value=None):return [q for q in self.base.mpd_video_qualities() if q['nom_height']<=720]
+    def stream_features(self,value=None,raw_values=False):
+        features=[x for x in self.base.stream_features(raw_values=True) if x not in ('vp9','av01')]
+        if 'avc1' not in features:features.append('avc1')
+        return features if raw_values else frozenset(features)
+    def max_video_height(self):return min(720,self.base.max_video_height())
+    def fixed_video_quality(self,value=None):return min(720,self.base.fixed_video_quality())
 
 class _PreviewUI:
     def __init__(self,base,effects):self.base,self.effects=base,effects

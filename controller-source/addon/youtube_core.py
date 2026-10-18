@@ -41,7 +41,7 @@ def preview_path(item):
     if not value:return None
     # screensaver skips suggested-playlist enqueue as well as quality prompts;
     # incognito suppresses both local and remote watch/resume history writes.
-    return BASE+'/play/?'+urlencode({'video_id':value,'incognito':'true','screensaver':'true','start':'0','end':'30'})
+    return BASE+'/play/?'+urlencode({'video_id':value,'incognito':'true','screensaver':'true','start':'0','end':'0'})
 
 def is_youtube(item):
     source=urlsplit(item.get('file',''))

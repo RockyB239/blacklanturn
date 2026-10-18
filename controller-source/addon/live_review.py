@@ -242,9 +242,33 @@ class LiveReview(YouTubeBrowser,xbmcgui.WindowXML):
     def finish_loading(self,reason):
         if self.getProperty('loading')=='true':
             self.setProperty('loading','false');event('branded_loading_complete',reason=reason,seconds=round(time.monotonic()-self.loading_started,2))
+    def finish_inline_preview(self):
+        with self.preview_dispatch_lock:
+            key=self.preview_key
+            self.stop_preview()
+            if (self.selected or {}).get('file')==key:self.preview_key=key
+            self.setProperty('notice','Preview ended')
+    def advance_inline_preview(self,playing,token=None,attempts=None):
+        with self.preview_dispatch_lock:
+            clock=getattr(self,'inline_preview_clock',None)
+            generation=self.preview_generation if token is None else token
+            lifetime=self.window_lifetime;epoch=getattr(self,'input_generation',0)
+            def current():
+                return (self.alive and self.owned_preview and self.window_lifetime is lifetime and self.preview_generation==generation
+                        and getattr(self,'input_generation',0)==epoch and self.inline_preview_clock is clock
+                        and (attempts is None or attempts is self.preview_attempts))
+            if clock is None or not self.preview_playing or not current():return False
+            position=self.player.getTime() if playing else 0
+            if not current():return False
+            phase=clock.tick(time.monotonic(),position,playing)
+            if phase=='fading':self.setProperty('previewFade','true')
+            elif phase=='stop':self.finish_inline_preview();return True
+            return False
     def stop_preview(self):
         with self.preview_dispatch_lock:
             self.preview_generation+=1
+            self.inline_preview_clock=None
+            self.setProperty('preview','idle');self.setProperty('previewFade','false')
             self.cancel_preview_bar_scan()
             if self.preview_attempts:self.preview_attempts.cancel()
             self.preview_attempts=None
@@ -1787,6 +1811,7 @@ class LiveReview(YouTubeBrowser,xbmcgui.WindowXML):
                 attempts=self.preview_attempts;preview_token=self.preview_generation
                 if self.owned_preview and attempts:
                     playing=self.player.isPlayingVideo();failed=self.player.failed
+                    if self.advance_inline_preview(playing,preview_token,attempts):continue
                     self.player.failed=False
                     next_url=attempts.tick(time.monotonic(),playing,error=failed)
                     if preview_token!=self.preview_generation or attempts is not self.preview_attempts:continue
@@ -1805,6 +1830,10 @@ class LiveReview(YouTubeBrowser,xbmcgui.WindowXML):
                         result=rpc('Player.SetViewMode',{'viewmode':fit})
                         if not current():return
                         self.preview_playing=True;self.setProperty('preview','playing');self.setProperty('notice','')
+                        if youtube_video_id(self.selected or {}):
+                            from inline_preview import InlinePreviewClock
+                            total=self.player.getTotalTime()
+                            self.inline_preview_clock=InlinePreviewClock(min(45,total) if total>0 else 45)
                         self.start_preview_bar_scan(stream,aspect,fit)
                         event('trailer_playing',total=self.player.getTotalTime(),hero_fill=result.get('result')=='OK',preview_fit=fit,attempt=attempts.index+1)
                     elif attempts.finished:

@@ -49,7 +49,7 @@ class YouTubeSection(unittest.TestCase):
  def test_preview_plays_exact_highlighted_video_without_history_or_suggested_queue(self):
   preview=self.api('preview_path');item={'file':'plugin://plugin.video.youtube/play/?video_id=Abc_123-Xyz&playlist_id=private','filetype':'file','title':'Selected video'};before=copy.deepcopy(item)
   path=preview(item);q=parse_qs(urlsplit(path).query)
-  self.assertEqual(q['video_id'],['Abc_123-Xyz']);self.assertEqual(q['incognito'],['true']);self.assertEqual(q['screensaver'],['true']);self.assertEqual(q['end'],['30']);self.assertNotIn('playlist_id',q);self.assertEqual(item,before)
+  self.assertEqual(q['video_id'],['Abc_123-Xyz']);self.assertEqual(q['incognito'],['true']);self.assertEqual(q['screensaver'],['true']);self.assertEqual(q['end'],['0']);self.assertNotIn('playlist_id',q);self.assertEqual(item,before)
   for bad in [{'file':'plugin://evil/play/?video_id=Abc_123-Xyz'},{'file':item['file'],'filetype':'directory'},{'file':'plugin://plugin.video.youtube/play/?video_id=wrong)Quit()'}]:self.assertIsNone(preview(bad))
  def test_video_artwork_prefers_its_thumbnail_and_preserves_normal_movie_artwork(self):
   from live_core import card_artwork

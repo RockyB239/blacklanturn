@@ -9,7 +9,7 @@ from pathlib import Path
 from urllib.parse import urlsplit,urlunsplit,parse_qsl,urlencode
 from youtube_core import video_id,tab_rows
 from youtube_home import split_page,merge_page
-from youtube_provider import load_home_rows,load_shelf_page
+from youtube_provider import load_home_rows,load_shelf_page,load_related_page
 
 MAX_ROW_ITEMS=150
 
@@ -22,6 +22,8 @@ def _focus_id():
     return int(gui_labels(['System.CurrentControlId'])['System.CurrentControlId'] or '0')
 
 def _token(cursor):
+    if cursor and cursor.get('related_seeds'):
+        return 'related:'+cursor['related_seeds'][cursor.get('seed_index',0)]+':'+str(cursor.get('page_token',''))
     return (cursor or {}).get('continuation') or (cursor or {}).get('path')
 
 def _more_card(error=False):
@@ -89,6 +91,8 @@ class YouTubeRows:
                     and self.paths[n]==path and self.rows[n] is displayed and self.youtube_pages.get(path) is page
                     and getattr(self,'youtube_content_revision',None) is revision and self.youtube_job is job)
         counts=self.youtube_category_counts(path) if 'bl_shelf=' in path else {}
+        fallback=next((copy.deepcopy(d.get('youtube_fallback')) for d in self.page_definitions if d.get('path')==path),None)
+        existing={video_id(x) or x.get('file') for x in page['items']}
         self.setProperty('rowMessage'+str(n),'Loading more…')
         def work():
             try:
@@ -100,10 +104,14 @@ class YouTubeRows:
                     key=_token(more)
                     if not key or key in seen:more=None;break
                     seen.append(key)
-                    if 'path' in more:
+                    related=bool(more.get('related_seeds'))
+                    if related:incoming,following=load_related_page(more,current)
+                    elif 'path' in more:
                         incoming,following=split_page(_fetch_feed(more['path']),more['path'])
                     else:incoming,following=load_shelf_page(more,current)
                     if not current():return
+                    if not following and not related:following=copy.deepcopy(fallback)
+                    incoming=[x for x in incoming if (video_id(x) or x.get('file')) not in existing]
                     files=merge_page(files,incoming,counts);more=following
                     if _token(more) in seen:more=None
                     if files or not more:break

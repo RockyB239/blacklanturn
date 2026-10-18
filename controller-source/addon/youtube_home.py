@@ -73,7 +73,10 @@ def local_rows(shelves,items):
         videos=[deepcopy(x if x.get('filetype')=='directory' else items[x['id']]) for x in shelf['items'] if x.get('filetype')=='directory' or x['id'] in items]
         if not videos:continue
         key=hashlib.sha256((shelf['label']+'\0'+','.join(x['id'] for x in shelf['items'])).encode()).hexdigest()[:20]
-        rows.append({'label':shelf['label'],'path':BASE+'/special/recommendations?'+urlencode({'bl_shelf':key}),'local_items':videos,'youtube_cursor':deepcopy(shelf.get('youtube_cursor')),'youtube_category':True})
+        seeds=list(dict.fromkeys(ident for ident in (video_id(x) for x in videos) if ident))[:6]
+        fallback={'related_seeds':seeds,'seed_index':0} if seeds else None
+        rows.append({'label':shelf['label'],'path':BASE+'/special/recommendations?'+urlencode({'bl_shelf':key}),'local_items':videos,
+                     'youtube_cursor':deepcopy(shelf.get('youtube_cursor') or fallback),'youtube_fallback':fallback,'youtube_category':True})
     return rows
 
 def merge_shelves(previous,incoming):

@@ -48,5 +48,5 @@ class AccuracyFlow(unittest.TestCase):
   self.assertEqual(self.calls,[])
   query=parse_qs(urlsplit(self.effects[0]).query)
   self.assertEqual(query['video_id'],['Abc_123-Xyz'])
-  self.assertEqual(query['incognito'],['true']);self.assertEqual(query['screensaver'],['true']);self.assertEqual(query['end'],['30'])
+  self.assertEqual(query['incognito'],['true']);self.assertEqual(query['screensaver'],['true']);self.assertEqual(query['end'],['0'])
   self.assertEqual(o.selected['file'],'plugin://plugin.video.youtube/play/?video_id=Abc_123-Xyz')
