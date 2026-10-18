@@ -1,3 +1,9 @@
+# Release 1.1.11 / Installer 1.0.16
+
+Controller 0.1.82 tightens recognized YouTube subject rows while retaining personalized feed ordering, adaptive Refresh, card/watch state and continuation. Fresh Fire, Mac and Apple TV category/source/preservation/startup checks passed. Installer 1.0.16 and playback defaults are unchanged. See [validation](RELEASE_1_1_11_VALIDATION.md) for counts, hashes, scope and limits. Prior release assets and private recovery remain retained.
+
+## Prior release record
+
 # Release 1.1.10 / Installer 1.0.16
 
 Controller 0.1.81 is verified on Fire Stick, Mac and Apple TV, including category continuation/relevance,45-second capped previews/fade, automatic fullscreen quality and source/settings/authorization/history preservation. Both portable editions use explicit clean YouTube defaults and Standard-update preservation of 18 YouTube playback choices. See [release validation](RELEASE_1_1_10_VALIDATION.md) for exact hashes, scope, native evidence and acceptance limits. Existing release assets and device recovery copies remain retained.

@@ -1,4 +1,4 @@
-"""Reproducible 1.1.10 release from verified clean baselines, never live profiles."""
+"""Reproducible 1.1.11 release from verified clean baselines, never live profiles."""
 import argparse,ast,hashlib,importlib.util,json,re,sys,xml.etree.ElementTree as ET,zipfile
 from pathlib import Path
 ROOT=Path(__file__).resolve().parents[1]
@@ -27,8 +27,8 @@ def build(baselines,output):
   data.update({prefix+n:d for n,d in installer.items()})
   controller_root=ROOT/'controller-source/addon'
   controller={str(p.relative_to(controller_root)):p.read_bytes() for p in controller_root.rglob('*') if p.is_file() and '__pycache__' not in p.parts and p.suffix!='.pyc'}
-  controller_manifest=json.loads((ROOT/'controller-source/manifest81.json').read_text())
-  assert controller_manifest['controller']=='0.1.81' and ET.fromstring(controller['addon.xml']).get('version')=='0.1.81'
+  controller_manifest=json.loads((ROOT/'controller-source/manifest82.json').read_text())
+  assert controller_manifest['controller']=='0.1.82' and ET.fromstring(controller['addon.xml']).get('version')=='0.1.82'
   expected_controller=controller_manifest['files']
   assert {n:sha(raw) for n,raw in controller.items()}==expected_controller,'Validated controller changed'
   cp='addons/script.blacklanturn.preview/'
@@ -60,9 +60,9 @@ def build(baselines,output):
   apply_settings(yp,{'kodion.mpd.stream.select':'1','kodion.video.stream.select':'1'})
   defaults=json.loads((SOURCE/'resources/playback-defaults.json').read_text(encoding='utf-8'))
   for name,fields in defaults.items():apply_settings('userdata/'+name,fields)
-  marker=json.loads(data['userdata/blacklanturn-build.json']);marker.update(schema=3,preferences_policy='playback-trakt-youtube-1',build_version='1.1.10',helper_patch='empty-cache-1',installer_min_version='1.0.16',controller_version='0.1.81',helper_search_patch='search-batch-1')
+  marker=json.loads(data['userdata/blacklanturn-build.json']);marker.update(schema=3,preferences_policy='playback-trakt-youtube-1',build_version='1.1.11',helper_patch='empty-cache-1',installer_min_version='1.0.16',controller_version='0.1.82',helper_search_patch='search-batch-1')
   data['userdata/blacklanturn-build.json']=json.dumps(marker,indent=2).encode()
-  data['userdata/BlackLanturn-README.txt']=(before['userdata/BlackLanturn-README.txt'].decode()+'\n\nRelease 1.1.10: controller 0.1.81 with continued YouTube category rows and 45-second inline previews capped at 720p H264 with fade and same-hover completion. Normal full playback uses automatic quality with a 2160p ceiling. Installer 1.0.16 and the playback-trakt-youtube-1 policy validate all clean YouTube playback defaults. Standard updates preserve stored playback choices; account-only clean installs reset preferences to build defaults while retaining selected authorizations. Retains repaired search/preloading, history-safe previews, Cocoscrapers integration, Trakt defaults, High artwork and the 64MB fixed4x playback buffer. Includes the managed Helper search-empty repair. Native playback components remain device-specific. Full release acceptance requires the fresh exact-source three-device receipt; this package description alone is not native proof.\n').encode()
+  data['userdata/BlackLanturn-README.txt']=(before['userdata/BlackLanturn-README.txt'].decode()+'\n\nRelease 1.1.11: controller 0.1.82 with tighter YouTube Science, History, Ancient History, Electronics, Philosophy, Psychology, Nature and other recognized subject rows using positive public title or specific-topic evidence. Generic and format rows remain mixed. Personalized order, artwork, cursors and watch state remain preserved; 45-second inline previews stay capped at 720p H264 with fade and same-hover completion. Normal full playback uses automatic quality with a 2160p ceiling. Installer 1.0.16 and the playback-trakt-youtube-1 policy validate all clean YouTube playback defaults. Standard updates preserve stored playback choices; account-only clean installs reset preferences to build defaults while retaining selected authorizations. Retains repaired search/preloading, history-safe previews, Cocoscrapers integration, Trakt defaults, High artwork and the 64MB fixed4x playback buffer. Includes the managed Helper search-empty repair. Native playback components remain device-specific. Full release acceptance requires fresh exact-source three-device subject-row, restart, refresh and preservation evidence. Unchanged playback behavior retains explicitly identified controller 0.1.81 evidence only behind the exact four-path source-delta gate. This package description alone is not native proof.\n').encode()
   allowed={n for n in set(before)|set(data) if n.startswith((prefix,cp))}|{'userdata/blacklanturn-build.json','userdata/BlackLanturn-README.txt','userdata/guisettings.xml',hp,up,yp,target}
   changed={n for n in set(before)|set(data) if before.get(n)!=data.get(n)};assert changed<=allowed
   for n,raw in data.items():
@@ -79,7 +79,7 @@ def build(baselines,output):
    for dep in addon.findall('./requires/import'):
     if dep.get('optional')=='true':continue
     assert dep.get('addon') in addons or dep.get('addon') in system,(aid,dep.get('addon'))
-  out=output/f'BlackLanturn-{edition}-Kodi21-1.1.10.zip';zipwrite(out,data)
+  out=output/f'BlackLanturn-{edition}-Kodi21-1.1.11.zip';zipwrite(out,data)
   with zipfile.ZipFile(out) as z:managed.verify_archive(z)
   files={n:sha(d) for n,d in sorted(data.items())}
   report={'file':out.name,'sha256':sha(out.read_bytes()),'bytes':out.stat().st_size,'files':len(data),'changed_paths':sorted(changed),'helper':'6.17.9 + empty-cache-1 + search-batch-1','installer':'1.0.16','schema':3,'settings_and_rows':'clean 1.1.2 plus exact playback-provider, automatic YouTube quality, watch-indicator, 64MB/4x buffer and High artwork defaults','native_binaries':0}

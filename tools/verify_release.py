@@ -73,6 +73,29 @@ def verify_release110_acceptance(receipt,manifest):
  assert all(m.get('no_late_play') is True and m.get('normal_core_restored') is True for m in moments),'Fire cancellation leaves late playback or decoder override'
  assert fire.get('normal_clip_decoder')=='amc-h264','Normal Fire hardware decoding not verified'
 
+def verify_release111_acceptance(receipt,manifest):
+ """Fresh 82 subject-row proof; unchanged 81 playback evidence stays labeled 81."""
+ assert receipt.get('controller')==manifest.get('controller')=='0.1.82'
+ assert receipt.get('files')==manifest['files'],'Release 1.1.11 source differs from native-tested controller'
+ assert receipt.get('passed') is True,'Release 1.1.11 native acceptance incomplete'
+ baseline=json.loads((ROOT/'controller-source/manifest81.json').read_text())
+ prior_path='controller-source/youtube-release110-verification.json'
+ prior=json.loads((ROOT/prior_path).read_text())
+ verify_release110_acceptance(prior,baseline)
+ assert receipt.get('prior_playback_basis')=={'controller':'0.1.81','files':baseline['files'],'receipt':prior_path},'Unidentified prior playback evidence'
+ changed={name for name in set(baseline['files'])|set(manifest['files']) if baseline['files'].get(name)!=manifest['files'].get(name)}
+ assert changed=={'addon.xml','youtube_home.py','youtube_provider.py','youtube_relevance.py'},'Playback inheritance requires exactly the reviewed subject-row source delta'
+ assert set(manifest['files'])==set(baseline['files']),'Playback inheritance cannot add or remove controller files'
+ devices=receipt.get('devices',{})
+ assert set(devices)=={'mac','fire','apple_tv'},'Fresh native acceptance required on all three devices'
+ for name,d in devices.items():
+  for key in ('source_exact','ordinary_restart','authorization_grants_preserved','settings_preserved','youtube_history_preserved','refresh_recommendations_verified','continuation_preserves_existing_cards'):
+   assert d.get(key) is True,'Missing '+name+' release 1.1.11 acceptance: '+key
+  category=d.get('category_relevance',{})
+  assert category.get('subject_rows_checked',0)>=1,'New subject row not exercised on '+name
+  assert category.get('continued_new_choices',0)>=1,'New subject row continuation not exercised on '+name
+  assert category.get('row_mismatches')==0,'Subject-row mismatches on '+name
+
 def verify_playback_defaults(z):
  gui={n.get('id'):n.text or '' for n in ET.fromstring(z.read('userdata/guisettings.xml'))}
  assert gui.get('locale.audiolanguage')=='default','Build audio language must follow the interface language'
@@ -91,6 +114,7 @@ def verify_playback_defaults(z):
  except prefs.PreferenceError as exc:raise AssertionError(str(exc)) from exc
 
 def verify(folder):
+ verify_release111_acceptance(json.loads((ROOT/'controller-source/youtube-release111-verification.json').read_text()),json.loads((ROOT/'controller-source/manifest82.json').read_text()))
  verify_release110_acceptance(json.loads((ROOT/'controller-source/youtube-release110-verification.json').read_text()),json.loads((ROOT/'controller-source/manifest81.json').read_text()))
  verify_youtube_acceptance(json.loads((ROOT/'controller-source/youtube-native-verification.json').read_text()),json.loads((ROOT/'controller-source/manifest75.json').read_text()))
  verify_stall_acceptance(json.loads((ROOT/'controller-source/youtube-stall-mac-verification.json').read_text()),json.loads((ROOT/'controller-source/youtube-stall-native-verification.json').read_text()),json.loads((ROOT/'controller-source/manifest76.json').read_text()))
@@ -107,16 +131,16 @@ def verify(folder):
   expected_installer={'plugin.program.blacklanturninstaller/'+str(p.relative_to(SOURCE)):p.read_bytes() for p in SOURCE.rglob('*') if p.is_file() and '__pycache__' not in p.parts and not p.name.endswith(('.pyc','.DS_Store'))}
   assert installer==expected_installer,'Installer ZIP differs from reviewed source'
  for ed in ('General','Apple-TV-Mac'):
-  with zipfile.ZipFile(folder/f'BlackLanturn-{ed}-Kodi21-1.1.10.zip') as z:
+  with zipfile.ZipFile(folder/f'BlackLanturn-{ed}-Kodi21-1.1.11.zip') as z:
    assert z.testzip() is None;m.verify_archive(z);verify_playback_defaults(z)
    p=json.loads(z.read('userdata/blacklanturn-build.json'))
    assert p['schema']==3 and p['preferences_policy']=='playback-trakt-youtube-1' and p['helper_patch']=='empty-cache-1' and p['installer_min_version']=='1.0.16'
-   assert p['build_version']=='1.1.10'
-   assert p['controller_version']=='0.1.81' and p['helper_search_patch']=='search-batch-1'
+   assert p['build_version']=='1.1.11'
+   assert p['controller_version']=='0.1.82' and p['helper_search_patch']=='search-batch-1'
    gui={n.get('id'):n.text for n in ET.fromstring(z.read('userdata/guisettings.xml'))}
    assert {k:gui[k] for k in ('filecache.memorysize','filecache.readfactor','filecache.buffermode','filecache.chunksize')}=={'filecache.memorysize':'64','filecache.readfactor':'400','filecache.buffermode':'4','filecache.chunksize':'131072'}
    assert next(n.text for n in ET.fromstring(z.read('userdata/addon_data/plugin.video.themoviedb.helper/settings.xml')) if n.get('id')=='artwork_quality')=='1'
-   expected=json.loads((ROOT/'controller-source/manifest81.json').read_text())['files']
+   expected=json.loads((ROOT/'controller-source/manifest82.json').read_text())['files']
    actual={n[len('addons/script.blacklanturn.preview/'):]:hashlib.sha256(z.read(n)).hexdigest() for n in z.namelist() if n.startswith('addons/script.blacklanturn.preview/')}
    assert actual==expected
    for n,d in installer.items():assert z.read('addons/'+n)==d,'Installer mismatch'

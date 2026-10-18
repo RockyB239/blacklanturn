@@ -3,7 +3,7 @@ import hashlib,re
 from copy import deepcopy
 from urllib.parse import urlencode,urlsplit,parse_qs
 from youtube_core import BASE,video_id
-from youtube_relevance import family,matches
+from youtube_relevance import family,matches,matches_title
 MAX_GROUPS=16
 
 def _text(value):
@@ -72,7 +72,7 @@ def local_rows(shelves,items,metadata=None):
     rows=[]
     for shelf in shelves:
         wanted=family(shelf['label'])
-        selected=[x for x in shelf['items'] if x.get('filetype')=='directory' or (x['id'] in items and (not wanted or metadata is None or matches(metadata.get(x['id']),wanted)))]
+        selected=[x for x in shelf['items'] if ((not wanted or matches_title(x.get('title') or x.get('label'),wanted)) if x.get('filetype')=='directory' else (x['id'] in items and (not wanted or metadata is None or matches(metadata.get(x['id']),wanted))))]
         videos=[deepcopy(x if x.get('filetype')=='directory' else items[x['id']]) for x in selected]
         if not videos:continue
         key=hashlib.sha256((shelf['label']+'\0'+','.join(x['id'] for x in shelf['items'])).encode()).hexdigest()[:20]

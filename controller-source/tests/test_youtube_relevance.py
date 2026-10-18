@@ -16,9 +16,9 @@ def entry(n):return {'kind':'youtube#video','id':ident(n)}
 
 class Relevance(unittest.TestCase):
  def api(self):self.assertIsNotNone(relevance,'No category taxonomy policy');return relevance
- def test_conservative_families_leave_mixed_and_coarse_interests_unchanged(self):
+ def test_conservative_families_recognize_subjects_but_leave_mixed_interests_unchanged(self):
   p=self.api()
-  for label,want in [('Start a Music Mix','music'),('Guitar and more','music'),('Pop Music','music'),('Clash of Clans','gaming'),('MOBA games','gaming'),('Basketball','sports'),('History',None),('Science',None),('New to you',None),('Game shows',None)]:
+  for label,want in [('Start a Music Mix','music'),('Guitar and more','music'),('Pop Music','music'),('Clash of Clans','gaming'),('MOBA games','gaming'),('Basketball','sports'),('History','history'),('Science','science'),('New to you',None),('Game shows',None)]:
    with self.subTest(label=label):self.assertEqual(p.family(label),want)
  def test_music_rejects_politics_philosophy_but_accepts_music_under_entertainment(self):
   p=self.api();self.assertTrue(p.matches(metadata(1),'music'));self.assertTrue(p.matches(metadata(2,'24',['Rock_music']),'music'))
@@ -82,7 +82,7 @@ class ProviderRelevance(unittest.TestCase):
   with patch.object(provider,'_identity',return_value=runtime.identity),patch.object(provider,'_resolve',side_effect=self.resolve):rows=provider._load_home(runtime,client,lambda:True)
   self.assertEqual(rows[0]['local_items'],[video(1)]);self.assertIsNone(rows[0]['youtube_fallback']);self.assertIsNone(rows[0]['youtube_cursor'])
  def test_initial_taxonomy_requests_only_resolved_topical_videos(self):
-  raw=response(shelf('Music Mix',[ident(1),ident(2),ident(3)]),shelf('History',[ident(4)]));raw['contents']['tvBrowseRenderer']['content']['tvSurfaceContentRenderer']['content']['sectionListRenderer']['continuations']=[]
+  raw=response(shelf('Music Mix',[ident(1),ident(2),ident(3)]),shelf('New to you',[ident(4)]));raw['contents']['tvBrowseRenderer']['content']['tvSurfaceContentRenderer']['content']['sectionListRenderer']['continuations']=[]
   client=self.client(raw,{ident(1):metadata(1),ident(3):metadata(3,'25',['Politics'])});calls=[];fetch=client.get_videos
   def checked(ids,**kwargs):calls.extend(ids);return fetch(ids,**kwargs)
   client.get_videos=checked;runtime=self.runtime(client)

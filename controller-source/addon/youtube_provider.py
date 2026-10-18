@@ -11,7 +11,7 @@ from collections import OrderedDict
 from youtube_core import video_id
 from youtube_home import parse_shelves,parse_horizontal,section_continuation,local_rows,merge_shelves,MAX_GROUPS
 from youtube_artwork import cached_fit_cards
-from youtube_relevance import family,matches,taxonomy
+from youtube_relevance import family,matches,taxonomy,matches_title
 
 _lock=threading.RLock()
 _runtime=None
@@ -148,7 +148,7 @@ def _relevance_metadata(runtime,ids,current):
 def _relevant_entries(runtime,entries,wanted,current):
     if not wanted:return entries
     metadata=_relevance_metadata(runtime,[x['id'] for x in entries if x.get('kind')=='youtube#video'],current)
-    return [x for x in entries if x.get('filetype')=='directory' or matches(metadata.get(x.get('id')),wanted)]
+    return [x for x in entries if (matches_title(x.get('title') or x.get('label'),wanted) if x.get('filetype')=='directory' else matches(metadata.get(x.get('id')),wanted))]
 
 def load_shelf_page(cursor,current=lambda:True):
     if not current():raise RuntimeError('YouTube request retired')
