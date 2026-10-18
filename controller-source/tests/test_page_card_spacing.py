@@ -39,7 +39,7 @@ class PageCardSpacing(unittest.TestCase):
     controls=list(g.iter('control'))
     def icon(direction):return next(c for c in controls if c.findtext('texture')=='$INFO[ListItem.Art(navigation)]' and visible(c,parents,direction))
     prev,next_=icon('previous'),icon('next')
-    pl=next(c for c in controls if c.findtext('label')=='Previous');nl=next(c for c in controls if c.findtext('label')=='Next')
+    pl=next(c for c in controls if c.findtext('label')=='Previous');nl=next(c for c in controls if c.findtext('label')==('$INFO[ListItem.Label]' if l.get('condition')=='String.IsEqual(Window.Property(youtubeBrowser),true)' else 'Next'))
     pa=next(c for c in controls if c.findtext('texture')=='arrow-left.png');na=next(c for c in controls if c.findtext('texture')=='arrow-right.png')
     self.assertLessEqual(number(pl,'left')+number(pl,'width'),number(prev,'left'))
     self.assertLessEqual(number(next_,'left')+number(next_,'width'),number(nl,'left'),'Next lantern must be left of its label')

@@ -17,6 +17,10 @@ def _fetch_feed(path):
     from live_review import get_list
     return get_list(path)
 
+def _focus_id():
+    from live_review import gui_labels
+    return int(gui_labels(['System.CurrentControlId'])['System.CurrentControlId'] or '0')
+
 def _token(cursor):
     return (cursor or {}).get('continuation') or (cursor or {}).get('path')
 
@@ -155,41 +159,73 @@ class YouTubeRows:
                 if getattr(self,'youtube_job',None) is update['job']:self.youtube_job=None;self.youtube_refreshing=False
                 return False
             kind=update['kind'];self.youtube_update=None
-            if kind.startswith('refresh'):
-                self.youtube_refreshing=False;self.setProperty('youtubeRefreshLabel','Refresh recommendations')
-                if kind=='refresh':
-                    self.stop_preview();self.youtube_pages={};self.generation+=1
-                    self.youtube_home_cache={'identity':update['identity'],'time':time.monotonic(),'rows':copy.deepcopy(update['shelves'])}
-                    self.set_rows(update['rows']);self.setFocusId(900)
-                    self.setProperty('notice','YouTube recommendations refreshed')
-                else:self.setProperty('notice','Could not refresh YouTube. Current recommendations remain available; try Refresh recommendations again.')
-            else:
-                n=update['n'];page=update['page'];previous_count=len(page['items']);control=self.getControl(900+n);position=control.getSelectedPosition()
-                anchor=self.rows[n][position] if 0<=position<len(self.rows[n]) else None
-                if kind=='page_error':page['error']=True
+            try:
+                if kind.startswith('refresh'):
+                    self.youtube_refreshing=False;self.setProperty('youtubeRefreshLabel','Refresh recommendations')
+                    if kind=='refresh':
+                        self.stop_preview();self.youtube_pages={};self.generation+=1
+                        self.youtube_home_cache={'identity':update['identity'],'time':time.monotonic(),'rows':copy.deepcopy(update['shelves'])}
+                        self.set_rows(update['rows']);self.setFocusId(900)
+                        self.setProperty('notice','YouTube recommendations refreshed')
+                    else:self.setProperty('notice','Could not refresh YouTube. Current recommendations remain available; try Refresh recommendations again.')
                 else:
-                    page.update(items=update['items'],cursor=update['cursor'],seen=update['seen'],error=False)
-                    for definition in self.page_definitions:
-                        if definition.get('path')==update['path']:
-                            definition['local_items']=copy.deepcopy(page['items']);definition['youtube_cursor']=copy.deepcopy(page['cursor'])
-                    self.row_cache.pop(self.row_offset+n,None)
-                files=copy.deepcopy(page['items'])+([_more_card(page['error'])] if page['cursor'] else [])
-                if anchor and anchor.get('_page_control')=='previous':files.insert(0,copy.deepcopy(anchor))
-                if update.get('replace'):selected=0
-                elif kind=='page' and anchor and anchor.get('_youtube_more'):
-                    # Enter the appended choices instead of following Next to
-                    # its new trailing position and immediately paging again.
-                    selected=min(previous_count,max(0,len(files)-1))
-                elif anchor:selected=next((i for i,x in enumerate(files) if x.get('file')==anchor.get('file')),min(position,max(0,len(files)-1)))
-                else:selected=min(position,max(0,len(files)-1))
-                # apply_row runs the same presentation pipeline as initial load.
-                # Preserve this page object/cursor while its native vector rebinds.
-                label=next((d['label'] for d in self.page_definitions if d.get('path')==update['path']),self.getProperty('row'+str(n)))
-                self.apply_row(n,files,label,selected,update_selected=False)
-                self.youtube_pages[update['path']]=page
-                self.setProperty('rowMessage'+str(n),'Could not load more. Select Retry.' if kind=='page_error' else '')
-                self.focus_key=None
-            self.youtube_job=None
+                    n=update['n'];page=update['page'];previous_count=len(page['items']);control=self.getControl(900+n);position=control.getSelectedPosition()
+                    anchor=self.rows[n][position] if 0<=position<len(self.rows[n]) else None
+                    prior_page=copy.deepcopy(page);prior_rows=self.rows[n]
+                    if kind=='page_error':page['error']=True
+                    else:
+                        page.update(items=update['items'],cursor=update['cursor'],seen=update['seen'],error=False)
+                    files=copy.deepcopy(page['items'])+([_more_card(page['error'])] if page['cursor'] else [])
+                    if anchor and anchor.get('_page_control')=='previous':files.insert(0,copy.deepcopy(anchor))
+                    if update.get('replace'):selected=0
+                    elif kind=='page' and anchor and anchor.get('_youtube_more'):
+                        # Enter the appended choices instead of following Next to
+                        # its new trailing position and immediately paging again.
+                        selected=min(previous_count,max(0,len(files)-1))
+                    elif anchor:selected=next((i for i,x in enumerate(files) if x.get('file')==anchor.get('file')),min(position,max(0,len(files)-1)))
+                    else:selected=min(position,max(0,len(files)-1))
+                    # apply_row runs the same presentation pipeline as initial load.
+                    # Preserve this page object/cursor while its native vector rebinds.
+                    label=next((d['label'] for d in self.page_definitions if d.get('path')==update['path']),self.getProperty('row'+str(n)))
+                    focus=self.getFocusId();lifetime=self.window_lifetime;generation=self.generation
+                    definitions=[(d,'youtube_cursor' in d,copy.deepcopy(d.get('youtube_cursor'))) for d in self.page_definitions if d.get('path')==update['path']]
+                    for definition,_,_ in definitions:definition['youtube_cursor']=copy.deepcopy(page['cursor'])
+                    try:
+                        self.apply_row(n,files,label,selected,update_selected=False)
+                    except RuntimeError:
+                        # Cursor consumption commits only after native publication.
+                        # Keep the old window retryable even for a terminal response.
+                        page.clear();page.update(prior_page);page['error']=True
+                        for definition,present,cursor in definitions:
+                            if present:definition['youtube_cursor']=cursor
+                            else:definition.pop('youtube_cursor',None)
+                        self.youtube_pages[update['path']]=page;self.rows[n]=prior_rows
+                        retry=copy.deepcopy(page['items'])+([_more_card(True)] if page['cursor'] else [])
+                        if anchor and anchor.get('_page_control')=='previous':retry.insert(0,copy.deepcopy(anchor))
+                        try:self.apply_row(n,retry,label,min(position,max(0,len(retry)-1)),update_selected=False)
+                        except RuntimeError:pass
+                        self.youtube_pages[update['path']]=page
+                        self.setProperty('rowMessage'+str(n),'Could not load more. Select Retry.')
+                        raise
+                    finally:
+                        # Kodi queues reset/add/select. The dispatched read observes
+                        # the finished rebind rather than the old native focus.
+                        def focus_current():
+                            return (self.alive and self.window_lifetime is lifetime and self.generation==generation
+                                    and self.section=='YouTube' and self.mode=='home' and self.paths[n]==update['path'])
+                        try:
+                            if focus==900+n and focus_current() and _focus_id()==0 and focus_current():self.setFocusId(900+n)
+                        except RuntimeError:pass # A closed native window must not discard a successful page.
+                    self.youtube_pages[update['path']]=page
+                    if kind=='page':
+                        for definition in self.page_definitions:
+                            if definition.get('path')==update['path']:
+                                definition['local_items']=copy.deepcopy(page['items']);definition['youtube_cursor']=copy.deepcopy(page['cursor'])
+                        self.row_cache.pop(self.row_offset+n,None)
+                    self.setProperty('rowMessage'+str(n),'Could not load more. Select Retry.' if kind=='page_error' else '')
+                    self.focus_key=None
+            finally:
+                if getattr(self,'youtube_job',None) is update['job']:self.youtube_job=None
         return True
 
     def prefetch_youtube_row(self):
@@ -200,9 +236,9 @@ class YouTubeRows:
         n=focus-900;position=self.getControl(focus).getSelectedPosition()
         if position<max(0,len(self.rows[n])-6):return
         page=getattr(self,'youtube_pages',{}).get(self.paths[n])
-        if page and len(page['items'])>=MAX_ROW_ITEMS:return # Explicit Next keeps memory bounded.
         explicit=self.getProperty('youtubeRowEnd')=='true'
         if explicit:self.setProperty('youtubeRowEnd','false')
+        if page and len(page['items'])>=MAX_ROW_ITEMS and not explicit:return # Automatic prefetch stays bounded.
         self.request_youtube_more(n,explicit=explicit)
 
     def youtube_refresh_navigation(self):

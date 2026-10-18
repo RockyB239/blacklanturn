@@ -83,4 +83,14 @@ class YouTubeSection(unittest.TestCase):
   self.assertEqual(tile.properties.get('youtubeFolder'),'true');self.assertEqual(tile.art.get('youtubefolder'),'shorts.png');self.assertEqual(tile.path,folder['file']);self.assertEqual(folder,before)
   self.assertEqual(render(video).properties.get('youtubeFolder'),'false')
 
+ def test_playlist_thumbnail_uses_full_card_without_changing_folder_navigation(self):
+  from native_list_fixture import media_functions
+  render=media_functions()['media_item']
+  item={'file':'plugin://plugin.video.youtube/playlist/PL_real/','filetype':'directory','label':'StarTalk Podcast',
+        'art':{'thumb':'https://i.ytimg.com/vi/Abc_123-Xyz/hq720.jpg'}}
+  before=copy.deepcopy(item);card=render(item)
+  self.assertEqual(card.properties.get('youtubeFolder'),'false','Real playlist image must not use the centered icon layout')
+  self.assertEqual(card.properties.get('cardArtKind'),'landscape');self.assertEqual(card.art['landscape'],item['art']['thumb'])
+  self.assertEqual(card.getPath(),item['file']);self.assertEqual(item,before)
+
 if __name__=='__main__':unittest.main()

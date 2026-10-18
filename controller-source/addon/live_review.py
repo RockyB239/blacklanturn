@@ -109,7 +109,8 @@ def media_item(data):
     if selected_art['kind']=='square':art['square']=selected_art['image']
     if data.get('_page_control') and selected_art['kind']=='text':selected_art['kind']='paging'
     li.setProperty('pageControl',data.get('_page_control',''))
-    youtube_folder=is_youtube(data) and data.get('filetype')=='directory' and not data.get('_page_control')
+    youtube_folder=(is_youtube(data) and data.get('filetype')=='directory' and not data.get('_page_control')
+                    and not selected_art['image'].startswith(('http://','https://')))
     li.setProperty('youtubeFolder','true' if youtube_folder else 'false')
     if youtube_folder:art['youtubefolder']=selected_art['image'] or 'video-addons.png'
     li.setProperty('cardArtKind',selected_art['kind'])
@@ -630,6 +631,7 @@ class LiveReview(YouTubeBrowser,xbmcgui.WindowXML):
                         entry=dict(previous,history=self.histories[n],position=restored_position(previous['files'],anchor,position))
                     self.row_cache[index]=entry
         trim_row_cache(self.row_cache,offset)
+        self.setProperty('youtubeRowEnd','false')
         self.row_states={};self.failed_paths={};self.path_tokens={};self.loading_paths={};self.snapshot_rows={}
         for n in range(2):self.setProperty('rowState'+str(n),'');self.setProperty('rowMessage'+str(n),'')
         self.stop_preview();self.selected=None;self.generation+=1;generation=self.generation

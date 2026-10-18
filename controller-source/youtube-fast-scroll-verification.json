@@ -1,0 +1,56 @@
+{
+  "controller": "0.1.79",
+  "status": "development-candidate-three-device-validated",
+  "manifest": "manifest79.json",
+  "candidate_zip_sha256": "86262284a768af1e38112a49ddd0472fd1585492848aee8bf60e08bd7df5c296",
+  "root_causes": [
+    "Public playlist thumbnails were rendered in the small local navigation icon layout.",
+    "Queued native row resets could drop focus after the synchronous check.",
+    "Right-at-cap returned before consuming the explicit continuation signal.",
+    "A failed native publication could retain the global job or consume its cursor before publication succeeded.",
+    "The paging graphic hardcoded Next while the item caption said Retry."
+  ],
+  "tests": {
+    "controller": 605,
+    "installer_release": 193,
+    "device_validation": 16
+  },
+  "independent_review": "Approved after red-green cursor-rollback and ownership-after-dispatch regressions. All309 source hashes verified.",
+  "distribution": "All three devices now exact candidate79. Published build1.1.9 and Installer1.0.15 remain pinned to manifest76; no release promotion performed.",
+  "fire_stick": {
+    "passed": true,
+    "home_rows_tested": 17,
+    "continuation_batches": 27,
+    "real_retry_after_injected_native_publication_failure": true,
+    "native_full_card_playlist_items": 5,
+    "ordinary_restart_source_exact": true,
+    "fast_scroll_baseline_focus_lost": true,
+    "repaired_fast_scroll_cycles_passed": 8,
+    "protected_files_preserved": 13,
+    "owned_staging_removed": true,
+    "artwork_screenshot_inspected": true
+  },
+  "mac": {
+    "passed": true,
+    "home_rows_tested": 17,
+    "continuation_batches": 26,
+    "real_retry_after_injected_native_publication_failure": true,
+    "native_full_card_playlist_items": 5,
+    "ordinary_restart_source_exact": true,
+    "protected_files_preserved": 27,
+    "initial_provider_response_without_continuation": "One initial Strategy video games response lacked continuation content and correctly showed Retry. The complete fresh Home rerun passed; recovery of that exact opaque server cursor was not established."
+  },
+  "apple_tv": {
+    "passed": true,
+    "home_rows_tested": 17,
+    "continuation_batches": 26,
+    "real_retry_after_injected_native_publication_failure": true,
+    "native_full_card_playlist_items": 8,
+    "ordinary_restart_source_exact": true,
+    "protected_files_preserved": 24,
+    "persistent_preference_entries_preserved": 21,
+    "owned_staging_removed": true,
+    "screenshot_capture": false
+  },
+  "limits": "Bounded live signed-in Home validation. Finite provider shelves cannot supply additional items without a cursor. YouTube server failures can still require Retry or Refresh recommendations. This is not a long-duration soak or a new playback/performance benchmark."
+}

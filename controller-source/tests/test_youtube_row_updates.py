@@ -50,6 +50,7 @@ class RowUpdates(unittest.TestCase):
   class Thread:
    def __init__(s,target,**kwargs):self.jobs.append(target)
    def start(s):pass
+  focus_patch=patch.object(mod,'_focus_id',lambda:self.w.getFocusId());focus_patch.start();self.addCleanup(focus_patch.stop)
   self.thread_patch=patch.object(mod.threading,'Thread',Thread);self.thread_patch.start();self.addCleanup(self.thread_patch.stop)
   return self.w
  def ready(self,w):
@@ -187,5 +188,74 @@ class RowUpdates(unittest.TestCase):
    w.request_youtube_more(0,explicit=True);self.jobs.pop()()
   w.apply_youtube_updates()
   self.assertEqual(w.rows[0][self.controls[900].position]['file'],video(3)['file'])
+
+
+ def test_right_at_cap_requests_bounded_next_and_consumes_end_signal(self):
+  w=self.window();self.ready(w);page=w.youtube_pages[w.paths[0]]
+  page['items']=[video(n) for n in range(1,151)];w.rows[0]=page['items']+[mod._more_card()];self.controls[900].position=150
+  self.props['youtubeRowEnd']='true';w.prefetch_youtube_row()
+  self.assertEqual(self.props['youtubeRowEnd'],'false')
+  self.assertEqual(len(self.jobs),1)
+
+ def test_native_publication_failure_releases_job_so_retry_can_run(self):
+  w=self.window();self.ready(w)
+  with patch.object(mod,'_fetch_feed',return_value=[video(3),{'file':BASE+'/special/recommendations/?page=3&page_token=third','filetype':'directory','label':'Next page: 3'}]):w.request_youtube_more(0);self.jobs.pop()()
+  apply=w.apply_row
+  def failed(*a,**k):raise RuntimeError('native vector unavailable')
+  w.apply_row=failed
+  with self.assertRaises(RuntimeError):w.apply_youtube_updates()
+  self.assertIsNone(w.youtube_job);self.assertIsNone(w.youtube_update)
+  w.apply_row=apply;w.request_youtube_more(0,explicit=True)
+  self.assertEqual(len(self.jobs),1)
+
+ def test_rebinding_restores_lost_row_focus_without_stealing_intentional_navigation(self):
+  for before,after,expected in [(900,0,900),(600,600,600),(900,600,600)]:
+   with self.subTest(before=before,after=after):
+    w=self.window();self.ready(w);focus=[before];w.getFocusId=lambda:focus[0];w.setFocusId=lambda n:focus.__setitem__(0,n)
+    apply=w.apply_row
+    def rebind(*a,**k):apply(*a,**k);focus[0]=after
+    w.apply_row=rebind
+    with patch.object(mod,'_fetch_feed',return_value=[video(3)]):w.request_youtube_more(0);self.jobs.pop()()
+    w.apply_youtube_updates();self.assertEqual(focus[0],expected)
+
+ def test_failed_terminal_publication_restores_cursor_and_native_retry_before_retrying(self):
+  w=self.window();self.ready(w);before=copy.deepcopy(w.rows[0][:2]);cursor=copy.deepcopy(w.youtube_pages[w.paths[0]]['cursor'])
+  with patch.object(mod,'_fetch_feed',return_value=[video(3)]):w.request_youtube_more(0);self.jobs.pop()()
+  apply=w.apply_row;fail=[True]
+  def partial(n,files,*a,**k):
+   apply(n,files,*a,**k)
+   if fail[0]:fail[0]=False;raise RuntimeError('native vector rejected')
+  w.apply_row=partial
+  with self.assertRaises(RuntimeError):w.apply_youtube_updates()
+  page=w.youtube_pages[w.paths[0]]
+  self.assertEqual(page['cursor'],cursor);self.assertEqual(page['items'],before)
+  self.assertEqual(w.rows[0][:-1],before);self.assertEqual(w.rows[0][-1]['label'],'Retry')
+  self.assertNotIn('youtube_cursor',w.page_definitions[0]);self.assertIsNone(w.youtube_job)
+  with patch.object(mod,'_fetch_feed',return_value=[video(3)]):w.request_youtube_more(0,explicit=True);self.jobs.pop()()
+  w.apply_youtube_updates();self.assertEqual(w.rows[0],before+[video(3)])
+
+ def test_focus_check_waits_for_queued_native_reset_before_restoring(self):
+  w=self.window();self.ready(w);focus=[900];w.getFocusId=lambda:focus[0];w.setFocusId=lambda n:focus.__setitem__(0,n)
+  reads=[]
+  def dispatched():reads.append(True);focus[0]=0;return 0
+  with patch.object(mod,'_fetch_feed',return_value=[video(3)]):w.request_youtube_more(0);self.jobs.pop()()
+  with patch.object(mod,'_focus_id',dispatched,create=True):w.apply_youtube_updates()
+  self.assertEqual(reads,[True]);self.assertEqual(focus[0],900)
+
+ def test_focus_dispatch_failure_does_not_discard_successfully_published_items(self):
+  w=self.window();self.ready(w)
+  with patch.object(mod,'_fetch_feed',return_value=[video(3)]):w.request_youtube_more(0);self.jobs.pop()()
+  with patch.object(mod,'_focus_id',side_effect=RuntimeError('closed native window')):
+   try:w.apply_youtube_updates()
+   except RuntimeError:pass
+  self.assertEqual(w.page_definitions[0].get('local_items'),[video(1),video(2),video(3)])
+  self.assertIsNone(w.page_definitions[0]['youtube_cursor'])
+
+ def test_focus_repair_rechecks_owner_after_native_dispatch(self):
+  w=self.window();self.ready(w);restored=[];w.setFocusId=lambda n:restored.append(n)
+  with patch.object(mod,'_fetch_feed',return_value=[video(3)]):w.request_youtube_more(0);self.jobs.pop()()
+  def dispatch():w.generation+=1;return 0
+  with patch.object(mod,'_focus_id',dispatch):w.apply_youtube_updates()
+  self.assertEqual(restored,[])
 
 if __name__=='__main__':unittest.main()
