@@ -3,6 +3,7 @@ import hashlib,re
 from copy import deepcopy
 from urllib.parse import urlencode,urlsplit,parse_qs
 from youtube_core import BASE,video_id
+from youtube_relevance import family,matches
 MAX_GROUPS=16
 
 def _text(value):
@@ -67,16 +68,22 @@ def parse_shelves(payload):
             if len(rows)>=MAX_GROUPS:return rows
     return rows
 
-def local_rows(shelves,items):
+def local_rows(shelves,items,metadata=None):
     rows=[]
     for shelf in shelves:
-        videos=[deepcopy(x if x.get('filetype')=='directory' else items[x['id']]) for x in shelf['items'] if x.get('filetype')=='directory' or x['id'] in items]
+        wanted=family(shelf['label'])
+        selected=[x for x in shelf['items'] if x.get('filetype')=='directory' or (x['id'] in items and (not wanted or metadata is None or matches(metadata.get(x['id']),wanted)))]
+        videos=[deepcopy(x if x.get('filetype')=='directory' else items[x['id']]) for x in selected]
         if not videos:continue
         key=hashlib.sha256((shelf['label']+'\0'+','.join(x['id'] for x in shelf['items'])).encode()).hexdigest()[:20]
-        seeds=list(dict.fromkeys(ident for ident in (video_id(x) for x in videos) if ident))[:6]
+        seeds=list(dict.fromkeys(ident for ident in (video_id(x) for x in videos) if ident))[:6] if not wanted or metadata is not None else []
         fallback={'related_seeds':seeds,'seed_index':0} if seeds else None
+        cursor=deepcopy(shelf.get('youtube_cursor') or fallback)
+        if wanted:
+            if cursor:cursor['relevance_family']=wanted
+            if fallback:fallback['relevance_family']=wanted
         rows.append({'label':shelf['label'],'path':BASE+'/special/recommendations?'+urlencode({'bl_shelf':key}),'local_items':videos,
-                     'youtube_cursor':deepcopy(shelf.get('youtube_cursor') or fallback),'youtube_fallback':fallback,'youtube_category':True})
+                     'youtube_cursor':cursor,'youtube_fallback':fallback,'youtube_category':True,'relevance_family':wanted})
     return rows
 
 def merge_shelves(previous,incoming):

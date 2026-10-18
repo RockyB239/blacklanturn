@@ -7,9 +7,11 @@ import sys,threading,atexit,time
 from contextlib import contextmanager
 from types import SimpleNamespace
 from pathlib import Path
+from collections import OrderedDict
 from youtube_core import video_id
 from youtube_home import parse_shelves,parse_horizontal,section_continuation,local_rows,merge_shelves,MAX_GROUPS
 from youtube_artwork import cached_fit_cards
+from youtube_relevance import family,matches,taxonomy
 
 _lock=threading.RLock()
 _runtime=None
@@ -114,6 +116,40 @@ def _resolve_entries(runtime,entries,current):
         resolved.update({video_id(x):x for x in _resolve(runtime,batch,current)})
     return [x if x.get('filetype')=='directory' else resolved[x['id']] for x in entries if x.get('filetype')=='directory' or x['id'] in resolved]
 
+class RelevanceUnavailable(RuntimeError):pass
+
+def _relevance_metadata(runtime,ids,current):
+    """One identity-owned public taxonomy cache, bounded to512 entries/one hour."""
+    def guard():
+        if not current() or _identity()!=runtime.identity:raise RuntimeError('YouTube request retired')
+    guard();now=time.monotonic();cache=getattr(runtime,'_relevance_cache',None)
+    if cache is None:cache=runtime._relevance_cache=OrderedDict()
+    for key in list(cache):
+        if now-cache[key][0]>=3600:del cache[key]
+    ids=list(dict.fromkeys(ids));result={key:cache[key][1] for key in ids if key in cache};missing=[key for key in ids if key not in result]
+    client=runtime.provider.get_client(runtime.context)
+    for start in range(0,len(missing),50):
+        guard();batch=missing[start:start+50]
+        try:raw=client.get_videos(batch,_part='snippet,topicDetails',max_results=50,notify=False,raise_exc=False)
+        except Exception as exc:
+            guard();raise RelevanceUnavailable('YouTube category metadata unavailable') from exc
+        guard()
+        if not isinstance(raw,dict) or 'error' in raw or not isinstance(raw.get('items'),list):raise RelevanceUnavailable('YouTube category metadata unavailable')
+        found={x.get('id'):taxonomy(x) for x in raw['items'] if isinstance(x,dict) and x.get('id') in batch}
+        for key in batch:
+            # A valid videos response can omit private/deleted entries. Unknown
+            # classifications fail closed per card, without a negative cache.
+            result[key]=found.get(key)
+            if result[key] is None:continue
+            cache[key]=(time.monotonic(),result[key]);cache.move_to_end(key)
+            while len(cache)>512:cache.popitem(last=False)
+    guard();return result
+
+def _relevant_entries(runtime,entries,wanted,current):
+    if not wanted:return entries
+    metadata=_relevance_metadata(runtime,[x['id'] for x in entries if x.get('kind')=='youtube#video'],current)
+    return [x for x in entries if x.get('filetype')=='directory' or matches(metadata.get(x.get('id')),wanted)]
+
 def load_shelf_page(cursor,current=lambda:True):
     if not current():raise RuntimeError('YouTube request retired')
     with _session(current) as runtime:
@@ -124,7 +160,9 @@ def load_shelf_page(cursor,current=lambda:True):
         if not isinstance(raw,dict) or 'horizontalListContinuation' not in raw.get('continuationContents',{}):
             raise RuntimeError('YouTube shelf response unavailable')
         entries,more=parse_horizontal(raw,cursor.get('visitor'))
-        return _resolve_entries(runtime,entries,current),more
+        wanted=cursor.get('relevance_family')
+        if more and wanted:more['relevance_family']=wanted
+        return _resolve_entries(runtime,_relevant_entries(runtime,entries,wanted,current),current),more
 
 def load_related_page(cursor,current=lambda:True):
     if not current():raise RuntimeError('YouTube request retired')
@@ -137,11 +175,13 @@ def load_related_page(cursor,current=lambda:True):
         if not current():raise RuntimeError('YouTube request retired')
         if raw=={}:raw={'items':[]} # Native fallback clients exhausted this seed.
         if not isinstance(raw,dict) or not isinstance(raw.get('items'),list):raise RuntimeError('Related videos unavailable')
-        files=_resolve_entries(runtime,raw['items'][:100],current)
+        files=_resolve_entries(runtime,_relevant_entries(runtime,raw['items'][:100],cursor.get('relevance_family'),current),current)
         token=raw.get('nextPageToken')
         if token and token!=cursor.get('page_token'):
             more=dict(cursor,page_token=token,click_tracking=raw.get('clickTracking'),visitor=raw.get('visitorData'))
-        elif index+1<len(seeds):more={'related_seeds':list(seeds),'seed_index':index+1}
+        elif index+1<len(seeds):
+            more={'related_seeds':list(seeds),'seed_index':index+1}
+            if cursor.get('relevance_family'):more['relevance_family']=cursor['relevance_family']
         else:more=None
         return files,more
 
@@ -168,7 +208,13 @@ def _load_home(runtime,client,current):
     for start in range(0,len(entries),40):
         if not current():return []
         items.extend(_resolve(runtime,dict(entries[start:start+40]),current))
-    return local_rows(shelves,{video_id(x):x for x in items})
+    resolved={video_id(x):x for x in items}
+    topical={x['id'] for shelf in shelves if family(shelf['label']) for x in shelf['items'] if x.get('kind')=='youtube#video' and x['id'] in resolved}
+    metadata=None
+    if topical:
+        try:metadata=_relevance_metadata(runtime,sorted(topical),current)
+        except RelevanceUnavailable:pass # Keep native initial shelves; unverified cards cannot seed extensions.
+    return local_rows(shelves,resolved,metadata)
 
 def refresh_watch_items(files,current=lambda:True):
     from copy import deepcopy

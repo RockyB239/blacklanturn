@@ -9,6 +9,14 @@
     "sync_source_playback": "Trakt",
     "trakt_scrobbling": "true"
   },
+  "addon_data/plugin.video.youtube/settings.xml": {
+    "kodion.mpd.quality.selection": "6",
+    "kodion.mpd.stream.select": "1",
+    "kodion.mpd.stream.features": "avc1,mp4a,vtt,filter,alt_sort,vp9",
+    "kodion.video.quality.isa": "true",
+    "kodion.mpd.videos": "true",
+    "kodion.video.stream.select": "1"
+  },
   "addon_data/plugin.video.umbrella/settings.xml": {
     "indicators.alt": "1",
     "indicators": "Trakt",

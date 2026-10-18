@@ -5,14 +5,14 @@ ROOT=Path(__file__).resolve().parents[1]
 class RepairedRelease(unittest.TestCase):
  def test_controller_has_reviewed_repair_and_preview_safety(self):
   addon=ROOT/'controller-source/addon'
-  self.assertEqual(ET.parse(addon/'addon.xml').getroot().get('version'),'0.1.80')
+  self.assertEqual(ET.parse(addon/'addon.xml').getroot().get('version'),'0.1.81')
   self.assertTrue((addon/'page_ahead.py').is_file())
-  manifest=json.loads((ROOT/'controller-source/manifest80.json').read_text())
-  self.assertEqual(manifest['controller'],'0.1.80')
+  manifest=json.loads((ROOT/'controller-source/manifest81.json').read_text())
+  self.assertEqual(manifest['controller'],'0.1.81')
   self.assertEqual(manifest['files'],{str(p.relative_to(addon)):hashlib.sha256(p.read_bytes()).hexdigest() for p in addon.rglob('*') if p.is_file() and '__pycache__' not in p.parts and p.suffix not in ('.pyc','.pyo')})
  def test_managed_provider_and_installer_require_repaired_payload(self):
   source=ROOT/'installer-source/plugin.program.blacklanturninstaller'
-  self.assertEqual(ET.parse(source/'addon.xml').getroot().get('version'),'1.0.15')
+  self.assertEqual(ET.parse(source/'addon.xml').getroot().get('version'),'1.0.16')
   manifest=json.loads((source/'resources/managed-helper.json').read_text())
   self.assertEqual(manifest['search_patch'],'search-batch-1')
   path='resources/tmdbhelper/lib/items/directories/tmdb/lists_search.py'

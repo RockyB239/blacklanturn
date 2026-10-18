@@ -10,14 +10,14 @@ from test_youtube_continuation import video
 class RelatedRows(unittest.TestCase):
  def test_finite_shelf_gets_row_specific_related_cursor_without_touching_cards(self):
   items={'00000000001':video(1),'00000000002':video(2)};before=copy.deepcopy(items)
-  result=home.local_rows([{'label':'Guitar and more','items':[{'id':x} for x in items],'youtube_cursor':None}],items)[0]
+  result=home.local_rows([{'label':'Guitar and more','items':[{'id':x} for x in items],'youtube_cursor':None}],items,{x:{'snippet':{'categoryId':'10'}} for x in items})[0]
   self.assertEqual(result['local_items'],list(items.values()));self.assertEqual(items,before)
   self.assertIsNotNone(result['youtube_cursor']);self.assertEqual(result['youtube_cursor'].get('related_seeds'),['v0000000001','v0000000002'])
   self.assertEqual(result['youtube_cursor'],result['youtube_fallback'])
  def test_native_shelf_keeps_its_real_cursor_before_related_extension(self):
   cursor={'continuation':'original-token'}
-  result=home.local_rows([{'label':'Guitar','items':[{'id':'00000000001'}],'youtube_cursor':cursor}],{'00000000001':video(1)})[0]
-  self.assertEqual(result['youtube_cursor'],cursor);self.assertTrue(result.get('youtube_fallback'))
+  result=home.local_rows([{'label':'Guitar','items':[{'id':'00000000001'}],'youtube_cursor':cursor}],{'00000000001':video(1)},{'00000000001':{'snippet':{'categoryId':'10'}}})[0]
+  self.assertEqual(result['youtube_cursor'],dict(cursor,relevance_family='music'));self.assertTrue(result.get('youtube_fallback'))
  def test_related_loader_uses_current_seed_then_native_token_and_moves_to_next_seed(self):
   method=getattr(provider,'load_related_page',None);self.assertTrue(callable(method),'Related shelf loader missing')
   calls=[];raw={'kind':'youtube#videoListResponse','items':[],'nextPageToken':'next'}

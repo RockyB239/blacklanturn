@@ -48,6 +48,31 @@ def verify_stall_acceptance(mac,fire,manifest):
  assert len(native['youtube_trials'])==2 and all(t['available'] and t['adaptive_groups']>0 and all(t['main_row_counts']) for t in native['youtube_trials'])
  assert fire['apple_tv_accessed'] is False
 
+def verify_release110_acceptance(receipt,manifest):
+ """Fresh controller 81 proof; historical 75/76 receipts are provenance only."""
+ assert receipt.get('controller')==manifest.get('controller')=='0.1.81'
+ assert receipt.get('files')==manifest['files'],'Release 1.1.10 source differs from native-tested controller'
+ assert receipt.get('passed') is True,'Release 1.1.10 native acceptance incomplete'
+ devices=receipt.get('devices',{})
+ assert set(devices)=={'mac','fire','apple_tv'},'Fresh native acceptance required on all three devices'
+ for name,d in devices.items():
+  for key in ('source_exact','ordinary_restart','authorization_grants_preserved','settings_preserved','youtube_history_preserved'):
+   assert d.get(key) is True,'Missing '+name+' acceptance: '+key
+  assert d.get('continuation_rows',0)>=3 and d.get('continuation_batches',0)>=3,'Continuation rows not exercised on '+name
+  preview=d.get('inline_preview',{})
+  assert 42<=preview.get('media_seconds',0)<=47,'45-second preview not verified on '+name
+  assert 0<preview.get('max_height',0)<=720 and preview.get('codec')=='h264','Preview stream not capped at 720p H264 on '+name
+  assert preview.get('fade') is True and preview.get('same_hover_no_restart') is True,'Preview fade or same-hover completion missing on '+name
+  assert 0<=preview.get('max_probe_gap_seconds',float('inf'))<5,'Preview continuity not verified on '+name
+  full=d.get('fullscreen',{})
+  assert full.get('automatic') is True and full.get('ceiling')==2160 and 720<full.get('selected_height',0)<=2160,'Automatic full playback quality not verified on '+name
+  category=d.get('category_relevance',{})
+  assert category.get('music_rows_checked',0)>=1 and category.get('nonmusic_in_added_music_choices')==0,'Music relevance not verified on '+name
+ fire=devices['fire'];moments=fire.get('cancel_moments',[])
+ assert [m.get('moment') for m in moments]==['queued','opening','playing'],'Missing Fire cancellation stage'
+ assert all(m.get('no_late_play') is True and m.get('normal_core_restored') is True for m in moments),'Fire cancellation leaves late playback or decoder override'
+ assert fire.get('normal_clip_decoder')=='amc-h264','Normal Fire hardware decoding not verified'
+
 def verify_playback_defaults(z):
  gui={n.get('id'):n.text or '' for n in ET.fromstring(z.read('userdata/guisettings.xml'))}
  assert gui.get('locale.audiolanguage')=='default','Build audio language must follow the interface language'
@@ -58,13 +83,15 @@ def verify_playback_defaults(z):
  assert umbrella.get('provider.external.enabled')=='true','Playback has no configured external provider'
  assert umbrella.get('external_provider.module')=='script.module.cocoscrapers','Playback provider module missing'
  assert umbrella.get('external_provider.name')=='cocoscrapers','Playback provider name missing'
- assert youtube.get('kodion.mpd.stream.select')=='1' and youtube.get('kodion.video.stream.select')=='1','Embedded previews must not open stream-selection prompts'
+ for key,value in {'kodion.mpd.quality.selection':'6','kodion.mpd.stream.select':'1','kodion.mpd.stream.features':'avc1,mp4a,vtt,filter,alt_sort,vp9','kodion.video.quality.isa':'true','kodion.mpd.videos':'true','kodion.video.stream.select':'1'}.items():
+  assert youtube.get(key)==value,'Incorrect clean YouTube playback default: '+key
  assert helper.get('trakt_watchedindicators')=='true','Build must enable authenticated watch metadata'
  spec=importlib.util.spec_from_file_location('prefs',SOURCE/'resources/libs/build_preferences.py');prefs=importlib.util.module_from_spec(spec);spec.loader.exec_module(prefs)
  try:prefs.verify_archive(z)
  except prefs.PreferenceError as exc:raise AssertionError(str(exc)) from exc
 
 def verify(folder):
+ verify_release110_acceptance(json.loads((ROOT/'controller-source/youtube-release110-verification.json').read_text()),json.loads((ROOT/'controller-source/manifest81.json').read_text()))
  verify_youtube_acceptance(json.loads((ROOT/'controller-source/youtube-native-verification.json').read_text()),json.loads((ROOT/'controller-source/manifest75.json').read_text()))
  verify_stall_acceptance(json.loads((ROOT/'controller-source/youtube-stall-mac-verification.json').read_text()),json.loads((ROOT/'controller-source/youtube-stall-native-verification.json').read_text()),json.loads((ROOT/'controller-source/manifest76.json').read_text()))
  receipt=json.loads((ROOT/'compatibility/helper-empty-cache/native-verification.json').read_text())
@@ -73,22 +100,23 @@ def verify(folder):
  assert receipt['passed'] and receipt['tests']==12 and receipt['failures']==receipt['errors']==0
  assert receipt['source_version']==approved['upstream_version'] and receipt['source_files']==approved['files'],'New Helper requires fresh native regression evidence'
  spec=importlib.util.spec_from_file_location('managed',SOURCE/'resources/libs/managed_addons.py');m=importlib.util.module_from_spec(spec);spec.loader.exec_module(m)
- with zipfile.ZipFile(folder/'plugin.program.blacklanturninstaller-1.0.15.zip') as z:
+ with zipfile.ZipFile(folder/'plugin.program.blacklanturninstaller-1.0.16.zip') as z:
   assert z.testzip() is None
   installer={n:z.read(n) for n in z.namelist()}
   assert all(n.startswith('plugin.program.blacklanturninstaller/') for n in installer)
   expected_installer={'plugin.program.blacklanturninstaller/'+str(p.relative_to(SOURCE)):p.read_bytes() for p in SOURCE.rglob('*') if p.is_file() and '__pycache__' not in p.parts and not p.name.endswith(('.pyc','.DS_Store'))}
   assert installer==expected_installer,'Installer ZIP differs from reviewed source'
  for ed in ('General','Apple-TV-Mac'):
-  with zipfile.ZipFile(folder/f'BlackLanturn-{ed}-Kodi21-1.1.9.zip') as z:
+  with zipfile.ZipFile(folder/f'BlackLanturn-{ed}-Kodi21-1.1.10.zip') as z:
    assert z.testzip() is None;m.verify_archive(z);verify_playback_defaults(z)
    p=json.loads(z.read('userdata/blacklanturn-build.json'))
-   assert p['schema']==3 and p['preferences_policy']=='playback-trakt-1' and p['helper_patch']=='empty-cache-1' and p['installer_min_version']=='1.0.13'
-   assert p['controller_version']=='0.1.76' and p['helper_search_patch']=='search-batch-1'
+   assert p['schema']==3 and p['preferences_policy']=='playback-trakt-youtube-1' and p['helper_patch']=='empty-cache-1' and p['installer_min_version']=='1.0.16'
+   assert p['build_version']=='1.1.10'
+   assert p['controller_version']=='0.1.81' and p['helper_search_patch']=='search-batch-1'
    gui={n.get('id'):n.text for n in ET.fromstring(z.read('userdata/guisettings.xml'))}
    assert {k:gui[k] for k in ('filecache.memorysize','filecache.readfactor','filecache.buffermode','filecache.chunksize')}=={'filecache.memorysize':'64','filecache.readfactor':'400','filecache.buffermode':'4','filecache.chunksize':'131072'}
    assert next(n.text for n in ET.fromstring(z.read('userdata/addon_data/plugin.video.themoviedb.helper/settings.xml')) if n.get('id')=='artwork_quality')=='1'
-   expected=json.loads((ROOT/'controller-source/manifest76.json').read_text())['files']
+   expected=json.loads((ROOT/'controller-source/manifest81.json').read_text())['files']
    actual={n[len('addons/script.blacklanturn.preview/'):]:hashlib.sha256(z.read(n)).hexdigest() for n in z.namelist() if n.startswith('addons/script.blacklanturn.preview/')}
    assert actual==expected
    for n,d in installer.items():assert z.read('addons/'+n)==d,'Installer mismatch'

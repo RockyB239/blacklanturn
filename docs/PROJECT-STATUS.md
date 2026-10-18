@@ -1,3 +1,11 @@
+# Release 1.1.10 / Installer 1.0.16
+
+Controller 0.1.81 is verified on Fire Stick, Mac and Apple TV, including category continuation/relevance,45-second capped previews/fade, automatic fullscreen quality and source/settings/authorization/history preservation. Both portable editions use explicit clean YouTube defaults and Standard-update preservation of 18 YouTube playback choices. See [release validation](RELEASE_1_1_10_VALIDATION.md) for exact hashes, scope, native evidence and acceptance limits. Existing release assets and device recovery copies remain retained.
+
+## Prior release record
+
+The following record is retained unchanged for recovery and provenance; the release above supersedes its current-version labels.
+
 # BlackLanturn distribution — 1.1.8
 
 Kodi 21.3 Omega remains the target. BlackLanturn Repository and the OpenWizard-based BlackLanturn Installer retain their existing identities.

@@ -1,0 +1,20 @@
+BlackLanturn 1.1.10 / BlackLanturn Installer 1.0.16
+
+General and Apple TV & Mac editions target Kodi 21.3 Omega. Controller 0.1.81 includes continued YouTube browsing, fitted cards, category checks for recognized Music/Gaming/Sports rows, and 45-second previews that fade back to artwork. Previews use H.264 at 720p or below. Fullscreen YouTube chooses quality automatically up to 4K; the actual resolution depends on the available streams and adaptive selection.
+
+Update the installer first:
+1. In Kodi, open Add-ons > My add-ons > Add-on repository > BlackLanturn Repository > Check for updates.
+2. Open Add-ons > Install from repository > BlackLanturn Repository > Program add-ons > BlackLanturn Installer. Update to version 1.0.16.
+3. Restart Kodi. Open BlackLanturn Installer and select General or Apple TV & Mac version 1.1.10.
+4. Choose Standard Install to retain existing supported playback preferences and the selected Keep Trakt/Debrid/Login authorizations. Keep your current preservation selections.
+5. Complete installation and restart Kodi when requested.
+
+For a deliberately clean account-only installation, enable Clean install: keep only selected accounts and choose the desired Keep Trakt/Debrid/Login options. This mode uses build playback defaults while retaining those selected accounts. It is different from a Standard update.
+
+The new payload requires Installer 1.0.16. If an older installer rejects it, update the installer before trying again. Clean defaults include automatic YouTube quality up to 4K. Standard updates preserve 18 existing YouTube playback settings, including quality, codec flags, live formats and player routing. Existing language/Trakt/provider/artwork/buffer defaults and native-component protection remain included.
+
+Category checks use YouTube metadata and cover broad topic families; they cannot guarantee perfect instrument/genre classification. Mixed/coarse categories such as History and Science remain provider-defined. If a YouTube server cursor stops responding, try Retry, then Refresh recommendations.
+
+The controller was tested on Fire Stick, Mac and Apple TV with source, restart, settings, account and playback-history checks. These checks are not a full Apple TV clean-install, Intel Mac or sustained 4K performance guarantee. Apple devices require an already compatible signed Kodi app; this build does not install/sign Kodi.
+
+Recovery: keep the existing backup and prior release artifacts. If an update fails, stop and retain its pending recovery files. Use the matching device/software recovery procedure; do not overwrite current authorization/profile data with stale snapshots or copy native playback components between platforms.

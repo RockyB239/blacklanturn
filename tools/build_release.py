@@ -1,4 +1,4 @@
-"""Reproducible 1.1.9 release from verified clean baselines, never live profiles."""
+"""Reproducible 1.1.10 release from verified clean baselines, never live profiles."""
 import argparse,ast,hashlib,importlib.util,json,re,sys,xml.etree.ElementTree as ET,zipfile
 from pathlib import Path
 ROOT=Path(__file__).resolve().parents[1]
@@ -15,8 +15,8 @@ def zipwrite(path,data):
 def build(baselines,output):
  output.mkdir(parents=True,exist_ok=True)
  installer={str(p.relative_to(SOURCE)):p.read_bytes() for p in SOURCE.rglob('*') if p.is_file() and '__pycache__' not in p.parts and not p.name.endswith(('.pyc','.DS_Store'))}
- assert ET.fromstring(installer['addon.xml']).get('version')=='1.0.15'
- zipwrite(output/'plugin.program.blacklanturninstaller-1.0.15.zip',{'plugin.program.blacklanturninstaller/'+n:d for n,d in installer.items()})
+ assert ET.fromstring(installer['addon.xml']).get('version')=='1.0.16'
+ zipwrite(output/'plugin.program.blacklanturninstaller-1.0.16.zip',{'plugin.program.blacklanturninstaller/'+n:d for n,d in installer.items()})
  spec=importlib.util.spec_from_file_location('managed',SOURCE/'resources/libs/managed_addons.py');managed=importlib.util.module_from_spec(spec);spec.loader.exec_module(managed)
  for edition,expected in BASE_HASHES.items():
   source=baselines/f'BlackLanturn-{edition}-Kodi21-1.1.2.zip';assert sha(source.read_bytes())==expected,'Baseline changed'
@@ -27,7 +27,9 @@ def build(baselines,output):
   data.update({prefix+n:d for n,d in installer.items()})
   controller_root=ROOT/'controller-source/addon'
   controller={str(p.relative_to(controller_root)):p.read_bytes() for p in controller_root.rglob('*') if p.is_file() and '__pycache__' not in p.parts and p.suffix!='.pyc'}
-  expected_controller=json.loads((ROOT/'controller-source/manifest76.json').read_text())['files']
+  controller_manifest=json.loads((ROOT/'controller-source/manifest81.json').read_text())
+  assert controller_manifest['controller']=='0.1.81' and ET.fromstring(controller['addon.xml']).get('version')=='0.1.81'
+  expected_controller=controller_manifest['files']
   assert {n:sha(raw) for n,raw in controller.items()}==expected_controller,'Validated controller changed'
   cp='addons/script.blacklanturn.preview/'
   data={n:raw for n,raw in data.items() if not n.startswith(cp)}
@@ -58,9 +60,9 @@ def build(baselines,output):
   apply_settings(yp,{'kodion.mpd.stream.select':'1','kodion.video.stream.select':'1'})
   defaults=json.loads((SOURCE/'resources/playback-defaults.json').read_text(encoding='utf-8'))
   for name,fields in defaults.items():apply_settings('userdata/'+name,fields)
-  marker=json.loads(data['userdata/blacklanturn-build.json']);marker.update(schema=3,preferences_policy='playback-trakt-1',build_version='1.1.9',helper_patch='empty-cache-1',installer_min_version='1.0.13',controller_version='0.1.76',helper_search_patch='search-batch-1')
+  marker=json.loads(data['userdata/blacklanturn-build.json']);marker.update(schema=3,preferences_policy='playback-trakt-youtube-1',build_version='1.1.10',helper_patch='empty-cache-1',installer_min_version='1.0.16',controller_version='0.1.81',helper_search_patch='search-batch-1')
   data['userdata/blacklanturn-build.json']=json.dumps(marker,indent=2).encode()
-  data['userdata/BlackLanturn-README.txt']=(before['userdata/BlackLanturn-README.txt'].decode()+'\n\nRelease 1.1.9: controller 0.1.76 with the signed-in YouTube sidebar, Home/Search/Subscriptions/Library/Channels and exact-video automatic previews. Fire-tested cancellation before, during and after preview startup; restored normal hardware decoding. Mac-tested signed-in browsing and history-safe previews. Includes repaired search/preloading, retained preview safety and Cocoscrapers/automatic-preview defaults, exact managed Helper search-empty repair, and Installer 1.0.15 authorization-only preservation. Requires Installer 1.0.15. Playback/Trakt defaults are explicitly packaged and verified before cleanup. Standard updates preserve stored language/tracking choices; clean account-only installs reset preferences to build defaults while retaining selected authorizations. Reviewed batched search, next-page preloading and lifecycle ownership repair are included. Rejected 0.1.70 progressive delivery is excluded. Includes the tested 64MB fixed4x video cache, High artwork, audio following Kodi interface language and forced-only subtitles. Help explicitly decodes UTF-8, preview preference descriptions follow the selection, and public video titles are verified before playback. For a clean account-only install, enable Clean install: keep only selected accounts and the desired Keep Trakt/Debrid/Login choices. Native playback components remain device-specific.\n').encode()
+  data['userdata/BlackLanturn-README.txt']=(before['userdata/BlackLanturn-README.txt'].decode()+'\n\nRelease 1.1.10: controller 0.1.81 with continued YouTube category rows and 45-second inline previews capped at 720p H264 with fade and same-hover completion. Normal full playback uses automatic quality with a 2160p ceiling. Installer 1.0.16 and the playback-trakt-youtube-1 policy validate all clean YouTube playback defaults. Standard updates preserve stored playback choices; account-only clean installs reset preferences to build defaults while retaining selected authorizations. Retains repaired search/preloading, history-safe previews, Cocoscrapers integration, Trakt defaults, High artwork and the 64MB fixed4x playback buffer. Includes the managed Helper search-empty repair. Native playback components remain device-specific. Full release acceptance requires the fresh exact-source three-device receipt; this package description alone is not native proof.\n').encode()
   allowed={n for n in set(before)|set(data) if n.startswith((prefix,cp))}|{'userdata/blacklanturn-build.json','userdata/BlackLanturn-README.txt','userdata/guisettings.xml',hp,up,yp,target}
   changed={n for n in set(before)|set(data) if before.get(n)!=data.get(n)};assert changed<=allowed
   for n,raw in data.items():
@@ -77,10 +79,10 @@ def build(baselines,output):
    for dep in addon.findall('./requires/import'):
     if dep.get('optional')=='true':continue
     assert dep.get('addon') in addons or dep.get('addon') in system,(aid,dep.get('addon'))
-  out=output/f'BlackLanturn-{edition}-Kodi21-1.1.9.zip';zipwrite(out,data)
+  out=output/f'BlackLanturn-{edition}-Kodi21-1.1.10.zip';zipwrite(out,data)
   with zipfile.ZipFile(out) as z:managed.verify_archive(z)
   files={n:sha(d) for n,d in sorted(data.items())}
-  report={'file':out.name,'sha256':sha(out.read_bytes()),'bytes':out.stat().st_size,'files':len(data),'changed_paths':sorted(changed),'helper':'6.17.9 + empty-cache-1 + search-batch-1','installer':'1.0.15','schema':3,'settings_and_rows':'clean 1.1.2 plus exact playback-provider, automatic-preview, watch-indicator, 64MB/4x buffer and High artwork defaults','native_binaries':0}
+  report={'file':out.name,'sha256':sha(out.read_bytes()),'bytes':out.stat().st_size,'files':len(data),'changed_paths':sorted(changed),'helper':'6.17.9 + empty-cache-1 + search-batch-1','installer':'1.0.16','schema':3,'settings_and_rows':'clean 1.1.2 plus exact playback-provider, automatic YouTube quality, watch-indicator, 64MB/4x buffer and High artwork defaults','native_binaries':0}
   (output/(edition+'-package.json')).write_text(json.dumps(report,indent=2));(output/(edition+'-manifest.json')).write_text(json.dumps(files,indent=2));print(json.dumps(report),flush=True)
 if __name__=='__main__':
  p=argparse.ArgumentParser();p.add_argument('--baselines',type=Path,required=True);p.add_argument('--output',type=Path,required=True);a=p.parse_args();build(a.baselines,a.output)

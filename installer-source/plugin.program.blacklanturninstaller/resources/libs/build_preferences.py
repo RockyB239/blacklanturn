@@ -9,12 +9,20 @@ from pathlib import Path
 import xml.etree.ElementTree as E
 from resources.libs import settings_store as store
 DEFAULTS=json.loads((Path(__file__).parents[1]/'playback-defaults.json').read_text(encoding='utf-8'))
+YOUTUBE='addon_data/plugin.video.youtube/settings.xml'
+YOUTUBE_CHOICES={'kodion.video.quality','kodion.video.quality.ask','kodion.subtitle.languages.num','kodion.subtitle.download','kodion.audio_only',
+ 'kodion.live_stream.selection.1','kodion.live_stream.selection.2','kodion.support.alternative_player',
+ 'kodion.alternative_player.web_urls','kodion.alternative_player.mpd','kodion.default_player.web_urls','kodion.default_player.fallback_video'}
+CAPTURE_CHOICES={YOUTUBE:YOUTUBE_CHOICES,
+ 'guisettings.xml':{'videoplayer.usemediacodecsurface','videoplayer.usemediacodec'},
+ 'addon_data/plugin.video.umbrella/settings.xml':{'remove.hdr','remove.dolby.vision','remove.hevc'}}
 MAX_BYTES=4*1024*1024
 PROVIDERS={'0':'Local','1':'Trakt','2':'Simkl','3':'MDBList','4':'Custom','5':'Floppy','6':'Scrob','7':'PunchPlay'}
 class PreferenceError(Exception):pass
 
 def _paths(home,addon_ids):
  return {name:fields for name,fields in DEFAULTS.items() if name=='guisettings.xml' or name.split('/')[1] in addon_ids}
+def _keys(name,fields):return set(fields)|CAPTURE_CHOICES.get(name,set())
 def _path(home,name):
  base=Path(home).resolve();path=base/'userdata'/name
  for item in [path]+list(path.parents):
@@ -34,7 +42,7 @@ def _root(raw):
  return root
 
 def _value(key,value):
- if not isinstance(value,str) or (not value and key not in ('indicators','scrobble')) or len(value)>128 or any(ord(c)<32 for c in value):raise PreferenceError('Invalid playback preference. Installation stopped.')
+ if not isinstance(value,str) or (not value and key not in ('indicators','scrobble','kodion.mpd.stream.features')) or len(value)>(1024 if key=='kodion.mpd.stream.features' else 128) or any(ord(c)<32 for c in value):raise PreferenceError('Invalid playback preference. Installation stopped.')
  if key in ('trakt_watchedindicators','trakt_scrobbling','trakt.scrobble') and value not in ('true','false'):raise PreferenceError('Invalid Trakt preference. Installation stopped.')
  if key.startswith('sync_source_') and value not in ('Trakt','MDbList'):raise PreferenceError('Invalid sync preference. Installation stopped.')
  if key in ('indicators.alt','scrobble.source') and value not in PROVIDERS:raise PreferenceError('Unsupported tracking provider. Installation stopped.')
@@ -45,7 +53,7 @@ def _validate(snapshot,addon_ids,auth_only=None):
  if auth_only is not None and snapshot['auth_only']!=auth_only:raise PreferenceError('Finish the pending installation using its original clean/update mode.')
  allowed=_paths(None,addon_ids)
  for name,values in snapshot['values'].items():
-  if name not in allowed or not isinstance(values,dict) or not set(values)<=set(allowed[name]):raise PreferenceError('Unexpected preference recovery. Installation stopped.')
+  if name not in allowed or not isinstance(values,dict) or not set(values)<=_keys(name,allowed[name]):raise PreferenceError('Unexpected preference recovery. Installation stopped.')
   for key,value in values.items():_value(key,value)
  if snapshot['auth_only'] and snapshot['values']:raise PreferenceError('Clean recovery contains preferences. Installation stopped.')
  return snapshot
@@ -62,7 +70,7 @@ def prepare(home,accounts,addon_ids,auth_only=False):
     root=_root(_read(home,name));explicit={}
     for node in root:
      key=node.get('id')
-     if key in fields:explicit[key]=_value(key,node.text if node.text is not None else node.get('value',''))
+     if key in _keys(name,fields):explicit[key]=_value(key,node.text if node.text is not None else node.get('value',''))
     if explicit:values[name]=explicit
   result['build_preferences']={'schema':1,'auth_only':auth_only,'values':values}
   return result
@@ -88,10 +96,11 @@ def restore(home,accounts,addon_ids):
   for name,raw in prepared:_write(home,name,raw)
  except (OSError,ValueError,TypeError,E.ParseError) as exc:raise PreferenceError('Playback preference restoration needs attention. Keep the pending backup and reinstall.') from exc
 
-def verify_archive(archive):
+def verify_archive(archive,policy='playback-trakt-youtube-1'):
  """Reject missing/implicit defaults before any profile cleanup."""
  try:
   for name,fields in DEFAULTS.items():
+   if name==YOUTUBE and policy=='playback-trakt-1':continue
    root=_root(archive.read('userdata/'+name));nodes={n.get('id'):n for n in root}
    if name.startswith('addon_data/'):
     aid=name.split('/')[1];schema=E.fromstring(archive.read('addons/'+aid+'/resources/settings.xml'))
