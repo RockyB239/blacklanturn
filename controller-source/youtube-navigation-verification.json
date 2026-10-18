@@ -1,6 +1,6 @@
 {
   "controller": "0.1.78",
-  "status": "development-candidate-partial-device-validation",
+  "status": "development-candidate-three-device-validated",
   "manifest": "manifest78.json",
   "candidate_zip_sha256": "c88f2cbe9cd4904a353680b88ef1129236deb9d13b3e2236b68565a2e8c339b6",
   "fire_stick": {
@@ -31,17 +31,23 @@
     "protected_files_preserved": 27
   },
   "apple_tv": {
-    "passed": false,
-    "failure": "Kodi exited during native main-row continuation acceptance, including a dispatched-reader diagnostic",
-    "native_root_cause": "unresolved",
-    "recovery_target": "0.1.75",
-    "raw_crash_report_inspection": "blocked by approval review; explicit user approval pending",
-    "publication_allowed": false,
-    "restored": true,
-    "restored_controller": "0.1.75",
+    "passed": true,
+    "home_rows_tested": 17,
+    "main_and_category_continuations": true,
+    "finite_ends_without_wrap": true,
+    "next_selects_first_new_choice": true,
+    "artwork_watched_and_selection_preserved": true,
+    "caption_height_and_discovery_return": true,
+    "preview_windowed_exact_video_history_disabled": true,
+    "preview_navigation_stop_seconds": 1.544,
+    "ordinary_restart_source_exact": true,
     "protected_files_preserved": 24,
     "persistent_preference_entries_unchanged": 21,
-    "home_ready_after_recovery": true
+    "controller": "0.1.78",
+    "prior_crash_root_cause": "Kodi tvOS native Screenshot builtin called by the test harness after row pagination",
+    "crash_report_inspection": "explicitly approved by user; retained privately",
+    "test_correction": "Screenshot capture omitted on tvOS; all native navigation checks retained",
+    "visual_limit": "Native caption heights verified; no Apple TV pixel screenshot captured"
   },
   "tests": {
     "controller": 597,
@@ -49,6 +55,6 @@
     "device_validation": 16
   },
   "independent_review": "accepted after terminal-category, Next-selection and caption-transition regression repairs",
-  "limits": "Bounded signed-in Home tests. Finite provider categories cannot supply more items without a native cursor. Initial diagnostic crashes are not successful acceptance. No Apple TV success or general long-duration guarantee is claimed.",
-  "distribution": "Published build1.1.9 and Installer1.0.15 remain pinned to manifest76; candidate78 is not published."
+  "limits": "Bounded signed-in Home tests on all three devices. Finite provider categories cannot supply more items without a native cursor. Apple caption proof is native height/return behavior; Fire/Mac retain screenshot evidence. No general long-duration guarantee is claimed.",
+  "distribution": "All three devices validated on exact candidate78. Published build1.1.9 and Installer1.0.15 remain pinned to manifest76 until deliberate release promotion."
 }
