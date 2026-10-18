@@ -54,7 +54,8 @@ class YouTubeRows:
             return copy.deepcopy(page['items'])+([_more_card(page.get('error'))] if page['cursor'] else [])
         items,cursor=split_page(files,path)
         if 'youtube_cursor' in definition:cursor=copy.deepcopy(definition['youtube_cursor'])
-        if definition.get('youtube_category'):items=merge_page([],items,self.youtube_category_counts(path))
+        # Existing provider/saved cards are stable. Diversity is applied only
+        # to incoming continuation batches, never again at a finite end/return.
         page={'items':items,'cursor':cursor,'seen':[],'error':False}
         self.youtube_pages[path]=page
         # Off-screen rows retain at most the bounded native row window. Home
@@ -163,7 +164,7 @@ class YouTubeRows:
                     self.setProperty('notice','YouTube recommendations refreshed')
                 else:self.setProperty('notice','Could not refresh YouTube. Current recommendations remain available; try Refresh recommendations again.')
             else:
-                n=update['n'];page=update['page'];control=self.getControl(900+n);position=control.getSelectedPosition()
+                n=update['n'];page=update['page'];previous_count=len(page['items']);control=self.getControl(900+n);position=control.getSelectedPosition()
                 anchor=self.rows[n][position] if 0<=position<len(self.rows[n]) else None
                 if kind=='page_error':page['error']=True
                 else:
@@ -175,6 +176,10 @@ class YouTubeRows:
                 files=copy.deepcopy(page['items'])+([_more_card(page['error'])] if page['cursor'] else [])
                 if anchor and anchor.get('_page_control')=='previous':files.insert(0,copy.deepcopy(anchor))
                 if update.get('replace'):selected=0
+                elif kind=='page' and anchor and anchor.get('_youtube_more'):
+                    # Enter the appended choices instead of following Next to
+                    # its new trailing position and immediately paging again.
+                    selected=min(previous_count,max(0,len(files)-1))
                 elif anchor:selected=next((i for i,x in enumerate(files) if x.get('file')==anchor.get('file')),min(position,max(0,len(files)-1)))
                 else:selected=min(position,max(0,len(files)-1))
                 # apply_row runs the same presentation pipeline as initial load.

@@ -5,10 +5,10 @@ ROOT=Path(__file__).resolve().parents[1]
 class RepairedRelease(unittest.TestCase):
  def test_controller_has_reviewed_repair_and_preview_safety(self):
   addon=ROOT/'controller-source/addon'
-  self.assertEqual(ET.parse(addon/'addon.xml').getroot().get('version'),'0.1.77')
+  self.assertEqual(ET.parse(addon/'addon.xml').getroot().get('version'),'0.1.78')
   self.assertTrue((addon/'page_ahead.py').is_file())
-  manifest=json.loads((ROOT/'controller-source/manifest77.json').read_text())
-  self.assertEqual(manifest['controller'],'0.1.77')
+  manifest=json.loads((ROOT/'controller-source/manifest78.json').read_text())
+  self.assertEqual(manifest['controller'],'0.1.78')
   self.assertEqual(manifest['files'],{str(p.relative_to(addon)):hashlib.sha256(p.read_bytes()).hexdigest() for p in addon.rglob('*') if p.is_file() and '__pycache__' not in p.parts and p.suffix not in ('.pyc','.pyo')})
  def test_managed_provider_and_installer_require_repaired_payload(self):
   source=ROOT/'installer-source/plugin.program.blacklanturninstaller'

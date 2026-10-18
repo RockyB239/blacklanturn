@@ -97,7 +97,7 @@ class SearchUI(unittest.TestCase):
         self.assertEqual(obj.search_state,previous);self.assertEqual(opened,[0])
     def test_discovery_return_restores_search_without_a_second_provider_request(self):
         ui=self.core();props={};loaded=[];stack=[]
-        obj=SimpleNamespace(discovery_stack=stack,capture_browse=lambda **kw:{'search_state':{'query':'Dune','kind':'person'},'positions':[3,0]},
+        obj=SimpleNamespace(section='Home',discovery_stack=stack,capture_browse=lambda **kw:{'search_state':{'query':'Dune','kind':'person'},'positions':[3,0]},
             stop_preview=lambda:None,getControl=lambda n:SimpleNamespace(setHeight=lambda h:None),
             setProperty=lambda k,v:props.__setitem__(k,v),set_rows=lambda rows:loaded.extend(rows))
         method=extract(ROOT/'live_review.py','open_discovery',{},'LiveReview')

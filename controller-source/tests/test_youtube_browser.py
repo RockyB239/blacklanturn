@@ -124,4 +124,24 @@ class YouTubeBrowserFlow(unittest.TestCase):
   if retire:self.assertEqual(window.page_definitions,before);self.assertFalse(hasattr(window,'youtube_home_cache'))
   else:self.assertEqual(window.page_definitions[2]['label'],'Your changing interest');self.assertTrue(window.page_definitions[2]['local_items'])
 
+ def test_discovery_caption_height_matches_youtube_home_and_keeps_other_sections(self):
+  for section,want in [('YouTube',360),('Add-ons',344),('Movies',344)]:
+   with self.subTest(section=section):
+    heights=[];w=SimpleNamespace(section=section,discovery_stack=[],capture_browse=lambda **k:{},stop_preview=lambda:None,
+     setProperty=lambda *a:None,getControl=lambda c:SimpleNamespace(setHeight=heights.append),set_rows=lambda x:None)
+    extract(ROOT/'live_review.py','open_discovery',{'clear_search_selection':lambda w:None},'LiveReview')(w,{'heading':'Playlist','rows':[]})
+    self.assertEqual(heights,[want,want])
+ def test_browse_restore_preserves_youtube_caption_height_after_folder_or_settings(self):
+  for section,want in [('YouTube',360),('Add-ons',344),('Movies',276)]:
+   with self.subTest(section=section):
+    heights=[];state={'section':section,'youtube_identity':'account-a','mode':'home','selected':None,'active_page':None,
+     'episode_browser_context':None,'positions':[0,0],'rows':[[],[]],'focus':900,'row_offset':0,
+     'properties':{'captionRows':'true' if section!='Movies' else 'false','row0':'A','row1':'B'}}
+    w=SimpleNamespace(alive=True,window_lifetime=object(),generation=1,youtube_connection=SimpleNamespace(connected=True,identity='account-a'),
+     refresh_navigation=lambda:None,load_browse_sources=lambda:None,setProperty=lambda *a:None,
+     getControl=lambda c:SimpleNamespace(setHeight=heights.append),apply_row=lambda *a,**k:None,setFocusId=lambda c:None,restart_pending_rows=lambda:None)
+    from youtube_core import resume_allowed
+    extract(ROOT/'live_review.py','restore_browse',{'copy':copy,'youtube_resume_allowed':resume_allowed,'event':lambda *a,**k:None},'LiveReview')(w,state)
+    self.assertEqual(heights,[want,want])
+
 if __name__=='__main__':unittest.main()

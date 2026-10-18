@@ -128,7 +128,7 @@ class YouTubeBrowser(YouTubeRows):
         control.addItems(items);control.selectItem(selected)
         self.setProperty('browseFilters','true');self.setProperty('genreChooser','false')
         self.getControl(900).controlUp(control)
-        for cid in (900,901):self.getControl(cid).setHeight(344)
+        for cid in (900,901):self.getControl(cid).setHeight(360)
 
     def select_youtube_tab(self,tab=None):
         import xbmcgui

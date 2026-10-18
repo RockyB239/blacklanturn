@@ -1112,7 +1112,7 @@ class LiveReview(YouTubeBrowser,xbmcgui.WindowXML):
         for key,value in state['properties'].items():self.setProperty(key,value)
         for n in range(2):
             if not current():return
-            self.getControl(900+n).setHeight(344 if state['properties']['captionRows']=='true' else 276)
+            self.getControl(900+n).setHeight(360 if self.section=='YouTube' else 344 if state['properties']['captionRows']=='true' else 276)
             if not current():return
             self.apply_row(n,state['rows'][n],state.get('row_labels',{}).get(n,state['properties']['row'+str(n)]),state['positions'][n],update_selected=False)
         if not current():return
@@ -1923,7 +1923,7 @@ class LiveReview(YouTubeBrowser,xbmcgui.WindowXML):
         self.mode='home';self.active_page=None;self.selected=None
         captions=not discovery.get('hide_captions',False)
         for key,value in [('page','home'),('scroll','top'),('filmographyBrowser','false' if captions else 'true'),('captionRows','true' if captions else 'false'),('searchBrowser','false'),('episodeBrowser','false'),('browseFilters','false'),('allEpisodes','false'),('eyebrow',discovery['heading'])]:self.setProperty(key,value)
-        for cid in (900,901):self.getControl(cid).setHeight(344 if captions else 276)
+        for cid in (900,901):self.getControl(cid).setHeight(360 if self.section=='YouTube' else 344 if captions else 276)
         self.set_rows(discovery['rows'])
     def open_installed_addon(self,item):
         from addon_catalog import launch_destination
@@ -2058,7 +2058,7 @@ class LiveReview(YouTubeBrowser,xbmcgui.WindowXML):
                 self.mode='home';self.setProperty('page','home');self.setProperty('scroll','top');self.setFocusId(self.return_focus if self.return_focus in (900,901) else 900)
                 captions=bool(self.person_context or self.episode_browser_context or self.search_state or self.discovery_stack and self.getProperty('filmographyBrowser')!='true')
                 self.setProperty('captionRows','true' if captions else 'false')
-                for control in (900,901):self.getControl(control).setHeight(344 if captions else 276)
+                for control in (900,901):self.getControl(control).setHeight(360 if self.section=='YouTube' else 344 if captions else 276)
                 for control in (101,103,105,106):self.getControl(control).controlDown(self.getControl(900))
                 self.row_navigation()
             else:

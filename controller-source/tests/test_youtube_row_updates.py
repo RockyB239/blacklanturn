@@ -148,4 +148,44 @@ class RowUpdates(unittest.TestCase):
   w.apply_youtube_updates();self.assertEqual(w.rows[0],before);self.assertIsNone(w.youtube_pages[w.paths[0]]['cursor'])
   self.assertEqual(self.controls[900].position,149)
 
+ def test_terminal_category_page_never_refilters_existing_cards_against_other_rows(self):
+  w=self.window();path=w.paths[0]
+  w.page_definitions[0].update(youtube_category=True,youtube_cursor={'continuation':'category-token'})
+  w.rows[0]=w.prepare_youtube_row(0,[video(n) for n in range(1,9)])
+  self.controls[900].position=6;before=copy.deepcopy(w.rows[0][:-1])
+  for index in (1,2):w.page_definitions.append({'path':'other-'+str(index),'youtube_category':True,'local_items':[video(n) for n in range(1,9)]})
+  with patch.object(mod,'load_shelf_page',return_value=([video(9)],None)):
+   w.request_youtube_more(0);self.jobs.pop()()
+  w.apply_youtube_updates()
+  self.assertEqual(w.rows[0],before+[video(9)])
+  self.assertEqual(w.rows[0][self.controls[900].position]['file'],video(7)['file'])
+ def test_evicted_category_keeps_its_saved_cards_when_other_categories_overlap(self):
+  w=self.window();path=w.paths[0]
+  definition=w.page_definitions[0];definition.update(youtube_category=True,local_items=[video(n) for n in range(1,9)],youtube_cursor=None)
+  w.rows[0]=w.prepare_youtube_row(0,definition['local_items']);before=copy.deepcopy(w.rows[0])
+  for index in (1,2):w.page_definitions.append({'path':'other-'+str(index),'youtube_category':True,'local_items':[video(n) for n in range(1,9)]})
+  w.youtube_pages.clear()
+  self.assertEqual(w.prepare_youtube_row(0,definition['local_items']),before)
+
+ def test_next_enters_first_new_video_instead_of_chasing_the_trailing_next_card(self):
+  w=self.window();self.ready(w);self.controls[900].position=2
+  next_path=BASE+'/special/recommendations/?page=3&page_token=third'
+  with patch.object(mod,'_fetch_feed',return_value=[video(3),video(4),{'file':next_path,'filetype':'directory','label':'Next page: 3'}]):
+   w.request_youtube_more(0,explicit=True);self.jobs.pop()()
+  w.apply_youtube_updates()
+  self.assertEqual(w.rows[0][self.controls[900].position]['file'],video(3)['file'])
+  self.assertTrue(w.rows[0][-1].get('_youtube_more'))
+ def test_terminal_next_enters_first_new_video_with_previous_navigation_present(self):
+  from browse_controls import page_cards,page_card
+  from live_core import PageHistory
+  w=self.window();self.ready(w);history=PageHistory();history.push('original-home',0)
+  w.rows[0].insert(0,page_card('previous','blacklanturn://previous-page'));self.controls[900].position=3
+  def apply(n,files,label,position=0,**kwargs):
+   files=w.prepare_youtube_row(n,files);w.rows[n],position=page_cards(files,history,w.paths[n],position,display_position=kwargs.get('display_position',False));self.controls[900].position=position
+  w.apply_row=apply
+  with patch.object(mod,'_fetch_feed',return_value=[video(3),video(4)]):
+   w.request_youtube_more(0,explicit=True);self.jobs.pop()()
+  w.apply_youtube_updates()
+  self.assertEqual(w.rows[0][self.controls[900].position]['file'],video(3)['file'])
+
 if __name__=='__main__':unittest.main()
