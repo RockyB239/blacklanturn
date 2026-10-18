@@ -1,0 +1,106 @@
+{
+  "protocol": "cached-native-first-usable-row-v2",
+  "before_controller": "0.1.82",
+  "after_controller": "0.1.83",
+  "sections": {
+    "Home": {
+      "before_seconds": [
+        0.174223614987568,
+        0.2811143849976361,
+        0.5813130000024103
+      ],
+      "after_seconds": [
+        0.39055046199064236,
+        0.4873936920048436,
+        0.9049443839903688
+      ],
+      "before_median": 0.2811143849976361,
+      "after_median": 0.4873936920048436,
+      "allowed_increase_seconds": 0.35,
+      "within_tolerance": true
+    },
+    "Shows": {
+      "before_seconds": [
+        3.4726286929944763,
+        0.30766323099669535,
+        0.3111656149994815
+      ],
+      "after_seconds": [
+        3.7878533079929184,
+        0.30639661599707324,
+        0.3237568460026523
+      ],
+      "before_median": 0.3111656149994815,
+      "after_median": 0.3237568460026523,
+      "allowed_increase_seconds": 0.35,
+      "within_tolerance": true
+    },
+    "Movies": {
+      "before_seconds": [
+        1.6148963079904206,
+        0.2159368459979305,
+        0.22513107699342072
+      ],
+      "after_seconds": [
+        1.858911462011747,
+        0.35577884600206744,
+        0.36494984599994496
+      ],
+      "before_median": 0.22513107699342072,
+      "after_median": 0.36494984599994496,
+      "allowed_increase_seconds": 0.35,
+      "within_tolerance": true
+    },
+    "YouTube": {
+      "before_seconds": [
+        6.48317184599,
+        3.4632839240075555,
+        3.582718539008056
+      ],
+      "after_seconds": [
+        6.185059693001676,
+        3.2437303079932462,
+        4.077198922997923
+      ],
+      "before_median": 3.582718539008056,
+      "after_median": 4.077198922997923,
+      "allowed_increase_seconds": 0.7165437078016113,
+      "within_tolerance": true
+    },
+    "My Stuff": {
+      "before_seconds": [
+        1.1577246160013601,
+        0.19020515399461146,
+        0.1053763079980854
+      ],
+      "after_seconds": [
+        2.1478105389978737,
+        0.11116461599885952,
+        0.10944276899681427
+      ],
+      "before_median": 0.19020515399461146,
+      "after_median": 0.11116461599885952,
+      "allowed_increase_seconds": 0.35,
+      "within_tolerance": true
+    }
+  },
+  "metric": "gui_load_invocation_to_native_control_readiness",
+  "native_receipts": {
+    "before": {
+      "path": "controller-source/native-performance-v2-82.json",
+      "sha256": "5fb0d35f4baa00a468a99619bcc978b7378336961c64177c3a06b482d0e304e9"
+    },
+    "after": {
+      "path": "controller-source/native-performance-v2-83.json",
+      "sha256": "b3df056cf806fe0a877bbfcd93f33daf250955ec9ed4cf48bdbf724dc0cb99cc"
+    }
+  },
+  "max_observation_gap_seconds": {
+    "before": 0.622992692005937,
+    "after": 0.7183885380072752
+  },
+  "measurement_scope": "Fire GUI load invocation to first observed native control readiness; separate from historical v1 remote/sidebar timing.",
+  "observation_limit": "40ms is a requested probe delay, not precision; actual maximum observation gaps are reported above.",
+  "causation_limit": "This protocol comparison does not establish the cause of any historical v1 timing change.",
+  "preservation_scope": "Native controller rows.json/save method only; global device preservation and history require separate acceptance."
+}

@@ -1,0 +1,26 @@
+BlackLanturn 1.1.12 / BlackLanturn Installer 1.0.17
+
+General and Apple TV & Mac editions target Kodi 21.3 Omega. Four ratings are shown by default: Rotten Tomatoes critics, Metacritic, IMDb and Rotten Tomatoes audience. TMDb remains available in Settings but is hidden by default. Standard updates preserve your saved rating selection.
+
+Controller 0.1.83 gives YouTube its own Details layout, keeps movie-only Cast and More like this sections out of YouTube, and aligns focus with the independent movie and YouTube preview controls. Help describes the current controls. Adaptive recommendations, category checks, continued rows and existing artwork remain included.
+
+Inline YouTube previews use H.264 at 720p or below, run about 45 seconds and fade to artwork. Fullscreen playback uses automatic quality up to 4K; actual resolution depends on available streams, decoder and network conditions.
+
+Update the installer first:
+1. Open Add-ons > My add-ons > Add-on repository > BlackLanturn Repository > Check for updates.
+2. Open Add-ons > Install from repository > BlackLanturn Repository > Program add-ons > BlackLanturn Installer and update to 1.0.17.
+3. Restart Kodi, open BlackLanturn Installer and select General or Apple TV & Mac version 1.1.12.
+4. Review the displayed install mode and preservation choices before confirming.
+5. Restart Kodi when the installation finishes.
+
+Standard Install retains supported playback preferences and selected Keep Trakt/Debrid/Login authorizations. Keep GUI additionally preserves the supported Kodi interface settings. Account-only reset deliberately replaces preferences with build defaults and retains only the selected accounts; it overrides other Keep choices. The installer displays this mode in Save Data, the install action and final confirmation. An older installer rejects this payload before cleanup; update it first.
+
+Clean defaults include interface-language audio, forced-only subtitles, Cocoscrapers playback, Trakt watch indicators, automatic YouTube quality, High artwork and a 64 MB fixed 4x playback buffer. Native playback components remain device-specific. Standard updates preserve existing supported language, playback, codec, quality, tracking and authorization choices.
+
+Managed Helper retains empty-cache and search repairs and adds actual-position sampling for playback progress. This addresses stale clock-derived progress and pause drift. A separate upstream provider edge during an immediate seek-and-stop before playback tracking initializes is not covered by that repair. Resume status still depends on successful Trakt connectivity and the active playback provider.
+
+Category checks use public video metadata and cannot guarantee perfect semantic classification. Generic, format and unrecognized shelves remain mixed and provider-defined. If a server cursor stops responding, try Retry, then Refresh recommendations.
+
+Release acceptance records native checks separately. Targeted tests are not a full Apple TV clean-install, Intel Mac or sustained 4K guarantee. Apple devices require a compatible signed Kodi app; this build does not install or sign Kodi.
+
+Recovery: retain the existing backup and prior release artifacts. If installation fails, keep pending recovery files. Use the matching device recovery procedure; do not overwrite current authorizations with stale profile snapshots or copy native playback components between platforms.

@@ -17,6 +17,7 @@ class ManagedTests(unittest.TestCase):
   p=self.root/'helper.zip'
   with zipfile.ZipFile(BASE) as z:data={n:z.read(n) for n in z.namelist() if n.startswith('addons/'+ID+'/')}
   for name,rel in [('lists_default.py','lists_default.py'),('lists_trakt.py','trakt/lists_standard.py'),('lists_search.py','tmdb/lists_search.py')]:data['addons/'+ID+'/resources/tmdbhelper/lib/items/directories/'+rel]=(PATCH/name).read_bytes()
+  for name in ('player.py','scrobbler.py','service.py'):data['addons/'+ID+'/resources/tmdbhelper/lib/monitor/'+name]=(ROOT/'compatibility/helper-progress/candidate'/name).read_bytes()
   if change:change(data)
   with zipfile.ZipFile(p,'w') as z:
    for n,d in data.items():z.writestr(n,d)

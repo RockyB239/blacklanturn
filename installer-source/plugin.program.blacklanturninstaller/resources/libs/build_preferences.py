@@ -4,7 +4,7 @@ Clean installs receive explicit defaults. Standard updates retain stored choices
 including entries Kodi marks as upstream defaults. No startup loop
 or account token is used. Pending account recovery carries this bounded snapshot.
 """
-import copy,json
+import copy,json,math
 from pathlib import Path
 import xml.etree.ElementTree as E
 from resources.libs import settings_store as store
@@ -17,6 +17,8 @@ CAPTURE_CHOICES={YOUTUBE:YOUTUBE_CHOICES,
  'guisettings.xml':{'videoplayer.usemediacodecsurface','videoplayer.usemediacodec'},
  'addon_data/plugin.video.umbrella/settings.xml':{'remove.hdr','remove.dolby.vision','remove.hevc'}}
 MAX_BYTES=4*1024*1024
+CONTROLLER='script.blacklanturn.preview'
+CONTROLLER_CONFIG='addon_data/script.blacklanturn.preview/rows.json'
 PROVIDERS={'0':'Local','1':'Trakt','2':'Simkl','3':'MDBList','4':'Custom','5':'Floppy','6':'Scrob','7':'PunchPlay'}
 class PreferenceError(Exception):pass
 
@@ -48,20 +50,55 @@ def _value(key,value):
  if key in ('indicators.alt','scrobble.source') and value not in PROVIDERS:raise PreferenceError('Unsupported tracking provider. Installation stopped.')
  return value
 
+def _json_object(pairs):
+ result={}
+ for key,value in pairs:
+  if key in result:raise ValueError('Duplicate controller setting')
+  result[key]=value
+ return result
+
+def _reject_constant(value):
+ raise ValueError('Nonfinite controller setting')
+
+def _controller_text(raw):
+ """Validate a bounded object without changing its original UTF-8 representation."""
+ try:
+  if not isinstance(raw,str) or len(raw.encode('utf-8'))>MAX_BYTES:raise ValueError('Controller settings exceed limit')
+  value=json.loads(raw,object_pairs_hook=_json_object,parse_constant=_reject_constant)
+  if not isinstance(value,dict):raise ValueError('Controller settings must be an object')
+  pending=[value]
+  while pending:
+   item=pending.pop()
+   if isinstance(item,dict):pending.extend(item.values())
+   elif isinstance(item,list):pending.extend(item)
+   elif isinstance(item,float) and not math.isfinite(item):raise ValueError('Nonfinite controller setting')
+  return raw
+ except (ValueError,TypeError,RecursionError) as exc:
+  raise PreferenceError('Controller settings are invalid. Your current build has been kept.') from exc
+
 def _validate(snapshot,addon_ids,auth_only=None):
- if not isinstance(snapshot,dict) or snapshot.get('schema')!=1 or type(snapshot.get('auth_only')) is not bool or not isinstance(snapshot.get('values'),dict):raise PreferenceError('Invalid preference recovery. Installation stopped.')
+ if not isinstance(snapshot,dict) or type(snapshot.get('schema')) is not int or snapshot.get('schema') not in (1,2) or type(snapshot.get('auth_only')) is not bool or not isinstance(snapshot.get('values'),dict):raise PreferenceError('Invalid preference recovery. Installation stopped.')
+ expected={'schema','auth_only','values'}|({'controller'} if snapshot['schema']==2 else set())
+ if set(snapshot)!=expected:raise PreferenceError('Invalid preference recovery. Installation stopped.')
  if auth_only is not None and snapshot['auth_only']!=auth_only:raise PreferenceError('Finish the pending installation using its original clean/update mode.')
+ if snapshot['schema']==1 and not snapshot['auth_only'] and CONTROLLER in addon_ids:
+  raise PreferenceError('This pending backup is from an older Installer and has no original controller settings. Recover the original settings before continuing; installation has stopped.')
  allowed=_paths(None,addon_ids)
  for name,values in snapshot['values'].items():
   if name not in allowed or not isinstance(values,dict) or not set(values)<=_keys(name,allowed[name]):raise PreferenceError('Unexpected preference recovery. Installation stopped.')
   for key,value in values.items():_value(key,value)
  if snapshot['auth_only'] and snapshot['values']:raise PreferenceError('Clean recovery contains preferences. Installation stopped.')
+ controller=snapshot.get('controller')
+ if controller is not None:
+  if snapshot['auth_only'] or CONTROLLER not in addon_ids:raise PreferenceError('Unexpected controller preference recovery. Installation stopped.')
+  _controller_text(controller)
  return snapshot
 
 def prepare(home,accounts,addon_ids,auth_only=False):
  """Capture once before cleanup; retries reuse original choices and install mode."""
  try:
   result=copy.deepcopy(accounts)
+  if CONTROLLER in addon_ids:_path(home,CONTROLLER_CONFIG)
   if 'build_preferences' in result:
    _validate(result['build_preferences'],addon_ids,auth_only);return result
   values={}
@@ -72,7 +109,11 @@ def prepare(home,accounts,addon_ids,auth_only=False):
      key=node.get('id')
      if key in _keys(name,fields):explicit[key]=_value(key,node.text if node.text is not None else node.get('value',''))
     if explicit:values[name]=explicit
-  result['build_preferences']={'schema':1,'auth_only':auth_only,'values':values}
+  controller=None
+  if not auth_only and CONTROLLER in addon_ids:
+   raw=_read(home,CONTROLLER_CONFIG)
+   if raw is not None:controller=_controller_text(raw.decode('utf-8'))
+  result['build_preferences']={'schema':2,'auth_only':auth_only,'values':values,'controller':controller}
   return result
  except (OSError,ValueError,TypeError,E.ParseError) as exc:raise PreferenceError('Playback preferences could not be saved. Your current build has been kept.') from exc
 
@@ -83,6 +124,7 @@ def restore(home,accounts,addon_ids):
  """Restore only approved choices over extracted defaults; retain unrelated XML."""
  try:
   snapshot=_validate(accounts.get('build_preferences'),addon_ids)
+  if CONTROLLER in addon_ids:_path(home,CONTROLLER_CONFIG)
   prepared=[]
   for name,fields in _paths(home,addon_ids).items():
    root=_root(_read(home,name));values=dict(fields,**snapshot['values'].get(name,{}))
@@ -93,6 +135,7 @@ def restore(home,accounts,addon_ids):
     if node is None:node=E.SubElement(root,'setting',id=key)
     node.attrib.pop('default',None);node.attrib.pop('value',None);node.text=value
    prepared.append((name,E.tostring(root,encoding='utf-8',xml_declaration=True)))
+  if snapshot.get('controller') is not None:prepared.append((CONTROLLER_CONFIG,snapshot['controller'].encode('utf-8')))
   for name,raw in prepared:_write(home,name,raw)
  except (OSError,ValueError,TypeError,E.ParseError) as exc:raise PreferenceError('Playback preference restoration needs attention. Keep the pending backup and reinstall.') from exc
 

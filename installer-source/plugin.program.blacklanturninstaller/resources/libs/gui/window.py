@@ -272,7 +272,7 @@ def show_save_data_settings():
                                     self.thumbs]
             self.controlsettings = ['keeptrakt', 'keepdebrid', 'keeplogin',
                                     'keepsources', 'keepprofiles', 'keepplayercore', 'keepguisettings', 'keepadvanced',
-                                    'keepfavourites', 'keeprepos', 'keepsuper',
+                                    'keepfavourites', 'keepsuper', 'keeprepos',
                                     'keepwhitelist', 'clearcache', 'clearpackages',
                                     'clearthumbs']
             for item in self.controllist:
@@ -281,6 +281,12 @@ def show_save_data_settings():
 
         def show_dialog(self):
             self.getControl(self.title).setLabel(CONFIG.ADDONTITLE)
+            from resources.libs.wizard import install_mode
+            self.getControl(102).setText(
+                'Mode: ' + install_mode(CONFIG) + '. ' +
+                ('Only selected accounts are kept; other Keep choices apply to Standard. Change mode in Save Data.'
+                 if CONFIG.get_setting('authonlyclean') == 'true' else
+                 'Choose accounts and settings to keep. Change mode in Save Data.'))
             self.setFocus(self.getControl(self.okbutton))
 
         def onClick(self, controlid):
@@ -296,7 +302,7 @@ def show_save_data_settings():
                 if self.getControl(self.whitelist).isSelected() and not self.whitelistcurrent == 'true':
                     from resources.libs import whitelist
                     whitelist.whitelist('edit')
-                
+                CONFIG.set_setting('first_install', 'false')
                 self.close()
 
         def onAction(self, action):
@@ -305,7 +311,6 @@ def show_save_data_settings():
 
     fr = FirstRun("FirstRunSaveData.xml", CONFIG.ADDON_PATH, 'Default', current=CONFIG.KEEPWHITELIST)
     fr.doModal()
-    CONFIG.set_setting('first_install', 'false')
     del fr
 
 

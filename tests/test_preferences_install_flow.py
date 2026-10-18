@@ -15,7 +15,7 @@ class PreferenceInstallFlow(CompatibilityTests):
   data['addons/plugin.video.umbrella/resources/settings.xml']=('<settings>'+''.join('<setting id="'+key+'"/>' for key in EXPECTED['addon_data/plugin.video.umbrella/settings.xml'])+'</settings>').encode()
   data['addons/plugin.video.youtube/resources/settings.xml']=('<settings>'+''.join('<setting id="'+key+'"/>' for key in EXPECTED['addon_data/plugin.video.youtube/settings.xml'])+'</settings>').encode()
   if change:change(data)
-  return self.archive({'schema':3,'edition':'apple','kodi_major':21,'helper_patch':'empty-cache-1','preferences_policy':'playback-trakt-youtube-1','installer_min_version':'1.0.16'},data)
+  return self.archive({'schema':3,'edition':'apple','kodi_major':21,'helper_patch':'empty-cache-1','preferences_policy':'playback-trakt-youtube-1','installer_min_version':'1.0.17'},data)
  def run_install(self,auth_only=False,gui_keep=False,youtube_choices=None,compatibility_choices=False):
   k=Kodi();cfg,mods=self.install_environment(k);self.packaged();cfg.KEEPTRAKT='true';cfg.KEEPLOGIN='true';cfg.KEEPGUISETTINGS='true' if gui_keep else 'false';cfg.get_setting=lambda key:'true' if key=='authonlyclean' and auth_only else 'false'
   db=Path(cfg.DATABASE)/'Addons33.db';db.parent.mkdir(parents=True)

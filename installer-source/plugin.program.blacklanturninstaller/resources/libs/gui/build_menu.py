@@ -190,7 +190,8 @@ class BuildMenu:
                     fanart=fanart, icon=icon, themeit=CONFIG.THEME3)
                     
             directory.add_separator('INSTALL')
-            directory.add_file('Install', {'mode': 'install', 'action': 'build', 'name': name}, description=description, fanart=fanart,
+            from resources.libs.wizard import install_mode, install_summary
+            directory.add_file('Install - ' + install_mode(CONFIG), {'mode': 'install', 'action': 'build', 'name': name}, description=install_summary(CONFIG), fanart=fanart,
                                icon=icon, themeit=CONFIG.THEME1)
                                
             if guicheck:

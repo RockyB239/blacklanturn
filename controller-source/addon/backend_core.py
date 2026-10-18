@@ -6,7 +6,7 @@ SETTINGS_GROUPS=[
   ('categories','Category pages','Configure ordered rows within themed collections.'),
   ('sidebar','Sidebar','Add pages, add-ons and Kodi sections; choose names, icons and order.')]),
  ('Previews','Set how previews behave while you browse.',[
-  ('preview_mode','Automatic previews','Switch between automatic and manual previews.'),
+  ('preview_mode','Movie & show automatic previews','Switch movie and show previews between automatic and manual.'),
   ('preview_delay','Preview delay','Wait before starting a preview on a selected title.'),
   ('preview_language','Preview language','Prefer English and dubbed previews; retain other-language fallbacks.'),
   ('youtube_previews','YouTube automatic previews','Preview the highlighted YouTube video without changing watch history.')]),
@@ -33,7 +33,7 @@ SETTINGS_GROUPS=[
   ('kodi:addonbrowser','Add-ons','Installed add-ons and repositories.'),
   ('kodi:systeminfo','System information','Kodi version, hardware and network information.'),
   ('kodi:eventlog','Event log','Kodi notices and errors.')]),
- ('Help','Guidance for this BlackLanturn review.',[
+ ('Help','Guidance for using BlackLanturn.',[
   ('startup_preview','Preview loading screen','Review the BlackLanturn startup design.'),
   ('help','Using BlackLanturn','Browsing, search, accounts, previews and recovery.'),
   ('clear_search','Clear saved search','Remove the last search term saved on this device.'),

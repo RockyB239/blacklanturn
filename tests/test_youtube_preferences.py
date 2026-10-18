@@ -50,7 +50,7 @@ class YouTubePolicy(unittest.TestCase):
  packaged=flow.PreferenceInstallFlow.packaged
  module=flow.PreferenceInstallFlow.module
  def test_new_policy_installs_with_new_default_validation(self):
-  p=self.packaged();self.rewrite_policy(p,'playback-trakt-youtube-1','1.0.16');k=Kodi()
+  p=self.packaged();self.rewrite_policy(p,'playback-trakt-youtube-1','1.0.17');k=Kodi()
   m=self.module()
   try:result=m.prepare(p,k)
   except m.CompatibilityError as exc:self.fail('New YouTube policy was rejected: '+str(exc))
@@ -71,7 +71,7 @@ class YouTubePolicy(unittest.TestCase):
    with self.assertRaises(m.CompatibilityError):m.prepare(p,k)
    self.assertEqual(k.requests,[])
  def test_old_installer_rejects_new_policy_before_native_setup(self):
-  p=self.packaged();self.rewrite_policy(p,'playback-trakt-youtube-1','1.0.16');k=Kodi()
+  p=self.packaged();self.rewrite_policy(p,'playback-trakt-youtube-1','1.0.17');k=Kodi()
   # The published1.0.15 safeguard is retained directly from the prior Git revision.
   s=importlib.util.spec_from_file_location('published_guard',LIB.parents[3]/'tests/fixtures/platform_compatibility_1_0_15.py');m=importlib.util.module_from_spec(s);s.loader.exec_module(m)
   with self.assertRaises(m.CompatibilityError):m.prepare(p,k)

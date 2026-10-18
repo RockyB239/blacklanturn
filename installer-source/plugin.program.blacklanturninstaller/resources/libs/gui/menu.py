@@ -306,6 +306,17 @@ def system_info():
 
 
 def save_menu():
+    from resources.libs.wizard import install_mode, install_summary
+
+    directory.add_file('Install mode: ' + install_mode(CONFIG) + ' (click to change)',
+                       {'mode': 'togglesetting', 'name': 'authonlyclean'},
+                       description=install_summary(CONFIG), icon=CONFIG.ICONSAVE, themeit=CONFIG.THEME1)
+    directory.add_file('Standard Keep options below are ignored during Account-only reset.'
+                       if CONFIG.get_setting('authonlyclean') == 'true' else
+                       'Standard keeps the selected accounts and settings below.',
+                       description=install_summary(CONFIG), themeit=CONFIG.THEME3)
+    directory.add_file('Account choices apply to both modes; Standard Keep options below apply only to Standard.',
+                       themeit=CONFIG.THEME3)
     on = '[COLOR springgreen]ON[/COLOR]'
     off = '[COLOR red]OFF[/COLOR]'
 
@@ -334,7 +345,7 @@ def save_menu():
     directory.add_file('Keep \'Sources.xml\': {0}'.format(sources.replace('true', on).replace('false', off)), {'mode': 'togglesetting', 'name': 'keepsources'}, icon=CONFIG.ICONSAVE, themeit=CONFIG.THEME1)
     directory.add_file('Keep \'Profiles.xml\': {0}'.format(profiles.replace('true', on).replace('false', off)), {'mode': 'togglesetting', 'name': 'keepprofiles'}, icon=CONFIG.ICONSAVE, themeit=CONFIG.THEME1)
     directory.add_file('Keep \'playercorefactory.xml\': {0}'.format(playercore.replace('true', on).replace('false', off)), {'mode': 'togglesetting', 'name': 'keepplayercore'}, icon=CONFIG.ICONSAVE, themeit=CONFIG.THEME1)
-    directory.add_file('Keep \'guisettings.xml\': {0}'.format(guisettings.replace('true', on).replace('false', off)), {'mode': 'togglesetting', 'name': 'keepguiseettings'}, icon=CONFIG.ICONSAVE, themeit=CONFIG.THEME1)
+    directory.add_file('Keep \'guisettings.xml\': {0}'.format(guisettings.replace('true', on).replace('false', off)), {'mode': 'togglesetting', 'name': 'keepguisettings'}, icon=CONFIG.ICONSAVE, themeit=CONFIG.THEME1)
     directory.add_file('Keep \'Advancedsettings.xml\': {0}'.format(advanced.replace('true', on).replace('false', off)), {'mode': 'togglesetting', 'name': 'keepadvanced'}, icon=CONFIG.ICONSAVE, themeit=CONFIG.THEME1)
     directory.add_file('Keep \'Favourites.xml\': {0}'.format(favourites.replace('true', on).replace('false', off)), {'mode': 'togglesetting', 'name': 'keepfavourites'}, icon=CONFIG.ICONSAVE, themeit=CONFIG.THEME1)
     directory.add_file('Keep Super Favourites: {0}'.format(super.replace('true', on).replace('false', off)), {'mode': 'togglesetting', 'name': 'keepsuper'}, icon=CONFIG.ICONSAVE, themeit=CONFIG.THEME1)

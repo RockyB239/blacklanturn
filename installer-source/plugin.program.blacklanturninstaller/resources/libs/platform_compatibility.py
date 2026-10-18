@@ -71,7 +71,7 @@ def prepare(path, kodi):
                     if policy['schema'] == 3:
                         from resources.libs import build_preferences
                         preference_policy=policy.get('preferences_policy')
-                        minimum={'playback-trakt-1':'1.0.13','playback-trakt-youtube-1':'1.0.16'}.get(preference_policy)
+                        minimum={'playback-trakt-1':'1.0.13','playback-trakt-youtube-1':'1.0.17'}.get(preference_policy)
                         if minimum is None or policy.get('installer_min_version') != minimum:
                             raise CompatibilityError('Update BlackLanturn Installer before installing this build.')
                         try:

@@ -332,10 +332,10 @@
     "resources/tmdbhelper/lib/monitor/listitemfinaliser.py": "eb26c14a19650c761d5b9c2f9ff88d9ce35a4142a7d666887de3e2aaccae9321",
     "resources/tmdbhelper/lib/monitor/listitemgetter.py": "dbe552713a12b7657374ac1d534330f67bafcda8d12d3ccc4624b2010a03655f",
     "resources/tmdbhelper/lib/monitor/listitemtools.py": "9f0ab5236874c456a43a47c420d24263406eeb7eadfa3efb6f80abe48daffcd0",
-    "resources/tmdbhelper/lib/monitor/player.py": "079edde05adceebe5a8cb7aafab02b1e5fbadfed0c8165db9d3f3d92a7606424",
+    "resources/tmdbhelper/lib/monitor/player.py": "cc8c8f4e6f499f54bfab551a8a23687d9979a43a1562fc0fc6f066a09f9112ec",
     "resources/tmdbhelper/lib/monitor/poller.py": "a7ac3d3eea37e5ef20e0ff8813935f3b66026e9a71904de50e26722784000e59",
-    "resources/tmdbhelper/lib/monitor/scrobbler.py": "41c14fcb319807aedec1aad9e43408d0d4e3f00e053cad4ea8390d3bf95af7c3",
-    "resources/tmdbhelper/lib/monitor/service.py": "be6dbaa4855e25f644d45f4c23ef3934323095f4e87d3a528e08f81d0a56473a",
+    "resources/tmdbhelper/lib/monitor/scrobbler.py": "c86c9959f7fafbc78809e77d9797846317c971cc0ad429c43b35f812020273fb",
+    "resources/tmdbhelper/lib/monitor/service.py": "bc2f093687fcc763461aa8deb4930b35a17a7162d7b9cc23edda56c73fd87224",
     "resources/tmdbhelper/lib/monitor/update.py": "781fbfd612356832a051c7db1059379622d8c59656f9300a92b8751646d2936e",
     "resources/tmdbhelper/lib/monitor/utils.py": "4845cc9b5838ee5372f302e22af116b3d2ee55134da1bbf73b0a5706eb49c720",
     "resources/tmdbhelper/lib/player/action/dialog.py": "906187275f19d06747b74633793f8c4e30d0c568f0dbbbf440d338973294643a",
@@ -476,5 +476,6 @@
     "resources/tmdbhelper/lib/window/manager.py": "8ad0ab16166c8740151022c2f97ce4b394031432972e73f866fd18a859a2ac70",
     "resources/tmdbhelper/lib/window/recommendations.py": "74e365277a2c9cbcdf490341ecb4b37c36806d9c0a38beeb35dbace2f9e26bea"
   },
-  "search_patch": "search-batch-1"
+  "search_patch": "search-batch-1",
+  "playback_patch": "sampled-progress-1"
 }

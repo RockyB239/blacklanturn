@@ -33,6 +33,38 @@ from resources.libs.common.config import CONFIG
 from resources.libs.downloader import Downloader
 
 
+def install_mode(config):
+    return 'Account-only reset' if config.get_setting('authonlyclean') == 'true' else 'Standard'
+
+def install_summary(config):
+    """Describe the same saved choices consumed by OpenWizard's build install."""
+    def choices(items):
+        return ', '.join('{}: {}'.format(label, 'ON' if getattr(config, key, 'false') == 'true' else 'OFF')
+                         for key, label in items)
+    accounts = choices((('KEEPTRAKT', 'Trakt'), ('KEEPDEBRID', 'Debrid'), ('KEEPLOGIN', 'Login')))
+    if config.get_setting('authonlyclean') == 'true':
+        return ('Mode: Account-only reset\nAccounts to keep - {}\n'
+                'Reset settings, playback preferences, sources, favourites and other user data to build defaults. '
+                'Only selected accounts are kept. Standard Keep options are ignored.').format(accounts)
+    settings = choices((('KEEPSOURCES', 'Sources'), ('KEEPPROFILES', 'Profiles'),
+                        ('KEEPPLAYERCORE', 'playercorefactory.xml'), ('KEEPGUISETTINGS', 'guisettings.xml'),
+                        ('KEEPADVANCED', 'advancedsettings.xml'), ('KEEPFAVS', 'Favourites'),
+                        ('KEEPSUPER', 'Super Favourites'), ('KEEPREPOS', 'Repositories'),
+                        ('KEEPWHITELIST', 'Whitelist')))
+    return ('Mode: Standard\nAccounts to keep - {}\nKeep options - {}\n'
+            'Supported build preferences are preserved; other unselected user data is replaced.').format(accounts, settings)
+
+
+def install_confirmation(config):
+    """Put the decision before detail in Kodi's short native yes/no textbox."""
+    summary = install_summary(config).splitlines()
+    if config.get_setting('authonlyclean') == 'true':
+        return '\n'.join((summary[0], 'Reset settings and playback; Keep options ignored.', summary[1],
+                          'Other user data is replaced by build defaults.'))
+    return '\n'.join((summary[0], 'Preserve accounts, preferences and selected Keep data.', summary[1], summary[2],
+                      'Other unselected user data is replaced.'))
+
+
 class Wizard:
 
     def __init__(self):
@@ -74,26 +106,16 @@ class Wizard:
         else:
             warning = False
 
+        # Even update calls must review the saved preservation mode before download.
+        reviewed_auth_only = CONFIG.get_setting('authonlyclean') == 'true'
+        summary = install_confirmation(CONFIG)
+        title = '{} v{}'.format(name, check.check_build(name, 'version'))
         if warning:
-            yes_pressed = self.dialog.yesno("{0} - [COLOR red]WARNING!![/COLOR]".format(CONFIG.ADDONTITLE),
-                                       '[COLOR {0}]There is a chance that the skin will not appear correctly'.format(
-                                           CONFIG.COLOR2),
-                                       'When installing a {0} build on a Kodi {1} install'.format(
-                                           check.check_build(name, 'kodi'), CONFIG.KODIV),
-                                       'Would you still like to install: [COLOR {0}]{1} v{2}[/COLOR]?[/COLOR]'.format(
-                                           CONFIG.COLOR1, name, check.check_build(name, 'version')),
-                                       nolabel='[B][COLOR red]No, Cancel[/COLOR][/B]',
-                                       yeslabel='[B][COLOR springgreen]Yes, Install[/COLOR][/B]')
-        else:
-            if over:
-                yes_pressed = 1
-            else:
-                yes_pressed = self.dialog.yesno(
-                                           CONFIG.ADDONTITLE,
-                                           '[COLOR {0}]Would you like to Download and Install:\n\n[COLOR {1}]{2} v{3}[/COLOR]?[/COLOR]'.format(
-                                               CONFIG.COLOR2, CONFIG.COLOR1, name, check.check_build(name, 'version')),
-                                           nolabel='[B][COLOR red]No, Cancel[/COLOR][/B]',
-                                           yeslabel='[B][COLOR springgreen]Yes, Install[/COLOR][/B]')
+            title = 'WARNING: ' + title
+            summary += '\nTargets Kodi {} (installed: {}). Skin display may differ.'.format(buildv, CONFIG.KODIV)
+        yes_pressed = self.dialog.yesno(
+            title, summary,
+            nolabel='Cancel', yeslabel='Reset & install' if reviewed_auth_only else 'Install')
         if yes_pressed:
             CONFIG.clear_setting('build')
             CONFIG.set_setting('authorizationsrestored', 'false')
@@ -133,7 +155,13 @@ class Wizard:
 
             protected_helper = (prepared.get('policy') or {}).get('schema') in (2, 3)
             protected_preferences = (prepared.get('policy') or {}).get('schema') == 3
-            auth_only = protected_helper and CONFIG.get_setting('authonlyclean') == 'true'
+            if reviewed_auth_only and not protected_helper:
+                self.dialogProgress.close()
+                self.dialog.ok(CONFIG.ADDONTITLE,
+                               'Account-only reset is unavailable for this older build. '
+                               'No cleanup has run. Choose Standard in Save Data to install it with your selected Keep options.')
+                return
+            auth_only = protected_helper and reviewed_auth_only
             if auth_only:
                 for option in ('KEEPFAVS', 'KEEPSOURCES', 'KEEPPROFILES', 'KEEPPLAYERCORE',
                                'KEEPADVANCED', 'KEEPGUISETTINGS', 'KEEPREPOS', 'KEEPSUPER',

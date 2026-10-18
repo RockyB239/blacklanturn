@@ -852,7 +852,7 @@ class LiveReview(YouTubeBrowser,xbmcgui.WindowXML):
             if getattr(self,'search_state',None) and not any(self.rows):first=600
             self.getControl(600).controlUp(self.getControl(101 if self.selected else 600))
             has_episodes=bool(show_identity(self.selected or {}) and not self.episode_browser_context)
-            manual_preview=self.preview_mode!='auto' and getattr(self,'previews_ready',True)
+            manual_preview=not automatic_preview(getattr(self,'config',{}),getattr(self,'section',''),self.preview_mode) and (getattr(self,'section','')=='YouTube' or getattr(self,'previews_ready',True))
             if getattr(self,'startup_idle',False):
                 idle=self.getControl(5);idle.controlRight(self.getControl(first));idle.controlDown(self.getControl(first))
             if self.mode=='home':
@@ -989,7 +989,7 @@ class LiveReview(YouTubeBrowser,xbmcgui.WindowXML):
             discovery=discovery_result(item)
             self.setProperty('browsable','true' if discovery or item.get('type')=='addon' or item.get('_page_control') else 'false')
             self.getControl(101).setLabel(item['label'] if item.get('_page_control') else 'Open add-on' if item.get('type')=='addon' else discovery['button'] if discovery else 'Episodes' if item.get('filetype')=='directory' and item.get('year') else 'Resume' if episode_line and watch_state(item)['state']=='progress' else 'Play')
-            self.getControl(103).controlRight(self.getControl(105 if self.mode=='home' and self.preview_mode!='auto' and getattr(self,'previews_ready',True) else 106 if show_identity(item) and not self.episode_browser_context else 103))
+            self.getControl(103).controlRight(self.getControl(105 if self.mode=='home' and not automatic_preview(getattr(self,'config',{}),getattr(self,'section',''),self.preview_mode) and (getattr(self,'section','')=='YouTube' or getattr(self,'previews_ready',True)) else 106 if show_identity(item) and not self.episode_browser_context else 103))
             self.getControl(105).controlRight(self.getControl(103 if self.mode=='details' else 106 if show_identity(item) and not self.episode_browser_context else 105))
             self.display_ratings([] if discovery or is_youtube(item) else rating_badges(item));self.setProperty('plot',item.get('plot') or ('Browse movies and shows from this studio.' if entity_kind(item)=='company' else 'Browse the titles in this collection.' if entity_kind(item)=='collection' else ''))
             if is_youtube(item):
@@ -1311,13 +1311,18 @@ class LiveReview(YouTubeBrowser,xbmcgui.WindowXML):
         discovery=discovery_result(item)
         if discovery:self.open_discovery(discovery);return
         self.setProperty('captionRows','false')
-        self.stop_preview();self.return_focus=self.getFocusId();self.mode='details';self.setProperty('page','details');self.setProperty('scroll','top');self.update(item)
+        self.stop_preview();self.return_focus=self.getFocusId();self.mode='details';self.setProperty('page','details');self.setProperty('scroll','top')
+        youtube=is_youtube(item);self.setProperty('youtubeDetails','true' if youtube else 'false');self.update(item)
+        preview_available=self.getProperty('previewsReady')=='true'
         self.getControl(101).controlDown(self.getControl(3000));self.getControl(103).controlDown(self.getControl(3000));self.getControl(105).controlDown(self.getControl(3000))
-        self.getControl(101).controlRight(self.getControl(105 if getattr(self,'previews_ready',True) else 103))
+        self.getControl(101).controlRight(self.getControl(105 if preview_available else 103))
         self.getControl(105).controlLeft(self.getControl(101));self.getControl(105).controlRight(self.getControl(103))
-        self.getControl(103).controlLeft(self.getControl(105 if getattr(self,'previews_ready',True) else 101));self.getControl(103).controlRight(self.getControl(106 if show_identity(item) and not self.episode_browser_context else 103))
+        self.getControl(103).controlLeft(self.getControl(105 if preview_available else 101));self.getControl(103).controlRight(self.getControl(106 if show_identity(item) and not self.episode_browser_context else 103))
         self.getControl(106).controlDown(self.getControl(3000));self.getControl(106).controlLeft(self.getControl(103))
-        self.getControl(3000).reset();self.getControl(3100).reset();self.related=[];self.setFocusId(101)
+        self.getControl(3000).reset();self.getControl(3100).reset();self.related=[];self.cast_people=[];self.setFocusId(101)
+        if youtube:
+            for cid in (101,103,105,106):self.getControl(cid).controlDown(self.getControl(cid))
+            self.setProperty('notice','YouTube · Back returns to browsing');return
         source_key=item.get('file');self.setProperty('notice','Loading details…')
         def current():return self.alive and lifetime is getattr(self,'window_lifetime',None) and self.mode=='details' and (self.selected or {}).get('file')==source_key
         def work():
@@ -1429,7 +1434,7 @@ class LiveReview(YouTubeBrowser,xbmcgui.WindowXML):
             except (OSError,ValueError):store={}
             ready=preview_configured(fields,store,enabled=enabled)
         except Exception:pass
-        self.previews_ready=ready;self.setProperty('previewsReady','true' if ready else 'false')
+        self.previews_ready=ready;self.setProperty('previewsReady','true' if getattr(self,'section','')=='YouTube' or ready else 'false')
     def preview(self,automatic=False):
         input_generation=getattr(self,'input_generation',0)
         if automatic and time.monotonic()-self.dwell<self.config.get('PreviewDelay',5):return
@@ -1723,7 +1728,8 @@ class LiveReview(YouTubeBrowser,xbmcgui.WindowXML):
                 if self.selected:self.update(self.selected)
         elif action=='youtube_previews':
             self.stop_preview();self.config['YouTubePreviews']=not self.config.get('YouTubePreviews',True);self.save()
-            if self.section=='YouTube':self.setProperty('previewMode','auto' if self.config['YouTubePreviews'] else 'manual')
+            if self.section=='YouTube':
+                self.setProperty('previewMode','auto' if self.config['YouTubePreviews'] else 'manual');self.row_navigation()
         elif action=='preview_language':
             chosen=xbmcgui.Dialog().select('Preferred preview language',['English first, other languages as fallback','Provider order'],preselect=0 if self.config.get('PreviewLanguage','en')=='en' else 1)
             if chosen>=0:
@@ -1734,7 +1740,8 @@ class LiveReview(YouTubeBrowser,xbmcgui.WindowXML):
             if chosen>=0:self.config['PreviewDelay']=delays[chosen];self.save();self.dwell=time.monotonic()
         elif action=='preview_mode':
             self.stop_preview();self.preview_mode='auto' if self.preview_mode=='manual' else 'manual'
-            self.setProperty('previewMode',self.preview_mode);self.config['PreviewMode']=self.preview_mode;self.save()
+            if self.section!='YouTube':self.setProperty('previewMode',self.preview_mode)
+            self.config['PreviewMode']=self.preview_mode;self.save();self.row_navigation()
         elif action=='integration_status':self.integration_status()
         elif action=='help':
             xbmcgui.Dialog().textviewer('BlackLanturn · Help',(ROOT/'HELP.txt').read_text(encoding='utf-8'))
@@ -1846,6 +1853,7 @@ class LiveReview(YouTubeBrowser,xbmcgui.WindowXML):
                 if not current():return
             time.sleep(.08)
     def arrow(self,cid):
+        if self.mode=='details' and self.getProperty('youtubeDetails')=='true':return
         if cid in (700,701):
             if self.mode=='home' and getattr(self,'adaptive_browsing',False):
                 if getattr(self,'search_state',None) and self.mouse:
@@ -2086,12 +2094,13 @@ class LiveReview(YouTubeBrowser,xbmcgui.WindowXML):
             self.stop_preview()
             if self.nav:self.set_nav(False,pending_focus=True);self.setFocusId(101 if self.mode=='details' else 600 if getattr(self,'search_state',None) and not any(self.rows) else self.return_focus)
             elif self.mode=='details':
-                self.mode='home';self.setProperty('page','home');self.setProperty('scroll','top');self.setFocusId(self.return_focus if self.return_focus in (900,901) else 900)
-                captions=bool(self.person_context or self.episode_browser_context or self.search_state or self.discovery_stack and self.getProperty('filmographyBrowser')!='true')
+                self.mode='home';self.setProperty('page','home');self.setProperty('scroll','top')
+                captions=bool(self.section=='YouTube' or self.person_context or self.episode_browser_context or self.search_state or self.discovery_stack and self.getProperty('filmographyBrowser')!='true')
                 self.setProperty('captionRows','true' if captions else 'false')
                 for control in (900,901):self.getControl(control).setHeight(360 if self.section=='YouTube' else 344 if captions else 276)
                 for control in (101,103,105,106):self.getControl(control).controlDown(self.getControl(900))
                 self.row_navigation()
+                self.setFocusId(self.return_focus if self.return_focus in (900,901) else 900)
             else:
                 prior=self.histories[self.last_row].pop()
                 if prior:self.load_path(self.last_row,prior[0],back=True,position=prior[1])

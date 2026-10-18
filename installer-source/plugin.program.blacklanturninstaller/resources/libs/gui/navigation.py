@@ -1,5 +1,6 @@
 """Branded navigation over OpenWizard's existing catalog and maintenance menus."""
 import os,re
+from urllib.parse import urlparse
 import xbmc, xbmcgui, xbmcplugin
 from resources.libs.common.config import CONFIG
 from resources.libs.common import directory, tools
@@ -12,6 +13,12 @@ MAINT={'clean':'clean_menu','addon':'addon_menu','logging':'logging_menu','misc'
 SIMPLE={'savedata':'save_menu','trakt':'trakt_menu','realdebrid':'debrid_menu','login':'login_menu',
  'enableaddons':'enable_addons','removeaddondata':'remove_addon_data_menu','nettools':'net_tools',
  'systeminfo':'system_info','viewIP':'view_ip','youtube':'youtube_menu','apk':'apk_menu','developer':'developer'}
+
+def sidebar_items():
+    url=urlparse(getattr(CONFIG,'ADDONFILE','').strip())
+    configured=(url.scheme in ('http','https') and bool(url.netloc)) or os.path.isfile(
+        os.path.join(CONFIG.ADDON_PATH,'resources','text','addons.json'))
+    return [item for item in SIDEBAR if item[1].get('mode')!='addons' or configured]
 
 def producer(route):
     mode=route.get('mode');name=route.get('name')
@@ -88,11 +95,12 @@ class InstallerNavigation(xbmcgui.WindowXMLDialog):
         subtitles={'home':'Your BlackLanturn setup, all in one place.','builds':'Choose a build, then review its installation options.','savedata':'Choose which accounts and settings to preserve.','maint':'Keep your setup running smoothly.'}
         self.setProperty('subtitle',subtitles.get(mode or 'home','Select a tool or press Back to return.'))
         sidebar=self.getControl(100);sidebar.reset();active_index=0
-        for title,route,icon in SIDEBAR:
+        self.sidebar=sidebar_items()
+        for index,(title,route,icon) in enumerate(self.sidebar):
             li=xbmcgui.ListItem(title);li.setArt({'icon':os.path.join(CONFIG.ADDON_PATH,'resources/media',icon)})
             active=(not mode and not route) or (mode and route.get('mode')==mode) or (mode in ('viewbuild',) and route.get('mode')=='builds') or (mode in ('trakt','realdebrid','login') and route.get('mode')=='savedata')
             li.setProperty('active','true' if active else 'false');sidebar.addItem(li)
-            if active:active_index=SIDEBAR.index((title,route,icon))
+            if active:active_index=index
         sidebar.selectItem(active_index)
         self.control=200 if layout=='home' else 201 if layout=='builds' else 202
         if layout=='builds':self.rows=[r for r in self.rows if r['params'].get('mode')=='viewbuild']
@@ -116,7 +124,7 @@ class InstallerNavigation(xbmcgui.WindowXMLDialog):
     def onClick(self,control):
         self.remember()
         if control==100:
-            title,route,_=SIDEBAR[self.getControl(100).getSelectedPosition()]
+            title,route,_=self.sidebar[self.getControl(100).getSelectedPosition()]
             self.pending=('switch',route,title);self.close()
         elif control in (200,201,202):
             r=self.rows[self.nav.selected]

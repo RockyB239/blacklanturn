@@ -1,4 +1,4 @@
-"""Reproducible 1.1.11 release from verified clean baselines, never live profiles."""
+"""Reproducible 1.1.12 release from verified clean baselines, never live profiles."""
 import argparse,ast,hashlib,importlib.util,json,re,sys,xml.etree.ElementTree as ET,zipfile
 from pathlib import Path
 ROOT=Path(__file__).resolve().parents[1]
@@ -12,23 +12,29 @@ def zipwrite(path,data):
    e=zipfile.ZipInfo(name,(2026,10,16,0,0,0));e.compress_type=zipfile.ZIP_DEFLATED;e.external_attr=0o100644<<16;z.writestr(e,raw)
  with zipfile.ZipFile(path) as z:assert z.testzip() is None
 
+def apply_display_defaults(data):
+ key='userdata/addon_data/script.blacklanturn.preview/rows.json'
+ config=json.loads(data[key]);ratings=['rottentomatoes','metacritic','imdb','popcorn']
+ if config.get('RatingSources')!=ratings:
+  config['RatingSources']=ratings;data[key]=json.dumps(config,indent=2).encode()
+
 def build(baselines,output):
  output.mkdir(parents=True,exist_ok=True)
  installer={str(p.relative_to(SOURCE)):p.read_bytes() for p in SOURCE.rglob('*') if p.is_file() and '__pycache__' not in p.parts and not p.name.endswith(('.pyc','.DS_Store'))}
- assert ET.fromstring(installer['addon.xml']).get('version')=='1.0.16'
- zipwrite(output/'plugin.program.blacklanturninstaller-1.0.16.zip',{'plugin.program.blacklanturninstaller/'+n:d for n,d in installer.items()})
+ assert ET.fromstring(installer['addon.xml']).get('version')=='1.0.17'
+ zipwrite(output/'plugin.program.blacklanturninstaller-1.0.17.zip',{'plugin.program.blacklanturninstaller/'+n:d for n,d in installer.items()})
  spec=importlib.util.spec_from_file_location('managed',SOURCE/'resources/libs/managed_addons.py');managed=importlib.util.module_from_spec(spec);spec.loader.exec_module(managed)
  for edition,expected in BASE_HASHES.items():
   source=baselines/f'BlackLanturn-{edition}-Kodi21-1.1.2.zip';assert sha(source.read_bytes())==expected,'Baseline changed'
   with zipfile.ZipFile(source) as z:
    assert z.testzip() is None;before={n:z.read(n) for n in z.namelist()}
-  data=dict(before);prefix='addons/plugin.program.blacklanturninstaller/'
+  data=dict(before);apply_display_defaults(data);prefix='addons/plugin.program.blacklanturninstaller/'
   data={n:d for n,d in data.items() if not n.startswith(prefix)}
   data.update({prefix+n:d for n,d in installer.items()})
   controller_root=ROOT/'controller-source/addon'
   controller={str(p.relative_to(controller_root)):p.read_bytes() for p in controller_root.rglob('*') if p.is_file() and '__pycache__' not in p.parts and p.suffix!='.pyc'}
-  controller_manifest=json.loads((ROOT/'controller-source/manifest82.json').read_text())
-  assert controller_manifest['controller']=='0.1.82' and ET.fromstring(controller['addon.xml']).get('version')=='0.1.82'
+  controller_manifest=json.loads((ROOT/'controller-source/manifest83.json').read_text())
+  assert controller_manifest['controller']=='0.1.83' and ET.fromstring(controller['addon.xml']).get('version')=='0.1.83'
   expected_controller=controller_manifest['files']
   assert {n:sha(raw) for n,raw in controller.items()}==expected_controller,'Validated controller changed'
   cp='addons/script.blacklanturn.preview/'
@@ -38,6 +44,8 @@ def build(baselines,output):
   assert sha(before[target])=='27f4d284eab62bfdfb414c6945f84dcbf86affa3e58277ddb5a6d370b4330996'
   data[target]=(PATCH/'candidate/lists_search.py').read_bytes()
   assert sha(data[target])=='3cc1c1165fd57b233b868fb35e4ceca1cf2449a85a44fb5b9f04cde4b6ae2862'
+  for name in ('player.py','scrobbler.py','service.py'):
+   data['addons/plugin.video.themoviedb.helper/resources/tmdbhelper/lib/monitor/'+name]=(ROOT/'compatibility/helper-progress/candidate'/name).read_bytes()
   gui=ET.fromstring(data['userdata/guisettings.xml'])
   for key,value in {'filecache.memorysize':'64','filecache.readfactor':'400','filecache.buffermode':'4','filecache.chunksize':'131072','locale.audiolanguage':'default','locale.subtitlelanguage':'forced_only'}.items():
    node=next((n for n in gui if n.get('id')==key),None)
@@ -60,10 +68,10 @@ def build(baselines,output):
   apply_settings(yp,{'kodion.mpd.stream.select':'1','kodion.video.stream.select':'1'})
   defaults=json.loads((SOURCE/'resources/playback-defaults.json').read_text(encoding='utf-8'))
   for name,fields in defaults.items():apply_settings('userdata/'+name,fields)
-  marker=json.loads(data['userdata/blacklanturn-build.json']);marker.update(schema=3,preferences_policy='playback-trakt-youtube-1',build_version='1.1.11',helper_patch='empty-cache-1',installer_min_version='1.0.16',controller_version='0.1.82',helper_search_patch='search-batch-1')
+  marker=json.loads(data['userdata/blacklanturn-build.json']);marker.update(schema=3,preferences_policy='playback-trakt-youtube-1',build_version='1.1.12',helper_patch='empty-cache-1',installer_min_version='1.0.17',controller_version='0.1.83',helper_search_patch='search-batch-1',helper_playback_patch='sampled-progress-1')
   data['userdata/blacklanturn-build.json']=json.dumps(marker,indent=2).encode()
-  data['userdata/BlackLanturn-README.txt']=(before['userdata/BlackLanturn-README.txt'].decode()+'\n\nRelease 1.1.11: controller 0.1.82 with tighter YouTube Science, History, Ancient History, Electronics, Philosophy, Psychology, Nature and other recognized subject rows using positive public title or specific-topic evidence. Generic and format rows remain mixed. Personalized order, artwork, cursors and watch state remain preserved; 45-second inline previews stay capped at 720p H264 with fade and same-hover completion. Normal full playback uses automatic quality with a 2160p ceiling. Installer 1.0.16 and the playback-trakt-youtube-1 policy validate all clean YouTube playback defaults. Standard updates preserve stored playback choices; account-only clean installs reset preferences to build defaults while retaining selected authorizations. Retains repaired search/preloading, history-safe previews, Cocoscrapers integration, Trakt defaults, High artwork and the 64MB fixed4x playback buffer. Includes the managed Helper search-empty repair. Native playback components remain device-specific. Full release acceptance requires fresh exact-source three-device subject-row, restart, refresh and preservation evidence. Unchanged playback behavior retains explicitly identified controller 0.1.81 evidence only behind the exact four-path source-delta gate. This package description alone is not native proof.\n').encode()
-  allowed={n for n in set(before)|set(data) if n.startswith((prefix,cp))}|{'userdata/blacklanturn-build.json','userdata/BlackLanturn-README.txt','userdata/guisettings.xml',hp,up,yp,target}
+  data['userdata/BlackLanturn-README.txt']=(before['userdata/BlackLanturn-README.txt'].decode()+'\n\nRelease 1.1.12: controller 0.1.83 uses YouTube-specific Details and consistent independent preview navigation. Both clean editions default to four ratings with TMDb hidden; ratings remain configurable. Installer 1.0.17 makes Standard versus Account-only reset explicit, repairs preservation controls and hides unconfigured destinations. Standard updates retain selected playback choices and authorizations; account-only reset deliberately uses build defaults and selected accounts. Managed Helper 6.17.9 includes sampled-progress-1 alongside empty-cache-1 and search-batch-1. Position sampling uses the existing playback service only, with no added browsing network requests or background thread. Existing adaptive YouTube recommendations, artwork, watch status, 45-second inline previews, automatic fullscreen quality, language/forced subtitle defaults and device-specific playback compatibility remain retained. Native release acceptance is recorded separately; this package description is not proof.\n').encode()
+  allowed={n for n in set(before)|set(data) if n.startswith((prefix,cp))}|{'userdata/blacklanturn-build.json','userdata/BlackLanturn-README.txt','userdata/guisettings.xml','userdata/addon_data/script.blacklanturn.preview/rows.json',hp,up,yp,target}|{'addons/plugin.video.themoviedb.helper/resources/tmdbhelper/lib/monitor/'+n for n in ('player.py','scrobbler.py','service.py')}
   changed={n for n in set(before)|set(data) if before.get(n)!=data.get(n)};assert changed<=allowed
   for n,raw in data.items():
    assert n.startswith(('addons/','userdata/')) and '..' not in n.split('/')
@@ -72,17 +80,17 @@ def build(baselines,output):
    assert not raw.startswith((b'\x7fELF',b'\xcf\xfa\xed\xfe',b'\xfe\xed\xfa\xcf',b'MZ'))
    if n.endswith('/addon.xml'):ET.fromstring(raw)
    if n.endswith('.py') and n!=prefix+'resources/libs/zipfile.py':ast.parse(raw,n)
-   if n.startswith('userdata/') and n not in ('userdata/blacklanturn-build.json','userdata/BlackLanturn-README.txt','userdata/guisettings.xml',hp,up,yp):assert raw==before[n],'Userdata changed'
+   if n.startswith('userdata/') and n not in ('userdata/blacklanturn-build.json','userdata/BlackLanturn-README.txt','userdata/guisettings.xml','userdata/addon_data/script.blacklanturn.preview/rows.json',hp,up,yp):assert raw==before[n],'Userdata changed'
   addons={n.split('/')[1]:ET.fromstring(raw) for n,raw in data.items() if n.startswith('addons/') and n.endswith('/addon.xml')}
   system={'xbmc.python','xbmc.gui','xbmc.json','xbmc.addon','kodi.resource','script.module.pil','script.module.pycryptodome','inputstream.adaptive'}
   for aid,addon in addons.items():
    for dep in addon.findall('./requires/import'):
     if dep.get('optional')=='true':continue
     assert dep.get('addon') in addons or dep.get('addon') in system,(aid,dep.get('addon'))
-  out=output/f'BlackLanturn-{edition}-Kodi21-1.1.11.zip';zipwrite(out,data)
+  out=output/f'BlackLanturn-{edition}-Kodi21-1.1.12.zip';zipwrite(out,data)
   with zipfile.ZipFile(out) as z:managed.verify_archive(z)
   files={n:sha(d) for n,d in sorted(data.items())}
-  report={'file':out.name,'sha256':sha(out.read_bytes()),'bytes':out.stat().st_size,'files':len(data),'changed_paths':sorted(changed),'helper':'6.17.9 + empty-cache-1 + search-batch-1','installer':'1.0.16','schema':3,'settings_and_rows':'clean 1.1.2 plus exact playback-provider, automatic YouTube quality, watch-indicator, 64MB/4x buffer and High artwork defaults','native_binaries':0}
+  report={'file':out.name,'sha256':sha(out.read_bytes()),'bytes':out.stat().st_size,'files':len(data),'changed_paths':sorted(changed),'helper':'6.17.9 + empty-cache-1 + search-batch-1 + sampled-progress-1','installer':'1.0.17','schema':3,'settings_and_rows':'clean 1.1.2 plus exact playback-provider, automatic YouTube quality, watch-indicator, 64MB/4x buffer and High artwork defaults','native_binaries':0}
   (output/(edition+'-package.json')).write_text(json.dumps(report,indent=2));(output/(edition+'-manifest.json')).write_text(json.dumps(files,indent=2));print(json.dumps(report),flush=True)
 if __name__=='__main__':
  p=argparse.ArgumentParser();p.add_argument('--baselines',type=Path,required=True);p.add_argument('--output',type=Path,required=True);a=p.parse_args();build(a.baselines,a.output)

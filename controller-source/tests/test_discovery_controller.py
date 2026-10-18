@@ -7,7 +7,7 @@ sys.path.insert(0,str(Path(__file__).parents[1]/'addon'))
 from live_core import PageHistory,row_items,my_stuff_rows,show_identity
 from discovery_core import window_shift
 from episode_ui import episode_item
-from youtube_core import resume_allowed
+from youtube_core import resume_allowed,automatic_preview
 from row_feedback import trim_row_cache,row_message
 from search_ui import discovery_result,best_matches,clear_search_selection,entity_kind
 from filtered_pages import provider_path,upstream_path,needs_fill
@@ -28,7 +28,7 @@ class SyncThread:
  def start(self):self.target()
 def methods(names,namespace):
  from browse_controls import page_cards,should_exclude_anime
- namespace.update(youtube_resume_allowed=resume_allowed,page_cards=page_cards,should_exclude_anime=should_exclude_anime,best_matches=best_matches,clear_search_selection=clear_search_selection,entity_kind=entity_kind,show_identity=show_identity,parse_qs=parse_qs,urlsplit=urlsplit)
+ namespace.update(automatic_preview=automatic_preview,youtube_resume_allowed=resume_allowed,page_cards=page_cards,should_exclude_anime=should_exclude_anime,best_matches=best_matches,clear_search_selection=clear_search_selection,entity_kind=entity_kind,show_identity=show_identity,parse_qs=parse_qs,urlsplit=urlsplit)
  namespace.update(row_items=row_items,provider_path=provider_path,upstream_path=upstream_path,needs_fill=needs_fill)
  cls=next(n for n in ast.parse(SOURCE.read_text()).body if isinstance(n,ast.ClassDef) and n.name=='LiveReview')
  nodes=[next((n for n in cls.body if isinstance(n,ast.FunctionDef) and n.name==name),None) for name in names]
