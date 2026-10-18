@@ -8,7 +8,7 @@ from contextlib import contextmanager
 from types import SimpleNamespace
 from pathlib import Path
 from youtube_core import video_id
-from youtube_home import parse_shelves,section_continuation,local_rows,merge_shelves,MAX_GROUPS
+from youtube_home import parse_shelves,parse_horizontal,section_continuation,local_rows,merge_shelves,MAX_GROUPS
 from youtube_artwork import cached_fit_cards
 
 _lock=threading.RLock()
@@ -86,11 +86,45 @@ def _resolve(runtime,unique,current):
                       'artist':item.get_artists() or [],'studio':item.get_studios() or [],'art':{'thumb':item.get_image(),'fanart':item.get_fanart() or ''}})
     return cached_fit_cards(items)
 
-def load_home_rows(current=lambda:True):
+@contextmanager
+def _content_refresh(runtime,refresh):
+    # Native request caching honors this context flag. Never clear account,
+    # history or shared databases, and never leave it set for later previews.
+    params=runtime.context.get_params() if refresh else None
+    missing=object();previous=params.get('refresh',missing) if params is not None else missing
+    if params is not None:params['refresh']=1
+    try:yield
+    finally:
+        if params is not None:
+            if previous is missing:params.pop('refresh',None)
+            else:params['refresh']=previous
+
+def load_home_rows(current=lambda:True,refresh=False):
     if not current():return []
     with _session(current) as runtime:
         context,provider=runtime.context,runtime.provider;client=provider.get_client(context)
-        return _load_home(runtime,client,current)
+        with _content_refresh(runtime,refresh):return _load_home(runtime,client,current)
+
+def _resolve_entries(runtime,entries,current):
+    unique={x['id']:x for x in entries if x.get('kind')=='youtube#video'}
+    resolved={}
+    for start in range(0,len(unique),40):
+        if not current():return []
+        batch=dict(list(unique.items())[start:start+40])
+        resolved.update({video_id(x):x for x in _resolve(runtime,batch,current)})
+    return [x if x.get('filetype')=='directory' else resolved[x['id']] for x in entries if x.get('filetype')=='directory' or x['id'] in resolved]
+
+def load_shelf_page(cursor,current=lambda:True):
+    if not current():raise RuntimeError('YouTube request retired')
+    with _session(current) as runtime:
+        client=runtime.provider.get_client(runtime.context)
+        raw=client.get_browse_items(browse_id='FEwhat_to_watch',client='tv',do_auth=True,json_path=None,
+                                    page_token=cursor['continuation'],click_tracking=cursor.get('clickTrackingParams'),visitor=cursor.get('visitor'))
+        if not current():raise RuntimeError('YouTube request retired')
+        if not isinstance(raw,dict) or 'horizontalListContinuation' not in raw.get('continuationContents',{}):
+            raise RuntimeError('YouTube shelf response unavailable')
+        entries,more=parse_horizontal(raw,cursor.get('visitor'))
+        return _resolve_entries(runtime,entries,current),more
 
 def _load_home(runtime,client,current):
     # Main recommendations/subscriptions resolve independently. Broader interest
@@ -108,8 +142,8 @@ def _load_home(runtime,client,current):
         except Exception:break # Keep earlier real groups on a later-page failure.
         if not current():return []
         shelves=merge_shelves(shelves,parse_shelves(raw))
-    unique={x['id']:x for shelf in shelves for x in shelf['items']}
-    if not unique:return []
+    unique={x['id']:x for shelf in shelves for x in shelf['items'] if x.get('kind')=='youtube#video'}
+    if not shelves:return []
     # The native converter's page size must not truncate the later shelves.
     items=[];entries=list(unique.items())
     for start in range(0,len(entries),40):

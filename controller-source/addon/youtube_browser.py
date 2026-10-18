@@ -3,6 +3,7 @@ import json,time,threading,copy
 from contextlib import nullcontext
 from youtube_core import ConnectionState,TABS,tab_rows,account_options,connected_account
 from youtube_provider import load_home_rows
+from youtube_rows import YouTubeRows
 
 def read_account_store():
     import xbmcvfs
@@ -16,7 +17,7 @@ def read_account_store():
     if not raw:raise ValueError('YouTube account store temporarily unreadable')
     return json.loads(raw.decode('utf-8'))
 
-class YouTubeBrowser:
+class YouTubeBrowser(YouTubeRows):
     def refresh_youtube_connection(self,force=False):
         import xbmc
         lifetime=getattr(self,'window_lifetime',None)
@@ -35,6 +36,7 @@ class YouTubeBrowser:
         self.setProperty('youtubeConnected','true' if candidate.connected else 'false')
         if not current() or not changed:return
         self.youtube_home_cache=None;self.youtube_home_request=object()
+        self.youtube_pages={};self.youtube_content_revision=object();self.youtube_job=None;self.youtube_update=None;self.youtube_refreshing=False
         self.invalidate_row_results()
         if not current():return
         self.youtube_query='';self.refresh_navigation()
@@ -47,6 +49,8 @@ class YouTubeBrowser:
         if not getattr(getattr(self,'youtube_connection',None),'connected',False):
             self.section='Home';self.navigation_id='home';self.load_section();return
         self.youtube_home_request=object()
+        self.youtube_pages={};self.youtube_content_revision=object();self.youtube_job=None;self.youtube_update=None;self.youtube_refreshing=False
+        self.setProperty('youtubeRowEnd','false')
         self.stop_preview();self.section='YouTube';self.mode='home';self.active_page=tab
         self.youtube_tab=tab;self.youtube_query=query if query is not None else getattr(self,'youtube_query','')
         self.search_state=None;self.search_origin=None;self.discovery_stack=[];self.person_context=None;self.episode_browser_context=None
@@ -79,7 +83,9 @@ class YouTubeBrowser:
         # YouTube's own labels/order without moving the user's current selection.
         rows=copy.deepcopy(cache['rows'][1:])
         with getattr(self,'preview_dispatch_lock',nullcontext()):
-            if current():definitions.extend(rows)
+            if current():
+                definitions.extend(rows)
+                if hasattr(self,'youtube_refresh_navigation'):self.youtube_refresh_navigation()
 
     def start_youtube_home(self):
         self.youtube_home_pending=False
@@ -151,15 +157,16 @@ class YouTubeBrowser:
         for definition in getattr(self,'page_definitions',[]):update(definition.get('local_items',[]))
         for cached in getattr(self,'row_cache',{}).values():
             if isinstance(cached,dict):update(cached.get('files',[]))
+        for page in getattr(self,'youtube_pages',{}).values():update(page.get('items',[]))
         cache=getattr(self,'youtube_home_cache',None)
         if cache:
             for definition in cache['rows']:update(definition.get('local_items',[]))
 
-    def youtube_request_guard(self,generation):
+    def youtube_request_guard(self,generation=None):
         lifetime=self.window_lifetime;identity=self.youtube_connection.identity
         def owns():
             active=getattr(self,'youtube_connection',None)
-            return (self.alive and self.window_lifetime is lifetime and self.generation==generation
+            return (self.alive and self.window_lifetime is lifetime and (generation is None or self.generation==generation)
                     and getattr(active,'connected',False) and active.identity==identity)
         def current():
             if not owns():return False

@@ -818,6 +818,7 @@ class LiveReview(YouTubeBrowser,xbmcgui.WindowXML):
             self.getControl(901).controlUp(self.getControl(900 if self.rows[0] else (901 if self.row_offset>0 else (600 if self.browse_sources or getattr(self,'search_state',None) else 101))));self.getControl(901).controlDown(self.getControl(901))
             if getattr(self,'adaptive_browsing',False) and self.mode=='home':
                 self.getControl(900).controlDown(self.getControl(900))
+            if hasattr(self,'youtube_refresh_navigation'):self.youtube_refresh_navigation()
             if getattr(self,'search_state',None) and getattr(self,'adaptive_browsing',False):
                 for cid in (900,901):
                     self.getControl(cid).controlUp(self.getControl(cid));self.getControl(cid).controlDown(self.getControl(cid))
@@ -914,6 +915,7 @@ class LiveReview(YouTubeBrowser,xbmcgui.WindowXML):
     def apply_row(self,n,files,label,position=0,update_selected=True,display_position=False):
         with self.preview_dispatch_lock:
             original=files[position] if 0<=position<len(files) else None
+            if getattr(self,'section','')=='YouTube' and hasattr(self,'prepare_youtube_row'):files=self.prepare_youtube_row(n,files)
             metadata=getattr(self,'anime_metadata',None)
             if metadata and should_exclude_anime(self,self.paths[n]):files=metadata.without_anime(files)
             files,position=page_cards(files,self.histories[n],self.paths[n],position,display_position=display_position)
@@ -1015,6 +1017,8 @@ class LiveReview(YouTubeBrowser,xbmcgui.WindowXML):
         threading.Thread(target=work,name='BlackLanturnSelectedRatings',daemon=True).start()
     def load_path(self,n,path,label=None,back=False,position=0):
         if not valid_source(path):return
+        if getattr(self,'section','')=='YouTube':
+            self.youtube_content_revision=object();self.youtube_job=None;self.youtube_update=None;self.youtube_refreshing=False
         label=provider_page_label(self.paths[n],path,self.getProperty('row'+str(n)),label)
         generation=self.generation
         if not hasattr(self,'path_tokens'):self.path_tokens={}
@@ -1076,7 +1080,7 @@ class LiveReview(YouTubeBrowser,xbmcgui.WindowXML):
     def capture_browse(self,include_stack=True):
         fields=('section','mode','navigation_id','active_page','page_definitions','row_offset','row_cache','rows','paths','histories','last_row','return_focus','selected','person_context','episode_browser_context','season_sources','season_title','season_position')
         state={key:getattr(self,key) for key in fields}
-        state.update(youtube_identity=getattr(getattr(self,'youtube_connection',None),'identity',''),youtube_tab=getattr(self,'youtube_tab','home'),youtube_query=getattr(self,'youtube_query',''),snapshot_rows=copy.deepcopy(getattr(self,'snapshot_rows',{})),window_ready=list(getattr(self,'window_ready',[True,True])),search_state=copy.deepcopy(getattr(self,'search_state',None)),search_origin=copy.deepcopy(getattr(self,'search_origin',None)),row_states=copy.deepcopy(getattr(self,'row_states',{})),failed_paths=copy.deepcopy(getattr(self,'failed_paths',{})),row_labels=copy.deepcopy(getattr(self,'row_labels',{})))
+        state.update(youtube_identity=getattr(getattr(self,'youtube_connection',None),'identity',''),youtube_tab=getattr(self,'youtube_tab','home'),youtube_query=getattr(self,'youtube_query',''),youtube_pages=copy.deepcopy(getattr(self,'youtube_pages',{})),snapshot_rows=copy.deepcopy(getattr(self,'snapshot_rows',{})),window_ready=list(getattr(self,'window_ready',[True,True])),search_state=copy.deepcopy(getattr(self,'search_state',None)),search_origin=copy.deepcopy(getattr(self,'search_origin',None)),row_states=copy.deepcopy(getattr(self,'row_states',{})),failed_paths=copy.deepcopy(getattr(self,'failed_paths',{})),row_labels=copy.deepcopy(getattr(self,'row_labels',{})))
         if include_stack:state['discovery_stack']=copy.deepcopy(getattr(self,'discovery_stack',[]))
         if self.mode=='details':state['cast_position']=self.getControl(3000).getSelectedPosition()
         state['positions']=[self.getControl(900+n).getSelectedPosition() for n in range(2)]
@@ -1119,7 +1123,7 @@ class LiveReview(YouTubeBrowser,xbmcgui.WindowXML):
             self.details(state['selected'],cast_position=state.get('cast_position'));self.return_focus=state['return_focus']
         elif state['selected']:self.update(state['selected'])
         if not current():return
-        focus=state['focus'] if state['focus'] in (101,102,103,105,106,600,900,901) else 101 if self.mode=='details' else 900+self.last_row
+        focus=state['focus'] if state['focus'] in (101,102,103,105,106,600,610,900,901) else 101 if self.mode=='details' else 900+self.last_row
         self.setFocusId(focus);self.focus_key=None
         if not current():return
         self.restart_pending_rows()
@@ -1219,6 +1223,7 @@ class LiveReview(YouTubeBrowser,xbmcgui.WindowXML):
         n=focus-900 if focus in (900,901) else getattr(self,'last_row',0)
         histories=getattr(self,'histories',[])
         options=[]
+        if getattr(self,'youtube_home_visible',lambda:False)():options.append(('youtube_refresh','Refresh recommendations'))
         if can_choose_genre(self):options.append(('genre','Choose genre…'))
         if n<len(histories) and histories[n].pages:options.append(('previous','Previous page'))
         item=self.chosen(focus) if focus in (101,102,103,105,106,900,901,3100) else None
@@ -1245,7 +1250,8 @@ class LiveReview(YouTubeBrowser,xbmcgui.WindowXML):
         event('title_action_selected',choice=chosen)
         if chosen<0:return
         action=options[chosen][0]
-        if action=='genre':
+        if action=='youtube_refresh':self.refresh_youtube_recommendations()
+        elif action=='genre':
             generation=getattr(self,'generation',0)
             self.browse_source()
             if getattr(self,'generation',0)==generation:self.setFocusId(focus)
@@ -1728,6 +1734,10 @@ class LiveReview(YouTubeBrowser,xbmcgui.WindowXML):
                     time.sleep(.08);continue
                 self.refresh_youtube_connection()
                 if not current():return
+                if hasattr(self,'apply_youtube_updates') and self.apply_youtube_updates():
+                    # Native list binding/select are queued GUI messages. Do not
+                    # observe the temporary selection-zero state as preview intent.
+                    time.sleep(.08);continue
                 self.apply_nav_width()
                 if not current():return
                 pending=getattr(self,'search_row_step',None)
@@ -1769,6 +1779,7 @@ class LiveReview(YouTubeBrowser,xbmcgui.WindowXML):
                 if not current():return
                 if (getattr(self,'previews_ready',True) or youtube_video_id(self.selected or {})) and not getattr(self,'startup_idle',False) and automatic_preview(getattr(self,'config',{}),getattr(self,'section',''),self.preview_mode) and self.mode=='home' and not self.episode_browser_context and not self.nav and focus in (900,901) and self.selected and (youtube_video_id(self.selected) or self.rating_identity(self.selected)) and time.monotonic()-self.dwell>=self.config.get('PreviewDelay',5) and self.preview_key!=self.selected.get('file'):self.preview(automatic=True)
                 if getattr(self,'page_ahead',None) is not None:self.prefetch_next_page()
+                if getattr(self,'section','')=='YouTube':self.prefetch_youtube_row()
                 if getattr(self,'prefetch_trial',False):self.prefetch_next_row()
                 if not self.nav and time.monotonic()-self.dwell>=1.2:self.selected_ratings()
                 attempts=self.preview_attempts;preview_token=self.preview_generation
@@ -1935,6 +1946,7 @@ class LiveReview(YouTubeBrowser,xbmcgui.WindowXML):
         if cid==5:
             if self.rows[0] or self.rows[1]:self.setFocusId(900 if self.rows[0] else 901)
         elif cid in (700,701,710,711,712,713,720,721):self.arrow(cid)
+        elif cid==610:self.refresh_youtube_recommendations()
         elif cid==600:
             if self.episode_browser_context:self.select_episode_season()
             elif self.search_state:self.select_search(self.getControl(600).getSelectedPosition())
@@ -1943,6 +1955,8 @@ class LiveReview(YouTubeBrowser,xbmcgui.WindowXML):
         elif cid in (900,901,3100):
             item=self.chosen(cid)
             if not item:return
+            if item.get('_youtube_more'):
+                self.request_youtube_more(cid-900 if cid in (900,901) else 0,explicit=True);return
             if item.get('_page_control'):
                 n=cid-900 if cid in (900,901) else 0
                 if item['_page_control']=='previous':
@@ -1966,6 +1980,8 @@ class LiveReview(YouTubeBrowser,xbmcgui.WindowXML):
         elif cid==101:
             item=self.selected
             if not item:return
+            if item.get('_youtube_more'):
+                self.request_youtube_more(getattr(self,'last_row',0),explicit=True);return
             if item.get('_page_control'):
                 n=getattr(self,'last_row',0)
                 if item['_page_control']=='previous':

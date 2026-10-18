@@ -1,0 +1,151 @@
+"""Exercise real row publication/refresh with only native IO replaced."""
+import copy,threading,unittest,importlib.util
+from types import SimpleNamespace,MethodType
+from unittest.mock import patch
+from youtube_core import BASE,video_id
+from test_youtube_continuation import video
+
+spec=importlib.util.find_spec('youtube_rows')
+if spec:import youtube_rows as mod
+else:mod=None
+
+class Control:
+ def __init__(self):self.position=0
+ def getSelectedPosition(self):return self.position
+ def selectItem(self,n):self.position=n
+ def controlDown(self,other):self.down=other
+
+class RowUpdates(unittest.TestCase):
+ def test_refresh_button_and_more_card_dispatch_inside_skin_without_generic_folder_navigation(self):
+  from test_window_lifecycle import extract,ROOT
+  for control in (610,900):
+   with self.subTest(control=control):
+    calls=[]
+    window=SimpleNamespace(actions_open=False,owned_preview=False,chosen=lambda cid:{'_youtube_more':True,'_page_control':'next','file':'blacklanturn://youtube/more'},
+     refresh_youtube_recommendations=lambda:calls.append('refresh'),request_youtube_more=lambda n,**k:calls.append(('more',n,k)),
+     load_path=lambda *a,**k:calls.append('wrong-folder'))
+    extract(ROOT/'live_review.py','onClick',{},'LiveReview')(window,control)
+    self.assertEqual(calls,['refresh'] if control==610 else [('more',0,{'explicit':True})])
+ def window(self):
+  self.assertIsNotNone(mod,'YouTube row publication is missing')
+  self.jobs=[];self.props={};self.applied=[];self.controls={900:Control(),901:Control(),610:Control()}
+  self.w=SimpleNamespace(alive=True,window_lifetime=object(),generation=3,section='YouTube',youtube_tab='home',mode='home',nav=False,
+   actions_open=False,settings_open=False,owned_preview=False,discovery_stack=[],youtube_connection=SimpleNamespace(connected=True,identity='account-a'),
+   preview_dispatch_lock=threading.RLock(),rows=[[video(1),video(2)],[]],paths=[BASE+'/special/recommendations',''],row_offset=0,
+   page_definitions=[{'label':'Recommended','path':BASE+'/special/recommendations'},{'label':'Subscriptions','path':BASE+'/special/my_subscriptions'}],
+   row_cache={},window_ready=[True,True],selected=video(2),focus_key=(900,1),config={'Saved':[],'YouTubePreviews':True},
+   setProperty=lambda k,v:self.props.__setitem__(k,v),getProperty=lambda k:self.props.get(k,''),getControl=lambda n:self.controls[n],
+   getFocusId=lambda:900,setFocusId=lambda n:None,stop_preview=lambda:None,
+   player=SimpleNamespace(isPlaying=lambda:False),row_navigation=lambda:None)
+  for name in dir(mod.YouTubeRows):
+   if not name.startswith('__'):setattr(self.w,name,MethodType(getattr(mod.YouTubeRows,name),self.w))
+  def guard(generation=None):
+   lifetime=self.w.window_lifetime;identity=self.w.youtube_connection.identity
+   return lambda:self.w.alive and self.w.window_lifetime is lifetime and (generation is None or self.w.generation==generation) and self.w.youtube_connection.connected and self.w.youtube_connection.identity==identity
+  self.w.youtube_request_guard=guard
+  def apply(n,files,label,position=0,**kwargs):
+   self.w.rows[n]=self.w.prepare_youtube_row(n,files);self.controls[900+n].position=position;self.applied.append((n,position,kwargs))
+  self.w.apply_row=apply
+  self.w.set_rows=lambda rows:self.applied.append(copy.deepcopy(rows))
+  class Thread:
+   def __init__(s,target,**kwargs):self.jobs.append(target)
+   def start(s):pass
+  self.thread_patch=patch.object(mod.threading,'Thread',Thread);self.thread_patch.start();self.addCleanup(self.thread_patch.stop)
+  return self.w
+ def ready(self,w):
+  cursor=BASE+'/special/recommendations/?page_token=next&page=2&visitor=private'
+  w.rows[0]=w.prepare_youtube_row(0,[video(1),video(2),{'file':cursor,'filetype':'directory','label':'Native next'}])
+  self.controls[900].position=1
+ def test_append_keeps_selected_video_and_does_not_hydrate_over_existing_watch_or_art(self):
+  w=self.window();self.ready(w);before=copy.deepcopy(w.rows[0][:2])
+  with patch.object(mod,'_fetch_feed',return_value=[dict(video(2),playcount=0),video(3)]):
+   w.request_youtube_more(0);self.assertEqual(len(self.jobs),1);self.jobs.pop()()
+  self.assertEqual(w.rows[0][:2],before,'Worker must not publish native controls')
+  self.assertTrue(w.apply_youtube_updates());self.assertEqual(w.rows[0],before+[video(3)])
+  self.assertEqual(self.controls[900].position,1);self.assertEqual(w.selected,video(2));self.assertFalse(self.applied[0][2]['update_selected'])
+ def test_navigation_or_account_change_rejects_pending_private_page(self):
+  for change in ['generation','account','lifetime']:
+   with self.subTest(change=change):
+    w=self.window();self.ready(w);before=copy.deepcopy(w.rows)
+    with patch.object(mod,'_fetch_feed',return_value=[video(3)]):w.request_youtube_more(0);self.jobs.pop()()
+    if change=='generation':w.generation+=1
+    elif change=='account':w.youtube_connection.identity='account-b'
+    else:w.window_lifetime=object()
+    w.apply_youtube_updates();self.assertEqual(w.rows,before);self.assertEqual(self.applied,[])
+ def test_failed_page_retains_cards_and_cursor_and_requires_explicit_retry(self):
+  w=self.window();self.ready(w);before=copy.deepcopy(w.rows[0][:2])
+  with patch.object(mod,'_fetch_feed',side_effect=RuntimeError('offline')):w.request_youtube_more(0);self.jobs.pop()()
+  w.apply_youtube_updates();self.assertEqual(w.rows[0][:2],before);self.assertEqual(w.rows[0][-1]['label'],'Retry')
+  w.request_youtube_more(0);self.assertEqual(self.jobs,[])
+  with patch.object(mod,'_fetch_feed',return_value=[video(3)]):w.request_youtube_more(0,explicit=True);self.jobs.pop()()
+  w.apply_youtube_updates();self.assertEqual(w.rows[0],before+[video(3)])
+ def test_only_one_request_runs_and_no_background_request_runs_during_playback(self):
+  w=self.window();self.ready(w);w.player.isPlaying=lambda:True;w.request_youtube_more(0);self.assertEqual(self.jobs,[])
+  w.player.isPlaying=lambda:False;w.request_youtube_more(0);w.request_youtube_more(0);self.assertEqual(len(self.jobs),1)
+ def test_refresh_keeps_live_rows_until_all_fresh_rows_are_ready_and_commits_once(self):
+  w=self.window();self.ready(w);before=copy.deepcopy(w.rows);config=copy.deepcopy(w.config)
+  fresh=[{'label':'Provider recommendations','local_items':[video(3)]},{'label':'New personalized interest','local_items':[video(4)],'youtube_cursor':{'continuation':'new-token'}}]
+  feed_calls=[]
+  def feed(path):feed_calls.append(path);return [video(5)]
+  with patch.object(mod,'_fetch_feed',feed),patch.object(mod,'load_home_rows',return_value=fresh):
+   w.refresh_youtube_recommendations();self.assertEqual(w.rows,before);self.jobs.pop()()
+  self.assertEqual(self.applied,[]);self.assertTrue(all('refresh=1' in p for p in feed_calls));self.assertEqual(len(feed_calls),2)
+  self.assertTrue(w.apply_youtube_updates());self.assertEqual(len(self.applied),1)
+  self.assertEqual([x['label'] for x in self.applied[0]],['Recommended for you','Subscriptions','New personalized interest'])
+  self.assertEqual(w.config,config);self.assertEqual(w.youtube_pages,{})
+ def test_refresh_failure_or_retirement_keeps_current_rows_and_cursors(self):
+  for failed in [True,False]:
+   with self.subTest(failed=failed):
+    w=self.window();self.ready(w);before=copy.deepcopy(w.rows);pages=copy.deepcopy(w.youtube_pages)
+    with patch.object(mod,'_fetch_feed',return_value=[video(3)]),patch.object(mod,'load_home_rows',side_effect=RuntimeError('offline') if failed else None,return_value=[{'label':'Fresh'}]):
+     w.refresh_youtube_recommendations();self.jobs.pop()()
+    if not failed:w.youtube_connection.identity='account-b'
+    w.apply_youtube_updates();self.assertEqual(w.rows,before);self.assertEqual(w.youtube_pages,pages);self.assertEqual(self.applied,[])
+ def test_refresh_can_finish_after_moving_to_another_row_of_same_home(self):
+  w=self.window();self.ready(w)
+  with patch.object(mod,'_fetch_feed',return_value=[video(3)]),patch.object(mod,'load_home_rows',return_value=[{'label':'Recommendations'},{'label':'New topic'}]):
+   w.refresh_youtube_recommendations();w.generation+=1;self.jobs.pop()()
+  self.assertTrue(w.apply_youtube_updates());self.assertEqual(self.applied[0][-1]['label'],'New topic')
+ def test_playlist_continuation_preserves_identity_with_inserted_previous_card(self):
+  from browse_controls import page_cards,page_card
+  from live_core import PageHistory
+  w=self.window();self.ready(w);history=PageHistory();history.push('original-home',0)
+  w.rows[0].insert(0,page_card('previous','blacklanturn://previous-page'));self.controls[900].position=2
+  def apply(n,files,label,position=0,**kwargs):
+   files=w.prepare_youtube_row(n,files);w.rows[n],position=page_cards(files,history,w.paths[n],position,display_position=kwargs.get('display_position',False))
+   self.controls[900].position=position
+  w.apply_row=apply
+  with patch.object(mod,'_fetch_feed',return_value=[video(3)]):w.request_youtube_more(0);self.jobs.pop()()
+  w.apply_youtube_updates();self.assertEqual(w.rows[0][self.controls[900].position]['file'],video(2)['file'])
+ def test_refresh_cannot_replace_a_playlist_or_details_opened_while_loading(self):
+  for destination in ('playlist','details'):
+   with self.subTest(destination=destination):
+    w=self.window();self.ready(w)
+    with patch.object(mod,'_fetch_feed',return_value=[video(3)]),patch.object(mod,'load_home_rows',return_value=[{'label':'Recommendations'},{'label':'New topic'}]):
+     w.refresh_youtube_recommendations();self.jobs.pop()()
+    if destination=='playlist':w.paths[0]=BASE+'/playlist/PL_example/'
+    else:w.mode='details'
+    self.assertFalse(w.apply_youtube_updates());self.assertEqual(self.applied,[])
+ def test_failed_playlist_continuation_keeps_selected_video_before_retry_card(self):
+  from browse_controls import page_cards,page_card
+  from live_core import PageHistory
+  w=self.window();self.ready(w);history=PageHistory();history.push('original-home',0)
+  w.rows[0].insert(0,page_card('previous','blacklanturn://previous-page'));self.controls[900].position=2
+  def apply(n,files,label,position=0,**kwargs):
+   files=w.prepare_youtube_row(n,files);w.rows[n],position=page_cards(files,history,w.paths[n],position,display_position=kwargs.get('display_position',False));self.controls[900].position=position
+  w.apply_row=apply
+  with patch.object(mod,'_fetch_feed',side_effect=RuntimeError('offline')):w.request_youtube_more(0);self.jobs.pop()()
+  w.apply_youtube_updates();self.assertEqual(w.rows[0][self.controls[900].position]['file'],video(2)['file'])
+ def test_home_refresh_controls_are_absent_inside_a_playlist(self):
+  w=self.window();w.row_offset=len(w.page_definitions)-1;w.paths[0]=BASE+'/playlist/PL_example/'
+  w.youtube_refresh_navigation();self.assertEqual(self.props['youtubeRefreshBottom'],'false')
+  w.refresh_youtube_recommendations();self.assertEqual(self.jobs,[])
+ def test_empty_terminal_next_page_keeps_the_capped_window(self):
+  w=self.window();self.ready(w);page=w.youtube_pages[w.paths[0]];page['items']=[video(n) for n in range(1,151)]
+  w.rows[0]=w.prepare_youtube_row(0,page['items']+[w.rows[0][-1]]);self.controls[900].position=150
+  before=copy.deepcopy(page['items'])
+  with patch.object(mod,'_fetch_feed',return_value=[]):w.request_youtube_more(0,explicit=True);self.jobs.pop()()
+  w.apply_youtube_updates();self.assertEqual(w.rows[0],before);self.assertIsNone(w.youtube_pages[w.paths[0]]['cursor'])
+  self.assertEqual(self.controls[900].position,149)
+
+if __name__=='__main__':unittest.main()
