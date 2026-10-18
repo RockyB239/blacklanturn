@@ -15,6 +15,7 @@ from search_ui import SEARCH_KINDS,search_sources,discovery_result,best_matches,
 from preview_setup import configured as preview_configured
 from youtube_core import video_id as youtube_video_id,preview_path as youtube_preview_path,is_youtube,caption as youtube_caption,automatic_preview,resume_allowed as youtube_resume_allowed
 from youtube_browser import YouTubeBrowser
+from youtube_provider import resolve_preview
 from watch_metadata import hydrate_watch_metadata
 from page_ahead import PageAhead,eligible as page_ahead_eligible
 from row_feedback import trim_row_cache,row_message,provider_page_label,RowResultCache
@@ -1459,10 +1460,12 @@ class LiveReview(YouTubeBrowser,xbmcgui.WindowXML):
     def play_preview_candidate(self,url,token=None,attempts=None):
         token=self.preview_generation if token is None else token
         attempts=self.preview_attempts if attempts is None else attempts
+        request=None
         def current():
-            return self.alive and self.owned_preview and token==self.preview_generation and getattr(self,'input_generation',0)==getattr(self,'preview_input_generation',0) and attempts is self.preview_attempts and attempts is not None
+            return self.alive and self.owned_preview and token==self.preview_generation and getattr(self,'input_generation',0)==getattr(self,'preview_input_generation',0) and attempts is self.preview_attempts and attempts is not None and (request is None or getattr(self,'preview_resolution',None) is request)
         with self.preview_dispatch_lock:
             if not current():return
+            request=object();self.preview_resolution=request
             if self.preview_dispatched:
                 self.preview_dispatched=False
                 xbmc.executebuiltin('PlayerControl(Stop)',False)
@@ -1478,23 +1481,35 @@ class LiveReview(YouTubeBrowser,xbmcgui.WindowXML):
                 self.restore_preview_viewmode();self.restore_preview_renderer();self.owned_preview=False;self.preview_dispatched=False;self.setProperty('preview','idle')
                 self.setProperty('notice','No working preview available; artwork retained');event('preview_exhausted')
             return
-        self.restore_preview_viewmode()
-        if not current():return
-        self.player.failed=False;self.preview_playing=False
-        self.preview_requested_at=time.monotonic();self.setProperty('preview','loading');self.setProperty('notice','Loading preview…')
-        acquired=self.preview_renderer.acquire()
-        with self.preview_dispatch_lock:
-            if not current():
-                # Preparation can finish after navigation cancelled this owner.
-                # Restore only when a newer preview has not taken ownership.
-                if not self.owned_preview:self.restore_preview_renderer()
-                return
-            if not acquired:
-                self.player.failed=True;event('preview_renderer_unavailable');return
-            # playStream posts a non-waiting message. Serialize its enqueue with
-            # cancellation so Stop cannot be queued ahead of an old Play.
-            self.preview_dispatched=True;self.player.play(url,windowed=True)
-            event('trailer_requested',attempt=attempts.index+1,video_id=parse_qs(urlsplit(url).query).get('video_id',[''])[0])
+        def work():
+            try:
+                prepared=resolve_preview(url,current)
+                with self.preview_dispatch_lock:
+                    if not current():return
+                    if prepared is None:
+                        self.player.failed=True;return
+                    self.restore_preview_viewmode()
+                    if not current():return
+                    self.player.failed=False;self.preview_playing=False
+                    self.preview_requested_at=time.monotonic();self.setProperty('preview','loading');self.setProperty('notice','Loading preview…')
+                    # Decoder preparation and cancellation/restoration are one
+                    # ownership transition; neither may overtake the other.
+                    acquired=self.preview_renderer.acquire()
+                    if not current():
+                        if not self.owned_preview:self.restore_preview_renderer()
+                        return
+                    if not acquired:
+                        self.player.failed=True;event('preview_renderer_unavailable');return
+                    if not prepared.publish():return
+                    # Only a resolved stream enters Kodi's playback queue. A
+                    # cancelled network lookup cannot open a late plug-in job.
+                    self.preview_dispatched=True;self.player.play(prepared.path,listitem=prepared.listitem,windowed=True)
+                    event('trailer_requested',attempt=attempts.index+1,video_id=parse_qs(urlsplit(url).query).get('video_id',[''])[0])
+            except Exception as exc:
+                with self.preview_dispatch_lock:
+                    if current():self.player.failed=True
+                event('preview_resolution_failed',error_type=type(exc).__name__)
+        threading.Thread(target=work,name='BlackLanturnPreviewResolve',daemon=True).start()
     def choose_source(self,addon=None):
         names=['TMDbHelper','Umbrella'];ids=['plugin.video.themoviedb.helper','plugin.video.umbrella']
         if addon:path='plugin://'+addon['addonid']+'/';label=addon.get('name',addon['addonid'])
@@ -2046,6 +2061,9 @@ class LiveReview(YouTubeBrowser,xbmcgui.WindowXML):
                 elif self.discovery_stack:self.generation+=1;self.restore_browse(self.discovery_stack.pop())
                 elif self.search_state and self.search_origin:
                     self.generation+=1;self.restore_browse(self.search_origin)
+                elif getattr(self,'section','')=='YouTube':
+                    if getattr(self,'youtube_tab','home')!='home':self.load_youtube_section('home');self.setFocusId(600)
+                    else:self.set_nav(True,pending_focus=True);self.setFocusId(50)
                 elif self.active_page:self.load_section();self.setFocusId(600)
                 else:self.set_nav(True,pending_focus=True);self.setFocusId(50)
         elif cid==2 and self.nav:self.set_nav(False,pending_focus=True);self.setFocusId(101 if self.mode=='details' else 600 if getattr(self,'search_state',None) and not any(self.rows) else self.return_focus)

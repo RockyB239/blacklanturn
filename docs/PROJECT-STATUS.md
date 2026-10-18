@@ -90,3 +90,8 @@ A slashless directory listing in an earlier diagnostic reproduced a Kodi 21.3 tv
 ## Release 1.1.8 — signed-in YouTube browser
 
 Controller 0.1.75 adds account-aware YouTube Home, Search, Subscriptions, Library and Channels in the existing skin, automatic sidebar visibility, exact-video history-safe previews, an independent preview toggle, real adaptive account-interest rows, 16:9 thumbnail fallback and independent card focus. Exact YouTube.com browser Home is not exposed by the existing login. Native Mac acceptance passed on the exact source; playback/settings/authorization grants were preserved. Both clean editions package the tested source through Installer 1.0.14. The existing schema-3 playback/Trakt policy and managed Helper remain unchanged. Fire Stick/Apple TV personal devices were not updated or newly feature-certified. See RELEASE_1_1_8_VALIDATION.md and hosted-files/setup-1.1.8.txt for evidence, limits and recovery.
+
+
+## Unpublished controller 0.1.76 — Fire Stick YouTube stall
+
+The Fire Stick cancellation stall was reproduced and repaired in the maintained controller source. Exact source76 passed three preview cancellation stages, restored normal hardware playback, browsing/search/YouTube checks and ordinary restart, with 13 protected files and YouTube local history preserved. All 569 controller tests passed; independent review confirmed the cancellation/decoder restoration race correction. Apple TV was not accessed. This is a Fire-tested candidate only: published 1.1.8/controller 75/Installer 14 remain unchanged, and future promotion must use manifest76 after appropriate device acceptance. See YOUTUBE-STALL-FIRE-0_1_76.md and controller-source/youtube-stall-native-verification.json.

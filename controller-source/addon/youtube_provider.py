@@ -130,3 +130,70 @@ def refresh_watch_items(files,current=lambda:True):
         if updated:
             item['playcount']=updated['playcount'];item['resume']=updated['resume']
     return result
+
+class _PreviewSettings:
+    def __init__(self,base):self.base=base
+    def __getattr__(self,name):return getattr(self.base,name)
+    def default_player_web_urls(self):return False
+    def default_player_fallback(self):return False
+
+class _PreviewUI:
+    def __init__(self,base,effects):self.base,self.effects=base,effects
+    def __getattr__(self,name):return getattr(self.base,name)
+    def set_property(self,*args,**kwargs):self.effects.append((self.base.set_property,args,kwargs))
+    def clear_property(self,*args,**kwargs):self.effects.append((self.base.clear_property,args,kwargs))
+    def pop_property(self,*args,**kwargs):return None # Never consume a full-video one-shot preference.
+    def get_property(self,*args,**kwargs):return False if kwargs.get('as_bool') else self.base.get_property(*args,**kwargs)
+    def show_notification(self,*args,**kwargs):pass # A decorative preview failure retains its artwork.
+
+class _PreviewContext:
+    def __init__(self,base,params):
+        self.base,self.params,self.effects=base,params,[]
+        self.ui=_PreviewUI(base.get_ui(),self.effects)
+    def __getattr__(self,name):return getattr(self.base,name)
+    def get_params(self):return self.params
+    def get_param(self,name,default=None):return self.params.get(name,default)
+    def get_path(self):return '/play'
+    def get_ui(self):return self.ui
+    def get_settings(self,**kwargs):return _PreviewSettings(self.base.get_settings(**kwargs))
+    def send_notification(self,*args,**kwargs):self.effects.append((self.base.send_notification,args,kwargs))
+
+class PreparedPreview:
+    def __init__(self,item,effects,current):
+        self.listitem,self.path,self.effects,self.current,self.published=item,item.getPath(),effects,current,False
+    def publish(self):
+        if self.published or not self.current():return False
+        self.published=True
+        for method,args,kwargs in self.effects:method(*args,**kwargs)
+        return True
+
+def _prepare_preview(runtime,context):
+    from youtube_plugin.youtube.helper.yt_play import _play_stream
+    from youtube_plugin.kodion.items import playback_item
+    media=_play_stream(runtime.provider,context)
+    if not media or isinstance(media,tuple):return None
+    return playback_item(context,media)
+
+def resolve_preview(path,current):
+    """Resolve off Kodi's player queue; a retired request cannot open a video.
+
+    Native stream conversion retains ISA/headers and incognito/end-time handling.
+    Buffer its player notification until the controller owns the actual dispatch.
+    No cloned native context, extra database runtime or sign-in flow is created.
+    """
+    import math
+    from urllib.parse import urlsplit,parse_qs
+    ident=video_id({'file':path})
+    if not ident:raise ValueError('Unsupported preview source')
+    values=parse_qs(urlsplit(path).query)
+    def number(key):
+        try:value=float(values.get(key,['0'])[0]);return value if math.isfinite(value) and value>=0 else 0.0
+        except (TypeError,ValueError):return 0.0
+    params={'video_id':ident,'incognito':True,'screensaver':True,'start':number('start'),'end':number('end')}
+    if not current():return None
+    with _session(current) as runtime:
+        context=_PreviewContext(runtime.context,params)
+        item=_prepare_preview(runtime,context)
+        if not current() or item is None:return None
+        if urlsplit(item.getPath()).scheme not in ('http','https'):raise ValueError('Preview did not resolve to a stream')
+        return PreparedPreview(item,context.effects,current)

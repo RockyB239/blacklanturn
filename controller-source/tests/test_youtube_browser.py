@@ -9,6 +9,23 @@ if spec:from youtube_browser import YouTubeBrowser
 else:YouTubeBrowser=None
 
 class YouTubeBrowserFlow(unittest.TestCase):
+ def test_back_from_youtube_home_opens_sidebar_without_restarting_feed_requests(self):
+  calls=[]
+  w=SimpleNamespace(actions_open=False,owned_preview=False,nav=False,mode='home',section='YouTube',youtube_tab='home',active_page='home',
+   histories=[SimpleNamespace(pop=lambda:None)],last_row=0,episode_browser_context=None,person_context=None,discovery_stack=[],search_state=None,
+   stop_preview=lambda:calls.append('stop'),setProperty=lambda *a:None,set_nav=lambda *a,**k:calls.append('sidebar'),setFocusId=lambda x:calls.append(('focus',x)),
+   load_section=lambda:self.fail('Back on YouTube Home must not reload the same feeds'))
+  method=extract(ROOT/'live_review.py','onAction',{},'LiveReview');method(w,SimpleNamespace(getId=lambda:92))
+  self.assertEqual(calls,['stop','sidebar',('focus',50)])
+
+ def test_back_from_youtube_tab_returns_home_before_sidebar(self):
+  calls=[]
+  w=SimpleNamespace(actions_open=False,owned_preview=False,nav=False,mode='home',section='YouTube',youtube_tab='subscriptions',active_page='subscriptions',
+   histories=[SimpleNamespace(pop=lambda:None)],last_row=0,episode_browser_context=None,person_context=None,discovery_stack=[],search_state=None,
+   stop_preview=lambda:None,setProperty=lambda *a:None,setFocusId=lambda x:calls.append(('focus',x)),load_youtube_section=lambda tab:calls.append(('youtube',tab)),
+   load_section=lambda:self.fail('Back must explicitly return to YouTube Home'))
+  extract(ROOT/'live_review.py','onAction',{},'LiveReview')(w,SimpleNamespace(getId=lambda:92))
+  self.assertEqual(calls,[('youtube','home'),('focus',600)])
  def test_tab_transition_loads_account_feed_without_writing_preferences(self):
   self.assertIsNotNone(YouTubeBrowser,'YouTube browsing transition is missing')
   config={'PreviewMode':'manual','PreviewDelay':8,'Saved':[{'file':'existing'}]};before=copy.deepcopy(config);props={};rows=[]

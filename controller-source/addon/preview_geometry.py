@@ -2,31 +2,51 @@
 import math,json
 
 class PreviewRendererGuard:
-    """Use MediaCodec texture rendering only while an Android preview is owned.
+    """Use software decoding only while an Android preview is owned.
 
-    Surface clips the destination rectangle without applying the matching source
-    crop. Texture rendering supports the proportional cover crop and GUI fades.
-    Record the original enabled Surface setting before changing it, so a later
-    startup can recover after an interrupted preview.
+    Kodi 21's texture MediaCodec initialization waits on its UI thread. A Stop
+    processed there during initialization waits on the decoder instead, so an
+    immediately cancelled decorative preview can deadlock both threads. Software
+    previews also support the cover crop/fades. Journal both original decoder
+    preferences before changing either, and restore them before normal playback.
     """
+    SETTINGS={'surface':'videoplayer.usemediacodecsurface','mediacodec':'videoplayer.usemediacodec'}
     def __init__(self,rpc,path,android):
-        self.rpc=rpc;self.path=path;self.android=android
+        self.rpc=rpc;self.path=path;self.android=android;self.generation=0
+    def _saved(self):
+        saved=json.loads(self.path.read_text())
+        legacy=isinstance(saved,dict) and set(saved)=={'surface'} and saved['surface'] is True
+        if not legacy and (not isinstance(saved,dict) or set(saved)!=set(self.SETTINGS) or any(type(value) is not bool for value in saved.values())):
+            raise ValueError('Invalid preview decoder recovery record')
+        return saved
     def acquire(self):
         if not self.android:return True
-        if self.path.exists():
-            if json.loads(self.path.read_text())!={'surface':True}:return False
-            return self.rpc('Settings.SetSettingValue',{'setting':'videoplayer.usemediacodecsurface','value':False}).get('result') is True
-        value=self.rpc('Settings.GetSettingValue',{'setting':'videoplayer.usemediacodecsurface'}).get('result',{}).get('value')
-        if value is False:return True
-        if value is not True:return False
-        self.path.parent.mkdir(parents=True,exist_ok=True)
-        temporary=self.path.with_suffix('.tmp');temporary.write_text(json.dumps({'surface':True}));temporary.replace(self.path)
-        return self.rpc('Settings.SetSettingValue',{'setting':'videoplayer.usemediacodecsurface','value':False}).get('result') is True
+        self.generation+=1;generation=self.generation
+        try:
+            exists=self.path.exists();saved=self._saved() if exists else {}
+            for key,setting in self.SETTINGS.items():
+                if key not in saved:saved[key]=self.rpc('Settings.GetSettingValue',{'setting':setting}).get('result',{}).get('value')
+            if generation!=self.generation or any(type(value) is not bool for value in saved.values()):return False
+            if not exists and not any(saved.values()):return True
+            self.path.parent.mkdir(parents=True,exist_ok=True)
+            temporary=self.path.with_suffix('.tmp');temporary.write_text(json.dumps(saved));temporary.replace(self.path)
+            for setting in self.SETTINGS.values():
+                if generation!=self.generation:return False
+                changed=self.rpc('Settings.SetSettingValue',{'setting':setting,'value':False}).get('result') is True
+                # Native boundaries may reenter cancellation on this thread.
+                # Never continue an acquisition invalidated by restore/new owner.
+                if generation!=self.generation or not changed:return False
+            return True
+        except (OSError,ValueError,TypeError):return False
     def restore(self):
+        self.generation+=1
         if not self.android or not self.path.exists():return True
-        if json.loads(self.path.read_text())!={'surface':True}:return False
-        if self.rpc('Settings.SetSettingValue',{'setting':'videoplayer.usemediacodecsurface','value':True}).get('result') is not True:return False
-        self.path.unlink();return True
+        try:
+            saved=self._saved()
+            for key,value in saved.items():
+                if self.rpc('Settings.SetSettingValue',{'setting':self.SETTINGS[key],'value':value}).get('result') is not True:return False
+            self.path.unlink();return True
+        except (OSError,ValueError,TypeError):return False
 
 def preview_display_aspect(stream,aspect_label=''):
     def positive(value):
