@@ -95,3 +95,8 @@ Controller 0.1.75 adds account-aware YouTube Home, Search, Subscriptions, Librar
 ## Unpublished controller 0.1.76 — Fire Stick YouTube stall
 
 The Fire Stick cancellation stall was reproduced and repaired in the maintained controller source. Exact source76 passed three preview cancellation stages, restored normal hardware playback, browsing/search/YouTube checks and ordinary restart, with 13 protected files and YouTube local history preserved. All 569 controller tests passed; independent review confirmed the cancellation/decoder restoration race correction. Apple TV was not accessed. This is a Fire-tested candidate only: published 1.1.8/controller 75/Installer 14 remain unchanged, and future promotion must use manifest76 after appropriate device acceptance. See YOUTUBE-STALL-FIRE-0_1_76.md and controller-source/youtube-stall-native-verification.json.
+
+
+## Release1.1.9 — durable YouTube preview stall repair
+
+Both reproducible editions and Installer1.0.15 now select exact controller0.1.76. The release gate requires matching Fire and fresh Mac native acceptance, decoder restoration, history/settings preservation and ordinary restart evidence. Both payloads change exactly seven approved paths from1.1.8; playback/Trakt/defaults and installer account/preservation logic remain byte-identical. Tests:569 controller,193 installer/release,16 native-probe. Mac27 protected files and the prior Fire13-file audit preserve settings/grants. Apple TV was not accessed or updated. See RELEASE_1_1_9_VALIDATION.md for evidence, historical visual provenance, distribution checks and limits.

@@ -1,6 +1,6 @@
 # Controller 0.1.76 — Fire Stick YouTube stall repair
 
-Status: candidate source and Fire Stick deployment; not a published build or installer release. Apple TV was not accessed. Published 1.1.8/controller 0.1.75/Installer 1.0.14 metadata and payloads remain unchanged.
+Status: promoted into release1.1.9 / Installer1.0.15 with fresh shared-controller Mac acceptance. Original Fire proof remains unchanged. Apple TV was not accessed. See RELEASE_1_1_9_VALIDATION.md for release validation and distribution scope.
 
 ## Confirmed failure
 
@@ -30,7 +30,7 @@ Final native acceptance and restart/preservation receipts are recorded in `contr
 
 This verifies targeted preview cancellation and browsing on this Fire Stick. It does not establish universal streams, long-duration playback stability, every codec/resolution, or a network throughput improvement. The normal-playback decoder check uses an anonymous 720p H264 fixture; no personal title or Trakt progress was changed. Software preview CPU cost can vary by stream; the observed Kodi UI FPS is a sample, not a CPU benchmark.
 
-Before promoting the candidate into a future installer/build, perform the appropriate Mac/Apple acceptance when those devices are available, advance the maintained release tooling to manifest76, rebuild both sanitized editions, and rerun packaging checks. Do not label the existing manifest75 native receipt as acceptance for76. No Apple TV test or rollout is implied here.
+Release1.1.9 advances maintained tools to manifest76 and requires matching Fire/Mac native receipts before either clean edition verifies. Historical75 visual evidence is explicitly identified and usable only for unchanged layout/media/artwork source. No Apple TV test or rollout is implied.
 
 ## Recovery
 
