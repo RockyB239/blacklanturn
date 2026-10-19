@@ -1,6 +1,6 @@
 # Release 1.1.14 candidate validation
 
-Status: **unpublished candidate; isolated Kodi runtime acceptance pending**. The active public release remains 1.1.13 / Installer 1.0.18. This document is not a device-upgrade receipt.
+Status: **tested unpublished candidate; isolated Kodi runtime acceptance passed**. The active public release remains 1.1.13 / Installer 1.0.18. This document is not a device-upgrade receipt.
 
 ## Authorized scope
 
@@ -32,8 +32,15 @@ Installer1.0.19 extends the existing managed-addon policy to the complete23-file
 
 ## Runtime and publication gate
 
-A new disposable copy of Kodi21.3 and its own blank portable profile were created; no personal profile or another task's app was copied or used. Its first network-denied launch proved the task-owned home, but the test did not run because userdata autoexec was not invoked. The owned process was stopped after120seconds. A copied-skin startup hook was prepared to invoke the native test; subsequent launches have been blocked before execution by intermittent automatic approval-review capacity errors.
+A new disposable copy of Kodi21.3 and its own blank portable profile were used; no personal profile or another task's app was copied or used. All network access was denied by the native sandbox. Initial fixture attempts did not execute autoexec or found copied dependencies disabled; the final fixture uses a copied-skin startup hook, standard local-addon refresh and the normal enable-addon API. No product source was changed for those fixture corrections. Failed attempt records are retained locally.
 
-`tools/verify_release.py` requires a source-bound `compatibility/shared-requests/native-verification.json` before accepting this release. No substitute/synthetic native receipt has been generated. Ordinary HTTP transport is simulated in the test, while RequestAPI dependencies and Kodi property APIs are real; this is separate from physical Fire Stick/Apple TV playback acceptance. The unchanged controller/player evidence remains explicitly historical.
+The actual Kodi21.3 run passed for both exact packaged request sources. Each honored120seconds from Retry-After, applied the60-second fallback/floor, suppressed repeat requests without sleeping, and redacted ordinary HTTP-error details. Each returned the identical successful response for10000 synthetic calls with no extra transport calls; elapsed times were0.004061s General and0.004179s Apple. These are synthetic branch timings, not end-to-end browsing benchmarks. No new worker/background thread is introduced. The disposable app exited normally after1.1seconds; actual module paths and the task-owned home were verified. Personal-profile access was false.
+`tools/verify_release.py` requires a source-bound `compatibility/shared-requests/native-verification.json` before accepting this release. The receipt records an actual Kodi runtime with synthetic transport outcomes; it is not a physical-device playback receipt. Ordinary HTTP transport is simulated in the test, while RequestAPI dependencies and Kodi property APIs are real; this is separate from physical Fire Stick/Apple TV playback acceptance. The unchanged controller/player evidence remains explicitly historical.
 
-Pending: isolated native result, complete final package gate, final immutable asset hashes, candidate CI, release asset publication/anonymous readback, main/Pages activation. No public release or personal device update has occurred.
+The complete final package verifier passed, including source-bound shared-network evidence. Pending: candidate CI, release asset publication/anonymous readback, main/Pages activation. No public release or personal device update has occurred.
+
+## Exact candidate artifacts
+
+- `BlackLanturn-Apple-TV-Mac-Kodi21-1.1.14.zip`: SHA256 `5ebe0592a91476ee0a03645bd996d996eeeb2384724fa15823f293a0c32adf5c`, 91860884bytes.
+- `BlackLanturn-General-Kodi21-1.1.14.zip`: SHA256 `d52962f9fe3cbf096d377cb819c59d7dbe4925577a45f154af84d1d0d9730655`, 91045339bytes.
+- `plugin.program.blacklanturninstaller-1.0.19.zip`: SHA256 `555dfe2ac992663fc988770235526a65f1427d50e9c8cf3ea118483cdb4021d5`, 3748315bytes.

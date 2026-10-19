@@ -1,0 +1,32 @@
+{
+  "passed": true,
+  "runtime": "21.3 (21.3.0) Git:20251031-a3a448d26b",
+  "scope": "Actual Kodi API/RequestAPI, synthetic HTTP responses; no live account or provider requests",
+  "personal_profile_accessed": false,
+  "editions": {
+    "General": {
+      "passed": true,
+      "source_sha256": "9d232490dba165c07fd6ceab42c512ebe90997a794b610fbca14c64429668d59",
+      "actual_module_loaded": true,
+      "server_cooldown_seconds": 120,
+      "minimum_cooldown_seconds": 60,
+      "ordinary_http_error_logs_redacted": true,
+      "successful_calls": 10000,
+      "successful_synthetic_calls_seconds": 0.004061,
+      "extra_transport_calls": 0,
+      "new_background_thread": false
+    },
+    "Apple-TV-Mac": {
+      "passed": true,
+      "source_sha256": "9d232490dba165c07fd6ceab42c512ebe90997a794b610fbca14c64429668d59",
+      "actual_module_loaded": true,
+      "server_cooldown_seconds": 120,
+      "minimum_cooldown_seconds": 60,
+      "ordinary_http_error_logs_redacted": true,
+      "successful_calls": 10000,
+      "successful_synthetic_calls_seconds": 0.004179,
+      "extra_transport_calls": 0,
+      "new_background_thread": false
+    }
+  }
+}
