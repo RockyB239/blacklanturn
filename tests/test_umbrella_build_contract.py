@@ -30,7 +30,8 @@ class UmbrellaBuildContract(unittest.TestCase):
    with patch.object(BUILD,'ROOT',root),self.assertRaisesRegex(AssertionError,'Reviewed Umbrella player changed'):BUILD.apply_umbrella(data)
    self.assertEqual(data,{'userdata/keep':b'original'})
  def test_both_actual_builds_keep_controller83_defaults_and_only_reviewed_provider_changes(self):
-  baselines=ROOT.parents[1]/'helper-managed-release-1.1.2/artifacts'
+  baselines=ROOT/'baselines'
+  if not baselines.is_dir():baselines=ROOT.parents[1]/'helper-managed-release-1.1.2/artifacts'
   self.assertTrue(baselines.is_dir(),'Pinned clean build baselines unavailable')
   with tempfile.TemporaryDirectory()as folder:
    BUILD.build(baselines,Path(folder))

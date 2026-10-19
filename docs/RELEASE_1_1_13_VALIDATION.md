@@ -53,3 +53,5 @@ Both held payloads reproduce from hash-pinned public1.1.2 baselines plus maintai
 ## Final local regression checkpoint
 
 All 450 installer/release tests, 659 controller regression tests and 16 native-probe tests pass. The missing-native-receipt regression explicitly mocks an absent receipt independently of checkout state; the production acceptance gate is unchanged. Independent review reports no remaining Important findings. The exact publication inputs and all three ZIP artifacts pass the known-private-value scan against 19 protected archives and seven persisted preference snapshots (38 private values checked; no findings).
+
+The first candidate CI run (39192548525) failed only because the new actual-packaging test used the local baseline directory before the workflow downloaded its baselines. The test now prefers the checkout baselines directory, and the unchanged hash-pinned public baseline download runs before tests. Missing baselines still fail acceptance; no skip or runtime/package change was introduced.
