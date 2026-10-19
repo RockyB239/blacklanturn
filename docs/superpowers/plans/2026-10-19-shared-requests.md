@@ -41,3 +41,5 @@
 - Task3 pending: both ZIPs preserve all platform YouTube source and nonreceipt/default userdata exactly against1.1.13, clean account-field/privacy scan passed. First disposable Kodi launch proved21.3 and task-owned home but userdata autoexec was not invoked; owned process terminated on120s bound and startup hook corrected. Subsequent launches await automatic approval review (capacity failures). No personal device or public release changes.
 
 - Task3 native gate complete: actual Kodi21.3, blank owned portable profile, network denied; both exact request sources passed real API/property integration with synthetic transport. Disabled fixture modules were enabled through normal Kodi API; app exited normally. Final full package gate passed. Public/device state remains unchanged pending publication.
+
+- Candidate/source4ea3db4 passed GitHub CI39203460429; tag v1.1.14 passed CI39203797832. All three server asset digests/sizes and full anonymous SHA256/CRC downloads match. Proceeding to the already-authorized main/Pages catalog activation; no personal device update.

@@ -1,6 +1,6 @@
 # Release 1.1.14 candidate validation
 
-Status: **tested unpublished candidate; isolated Kodi runtime acceptance passed**. The active public release remains 1.1.13 / Installer 1.0.18. This document is not a device-upgrade receipt.
+Status: **published release assets and validated source**. Local isolated Kodi acceptance and both candidate/tag CI runs passed. The three public1.1.14 assets were downloaded anonymously and exactly match the frozen SHA256, size and ZIP CRC checks. Main/Pages activation is a separate distribution checkpoint; the live installer catalog identifies the active release. This document is not a personal-device upgrade receipt.
 
 ## Authorized scope
 
@@ -37,10 +37,14 @@ A new disposable copy of Kodi21.3 and its own blank portable profile were used; 
 The actual Kodi21.3 run passed for both exact packaged request sources. Each honored120seconds from Retry-After, applied the60-second fallback/floor, suppressed repeat requests without sleeping, and redacted ordinary HTTP-error details. Each returned the identical successful response for10000 synthetic calls with no extra transport calls; elapsed times were0.004061s General and0.004179s Apple. These are synthetic branch timings, not end-to-end browsing benchmarks. No new worker/background thread is introduced. The disposable app exited normally after1.1seconds; actual module paths and the task-owned home were verified. Personal-profile access was false.
 `tools/verify_release.py` requires a source-bound `compatibility/shared-requests/native-verification.json` before accepting this release. The receipt records an actual Kodi runtime with synthetic transport outcomes; it is not a physical-device playback receipt. Ordinary HTTP transport is simulated in the test, while RequestAPI dependencies and Kodi property APIs are real; this is separate from physical Fire Stick/Apple TV playback acceptance. The unchanged controller/player evidence remains explicitly historical.
 
-The complete final package verifier passed, including source-bound shared-network evidence. Pending: candidate CI, release asset publication/anonymous readback, main/Pages activation. No public release or personal device update has occurred.
+The complete final package verifier passed, including source-bound shared-network evidence. Candidate/tag CI and anonymous public asset readback passed. Main/Pages activation follows the verified assets; the live catalog is authoritative. No personal device update has occurred.
 
 ## Exact candidate artifacts
 
 - `BlackLanturn-Apple-TV-Mac-Kodi21-1.1.14.zip`: SHA256 `5ebe0592a91476ee0a03645bd996d996eeeb2384724fa15823f293a0c32adf5c`, 91860884bytes.
 - `BlackLanturn-General-Kodi21-1.1.14.zip`: SHA256 `d52962f9fe3cbf096d377cb819c59d7dbe4925577a45f154af84d1d0d9730655`, 91045339bytes.
 - `plugin.program.blacklanturninstaller-1.0.19.zip`: SHA256 `555dfe2ac992663fc988770235526a65f1427d50e9c8cf3ea118483cdb4021d5`, 3748315bytes.
+
+## Publication evidence
+
+Release: https://github.com/RockyB239/blacklanturn/releases/tag/v1.1.14 . Tag/source commit: `4ea3db481f58341688e63754cddc1178f9e6c1a9`. Candidate CI39203460429 and tag CI39203797832 succeeded. All three uploaded server SHA256 digests and sizes matched, followed by complete unauthenticated downloads and ZIP CRC checks. Catalog activation is allowed only after this evidence; no personal device install is part of this release operation.
