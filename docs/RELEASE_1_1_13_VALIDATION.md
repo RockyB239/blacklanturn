@@ -1,6 +1,6 @@
 # Release1.1.13 validation
 
-Native device acceptance and local package verification complete. Distribution publication, CI and anonymous hosted-byte checks are pending and must be recorded separately; this document does not itself assert publication.
+Native device acceptance and local package verification are complete. Candidate commit dcdb7d47010b446150ff4acc304ff4f73360c3b5 passed independent CI run39192778558. GitHub release v1.1.13 contains the three exact tested ZIP assets; both build payloads were downloaded anonymously and match the held SHA256/CRC checks. Main/Pages activation is a separate distribution checkpoint; live catalog and GitHub deployment state identify the active release.
 
 ## Repair and bounded runtime scope
 
@@ -55,3 +55,7 @@ Both held payloads reproduce from hash-pinned public1.1.2 baselines plus maintai
 All 450 installer/release tests, 659 controller regression tests and 16 native-probe tests pass. The missing-native-receipt regression explicitly mocks an absent receipt independently of checkout state; the production acceptance gate is unchanged. Independent review reports no remaining Important findings. The exact publication inputs and all three ZIP artifacts pass the known-private-value scan against 19 protected archives and seven persisted preference snapshots (38 private values checked; no findings).
 
 The first candidate CI run (39192548525) failed only because the new actual-packaging test used the local baseline directory before the workflow downloaded its baselines. The test now prefers the checkout baselines directory, and the unchanged hash-pinned public baseline download runs before tests. Missing baselines still fail acceptance; no skip or runtime/package change was introduced.
+
+## Release asset checkpoint
+
+Release: https://github.com/RockyB239/blacklanturn/releases/tag/v1.1.13 . General SHA256:9c23df90b758a47fe1e13f1f7a1f259efc1d5af60480fc707369ab5f7f4a18db; Apple-TV-Mac:cf58890ddc6c90a96c342a4a568d3b744ea2ab0d7b9002d1455b16c97e3ca274; Installer18:3c944c3a9e39c5597037c2a64c95e06a256298f53e0e348d0504dd8dd3d13c26. All three GitHub server digests and sizes match. Both anonymous build downloads are exact and pass ZIP CRC; catalog promotion follows this checkpoint. Failed initial CI remains recorded above.
