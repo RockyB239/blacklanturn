@@ -1,0 +1,18 @@
+{
+  "patch": "event-progress-2",
+  "path": "resources/lib/modules/player.py",
+  "variants": {
+    "6.7.90": {
+      "before_sha256": "7fb46ee4747234fa5253f92bf43436dd2ea92475ed735db338dd5696e2c9cdd8",
+      "previous_sha256": "9af7fbfb6d897d816d1f57738d8042d1c014374d713ab29aae8b1b78ee932064",
+      "after_sha256": "33d0659d5b0519147d490af635ecaf0f59404113f92a8c4014eef912c014bc3a",
+      "file": "zero-candidate/6.7.90/player.py"
+    },
+    "6.7.92": {
+      "before_sha256": "2e3397e4ea496690edb1b2db023d47c5c3f040cc21e7f86ec5a5800e1f9f6889",
+      "previous_sha256": "b41553818ff9b045fbce8409d97164f3c76232d9769620091c9b87de47760490",
+      "after_sha256": "83e68cc7f91c4814c00b668d7861e685691e08ad5a9e273b891a5315c07f8769",
+      "file": "zero-candidate/6.7.92/player.py"
+    }
+  }
+}

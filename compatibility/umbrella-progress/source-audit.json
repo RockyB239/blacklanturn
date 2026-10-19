@@ -1,0 +1,36 @@
+{
+  "6.7.90": {
+    "changed_functions": [
+      "Player._progress_owns_playback",
+      "Player._sample_progress",
+      "Player._sendFinishedItemState",
+      "Player.getWatchedPercent",
+      "Player.keepAlive",
+      "Player.onAVStarted",
+      "Player.onPlayBackPaused",
+      "Player.onPlayBackResumed",
+      "Player.onPlayBackSeek",
+      "_progress_now",
+      "_progress_number"
+    ],
+    "all_Bookmarks_functions_unchanged": true,
+    "newline_style_preserved": true
+  },
+  "6.7.92": {
+    "changed_functions": [
+      "Player._progress_owns_playback",
+      "Player._sample_progress",
+      "Player._sendFinishedItemState",
+      "Player.getWatchedPercent",
+      "Player.keepAlive",
+      "Player.onAVStarted",
+      "Player.onPlayBackPaused",
+      "Player.onPlayBackResumed",
+      "Player.onPlayBackSeek",
+      "_progress_now",
+      "_progress_number"
+    ],
+    "all_Bookmarks_functions_unchanged": true,
+    "newline_style_preserved": true
+  }
+}

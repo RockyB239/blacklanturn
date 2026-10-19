@@ -1,0 +1,251 @@
+--- upstream-6.7.92
++++ candidate-6.7.92
+@@ -38,6 +38,19 @@
+ getSetting = control.setting
+ homeWindow = control.homeWindow
+ playerWindow = control.playerWindow
++
++
++def _progress_now():
++	return time.monotonic()
++
++
++def _progress_number(value):
++	"""Kodi timing must be finite and nonnegative; zero is a valid seek."""
++	try:
++		value = float(value)
++		if value >= 0 and value < float('inf'): return value
++	except (TypeError, ValueError, OverflowError): pass
++	return None
+ 
+ 
+ def _remote_playback_enabled(scrobble_source, provider_source, markwatched_setting):
+@@ -528,15 +541,45 @@
+ 			log_utils.log('singleItemPlaylist() exception: returning false', level=log_utils.LOGDEBUG)
+ 			return False
+ 
++	def _progress_owns_playback(self):
++		# _playback_path is Kodi's resolved getPlayingFile(), never plugin metadata.
++		if self.media_type is None: return False
++		try:
++			path = self.getPlayingFile()
++			return not self._playback_path or not path or path == self._playback_path
++		except RuntimeError:
++			# Stop can discard the native file and clock; retain this item's cache.
++			return True
++
++	def _sample_progress(self):
++		# Only called from existing playback/callback sampling sites. No poller.
++		current = _progress_number(self.current_time)
++		length = _progress_number(self.media_length)
++		self.current_time = current if current is not None else 0
++		self.media_length = length if length is not None else 0
++		if self.scrobble_sent or not self._progress_owns_playback(): return
++		try:
++			length = _progress_number(self.getTotalTime())
++			if length is not None and length > 0: self.media_length = max(self.media_length, length)
++		except RuntimeError: pass
++		try:
++			position = _progress_number(self.getTime())
++		except RuntimeError: return
++		if position is None: return
++		if self.media_length > 0 and position > self.media_length: return
++		pending = getattr(self, '_progress_pending_seek', None)
++		if pending is not None:
++			target, started = pending
++			# A callback can precede Kodi's updated getTime. Accept the destination
++			# or real elapsed playback near it, including a paused exact target.
++			elapsed = max(0, _progress_now() - started)
++			if not target - 1 <= position <= target + elapsed + 1: return
++			self._progress_pending_seek = None
++		self.current_time = position
++
+ 	def getWatchedPercent(self):
+ 		try:
+-			if self.isPlayback():
+-				try:
+-					position = self.getTime()
+-					if position != 0: self.current_time = position
+-					total_length = self.getTotalTime()
+-					if total_length > 0: self.media_length = max(self.media_length, total_length)
+-				except: pass
++			self._sample_progress()
+ 			current_position = self.current_time
+ 			#log_utils.log('getWatchedPercent() current_position: %s' % current_position, level=log_utils.LOGDEBUG)
+ 			total_length = self.media_length
+@@ -593,11 +636,7 @@
+ 					playlist_skip = True
+ 					break
+ 
+-				try:
+-					self.current_time = self.getTime()
+-					_total = self.getTotalTime()
+-					if _total > 0: self.media_length = max(self.media_length, _total)
+-				except: pass
++				self._sample_progress()
+ 				self._maybe_show_skip_intro(running_path)
+ 				self._maybe_show_skip_recap(running_path)
+ 				try:
+@@ -840,7 +879,7 @@
+ 	def onAVStarted(self): 
+ 		# Each resolved playlist item has its own Player. Kodi can deliver the
+ 		# next item's callbacks to the previous instance while it is finishing.
+-		if self.av_started_ran or self.media_type is None: return
++		if self.av_started_ran or self.media_type is None or self.onPlayBackStopped_ran or self.scrobble_sent: return
+ 		try: self._playback_path = self.getPlayingFile()
+ 		except: pass
+ 		playerWindow.clearProperty('umbrella.playnext.transition')
+@@ -875,7 +914,7 @@
+ 				#control.closeAll() #i cannot remember what this was for.
+ 				break
+ 			else: control.sleep(200)
+-		if self.offset != '0' and self.playback_resumed is False:
++		if self.offset != '0' and self.playback_resumed is False and not getattr(self, '_progress_seek_received', False):
+ 			control.sleep(200)
+ 			_resume_source = getSetting('scrobble.source')
+ 			if self.traktCredentials and _resume_source == '1': # re-adjust the resume point since dialog is based on meta runtime vs. getTotalTime() and inaccurate
+@@ -925,17 +964,22 @@
+ 					resume_item = punchplay.get_resume_item(self.tmdb, self.season, self.episode)
+ 					if resume_item: self.offset = resume_item['position_seconds']
+ 				except: pass
+-			try:
+-				self.seekTime(self.offset)
+-			except:
+-				log_utils.log('Exception trying to seekTime() offset: %s'% self.offset, level=log_utils.LOGDEBUG)
+-			self.playback_resumed = True
++			# The user may seek or Stop during the resume lookup/delay.
++			if not getattr(self, '_progress_seek_received', False) and not self.onPlayBackStopped_ran and not self.scrobble_sent:
++				try:
++					self.seekTime(self.offset)
++					# Native seek acknowledgement can arrive after this callback.
++					if not getattr(self, '_progress_seek_received', False):
++						position = _progress_number(self.offset)
++						if position is not None:
++							self.current_time = position
++							self._progress_pending_seek = (position, _progress_now())
++				except:
++					log_utils.log('Exception trying to seekTime() offset: %s'% self.offset, level=log_utils.LOGDEBUG)
++				self.playback_resumed = True
+ 		if getSetting('subtitles') == 'true': Subtitles().get(self.title, self.year, self.imdb, self.season, self.episode)
+ 		if self.onPlayBackStopped_ran or self.scrobble_sent or not self.isPlayingVideo(): return
+-		try:
+-			self.current_time = self.getTime()
+-			self.media_length = self.getTotalTime()
+-		except: pass
++		self._sample_progress()
+ 		if not self.av_started_ran:
+ 			self.av_started_ran = True
+ 			scrobble_source = getSetting('scrobble.source')
+@@ -945,7 +989,7 @@
+ 				# crossing the normal watched threshold will add it again during playback.
+ 				customtrakt.markEpisodeAsNotWatched(self.imdb, self.tvdb, self.season, self.episode)
+ 				self.custom_rewatch = False
+-			try: _start_percent = round((float(self.offset) / self.getTotalTime()) * 100, 2) if self.playback_resumed and self.getTotalTime() > 0 else 0
++			try: _start_percent = round((self.current_time / self.media_length) * 100, 2) if self.media_length > 0 else 0
+ 			except: _start_percent = 0
+ 			if self.traktCredentials and _remote_playback_enabled(scrobble_source, '1', 'trakt.markwatched'):
+ 				trakt.scrobbleReset(imdb=self.imdb, tmdb=self.tmdb, tvdb=self.tvdb, season=self.season, episode=self.episode, refresh=False) # refresh issues container.refresh()
+@@ -960,19 +1004,33 @@
+ 				customtrakt.scrobbleStart(media_type=self.media_type, title=self.title, tvshowtitle=self.title, year=self.year, imdb=self.imdb, tmdb=self.tmdb, tvdb=self.tvdb, season=self.season, episode=self.episode, watched_percent=_start_percent)
+ 			if self.floppyCredentials and not floppy.isReadOnly() and _remote_playback_enabled(scrobble_source, '5', 'floppy.markwatched'):
+ 				floppy.scrobbleReset(imdb=self.imdb, tmdb=self.tmdb, tvdb=self.tvdb, season=self.season, episode=self.episode, refresh=False, remote=False)
+-				floppy.scrobbleStart(media_type=self.media_type, title=self.title, tvshowtitle=self.title, year=self.year, imdb=self.imdb, tmdb=self.tmdb, tvdb=self.tvdb, season=self.season, episode=self.episode, watched_percent=_start_percent, current_time=(self.offset if self.playback_resumed else 0), total_time=self.getTotalTime())
++				floppy.scrobbleStart(media_type=self.media_type, title=self.title, tvshowtitle=self.title, year=self.year, imdb=self.imdb, tmdb=self.tmdb, tvdb=self.tvdb, season=self.season, episode=self.episode, watched_percent=_start_percent, current_time=self.current_time, total_time=self.media_length)
+ 			if self.scrobCredentials and _remote_playback_enabled(scrobble_source, '6', 'scrob.markwatched'):
+ 				scrob.scrobbleReset(imdb=self.imdb, tmdb=self.tmdb, tvdb=self.tvdb, season=self.season, episode=self.episode, refresh=False, remote=False)
+-				scrob.scrobbleStart(media_type=self.media_type, title=self.title, tvshowtitle=self.title, year=self.year, imdb=self.imdb, tmdb=self.tmdb, tvdb=self.tvdb, season=self.season, episode=self.episode, watched_percent=_start_percent, current_time=(self.offset if self.playback_resumed else 0), total_time=self.getTotalTime(), resumed=self.playback_resumed)
++				scrob.scrobbleStart(media_type=self.media_type, title=self.title, tvshowtitle=self.title, year=self.year, imdb=self.imdb, tmdb=self.tmdb, tvdb=self.tvdb, season=self.season, episode=self.episode, watched_percent=_start_percent, current_time=self.current_time, total_time=self.media_length, resumed=self.playback_resumed)
+ 			if self.punchplayCredentials and _remote_playback_enabled(scrobble_source, '7', 'punchplay.markwatched'):
+-				punchplay.scrobbleStart(media_type=self.media_type, title=self.title, tvshowtitle=self.title, year=self.year, imdb=self.imdb, tmdb=self.tmdb, tvdb=self.tvdb, season=self.season, episode=self.episode, watched_percent=_start_percent, current_time=(self.offset if self.playback_resumed else 0), total_time=self.getTotalTime())
++				punchplay.scrobbleStart(media_type=self.media_type, title=self.title, tvshowtitle=self.title, year=self.year, imdb=self.imdb, tmdb=self.tmdb, tvdb=self.tvdb, season=self.season, episode=self.episode, watched_percent=_start_percent, current_time=self.current_time, total_time=self.media_length)
+ 		log_utils.log('onAVStarted callback', level=log_utils.LOGDEBUG)
+ 
+ 	def onPlayBackStarted(self):
+ 		control.hide() #this is new.
+ 
+ 	def onPlayBackSeek(self, time, seekOffset):
+-		seekOffset /= 1000
++		if self.scrobble_sent or self.onPlayBackStopped_ran or not self._progress_owns_playback(): return
++		position = _progress_number(time)
++		if position is None: return
++		position /= 1000.0
++		try:
++			length = _progress_number(self.getTotalTime())
++			if length is not None and length > 0: self.media_length = max(_progress_number(self.media_length) or 0, length)
++		except RuntimeError: pass
++		length = _progress_number(self.media_length)
++		if length and position > length: return
++		# Kodi supplies an absolute destination in milliseconds. The relative
++		# seekOffset cannot reconstruct position reliably, especially backward.
++		self.current_time = position
++		self._progress_seek_received = True
++		self._progress_pending_seek = (position, _progress_now())
+ 
+ 	def onPlayBackSeekChapter(self, chapter):
+ 		log_utils.log('onPlayBackSeekChapter callback', level=log_utils.LOGDEBUG)
+@@ -981,6 +1039,7 @@
+ 		log_utils.log('onQueueNextItem callback', level=log_utils.LOGDEBUG)
+ 
+ 	def _sendFinishedItemState(self):
++		self._sample_progress()
+ 		Bookmarks().reset(self.current_time, self.media_length, self.name, self.year)
+ 		self.scrobble_sent = True
+ 		self.scrobble_sent = True
+@@ -1167,11 +1226,13 @@
+ 
+ 	def onPlayBackPaused(self):
+ 		log_utils.log('onPlayBackPaused callback', level=log_utils.LOGDEBUG)
++		if self.scrobble_sent or self.onPlayBackStopped_ran or not self._progress_owns_playback(): return
+ 		try:
+ 			if self.watched_during_playback: return
+-			total_time = self.getTotalTime()
++			self._sample_progress()
++			total_time = self.media_length
+ 			if total_time <= 0: return
+-			pause_percent = round((self.getTime() / total_time) * 100, 2)
++			pause_percent = round((self.current_time / total_time) * 100, 2)
+ 			scrobble_source = getSetting('scrobble.source')
+ 			if self.traktCredentials and _remote_playback_enabled(scrobble_source, '1', 'trakt.markwatched'):
+ 				if self.media_type == 'movie':
+@@ -1195,19 +1256,19 @@
+ 					customtrakt.scrobbleEpisode(self.imdb, self.tmdb, self.tvdb, self.season, self.episode, pause_percent)
+ 			if self.floppyCredentials and not floppy.isReadOnly() and _remote_playback_enabled(scrobble_source, '5', 'floppy.markwatched'):
+ 				if self.media_type == 'movie':
+-					floppy.scrobbleMovie(self.imdb, self.tmdb, pause_percent, current_time=self.getTime(), total_time=total_time)
++					floppy.scrobbleMovie(self.imdb, self.tmdb, pause_percent, current_time=self.current_time, total_time=total_time)
+ 				else:
+-					floppy.scrobbleEpisode(self.imdb, self.tmdb, self.tvdb, self.season, self.episode, pause_percent, current_time=self.getTime(), total_time=total_time)
++					floppy.scrobbleEpisode(self.imdb, self.tmdb, self.tvdb, self.season, self.episode, pause_percent, current_time=self.current_time, total_time=total_time)
+ 			if self.scrobCredentials and _remote_playback_enabled(scrobble_source, '6', 'scrob.markwatched'):
+ 				if self.media_type == 'movie':
+-					scrob.scrobbleMovie(self.imdb, self.tmdb, pause_percent, current_time=self.getTime(), total_time=total_time)
++					scrob.scrobbleMovie(self.imdb, self.tmdb, pause_percent, current_time=self.current_time, total_time=total_time)
+ 				else:
+-					scrob.scrobbleEpisode(self.imdb, self.tmdb, self.tvdb, self.season, self.episode, pause_percent, current_time=self.getTime(), total_time=total_time)
++					scrob.scrobbleEpisode(self.imdb, self.tmdb, self.tvdb, self.season, self.episode, pause_percent, current_time=self.current_time, total_time=total_time)
+ 			if self.punchplayCredentials and _remote_playback_enabled(scrobble_source, '7', 'punchplay.markwatched'):
+ 				if self.media_type == 'movie':
+-					punchplay.scrobbleMovie(self.imdb, self.tmdb, pause_percent, current_time=self.getTime(), total_time=total_time)
++					punchplay.scrobbleMovie(self.imdb, self.tmdb, pause_percent, current_time=self.current_time, total_time=total_time)
+ 				else:
+-					punchplay.scrobbleEpisode(self.imdb, self.tmdb, self.tvdb, self.season, self.episode, pause_percent, current_time=self.getTime(), total_time=total_time)
++					punchplay.scrobbleEpisode(self.imdb, self.tmdb, self.tvdb, self.season, self.episode, pause_percent, current_time=self.current_time, total_time=total_time)
+ 		except RuntimeError:
+ 			# Kodi may deliver the pause callback as playback is stopping, after the
+ 			# player has already discarded its timing state.
+@@ -1216,11 +1277,13 @@
+ 
+ 	def onPlayBackResumed(self):
+ 		log_utils.log('onPlayBackResumed callback', level=log_utils.LOGDEBUG)
++		if self.scrobble_sent or self.onPlayBackStopped_ran or not self._progress_owns_playback(): return
+ 		try:
+ 			if self.watched_during_playback: return
+-			total_time = self.getTotalTime()
++			self._sample_progress()
++			total_time = self.media_length
+ 			if total_time <= 0: return
+-			resume_position = self.getTime() or self.current_time
++			resume_position = self.current_time
+ 			resume_percent = round((resume_position / total_time) * 100, 2)
+ 			scrobble_source = getSetting('scrobble.source')
+ 			if self.traktCredentials and _remote_playback_enabled(scrobble_source, '1', 'trakt.markwatched'):

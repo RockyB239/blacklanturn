@@ -1,0 +1,20 @@
+{
+  "addon_id": "plugin.video.umbrella",
+  "version": "6.7.92",
+  "source_archive": "upstream-6.7.92.zip",
+  "archive_sha256": "8dc3b19e70d0e02deb32d06579441288dbe1911ecaec2628d298590e1333853f",
+  "source_manifest": "upstream-6.7.92-manifest.json",
+  "file_count": 1682,
+  "origin": "Official Umbrella Repository archive supplied by parent task after download",
+  "repository_id": "repository.umbrella",
+  "repository_version": "2.2.6",
+  "kodi21_datadir": "https://raw.githubusercontent.com/umbrellaplug/umbrellaplug.github.io/master/omega/zips/",
+  "expected_archive_url": "https://raw.githubusercontent.com/umbrellaplug/umbrellaplug.github.io/master/omega/zips/plugin.video.umbrella/plugin.video.umbrella-6.7.92.zip",
+  "installed_source_comparison": {
+    "installed_files": 1682,
+    "missing": 0,
+    "extra": 0,
+    "changed": 0
+  },
+  "native_acceptance": "Not implied by archive identity; final player revision remains pending."
+}

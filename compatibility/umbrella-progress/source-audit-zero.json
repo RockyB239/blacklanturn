@@ -1,0 +1,16 @@
+{
+  "6.7.90": {
+    "functions_changed_from_frozen": [
+      "Bookmarks.reset",
+      "Player._sendFinishedItemState",
+      "Player.onPlayBackSeek"
+    ]
+  },
+  "6.7.92": {
+    "functions_changed_from_frozen": [
+      "Bookmarks.reset",
+      "Player._sendFinishedItemState",
+      "Player.onPlayBackSeek"
+    ]
+  }
+}

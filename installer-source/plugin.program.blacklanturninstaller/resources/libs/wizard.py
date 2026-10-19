@@ -147,7 +147,7 @@ class Wizard:
             self.dialogProgress.update(0, 'Checking download and playback setup…')
             from resources.libs import platform_compatibility
             try:
-                prepared = platform_compatibility.prepare(lib, xbmc)
+                prepared = platform_compatibility.prepare(lib, xbmc, home=CONFIG.HOME)
             except platform_compatibility.CompatibilityError as exc:
                 self.dialogProgress.close()
                 self.dialog.ok(CONFIG.ADDONTITLE, str(exc))
@@ -155,6 +155,21 @@ class Wizard:
 
             protected_helper = (prepared.get('policy') or {}).get('schema') in (2, 3)
             protected_preferences = (prepared.get('policy') or {}).get('schema') == 3
+            protected_umbrella = (prepared.get('policy') or {}).get('preferences_policy') == 'playback-trakt-youtube-umbrella-1'
+            if protected_umbrella and not reviewed_auth_only and CONFIG.KEEPWHITELIST == 'true':
+                from resources.libs import managed_addons, whitelist
+                try:
+                    kept = {entry[2] for entry in whitelist.whitelist('read')}
+                    # Match the same two dependency levels retained by wipe.
+                    for addon in tuple(kept):
+                        for dependency in db.depends_list(addon):
+                            kept.add(dependency)
+                            kept.update(db.depends_list(dependency))
+                    managed_addons.verify_kept(CONFIG.HOME, kept)
+                except (managed_addons.ProtectionError, OSError, ValueError, TypeError, IndexError) as exc:
+                    self.dialogProgress.close()
+                    self.dialog.ok(CONFIG.ADDONTITLE, str(exc))
+                    return
             if reviewed_auth_only and not protected_helper:
                 self.dialogProgress.close()
                 self.dialog.ok(CONFIG.ADDONTITLE,
@@ -170,7 +185,7 @@ class Wizard:
             if protected_helper:
                 from resources.libs import managed_addons
                 try:
-                    managed_addons.protect(os.path.join(CONFIG.DATABASE, db.latest_db('Addons')))
+                    managed_addons.protect(os.path.join(CONFIG.DATABASE, db.latest_db('Addons')), umbrella=protected_umbrella)
                     xbmc.executebuiltin('UpdateLocalAddons', wait=True)
                 except (managed_addons.ProtectionError, RuntimeError) as exc:
                     self.dialogProgress.close()
@@ -231,7 +246,7 @@ class Wizard:
                     self.dialog.ok(CONFIG.ADDONTITLE, 'The build did not finish installing. Helper updates remain protected. Reinstall this build before continuing.')
                     return
                 try:
-                    managed_addons.protect(os.path.join(CONFIG.DATABASE, db.latest_db('Addons')))
+                    managed_addons.protect(os.path.join(CONFIG.DATABASE, db.latest_db('Addons')), umbrella=protected_umbrella)
                     xbmc.executebuiltin('UpdateLocalAddons', wait=True)
                 except (managed_addons.ProtectionError, RuntimeError) as exc:
                     self.dialogProgress.close()

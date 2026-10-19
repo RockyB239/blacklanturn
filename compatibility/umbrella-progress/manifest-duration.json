@@ -1,0 +1,20 @@
+{
+  "patch": "event-progress-3",
+  "path": "resources/lib/modules/player.py",
+  "duration_fallback": "current-item metadata.duration seconds; first valid native value supersedes it",
+  "contradicted_fallback": "contradicted metadata retains absolute intent and withholds duration-dependent writes until a consistent native duration/position snapshot",
+  "variants": {
+    "6.7.90": {
+      "before_sha256": "7fb46ee4747234fa5253f92bf43436dd2ea92475ed735db338dd5696e2c9cdd8",
+      "previous_sha256": "33d0659d5b0519147d490af635ecaf0f59404113f92a8c4014eef912c014bc3a",
+      "after_sha256": "eac676e8505be26045ff77f1aac0a3ceece69880c2d6abb5e29fcfa4e6c8b6a4",
+      "file": "duration-candidate/6.7.90/player.py"
+    },
+    "6.7.92": {
+      "before_sha256": "2e3397e4ea496690edb1b2db023d47c5c3f040cc21e7f86ec5a5800e1f9f6889",
+      "previous_sha256": "83e68cc7f91c4814c00b668d7861e685691e08ad5a9e273b891a5315c07f8769",
+      "after_sha256": "904b7eb226045610c213e5083a55d99b4462620b1089fb413a4e2e1b04f1b00c",
+      "file": "duration-candidate/6.7.92/player.py"
+    }
+  }
+}

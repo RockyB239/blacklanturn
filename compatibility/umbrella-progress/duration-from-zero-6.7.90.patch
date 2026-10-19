@@ -1,0 +1,247 @@
+--- event-progress-2/6.7.90/player.py
++++ event-progress-3/6.7.90/player.py
+@@ -230,6 +230,7 @@
+ 			self.fanart = meta.get('fanart') if meta else ''
+ 			self.meta = meta
+ 			poster, thumb, season_poster, fanart, banner, clearart, clearlogo, discart, meta = self.getMeta(meta)
++			self._seed_progress_length(meta)
+ 			try:
+ 				bookmark = Bookmarks()
+ 				# Kodi passes the result of its native Resume/Start from beginning
+@@ -549,6 +550,37 @@
+ 			# Stop can discard the native file and clock; retain this item's cache.
+ 			return True
+ 
++	def _seed_progress_length(self, meta):
++		# This item's Kodi metadata duration is already seconds. It is only a
++		# fallback for callbacks queued until after Stop discards native timing.
++		if self.scrobble_sent or self.onPlayBackStopped_ran or not self._progress_owns_playback(): return
++		if getattr(self, '_progress_length_contradicted', False): return
++		if (_progress_number(self.media_length) or 0) > 0 or not isinstance(meta, dict): return
++		value = meta.get('duration')
++		if isinstance(value, bool): return
++		length = _progress_number(value)
++		if length is not None and length > 0:
++			self.media_length = length
++			self._progress_length_fallback = True
++
++	def _accept_progress_length(self, value):
++		if isinstance(value, bool): return
++		length = _progress_number(value)
++		if length is None or length <= 0: return
++		# The first native value supersedes approximate metadata in either
++		# direction; later native reads keep the established maximum policy.
++		if getattr(self, '_progress_length_fallback', False):
++			self.media_length = length
++			current = _progress_number(self.current_time)
++			pending = getattr(self, '_progress_pending_seek', None)
++			if ((current is not None and current > length)
++					or (pending is not None and pending[0] > length)):
++				self._progress_length_contradicted = True
++		else:
++			self.media_length = max(_progress_number(self.media_length) or 0, length)
++		self._progress_length_fallback = False
++		# A contradicted snapshot stays blocked until position is accepted too.
++
+ 	def _sample_progress(self):
+ 		# Only called from existing playback/callback sampling sites. No poller.
+ 		current = _progress_number(self.current_time)
+@@ -557,14 +589,18 @@
+ 		self.media_length = length if length is not None else 0
+ 		if self.scrobble_sent or not self._progress_owns_playback(): return
+ 		try:
+-			length = _progress_number(self.getTotalTime())
+-			if length is not None and length > 0: self.media_length = max(self.media_length, length)
++			self._accept_progress_length(self.getTotalTime())
+ 		except RuntimeError: pass
+ 		try:
+ 			position = _progress_number(self.getTime())
+ 		except RuntimeError: return
+ 		if position is None: return
+ 		if self.media_length > 0 and position > self.media_length: return
++		if (getattr(self, '_progress_length_contradicted', False)
++				and not getattr(self, '_progress_length_fallback', False) and self.media_length > 0):
++			pending = getattr(self, '_progress_pending_seek', None)
++			if pending is not None and pending[0] > self.media_length:
++				self._progress_pending_seek = None
+ 		pending = getattr(self, '_progress_pending_seek', None)
+ 		if pending is not None:
+ 			target, started = pending
+@@ -574,10 +610,13 @@
+ 			if not target - 1 <= position <= target + elapsed + 1: return
+ 			self._progress_pending_seek = None
+ 		self.current_time = position
++		if self.media_length > 0 and not getattr(self, '_progress_length_fallback', False):
++			self._progress_length_contradicted = False
+ 
+ 	def getWatchedPercent(self):
+ 		try:
+ 			self._sample_progress()
++			if getattr(self, '_progress_length_contradicted', False): return 0
+ 			current_position = self.current_time
+ 			#log_utils.log('getWatchedPercent() current_position: %s' % current_position, level=log_utils.LOGDEBUG)
+ 			total_length = self.media_length
+@@ -640,7 +679,7 @@
+ 				try:
+ 
+ 					scrobble_source = getSetting('scrobble.source')
+-					if self.scrobCredentials and _remote_playback_enabled(scrobble_source, '6', 'scrob.markwatched'):
++					if not getattr(self, '_progress_length_contradicted', False) and self.scrobCredentials and _remote_playback_enabled(scrobble_source, '6', 'scrob.markwatched'):
+ 						if self.current_time - self._scrob_heartbeat_at >= 30:
+ 							self._scrob_heartbeat_at = self.current_time
+ 							heartbeat_percent = round((self.current_time / self.media_length) * 100, 2) if self.media_length else 0
+@@ -648,7 +687,7 @@
+ 								'media_type': self.media_type, 'imdb': self.imdb, 'tmdb': self.tmdb, 'tvdb': self.tvdb,
+ 								'season': self.season, 'episode': self.episode, 'watched_percent': heartbeat_percent,
+ 								'current_time': self.current_time, 'total_time': self.media_length}).start()
+-					if self.punchplayCredentials and _remote_playback_enabled(scrobble_source, '7', 'punchplay.markwatched'):
++					if not getattr(self, '_progress_length_contradicted', False) and self.punchplayCredentials and _remote_playback_enabled(scrobble_source, '7', 'punchplay.markwatched'):
+ 						if self.current_time - self._punchplay_heartbeat_at >= 30:
+ 							self._punchplay_heartbeat_at = self.current_time
+ 							heartbeat_percent = round((self.current_time / self.media_length) * 100, 2) if self.media_length else 0
+@@ -963,7 +1002,7 @@
+ 		if getSetting('subtitles') == 'true': Subtitles().get(self.title, self.year, self.imdb, self.season, self.episode)
+ 		if self.onPlayBackStopped_ran or self.scrobble_sent or not self.isPlayingVideo(): return
+ 		self._sample_progress()
+-		if not self.av_started_ran:
++		if not self.av_started_ran and not getattr(self, '_progress_length_contradicted', False):
+ 			self.av_started_ran = True
+ 			scrobble_source = getSetting('scrobble.source')
+ 			if (self.custom_rewatch and self.customCredentials and self.media_type == 'episode'
+@@ -1004,14 +1043,18 @@
+ 		if position is None: return
+ 		position /= 1000.0
+ 		try:
+-			length = _progress_number(self.getTotalTime())
+-			if length is not None and length > 0: self.media_length = max(_progress_number(self.media_length) or 0, length)
++			self._accept_progress_length(self.getTotalTime())
+ 		except RuntimeError: pass
+ 		length = _progress_number(self.media_length)
+-		if length and position > length: return
++		if length and position > length:
++			if not getattr(self, '_progress_length_fallback', False): return
++			self.media_length = 0
++			self._progress_length_contradicted = True
+ 		# Kodi supplies an absolute destination in milliseconds. The relative
+ 		# seekOffset cannot reconstruct position reliably, especially backward.
+ 		self.current_time = position
++		if self.media_length > 0 and not getattr(self, '_progress_length_fallback', False):
++			self._progress_length_contradicted = False
+ 		self._progress_seek_received = True
+ 		self._progress_seek_target = position
+ 		self._progress_pending_seek = (position, _progress_now())
+@@ -1024,6 +1067,11 @@
+ 
+ 	def _sendFinishedItemState(self):
+ 		self._sample_progress()
++		if getattr(self, '_progress_length_contradicted', False):
++			# Unknown only because this item's accepted seek disproved metadata.
++			# Preserve the old resume/history until a native denominator is known.
++			self.scrobble_sent = True
++			return False, getSetting('scrobble.source')
+ 		# Only an accepted exact-zero seek can clear this item's old resume.
+ 		# Failed starts and unknown-duration streams keep their existing behavior.
+ 		clear_zero = (getattr(self, '_progress_seek_target', None) == 0
+@@ -1146,40 +1194,43 @@
+ 						return
+ 				except: pass
+ 			if getSetting('crefresh') == 'true': homeWindow.setProperty('umbrella.playback_cleanup', 'true')
+-			Bookmarks().reset(self.current_time, self.media_length, self.name, self.year)
+-			self.libForPlayback()
+-			_scrobble_source = getSetting('scrobble.source')
+-			if not self.scrobble_sent:
++			if getattr(self, '_progress_length_contradicted', False):
+ 				self.scrobble_sent = True
+-				self.scrobble_sent = True
+-				if self.traktCredentials and _remote_playback_enabled(_scrobble_source, '1', 'trakt.markwatched'):
+-					Bookmarks().set_scrobble(self.current_time, self.media_length, self.media_type, self.imdb, self.tmdb, self.tvdb, self.season, self.episode, already_watched=self.watched_during_playback)
+-				if self.simklCredentials and _remote_playback_enabled(_scrobble_source, '2', 'simkl.markwatched'):
+-					Bookmarks().set_scrobble(self.current_time, self.media_length, self.media_type, self.imdb, self.tmdb, self.tvdb, self.season, self.episode, service='simkl', title=self.title, year=self.year, already_watched=self.watched_during_playback)
+-				if self.mdblistCredentials and _remote_playback_enabled(_scrobble_source, '3', 'mdblist.markwatched'):
+-					Bookmarks().set_scrobble(self.current_time, self.media_length, self.media_type, self.imdb, self.tmdb, self.tvdb, self.season, self.episode, service='mdblist', title=self.title, tvshowtitle=self.title, year=self.year, already_watched=self.watched_during_playback)
+-				if self.customCredentials and _remote_playback_enabled(_scrobble_source, '4', 'custom.markwatched'):
+-					Bookmarks().set_scrobble(self.current_time, self.media_length, self.media_type, self.imdb, self.tmdb, self.tvdb, self.season, self.episode, service='custom', title=self.title, tvshowtitle=self.title, year=self.year, already_watched=self.watched_during_playback)
+-				if self.floppyCredentials and not floppy.isReadOnly() and _remote_playback_enabled(_scrobble_source, '5', 'floppy.markwatched'):
+-					Bookmarks().set_scrobble(self.current_time, self.media_length, self.media_type, self.imdb, self.tmdb, self.tvdb, self.season, self.episode, service='floppy', title=self.title, tvshowtitle=self.title, year=self.year, already_watched=self.watched_during_playback)
+-				if self.scrobCredentials and _remote_playback_enabled(_scrobble_source, '6', 'scrob.markwatched'):
+-					Bookmarks().set_scrobble(self.current_time, self.media_length, self.media_type, self.imdb, self.tmdb, self.tvdb, self.season, self.episode, service='scrob', title=self.title, tvshowtitle=self.title, year=self.year, already_watched=self.watched_during_playback)
+-				if self.punchplayCredentials and _remote_playback_enabled(_scrobble_source, '7', 'punchplay.markwatched'):
+-					Bookmarks().set_scrobble(self.current_time, self.media_length, self.media_type, self.imdb, self.tmdb, self.tvdb, self.season, self.episode, service='punchplay', title=self.title, tvshowtitle=self.title, year=self.year, already_watched=self.watched_during_playback)
+-			if _scrobble_source == '0':
+-				if getSetting('localnotify') == 'true': control.notification(title=self.title, message=getLS(35510))
+-				if not self.watched_during_playback and self.media_length > 0:
+-					_pct = float(self.current_time / self.media_length) * 100
+-					if _pct >= int(self.markwatched_percentage):
+-						# Watched history is independent of the resume/scrobble source.
+-						if self.media_type == 'episode':
+-							playcount.markEpisodeDuringPlayback(self.imdb, self.tvdb, self.season, self.episode, '5')
+-						elif self.media_type == 'movie':
+-							playcount.markMovieDuringPlayback(self.imdb, '5')
+-						self.watched_during_playback = True
+-				if self.imdb:
+-					from resources.lib.database import watchedcache as _wc
+-					_wc.delete_progress(self.media_type, self.imdb, self.tmdb or '', self.season or 0, self.episode or 0)
++			else:
++				Bookmarks().reset(self.current_time, self.media_length, self.name, self.year)
++				self.libForPlayback()
++				_scrobble_source = getSetting('scrobble.source')
++				if not self.scrobble_sent:
++					self.scrobble_sent = True
++					self.scrobble_sent = True
++					if self.traktCredentials and _remote_playback_enabled(_scrobble_source, '1', 'trakt.markwatched'):
++						Bookmarks().set_scrobble(self.current_time, self.media_length, self.media_type, self.imdb, self.tmdb, self.tvdb, self.season, self.episode, already_watched=self.watched_during_playback)
++					if self.simklCredentials and _remote_playback_enabled(_scrobble_source, '2', 'simkl.markwatched'):
++						Bookmarks().set_scrobble(self.current_time, self.media_length, self.media_type, self.imdb, self.tmdb, self.tvdb, self.season, self.episode, service='simkl', title=self.title, year=self.year, already_watched=self.watched_during_playback)
++					if self.mdblistCredentials and _remote_playback_enabled(_scrobble_source, '3', 'mdblist.markwatched'):
++						Bookmarks().set_scrobble(self.current_time, self.media_length, self.media_type, self.imdb, self.tmdb, self.tvdb, self.season, self.episode, service='mdblist', title=self.title, tvshowtitle=self.title, year=self.year, already_watched=self.watched_during_playback)
++					if self.customCredentials and _remote_playback_enabled(_scrobble_source, '4', 'custom.markwatched'):
++						Bookmarks().set_scrobble(self.current_time, self.media_length, self.media_type, self.imdb, self.tmdb, self.tvdb, self.season, self.episode, service='custom', title=self.title, tvshowtitle=self.title, year=self.year, already_watched=self.watched_during_playback)
++					if self.floppyCredentials and not floppy.isReadOnly() and _remote_playback_enabled(_scrobble_source, '5', 'floppy.markwatched'):
++						Bookmarks().set_scrobble(self.current_time, self.media_length, self.media_type, self.imdb, self.tmdb, self.tvdb, self.season, self.episode, service='floppy', title=self.title, tvshowtitle=self.title, year=self.year, already_watched=self.watched_during_playback)
++					if self.scrobCredentials and _remote_playback_enabled(_scrobble_source, '6', 'scrob.markwatched'):
++						Bookmarks().set_scrobble(self.current_time, self.media_length, self.media_type, self.imdb, self.tmdb, self.tvdb, self.season, self.episode, service='scrob', title=self.title, tvshowtitle=self.title, year=self.year, already_watched=self.watched_during_playback)
++					if self.punchplayCredentials and _remote_playback_enabled(_scrobble_source, '7', 'punchplay.markwatched'):
++						Bookmarks().set_scrobble(self.current_time, self.media_length, self.media_type, self.imdb, self.tmdb, self.tvdb, self.season, self.episode, service='punchplay', title=self.title, tvshowtitle=self.title, year=self.year, already_watched=self.watched_during_playback)
++				if _scrobble_source == '0':
++					if getSetting('localnotify') == 'true': control.notification(title=self.title, message=getLS(35510))
++					if not self.watched_during_playback and self.media_length > 0:
++						_pct = float(self.current_time / self.media_length) * 100
++						if _pct >= int(self.markwatched_percentage):
++							# Watched history is independent of the resume/scrobble source.
++							if self.media_type == 'episode':
++								playcount.markEpisodeDuringPlayback(self.imdb, self.tvdb, self.season, self.episode, '5')
++							elif self.media_type == 'movie':
++								playcount.markMovieDuringPlayback(self.imdb, '5')
++							self.watched_during_playback = True
++					if self.imdb:
++						from resources.lib.database import watchedcache as _wc
++						_wc.delete_progress(self.media_type, self.imdb, self.tmdb or '', self.season or 0, self.episode or 0)
+ 			try:
+ 				playingfile = self.isPlaying()
+ 			except:
+@@ -1212,7 +1263,8 @@
+ 		playerWindow.clearProperty('umbrella.playlistStart_position')
+ 		homeWindow.clearProperty('umbrella.window_keep_alive')
+ 
+-		Bookmarks().reset(self.current_time, self.media_length, self.name, self.year)
++		if not getattr(self, '_progress_length_contradicted', False):
++			Bookmarks().reset(self.current_time, self.media_length, self.name, self.year)
+ 		log_utils.error()
+ 		log_utils.log('onPlayBackError callback', level=log_utils.LOGDEBUG)
+ 		#control.checkforSkin(action='off')
+@@ -1223,6 +1275,7 @@
+ 		try:
+ 			if self.watched_during_playback: return
+ 			self._sample_progress()
++			if getattr(self, '_progress_length_contradicted', False): return
+ 			total_time = self.media_length
+ 			if total_time <= 0: return
+ 			pause_percent = round((self.current_time / total_time) * 100, 2)
+@@ -1274,6 +1327,7 @@
+ 		try:
+ 			if self.watched_during_playback: return
+ 			self._sample_progress()
++			if getattr(self, '_progress_length_contradicted', False): return
+ 			total_time = self.media_length
+ 			if total_time <= 0: return
+ 			resume_position = self.current_time

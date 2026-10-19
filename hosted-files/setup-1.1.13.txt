@@ -1,0 +1,11 @@
+BlackLanturn 1.1.13 - Kodi21.3
+
+Install BlackLanturn Repository, update BlackLanturn Installer to1.0.18, open Builds and select your device edition. Standard preserves selected accounts and existing playback/controller choices. Account-only reset keeps selected known authorizations and uses the clean build defaults. Review Save Data and the final confirmation before installing.
+
+Managed Umbrella6.7.92 repairs immediate seek/Stop progress before playback tracking initializes. Absolute zero clears only that title's resume record; watched history remains unchanged. The first native media duration replaces approximate metadata. Helper6.17.9 retains empty-cache, search batching and sampled playback progress. Installer protects and verifies both complete managed addons, rejects unknown/changed source before cleanup, and guards ambiguous ZIP destinations.
+
+Controller0.1.83 and its existing YouTube navigation, adaptive categories, artwork, watched status, automatic fullscreen quality up to4K and lightweight45-second inline previews are unchanged. Clean defaults include four ratings (TMDb hidden), interface-language audio, forced-only subtitles, High artwork and64MB/4x buffering. Standard deliberately retains existing choices, including upstream defaults; use Account-only reset when you want the clean defaults.
+
+Fire Stick, Mac and Apple TV passed real early seek/Stop, saved resume, paused Stop and exact-zero tests. Apple TV additionally completed the real Installer Standard recovery and settings/account readbacks after a normal Quit and relaunch. Native Kodi app signing and installation remain the app provider's responsibility: the portable build contains no native app libraries or management profiles. The tested current KodiTVBox package resolved the Apple image-library signing error; this is not a claim that the build ZIP repairs another provider's app.
+
+No new browsing requests, background thread or sampler cadence are introduced by this progress patch. These targeted tests do not certify sustained4K/network/source reliability or claim a new browsing-speed benchmark. Historical releases and private recovery copies are retained.

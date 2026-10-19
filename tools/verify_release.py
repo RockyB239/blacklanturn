@@ -6,6 +6,51 @@ from pathlib import Path
 ROOT=Path(__file__).resolve().parents[1]
 SOURCE=ROOT/'installer-source/plugin.program.blacklanturninstaller'
 sys.path.insert(0,str(SOURCE))
+
+def verify_umbrella_progress_acceptance(receipt, manifest):
+ """Require real callbacks, settled provider results and clean device readbacks.
+
+ This gate covers the Python progress repair. It makes no claim about the
+ separately signed Apple TV application or its native image library.
+ """
+ def number(value): return type(value) in (int, float) and isfinite(value)
+ def digest(value): return isinstance(value, str) and len(value)==64 and all(c in '0123456789abcdef' for c in value)
+ def settled(case):
+  assert case.get('cloud_reads_matched')==2, 'Immediate and settled cloud reads are required'
+  error=case.get('cloud_error_seconds')
+  assert number(error) and 0<=error<=2, 'Progress differs from the observed native destination'
+ assert receipt.get('passed') is True and receipt.get('patch')==manifest.get('patch')=='event-progress-3'
+ devices=receipt.get('devices', {})
+ assert set(devices)=={'fire', 'mac', 'apple_tv'}, 'Progress acceptance is incomplete on the three devices'
+ for name, device in devices.items():
+  assert device.get('version')=='6.7.92', 'Both release editions package Umbrella 6.7.92; an older native variant cannot approve '+name
+  variant=manifest['variants'].get(device.get('version'))
+  assert variant and device.get('candidate_sha256')==variant['after_sha256'], 'Untested progress source on '+name
+  trace=device.get('loaded_trace_sha256')
+  assert digest(trace) and trace==device.get('expected_trace_sha256'), 'Native loaded source differs from guarded trace on '+name
+  for key in ('diagnostics_removed', 'other_sources_preserved', 'settings_authorizations_preserved',
+              'watched_history_unchanged', 'unrelated_progress_unchanged', 'ordinary_restart', 'quiet_home'):
+   assert device.get(key) is True, 'Missing '+name+' acceptance: '+key
+  cold=device['cold_seek_stop']
+  assert cold.get('absolute_callback_ms')==750000 and cold.get('av_ready') is False, 'Cold absolute seek was not tested'
+  elapsed=cold.get('seconds_after_player')
+  assert number(elapsed) and 0<elapsed<=2, 'Cold test waited for warmed-up tracking'
+  progress=cold.get('outgoing_progress')
+  assert number(progress) and 0<progress<100, 'Cold seek did not send positive progress'
+  settled(cold)
+  resume=device['saved_resume']
+  assert resume.get('native_duration_replaced_fallback') is True, 'Native duration refinement was not tested'
+  settled(resume)
+  pause=device['pause_stop']
+  assert number(pause.get('paused_seconds')) and pause['paused_seconds']>=3, 'Pause duration is unproven'
+  drift=pause.get('native_drift_seconds')
+  assert number(drift) and 0<=drift<0.1, 'Paused playback advanced'
+  settled(pause)
+  zero=device['zero_seek_stop']
+  assert zero.get('absolute_callback_ms')==0 and zero.get('selected_resume_id_matched') is True
+  assert zero.get('delete_status')==204 and zero.get('absent_cloud_reads')==2, 'Selected resume was not cleared and settled'
+  assert zero.get('invalid_zero_pause_sent') is False, 'Rejected zero-percent pause is still sent'
+
 def verify_youtube_acceptance(receipt,manifest,version='0.1.75'):
  assert receipt['controller']==manifest['controller']==version
  assert receipt['files']==manifest['files'],'YouTube source differs from native-tested controller'
@@ -295,19 +340,22 @@ def verify(folder):
  receipt=json.loads((ROOT/'compatibility/helper-progress/native-verification.json').read_text())
  approved=json.loads((SOURCE/'resources/managed-helper.json').read_text())
  verify_helper_progress_acceptance(receipt,approved)
+ verify_umbrella_progress_acceptance(
+  json.loads((ROOT/'compatibility/umbrella-progress/native-verification.json').read_text()),
+  json.loads((ROOT/'compatibility/umbrella-progress/manifest-duration.json').read_text()))
  spec=importlib.util.spec_from_file_location('managed',SOURCE/'resources/libs/managed_addons.py');m=importlib.util.module_from_spec(spec);spec.loader.exec_module(m)
- with zipfile.ZipFile(folder/'plugin.program.blacklanturninstaller-1.0.17.zip') as z:
+ with zipfile.ZipFile(folder/'plugin.program.blacklanturninstaller-1.0.18.zip') as z:
   assert z.testzip() is None
   installer={n:z.read(n) for n in z.namelist()}
   assert all(n.startswith('plugin.program.blacklanturninstaller/') for n in installer)
   expected_installer={'plugin.program.blacklanturninstaller/'+str(p.relative_to(SOURCE)):p.read_bytes() for p in SOURCE.rglob('*') if p.is_file() and '__pycache__' not in p.parts and not p.name.endswith(('.pyc','.DS_Store'))}
   assert installer==expected_installer,'Installer ZIP differs from reviewed source'
  for ed in ('General','Apple-TV-Mac'):
-  with zipfile.ZipFile(folder/f'BlackLanturn-{ed}-Kodi21-1.1.12.zip') as z:
-   assert z.testzip() is None;m.verify_archive(z);verify_playback_defaults(z);verify_display_defaults(z)
+  with zipfile.ZipFile(folder/f'BlackLanturn-{ed}-Kodi21-1.1.13.zip') as z:
+   assert z.testzip() is None;m.verify_archive(z,umbrella=True);verify_playback_defaults(z);verify_display_defaults(z)
    p=json.loads(z.read('userdata/blacklanturn-build.json'))
-   assert p['schema']==3 and p['preferences_policy']=='playback-trakt-youtube-1' and p['helper_patch']=='empty-cache-1' and p['installer_min_version']=='1.0.17'
-   assert p['build_version']=='1.1.12'
+   assert p['schema']==3 and p['preferences_policy']=='playback-trakt-youtube-umbrella-1' and p['helper_patch']=='empty-cache-1' and p['installer_min_version']=='1.0.18'
+   assert p['build_version']=='1.1.13' and p['umbrella_version']=='6.7.92' and p['umbrella_patch']=='event-progress-3'
    assert p['controller_version']=='0.1.83' and p['helper_search_patch']=='search-batch-1' and p['helper_playback_patch']=='sampled-progress-1'
    gui={n.get('id'):n.text for n in ET.fromstring(z.read('userdata/guisettings.xml'))}
    assert {k:gui[k] for k in ('filecache.memorysize','filecache.readfactor','filecache.buffermode','filecache.chunksize')}=={'filecache.memorysize':'64','filecache.readfactor':'400','filecache.buffermode':'4','filecache.chunksize':'131072'}
@@ -317,6 +365,6 @@ def verify(folder):
    assert actual==expected
    for n,d in installer.items():assert z.read('addons/'+n)==d,'Installer mismatch'
    assert z.read('addons/plugin.program.blacklanturninstaller/resources/libs/managed_addons.py')==(SOURCE/'resources/libs/managed_addons.py').read_bytes()
- print('PASS: both packages, protected schema, exact installer, full Helper manifest and native regression evidence')
+ print('PASS: both packages, protected schema, exact installer, full managed Helper/Umbrella manifests and three-device progress evidence')
 if __name__=='__main__':
  p=argparse.ArgumentParser();p.add_argument('artifacts',type=Path);verify(p.parse_args().artifacts)

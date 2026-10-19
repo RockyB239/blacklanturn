@@ -1,0 +1,123 @@
+{
+  "passed": true,
+  "patch": "event-progress-3",
+  "devices": {
+    "fire": {
+      "version": "6.7.92",
+      "candidate_sha256": "904b7eb226045610c213e5083a55d99b4462620b1089fb413a4e2e1b04f1b00c",
+      "loaded_trace_sha256": "c017cf529f7695409ffbddb3db467698d01c326ba0bf0718ea3345ed13d86527",
+      "expected_trace_sha256": "c017cf529f7695409ffbddb3db467698d01c326ba0bf0718ea3345ed13d86527",
+      "diagnostics_removed": true,
+      "other_sources_preserved": true,
+      "settings_authorizations_preserved": true,
+      "watched_history_unchanged": true,
+      "unrelated_progress_unchanged": true,
+      "ordinary_restart": true,
+      "quiet_home": true,
+      "cold_seek_stop": {
+        "absolute_callback_ms": 750000,
+        "seconds_after_player": 1.2281432151794434,
+        "av_ready": false,
+        "outgoing_progress": 12.490939904922296,
+        "cloud_reads_matched": 2,
+        "cloud_error_seconds": 0.0023960319999787316
+      },
+      "saved_resume": {
+        "native_duration_replaced_fallback": true,
+        "cloud_reads_matched": 2,
+        "cloud_error_seconds": 0.8254347519999783
+      },
+      "pause_stop": {
+        "paused_seconds": 4.442669630050659,
+        "native_drift_seconds": 0.0,
+        "cloud_reads_matched": 2,
+        "cloud_error_seconds": 0.0
+      },
+      "zero_seek_stop": {
+        "absolute_callback_ms": 0,
+        "selected_resume_id_matched": true,
+        "delete_status": 204,
+        "absent_cloud_reads": 2,
+        "invalid_zero_pause_sent": false
+      }
+    },
+    "mac": {
+      "version": "6.7.92",
+      "candidate_sha256": "904b7eb226045610c213e5083a55d99b4462620b1089fb413a4e2e1b04f1b00c",
+      "loaded_trace_sha256": "aa0798b434b1d79dc9caf555365b68d2579ecded4f69881fd13a54e98d404a5d",
+      "expected_trace_sha256": "aa0798b434b1d79dc9caf555365b68d2579ecded4f69881fd13a54e98d404a5d",
+      "diagnostics_removed": true,
+      "other_sources_preserved": true,
+      "settings_authorizations_preserved": true,
+      "watched_history_unchanged": true,
+      "unrelated_progress_unchanged": true,
+      "ordinary_restart": true,
+      "quiet_home": true,
+      "cold_seek_stop": {
+        "absolute_callback_ms": 750000,
+        "seconds_after_player": 0.5069601535797119,
+        "av_ready": false,
+        "outgoing_progress": 12.5,
+        "cloud_reads_matched": 2,
+        "cloud_error_seconds": 0.4560000000000173
+      },
+      "saved_resume": {
+        "native_duration_replaced_fallback": true,
+        "cloud_reads_matched": 2,
+        "cloud_error_seconds": 0.8216360960000202
+      },
+      "pause_stop": {
+        "paused_seconds": 4.322490215301514,
+        "native_drift_seconds": 0.0,
+        "cloud_reads_matched": 2,
+        "cloud_error_seconds": 0.0020036480000271695
+      },
+      "zero_seek_stop": {
+        "absolute_callback_ms": 0,
+        "selected_resume_id_matched": true,
+        "delete_status": 204,
+        "absent_cloud_reads": 2,
+        "invalid_zero_pause_sent": false
+      }
+    },
+    "apple_tv": {
+      "version": "6.7.92",
+      "candidate_sha256": "904b7eb226045610c213e5083a55d99b4462620b1089fb413a4e2e1b04f1b00c",
+      "loaded_trace_sha256": "878cebb13e268ea3062a1b954a213445783640f3e5eebf8c0adbf2127c62bab5",
+      "expected_trace_sha256": "878cebb13e268ea3062a1b954a213445783640f3e5eebf8c0adbf2127c62bab5",
+      "diagnostics_removed": true,
+      "other_sources_preserved": true,
+      "settings_authorizations_preserved": true,
+      "watched_history_unchanged": true,
+      "unrelated_progress_unchanged": true,
+      "ordinary_restart": true,
+      "quiet_home": true,
+      "cold_seek_stop": {
+        "cloud_reads_matched": 2,
+        "cloud_error_seconds": 0.4560000000000173,
+        "absolute_callback_ms": 750000,
+        "seconds_after_player": 0.5126237869262695,
+        "av_ready": false,
+        "outgoing_progress": 12.5
+      },
+      "saved_resume": {
+        "cloud_reads_matched": 2,
+        "cloud_error_seconds": 0.0,
+        "native_duration_replaced_fallback": true
+      },
+      "pause_stop": {
+        "cloud_reads_matched": 2,
+        "cloud_error_seconds": 0.0,
+        "paused_seconds": 4.36627197265625,
+        "native_drift_seconds": 0.0039999999999054126
+      },
+      "zero_seek_stop": {
+        "absolute_callback_ms": 0,
+        "selected_resume_id_matched": true,
+        "delete_status": 204,
+        "absent_cloud_reads": 2,
+        "invalid_zero_pause_sent": false
+      }
+    }
+  }
+}

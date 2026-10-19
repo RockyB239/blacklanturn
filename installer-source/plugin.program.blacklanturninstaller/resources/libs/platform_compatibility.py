@@ -1,10 +1,16 @@
 """Validate portable build payloads and retain Kodi-managed native components."""
+import importlib.util
 import json
-from pathlib import PurePosixPath
+from pathlib import Path, PurePosixPath
 import re
-import stat
 import zipfile
 import xml.etree.ElementTree as E
+
+# These modules are also loaded directly by the offline builder/tests, without
+# Kodi's resources package on sys.path. Keep shared path validation standalone.
+_path_spec = importlib.util.spec_from_file_location('_blacklanturn_archive_paths', Path(__file__).with_name('archive_paths.py'))
+_archive_paths = importlib.util.module_from_spec(_path_spec)
+_path_spec.loader.exec_module(_archive_paths)
 
 NATIVE_ADDONS = ('inputstream.adaptive', 'script.module.pil')
 POLICY_PATH = 'userdata/blacklanturn-build.json'
@@ -29,18 +35,17 @@ def _compatible(aid, details):
     if not version: return False
     return version[0] == 21 if aid == 'inputstream.adaptive' else version >= (1,1,7)
 
-def prepare(path, kodi):
+def prepare(path, kodi, home=None):
     """Called after download, before OpenWizard performs any profile cleanup."""
     try:
         with zipfile.ZipFile(path) as archive:
             names = archive.namelist()
-            if not names or len(set(names)) != len(names):
+            if not names:
                 raise CompatibilityError('The download is incomplete. Your current build has been kept.')
-            for item in archive.infolist():
-                name = item.filename
-                p = PurePosixPath(name)
-                if p.is_absolute() or '..' in p.parts or '\\' in name or not p.parts or p.parts[0] not in ('addons','userdata') or stat.S_ISLNK(item.external_attr >> 16):
-                    raise CompatibilityError('The download is not a valid build package. Your current build has been kept.')
+            try:
+                _archive_paths.validate(archive)
+            except _archive_paths.PathError as exc:
+                raise CompatibilityError(str(exc)) from exc
             if archive.testzip() is not None:
                 raise CompatibilityError('The download is damaged. Your current build has been kept.')
             addon_ids = sorted({PurePosixPath(n).parts[1] for n in names if n.startswith('addons/') and len(PurePosixPath(n).parts)==3 and n.endswith('/addon.xml')})
@@ -64,18 +69,31 @@ def prepare(path, kodi):
                     from resources.libs import managed_addons
                     if policy.get('helper_patch') != 'empty-cache-1':
                         raise CompatibilityError('Update BlackLanturn Installer before installing this build.')
+                    managed_umbrella = False
+                    if policy['schema'] == 3:
+                        from resources.libs import build_preferences
+                        preference_policy = policy.get('preferences_policy')
+                        minimum = {'playback-trakt-1':'1.0.13', 'playback-trakt-youtube-1':'1.0.17',
+                                   'playback-trakt-youtube-umbrella-1':'1.0.18'}.get(preference_policy)
+                        if minimum is None or policy.get('installer_min_version') != minimum:
+                            raise CompatibilityError('Update BlackLanturn Installer before installing this build.')
+                        managed_umbrella = preference_policy == 'playback-trakt-youtube-umbrella-1'
+                        if managed_umbrella and (policy.get('umbrella_patch') != 'event-progress-3'
+                                                 or policy.get('umbrella_version') != '6.7.92'):
+                            raise CompatibilityError('Update BlackLanturn Installer before installing this build.')
                     try:
-                        managed_addons.verify_archive(archive)
+                        if managed_umbrella:
+                            managed_addons.verify_archive(archive, umbrella=True)
+                            if home is None:
+                                raise CompatibilityError('Umbrella source verification needs the current profile. Your current build has been kept.')
+                            managed_addons.verify_installed(home)
+                        else:
+                            managed_addons.verify_archive(archive)
                     except managed_addons.ProtectionError as exc:
                         raise CompatibilityError(str(exc)) from exc
                     if policy['schema'] == 3:
-                        from resources.libs import build_preferences
-                        preference_policy=policy.get('preferences_policy')
-                        minimum={'playback-trakt-1':'1.0.13','playback-trakt-youtube-1':'1.0.17'}.get(preference_policy)
-                        if minimum is None or policy.get('installer_min_version') != minimum:
-                            raise CompatibilityError('Update BlackLanturn Installer before installing this build.')
                         try:
-                            build_preferences.verify_archive(archive,policy=preference_policy)
+                            build_preferences.verify_archive(archive, policy=preference_policy)
                         except build_preferences.PreferenceError as exc:
                             raise CompatibilityError(str(exc)) from exc
                 for name in names:

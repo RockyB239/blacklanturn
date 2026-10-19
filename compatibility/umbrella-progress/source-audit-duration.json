@@ -1,0 +1,48 @@
+{
+  "6.7.90": {
+    "changed_from_event_progress_2": [
+      "Player._accept_progress_length",
+      "Player._sample_progress",
+      "Player._seed_progress_length",
+      "Player._sendFinishedItemState",
+      "Player.getWatchedPercent",
+      "Player.keepAlive",
+      "Player.onAVStarted",
+      "Player.onPlayBackEnded",
+      "Player.onPlayBackError",
+      "Player.onPlayBackPaused",
+      "Player.onPlayBackResumed",
+      "Player.onPlayBackSeek",
+      "Player.play_source"
+    ],
+    "all_Bookmarks_methods_unchanged": true,
+    "sampling_call_sites_added": 0,
+    "threads_added": 0,
+    "network_calls_added": 0,
+    "settings_writes_added": 0,
+    "contradicted_fallback": "accepted seek intent retained; duration-dependent writes withheld until consistent native duration/position, preserving valid pending acknowledgment"
+  },
+  "6.7.92": {
+    "changed_from_event_progress_2": [
+      "Player._accept_progress_length",
+      "Player._sample_progress",
+      "Player._seed_progress_length",
+      "Player._sendFinishedItemState",
+      "Player.getWatchedPercent",
+      "Player.keepAlive",
+      "Player.onAVStarted",
+      "Player.onPlayBackEnded",
+      "Player.onPlayBackError",
+      "Player.onPlayBackPaused",
+      "Player.onPlayBackResumed",
+      "Player.onPlayBackSeek",
+      "Player.play_source"
+    ],
+    "all_Bookmarks_methods_unchanged": true,
+    "sampling_call_sites_added": 0,
+    "threads_added": 0,
+    "network_calls_added": 0,
+    "settings_writes_added": 0,
+    "contradicted_fallback": "accepted seek intent retained; duration-dependent writes withheld until consistent native duration/position, preserving valid pending acknowledgment"
+  }
+}
