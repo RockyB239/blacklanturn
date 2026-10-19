@@ -4,7 +4,7 @@ from pathlib import Path
 from types import SimpleNamespace
 sys.path.insert(0,str(Path(__file__).parents[1]/'addon'))
 from test_window_lifecycle import extract,ROOT
-from playback_core import trakt_command,choose_player_path
+from playback_core import trakt_command,choose_player_path,resume_options
 from search_ui import discovery_result
 from browse_controls import can_choose_genre
 
@@ -23,7 +23,7 @@ class TitleActionFailures(unittest.TestCase):
         chosen=extract(ROOT/'live_review.py','chosen',{},'LiveReview')
         state.chosen=lambda cid:chosen(state,cid)
         ns={'xbmcgui':SimpleNamespace(Dialog=lambda:SimpleNamespace(contextmenu=menu)),
-            'trakt_command':trakt_command,'choose_player_path':choose_player_path,'can_choose_genre':can_choose_genre,
+            'trakt_command':trakt_command,'choose_player_path':choose_player_path,'can_choose_genre':can_choose_genre,'resume_options':resume_options,
             'discovery_result':discovery_result,'event':lambda *a,**kw:None}
         extract(ROOT/'live_review.py','title_actions',ns,'LiveReview')(state)
         return calls,state

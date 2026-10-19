@@ -1248,23 +1248,27 @@ class LiveReview(YouTubeBrowser,xbmcgui.WindowXML):
         failed=any(value=='error' for value in getattr(self,'row_states',{}).values())
         n=focus-900 if focus in (900,901) else getattr(self,'last_row',0)
         histories=getattr(self,'histories',[])
-        options=[]
-        if getattr(self,'youtube_home_visible',lambda:False)():options.append(('youtube_refresh','Refresh recommendations'))
-        if can_choose_genre(self):options.append(('genre','Choose genre…'))
-        if n<len(histories) and histories[n].pages:options.append(('previous','Previous page'))
         item=self.chosen(focus) if focus in (101,102,103,105,106,900,901,3100) else None
         if focus in (900,901) and not self.rows[focus-900]:item=None
         if item and item.get('_page_control'):item=None
+        options=[]
+        if not item:
+            if getattr(self,'youtube_home_visible',lambda:False)():options.append(('youtube_refresh','Refresh recommendations'))
+            if can_choose_genre(self):options.append(('genre','Choose genre…'))
+            if n<len(histories) and histories[n].pages:options.append(('previous','Previous page'))
         discovery=discovery_result(item) if item else None
         command=trakt_command(item) if item and not discovery else None
         player_path=choose_player_path(item) if item and not discovery else None
         if discovery:options.append(('open_discovery',discovery['button']))
         elif item:
             saved=any(x.get('file')==item.get('file') for x in self.config['Saved'])
+            if item.get('filetype')!='directory' and item.get('type')!='addon':options.append(('play','Resume' if resume_options(item) else 'Play'))
+            if player_path:options.append(('player','Play using…'))
             options.extend([('details','Details'),('local','Remove from My Stuff on this device' if saved else 'Save to My Stuff on this device')])
+            if command:options.append(('trakt','Trakt: Watched, progress & lists'))
             if self.rating_identity(item):options.append(('discover','Discover collections & creator credits'))
-            if command:options.append(('trakt','Trakt · Watched, progress & lists'))
-            if player_path:options.extend([('player','Play using…'),('default_player','Set default player…')])
+            if getattr(self,'youtube_home_visible',lambda:False)():options.append(('youtube_refresh','Refresh recommendations'))
+            if player_path:options.append(('default_player','Set default player…'))
             options.append(('refresh','Refresh watched status'))
         if failed:
             options.append(('retry','Retry unavailable lists'))
@@ -1286,6 +1290,7 @@ class LiveReview(YouTubeBrowser,xbmcgui.WindowXML):
             if prior:self.load_path(n,prior[0],back=True,position=prior[1])
         elif action=='settings':self.settings()
         elif action=='open_discovery':self.open_discovery(discovery)
+        elif action=='play':self.update(item);self.onClick(101)
         elif action=='details':self.details(item)
         elif action=='discover':self.discover_more(item)
         elif action=='local':self.update(item);self.onClick(103)

@@ -115,7 +115,7 @@ class ControllerControls(unittest.TestCase):
             self.assertEqual(s.rows[0],original)
             s.search_state=None;s.active_page='animation';s.config={'Genres':[{'id':'animation','label':'Animation'}]}
             s.set_rows([{'label':'Animation','path':path}]);self.assertEqual(s.rows[0],original)
-    def test_options_can_choose_genre_on_a_title_or_previous_page_card(self):
+    def test_genre_remains_on_page_controls_without_mixing_into_title_actions(self):
         m=module(self)
         for selected in [item(1),{'_page_control':'previous','file':'blacklanturn://previous','label':'Previous'}]:
             calls=[];history=PageHistory();history.push('plugin://test/one',2)
@@ -124,9 +124,9 @@ class ControllerControls(unittest.TestCase):
                 chosen=lambda cid:selected,config={'Saved':[]},rating_identity=lambda _:None,
                 stop_preview=lambda:None,actions_open=False,browse_source=lambda:calls.append('genre'),setFocusId=lambda n:None)
             ns={'xbmcgui':SimpleNamespace(Dialog=lambda:SimpleNamespace(contextmenu=lambda opts:opts.index('Choose genre…') if 'Choose genre…' in opts else -1)),
-                'can_choose_genre':m.can_choose_genre,'trakt_command':lambda _:None,'choose_player_path':lambda _:None,'discovery_result':lambda _:None,'event':lambda *a,**kw:None}
+                'can_choose_genre':m.can_choose_genre,'trakt_command':lambda _:None,'choose_player_path':lambda _:None,'discovery_result':lambda _:None,'resume_options':lambda _: {},'event':lambda *a,**kw:None}
             extract(ROOT/'live_review.py','title_actions',ns,'LiveReview')(state)
-            self.assertEqual(calls,['genre']);self.assertFalse(state.actions_open)
+            self.assertEqual(calls,['genre'] if selected.get('_page_control') else []);self.assertFalse(state.actions_open)
     def test_clicking_previous_restores_that_rows_path_and_position(self):
         m=module(self);history=PageHistory();history.push('plugin://test/first',6);calls=[]
         state=SimpleNamespace(actions_open=False,histories=[PageHistory(),history],chosen=lambda cid:{'_page_control':'previous','file':'blacklanturn://previous'},
