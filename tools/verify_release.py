@@ -7,6 +7,22 @@ ROOT=Path(__file__).resolve().parents[1]
 SOURCE=ROOT/'installer-source/plugin.program.blacklanturninstaller'
 sys.path.insert(0,str(SOURCE))
 
+def verify_shared_network_acceptance(receipt, manifest):
+ """Actual isolated Kodi RequestAPI evidence, not three-device playback proof."""
+ assert receipt.get('passed') is True and receipt.get('personal_profile_accessed') is False
+ assert str(receipt.get('runtime','')).startswith('21.3'), 'Request compatibility needs Kodi21.3 acceptance'
+ assert set(receipt.get('editions',{}))=={'General','Apple-TV-Mac'}, 'Both packaged request sources need native acceptance'
+ expected=manifest['files']['resources/modules/jurialmunkey/reqapi.py']
+ for case in receipt['editions'].values():
+  assert case.get('passed') is True and case.get('actual_module_loaded') is True
+  assert case.get('source_sha256')==expected, 'Untested shared request source'
+  assert case.get('server_cooldown_seconds')==120 and case.get('minimum_cooldown_seconds')==60
+  assert case.get('ordinary_http_error_logs_redacted') is True
+  assert case.get('successful_calls')==10000 and case.get('extra_transport_calls')==0
+  assert case.get('new_background_thread') is False
+  elapsed=case.get('successful_synthetic_calls_seconds')
+  assert type(elapsed) in (int,float) and isfinite(elapsed) and 0<elapsed<5
+
 def verify_umbrella_progress_acceptance(receipt, manifest):
  """Require real callbacks, settled provider results and clean device readbacks.
 
@@ -343,19 +359,22 @@ def verify(folder):
  verify_umbrella_progress_acceptance(
   json.loads((ROOT/'compatibility/umbrella-progress/native-verification.json').read_text()),
   json.loads((ROOT/'compatibility/umbrella-progress/manifest-duration.json').read_text()))
+ verify_shared_network_acceptance(
+  json.loads((ROOT/'compatibility/shared-requests/native-verification.json').read_text()),
+  json.loads((SOURCE/'resources/managed-network.json').read_text()))
  spec=importlib.util.spec_from_file_location('managed',SOURCE/'resources/libs/managed_addons.py');m=importlib.util.module_from_spec(spec);spec.loader.exec_module(m)
- with zipfile.ZipFile(folder/'plugin.program.blacklanturninstaller-1.0.18.zip') as z:
+ with zipfile.ZipFile(folder/'plugin.program.blacklanturninstaller-1.0.19.zip') as z:
   assert z.testzip() is None
   installer={n:z.read(n) for n in z.namelist()}
   assert all(n.startswith('plugin.program.blacklanturninstaller/') for n in installer)
   expected_installer={'plugin.program.blacklanturninstaller/'+str(p.relative_to(SOURCE)):p.read_bytes() for p in SOURCE.rglob('*') if p.is_file() and '__pycache__' not in p.parts and not p.name.endswith(('.pyc','.DS_Store'))}
   assert installer==expected_installer,'Installer ZIP differs from reviewed source'
  for ed in ('General','Apple-TV-Mac'):
-  with zipfile.ZipFile(folder/f'BlackLanturn-{ed}-Kodi21-1.1.13.zip') as z:
-   assert z.testzip() is None;m.verify_archive(z,umbrella=True);verify_playback_defaults(z);verify_display_defaults(z)
+  with zipfile.ZipFile(folder/f'BlackLanturn-{ed}-Kodi21-1.1.14.zip') as z:
+   assert z.testzip() is None;m.verify_archive(z,umbrella=True,network=True);verify_playback_defaults(z);verify_display_defaults(z)
    p=json.loads(z.read('userdata/blacklanturn-build.json'))
-   assert p['schema']==3 and p['preferences_policy']=='playback-trakt-youtube-umbrella-1' and p['helper_patch']=='empty-cache-1' and p['installer_min_version']=='1.0.18'
-   assert p['build_version']=='1.1.13' and p['umbrella_version']=='6.7.92' and p['umbrella_patch']=='event-progress-3'
+   assert p['schema']==3 and p['preferences_policy']=='playback-trakt-youtube-umbrella-network-1' and p['helper_patch']=='empty-cache-1' and p['installer_min_version']=='1.0.19'
+   assert p['build_version']=='1.1.14' and p['network_patch']=='request-reliability-privacy-1' and p['umbrella_version']=='6.7.92' and p['umbrella_patch']=='event-progress-3'
    assert p['controller_version']=='0.1.83' and p['helper_search_patch']=='search-batch-1' and p['helper_playback_patch']=='sampled-progress-1'
    gui={n.get('id'):n.text for n in ET.fromstring(z.read('userdata/guisettings.xml'))}
    assert {k:gui[k] for k in ('filecache.memorysize','filecache.readfactor','filecache.buffermode','filecache.chunksize')}=={'filecache.memorysize':'64','filecache.readfactor':'400','filecache.buffermode':'4','filecache.chunksize':'131072'}

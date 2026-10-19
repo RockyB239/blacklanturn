@@ -1,7 +1,7 @@
-"""Verified BlackLanturn Helper payloads and Kodi 21 per-addon update protection.
+"""Verified BlackLanturn managed payloads and Kodi 21 per-addon update protection.
 
-Normal Helper updates are supplied by reviewed BlackLanturn build releases.
-Never copy an old patch over an unknown newer Helper implementation.
+Normal managed-addon updates are supplied by reviewed BlackLanturn build releases.
+Never copy an old patch over an unknown newer managed implementation.
 """
 import importlib.util
 import hashlib
@@ -19,6 +19,7 @@ _path_spec.loader.exec_module(_archive_paths)
 HELPER = 'plugin.video.themoviedb.helper'
 PREFIX = 'addons/' + HELPER + '/'
 UMBRELLA = 'plugin.video.umbrella'
+NETWORK = 'script.module.jurialmunkey'
 USER_DISABLED_AUTO_UPDATE = 1  # Kodi 21 AddonInfo.h AddonUpdateRule
 
 class ProtectionError(Exception):
@@ -27,8 +28,8 @@ class ProtectionError(Exception):
 def _umbrella_manifest():
     return json.loads((Path(__file__).parents[1] / 'managed-umbrella.json').read_text())
 
-def verify_archive(archive, umbrella=False):
-    """Verify the complete Helper tree against the installer's reviewed manifest."""
+def verify_archive(archive, umbrella=False, network=False):
+    """Verify Helper and selected managed dependencies against reviewed manifests."""
     try:
         _archive_paths.validate(archive)
     except _archive_paths.PathError as exc:
@@ -45,6 +46,13 @@ def verify_archive(archive, umbrella=False):
                   for n in archive.namelist() if n.startswith(prefix) and not n.endswith('/')}
         if actual != expected:
             raise ProtectionError('The Umbrella package has not passed BlackLanturn compatibility checks. Update BlackLanturn Installer and retry. Your current build has been kept.')
+    if network:
+        prefix = 'addons/' + NETWORK + '/'
+        expected = json.loads((Path(__file__).parents[1] / 'managed-network.json').read_text())['files']
+        actual = {n[len(prefix):]: hashlib.sha256(archive.read(n)).hexdigest()
+                  for n in archive.namelist() if n.startswith(prefix) and not n.endswith('/')}
+        if actual != expected:
+            raise ProtectionError('The shared network package has not passed BlackLanturn compatibility checks. Update BlackLanturn Installer and retry. Your current build has been kept.')
     return HELPER
 
 def _source_files(addon, message):
@@ -67,12 +75,14 @@ def _source_files(addon, message):
         actual[relative.as_posix()] = hashlib.sha256(path.read_bytes()).hexdigest()
     return actual
 
-def verify_installed(home):
-    """Reject unknown installed Umbrella code before cleanup or native setup.
+def verify_installed(home, network=False):
+    """Reject unknown installed Umbrella/shared code before cleanup or native setup.
 
     Only reviewed complete trees and explicit player variants are accepted.
     Runtime bytecode is excluded; foreign files, links and oversized trees fail.
     """
+    if network:
+        _verify_installed_network(home)
     addon = Path(home) / 'addons' / UMBRELLA
     if not addon.exists() and not addon.is_symlink():
         return None
@@ -91,10 +101,29 @@ def verify_installed(home):
         raise ProtectionError(message) from exc
     return UMBRELLA
 
-def verify_kept(home, addon_ids):
+def _verify_installed_network(home):
+    addon = Path(home) / 'addons' / NETWORK
+    if not addon.exists() and not addon.is_symlink():
+        return
+    message = 'Installed shared network dependency has unreviewed source or version. Your current build has been kept; update compatibility support before installing.'
+    try:
+        manifest = json.loads((Path(__file__).parents[1] / 'managed-network.json').read_text())
+        actual = _source_files(addon, message)
+        expected = manifest['files']
+        target = 'resources/modules/jurialmunkey/reqapi.py'
+        if (actual.get(target) not in manifest['installed_request_hashes']
+                or {k:v for k,v in actual.items() if k != target} != {k:v for k,v in expected.items() if k != target}):
+            raise ProtectionError(message)
+    except (OSError, ValueError, KeyError) as exc:
+        raise ProtectionError(message) from exc
+
+def verify_kept(home, addon_ids, network=False):
     """Whitelist may retain managed source only when it already matches target."""
-    for addon, label, filename in ((HELPER, 'TMDb Helper', 'managed-helper.json'),
-                                   (UMBRELLA, 'Umbrella', 'managed-umbrella.json')):
+    managed = [(HELPER, 'TMDb Helper', 'managed-helper.json'),
+               (UMBRELLA, 'Umbrella', 'managed-umbrella.json')]
+    if network:
+        managed.append((NETWORK, 'Shared network dependency', 'managed-network.json'))
+    for addon, label, filename in managed:
         if addon not in addon_ids:
             continue
         message = (label + " is in your whitelist but does not match this build. "
@@ -107,7 +136,7 @@ def verify_kept(home, addon_ids):
         except (OSError, ValueError, KeyError) as exc:
             raise ProtectionError(message) from exc
 
-def protect(db_path, umbrella=False):
+def protect(db_path, umbrella=False, network=False):
     """Use the existing registry, retaining all unrelated and existing rules.
 
 Caller refreshes Kodi's in-memory rules with UpdateLocalAddons before cleanup
@@ -124,13 +153,18 @@ and again after extraction. Never create a replacement addon registry.
             columns = [r[1] for r in connection.execute('PRAGMA table_info(update_rules)')]
             if columns != ['id', 'addonID', 'updateRule']:
                 raise ProtectionError('Kodi update protection is unsupported. Your current build has been kept.')
-            for addon in (HELPER, UMBRELLA) if umbrella else (HELPER,):
+            managed = [HELPER]
+            if umbrella:
+                managed.append(UMBRELLA)
+            if network:
+                managed.append(NETWORK)
+            for addon in managed:
                 connection.execute('INSERT INTO update_rules (addonID,updateRule) SELECT ?,? WHERE NOT EXISTS (SELECT 1 FROM update_rules WHERE addonID=? AND updateRule=?)',
                                    (addon, USER_DISABLED_AUTO_UPDATE, addon, USER_DISABLED_AUTO_UPDATE))
                 if not connection.execute('SELECT 1 FROM update_rules WHERE addonID=? AND updateRule=?',(addon, USER_DISABLED_AUTO_UPDATE)).fetchone():
                     raise ProtectionError('Addon update protection could not be verified.')
     except sqlite3.Error as exc:
-        raise ProtectionError('Helper update protection could not be saved. Please restart Kodi and retry.') from exc
+        raise ProtectionError('Managed add-on update protection could not be saved. Please restart Kodi and retry.') from exc
     finally:
         if connection is not None:
             connection.close()

@@ -1,4 +1,4 @@
-"""Reproducible 1.1.13 candidate from verified clean baselines, never live profiles."""
+"""Reproducible 1.1.14 candidate from verified clean baselines, never live profiles."""
 import argparse,ast,hashlib,importlib.util,json,re,sys,xml.etree.ElementTree as ET,zipfile
 from pathlib import Path
 ROOT=Path(__file__).resolve().parents[1]
@@ -6,6 +6,16 @@ SOURCE=ROOT/'installer-source/plugin.program.blacklanturninstaller'
 PATCH=ROOT/'compatibility/helper-empty-cache'
 BASE_HASHES={'General':'49581a62dd63333ff9be861a698d758550e59e2a6091eddb9c3f6f4431eaf3e4','Apple-TV-Mac':'ab396fbbee0bdf726bc1a21e4101bd8ccda3935add041f5b7f005c43a998ca73'}
 def sha(data):return hashlib.sha256(data).hexdigest()
+def apply_shared_requests(data):
+ """One reviewed request implementation; leave edition workarounds untouched."""
+ root=ROOT/'compatibility/shared-requests'
+ provenance=json.loads((root/'provenance.json').read_text())
+ target=provenance['path'];candidate=(root/'reqapi.py').read_bytes()
+ if sha(data[target]) not in (provenance['general_before_sha256'],provenance['candidate_sha256']):
+  raise ValueError('Unknown shared request source; compatibility review is required')
+ if sha(candidate)!=provenance['candidate_sha256']:
+  raise ValueError('Reviewed shared request candidate changed')
+ data[target]=candidate
 def zipwrite(path,data):
  with zipfile.ZipFile(path,'w',zipfile.ZIP_DEFLATED,compresslevel=6) as z:
   for name,raw in sorted(data.items()):
@@ -39,14 +49,14 @@ def apply_umbrella(data):
 def build(baselines,output):
  output.mkdir(parents=True,exist_ok=True)
  installer={str(p.relative_to(SOURCE)):p.read_bytes() for p in SOURCE.rglob('*') if p.is_file() and '__pycache__' not in p.parts and not p.name.endswith(('.pyc','.DS_Store'))}
- assert ET.fromstring(installer['addon.xml']).get('version')=='1.0.18'
- zipwrite(output/'plugin.program.blacklanturninstaller-1.0.18.zip',{'plugin.program.blacklanturninstaller/'+n:d for n,d in installer.items()})
+ assert ET.fromstring(installer['addon.xml']).get('version')=='1.0.19'
+ zipwrite(output/'plugin.program.blacklanturninstaller-1.0.19.zip',{'plugin.program.blacklanturninstaller/'+n:d for n,d in installer.items()})
  spec=importlib.util.spec_from_file_location('managed',SOURCE/'resources/libs/managed_addons.py');managed=importlib.util.module_from_spec(spec);spec.loader.exec_module(managed)
  for edition,expected in BASE_HASHES.items():
   source=baselines/f'BlackLanturn-{edition}-Kodi21-1.1.2.zip';assert sha(source.read_bytes())==expected,'Baseline changed'
   with zipfile.ZipFile(source) as z:
    assert z.testzip() is None;before={n:z.read(n) for n in z.namelist()}
-  data=dict(before);apply_display_defaults(data);apply_umbrella(data);prefix='addons/plugin.program.blacklanturninstaller/'
+  data=dict(before);apply_display_defaults(data);apply_umbrella(data);apply_shared_requests(data);prefix='addons/plugin.program.blacklanturninstaller/'
   data={n:d for n,d in data.items() if not n.startswith(prefix)}
   data.update({prefix+n:d for n,d in installer.items()})
   controller_root=ROOT/'controller-source/addon'
@@ -86,10 +96,10 @@ def build(baselines,output):
   apply_settings(yp,{'kodion.mpd.stream.select':'1','kodion.video.stream.select':'1'})
   defaults=json.loads((SOURCE/'resources/playback-defaults.json').read_text(encoding='utf-8'))
   for name,fields in defaults.items():apply_settings('userdata/'+name,fields)
-  marker=json.loads(data['userdata/blacklanturn-build.json']);marker.update(schema=3,preferences_policy='playback-trakt-youtube-umbrella-1',build_version='1.1.13',helper_patch='empty-cache-1',installer_min_version='1.0.18',controller_version='0.1.83',helper_search_patch='search-batch-1',helper_playback_patch='sampled-progress-1',umbrella_version='6.7.92',umbrella_patch='event-progress-3')
+  marker=json.loads(data['userdata/blacklanturn-build.json']);marker.update(schema=3,preferences_policy='playback-trakt-youtube-umbrella-network-1',build_version='1.1.14',network_patch='request-reliability-privacy-1',helper_patch='empty-cache-1',installer_min_version='1.0.19',controller_version='0.1.83',helper_search_patch='search-batch-1',helper_playback_patch='sampled-progress-1',umbrella_version='6.7.92',umbrella_patch='event-progress-3')
   data['userdata/blacklanturn-build.json']=json.dumps(marker,indent=2).encode()
-  data['userdata/BlackLanturn-README.txt']=(before['userdata/BlackLanturn-README.txt'].decode()+'\n\nRelease 1.1.13: Umbrella 6.7.92 includes event-progress-3 with current-item metadata duration fallback, absolute seek capture and guarded exact-zero resume clearing. Installer 1.0.18 verifies the complete managed Umbrella tree and protects its normal update path before cleanup. Controller 0.1.83 uses YouTube-specific Details and consistent independent preview navigation. Both clean editions default to four ratings with TMDb hidden; ratings remain configurable. The preserved install flow makes Standard versus Account-only reset explicit, repairs preservation controls and hides unconfigured destinations. Standard updates retain selected playback choices and authorizations; account-only reset deliberately uses build defaults and selected accounts. Managed Helper 6.17.9 includes sampled-progress-1 alongside empty-cache-1 and search-batch-1. Position sampling uses the existing playback service only, with no added browsing network requests or background thread. Existing adaptive YouTube recommendations, artwork, watch status, 45-second inline previews, automatic fullscreen quality, language/forced subtitle defaults and device-specific playback compatibility remain retained. Native release acceptance is recorded separately; this package description is not proof.\n').encode()
-  allowed={n for n in set(before)|set(data) if n.startswith((prefix,cp,'addons/plugin.video.umbrella/'))}|{'userdata/blacklanturn-build.json','userdata/BlackLanturn-README.txt','userdata/guisettings.xml','userdata/addon_data/script.blacklanturn.preview/rows.json',hp,up,yp,target}|{'addons/plugin.video.themoviedb.helper/resources/tmdbhelper/lib/monitor/'+n for n in ('player.py','scrobbler.py','service.py')}
+  data['userdata/BlackLanturn-README.txt']=(before['userdata/BlackLanturn-README.txt'].decode()+'\nRelease 1.1.14: Both editions share request-reliability-privacy-1: server Retry-After cooldown (minimum 60 seconds) and status/hostname-only HTTP error logging. Installer 1.0.19 validates and protects the complete shared dependency using the existing managed-addon update policy. Platform-specific YouTube source, processing limits and playback/default settings are unchanged.\n'+'\n\nRelease 1.1.13: Umbrella 6.7.92 includes event-progress-3 with current-item metadata duration fallback, absolute seek capture and guarded exact-zero resume clearing. Installer 1.0.18 verifies the complete managed Umbrella tree and protects its normal update path before cleanup. Controller 0.1.83 uses YouTube-specific Details and consistent independent preview navigation. Both clean editions default to four ratings with TMDb hidden; ratings remain configurable. The preserved install flow makes Standard versus Account-only reset explicit, repairs preservation controls and hides unconfigured destinations. Standard updates retain selected playback choices and authorizations; account-only reset deliberately uses build defaults and selected accounts. Managed Helper 6.17.9 includes sampled-progress-1 alongside empty-cache-1 and search-batch-1. Position sampling uses the existing playback service only, with no added browsing network requests or background thread. Existing adaptive YouTube recommendations, artwork, watch status, 45-second inline previews, automatic fullscreen quality, language/forced subtitle defaults and device-specific playback compatibility remain retained. Native release acceptance is recorded separately; this package description is not proof.\n').encode()
+  allowed={n for n in set(before)|set(data) if n.startswith((prefix,cp,'addons/plugin.video.umbrella/'))}|{'userdata/blacklanturn-build.json','userdata/BlackLanturn-README.txt','userdata/guisettings.xml','userdata/addon_data/script.blacklanturn.preview/rows.json',hp,up,yp,target,'addons/script.module.jurialmunkey/resources/modules/jurialmunkey/reqapi.py'}|{'addons/plugin.video.themoviedb.helper/resources/tmdbhelper/lib/monitor/'+n for n in ('player.py','scrobbler.py','service.py')}
   changed={n for n in set(before)|set(data) if before.get(n)!=data.get(n)};assert changed<=allowed
   for n,raw in data.items():
    assert n.startswith(('addons/','userdata/')) and '..' not in n.split('/')
@@ -105,10 +115,10 @@ def build(baselines,output):
    for dep in addon.findall('./requires/import'):
     if dep.get('optional')=='true':continue
     assert dep.get('addon') in addons or dep.get('addon') in system,(aid,dep.get('addon'))
-  out=output/f'BlackLanturn-{edition}-Kodi21-1.1.13.zip';zipwrite(out,data)
-  with zipfile.ZipFile(out) as z:managed.verify_archive(z, umbrella=True)
+  out=output/f'BlackLanturn-{edition}-Kodi21-1.1.14.zip';zipwrite(out,data)
+  with zipfile.ZipFile(out) as z:managed.verify_archive(z, umbrella=True, network=True)
   files={n:sha(d) for n,d in sorted(data.items())}
-  report={'file':out.name,'sha256':sha(out.read_bytes()),'bytes':out.stat().st_size,'files':len(data),'changed_paths':sorted(changed),'helper':'6.17.9 + empty-cache-1 + search-batch-1 + sampled-progress-1','installer':'1.0.18','umbrella':'6.7.92 + event-progress-3','schema':3,'settings_and_rows':'clean 1.1.2 plus exact playback-provider, automatic YouTube quality, watch-indicator, 64MB/4x buffer and High artwork defaults','native_binaries':0}
+  report={'file':out.name,'sha256':sha(out.read_bytes()),'bytes':out.stat().st_size,'files':len(data),'changed_paths':sorted(changed),'helper':'6.17.9 + empty-cache-1 + search-batch-1 + sampled-progress-1','installer':'1.0.19','umbrella':'6.7.92 + event-progress-3','schema':3,'settings_and_rows':'clean 1.1.2 plus exact playback-provider, automatic YouTube quality, watch-indicator, 64MB/4x buffer and High artwork defaults','native_binaries':0}
   (output/(edition+'-package.json')).write_text(json.dumps(report,indent=2));(output/(edition+'-manifest.json')).write_text(json.dumps(files,indent=2));print(json.dumps(report),flush=True)
 if __name__=='__main__':
  p=argparse.ArgumentParser();p.add_argument('--baselines',type=Path,required=True);p.add_argument('--output',type=Path,required=True);a=p.parse_args();build(a.baselines,a.output)

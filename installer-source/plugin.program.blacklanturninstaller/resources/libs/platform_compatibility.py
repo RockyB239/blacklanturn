@@ -74,19 +74,23 @@ def prepare(path, kodi, home=None):
                         from resources.libs import build_preferences
                         preference_policy = policy.get('preferences_policy')
                         minimum = {'playback-trakt-1':'1.0.13', 'playback-trakt-youtube-1':'1.0.17',
-                                   'playback-trakt-youtube-umbrella-1':'1.0.18'}.get(preference_policy)
+                                   'playback-trakt-youtube-umbrella-1':'1.0.18',
+                                   'playback-trakt-youtube-umbrella-network-1':'1.0.19'}.get(preference_policy)
                         if minimum is None or policy.get('installer_min_version') != minimum:
                             raise CompatibilityError('Update BlackLanturn Installer before installing this build.')
-                        managed_umbrella = preference_policy == 'playback-trakt-youtube-umbrella-1'
+                        managed_network = preference_policy == 'playback-trakt-youtube-umbrella-network-1'
+                        managed_umbrella = preference_policy in ('playback-trakt-youtube-umbrella-1', 'playback-trakt-youtube-umbrella-network-1')
+                        if managed_network and policy.get('network_patch') != 'request-reliability-privacy-1':
+                            raise CompatibilityError('Update BlackLanturn Installer before installing this build.')
                         if managed_umbrella and (policy.get('umbrella_patch') != 'event-progress-3'
                                                  or policy.get('umbrella_version') != '6.7.92'):
                             raise CompatibilityError('Update BlackLanturn Installer before installing this build.')
                     try:
                         if managed_umbrella:
-                            managed_addons.verify_archive(archive, umbrella=True)
+                            managed_addons.verify_archive(archive, umbrella=True, network=managed_network)
                             if home is None:
                                 raise CompatibilityError('Umbrella source verification needs the current profile. Your current build has been kept.')
-                            managed_addons.verify_installed(home)
+                            managed_addons.verify_installed(home, network=managed_network)
                         else:
                             managed_addons.verify_archive(archive)
                     except managed_addons.ProtectionError as exc:
