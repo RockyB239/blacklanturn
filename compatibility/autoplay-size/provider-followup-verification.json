@@ -1,0 +1,26 @@
+{
+  "status": "Mac-only correction verified; no publication",
+  "policy": "Runtime show/season session for later episodes: follow only manually selected debrid service and size ceiling; no hardcoded service preference. Normal autoplay without a manual choice retains existing configured source ranking. Unknown/uncached excluded; max three matches; picker fallback; prepared policy stamp; Stop/end clears session.",
+  "native_verification": {
+    "passed": true,
+    "stage": "completed",
+    "providers_followed": {
+      "TorBox": true,
+      "AllDebrid": true,
+      "Real-Debrid": true
+    },
+    "real_snapshot_matching_mean_ms": 0.009583583299536258,
+    "tv_autoplay_setting": "1",
+    "installed_sha256": "2f5f9c57e0c847b65780d8d34f1d935a2d9d63b067fef4804014bf1db70b5838"
+  },
+  "preservation": {
+    "passed": true,
+    "setting_changes": [],
+    "existing_authorizations_and_four_history_databases_preserved": true
+  },
+  "tests": {
+    "source_policy_and_dispatch": 21,
+    "controller": 665
+  },
+  "release_validation": "Unpublished trial; same two published-controller hash guards remain for later packaging. No release tests rerun for this isolated provider-filter correction."
+}

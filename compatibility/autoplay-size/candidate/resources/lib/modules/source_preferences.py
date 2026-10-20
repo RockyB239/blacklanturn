@@ -118,14 +118,13 @@ def session_candidates(items, policy):
     if not ceiling:
         return []
     candidates = [item for item in items
-                  if item.get('debrid') in ('TorBox', policy.get('debrid'))
+                  if item.get('debrid') == policy.get('debrid')
                   and not item.get('cloud_folder')
                   and 'uncached' not in item.get('source', '').lower()
                   and _positive_size(item) is not None
                   and _positive_size(item) <= ceiling]
     preferred_hash = policy.get('hash')
     return sorted(candidates, key=lambda item: (
-        item.get('debrid') != 'TorBox',
         not (preferred_hash and str(item.get('hash') or '').lower() == preferred_hash),
         ceiling - _positive_size(item)))[:3]
 

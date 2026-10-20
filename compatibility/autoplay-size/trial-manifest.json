@@ -9,7 +9,7 @@
     },
     "resources/lib/modules/source_preferences.py": {
       "before_sha256": "852845745d6f2e1c2e4cc814517687c9bce6f143bfdd956a58479df550503b93",
-      "after_sha256": "ddb80faf3cb90d14b160b4183ce01e072212be8b5c160b8f05e2e10b0be03bbf"
+      "after_sha256": "2f5f9c57e0c847b65780d8d34f1d935a2d9d63b067fef4804014bf1db70b5838"
     },
     "resources/lib/modules/player.py": {
       "before_sha256": "904b7eb226045610c213e5083a55d99b4462620b1089fb413a4e2e1b04f1b00c",
@@ -17,5 +17,5 @@
     }
   },
   "settings_changes": "No playback preference changes; separately requested TorBox device authorization completed on Mac",
-  "source_identity_policy": "Current show/season, later episodes only, selected size ceiling, TorBox then manually selected service; no automatic service expansion; max three candidates; cached results only; unknown-size/uncached excluded; prepared URL policy stamp; explicit Stop/end clears session"
+  "source_identity_policy": "Runtime show/season session for later episodes: follow only manually selected debrid service and size ceiling; no hardcoded service preference. Normal autoplay without a manual choice retains existing configured source ranking. Unknown/uncached excluded; max three matches; picker fallback; prepared policy stamp; Stop/end clears session."
 }

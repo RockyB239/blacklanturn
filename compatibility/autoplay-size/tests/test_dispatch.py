@@ -15,13 +15,13 @@ class Window:
  def setProperty(self,key,value):self.props[key]=value
  def clearProperty(self,key):self.props.pop(key,None)
 class Dispatch(unittest.TestCase):
- def run_play(self,items,select=None,variant=None,policy=True,saved_pack=None,resolve=True,prepared=False):
+ def run_play(self,items,select=None,variant=None,policy=True,saved_pack=None,resolve=True,prepared=False,service='TorBox'):
   calls=[];window=Window()
   if prepared:
    for k,v in [('umbrella.preResolved_nextUrl','https://example.test/stale-large.mp4'),('prepared-policy','old-policy'),('umbrella.preResolved_season','1'),('umbrella.preResolved_episode','2'),('umbrella.preResolved_imdb','tt0386676'),('umbrella.preResolved_tmdb','2316')]:window.setProperty(k,v)
   nextmeta=dict(META,episode='2',title='Diversity Day')
   pref=types.SimpleNamespace(get=lambda meta:saved_pack,matching=p.matching,
-   get_session=lambda meta:p.session_policy(META,source(.3,'TorBox'),100) if policy else None,
+   get_session=lambda meta:p.session_policy(META,source(.3,service),100) if policy else None,
    session_candidates=p.session_candidates,session_stamp=lambda m:'policy-v1' if policy else '',PREPARED_PROPERTY='prepared-policy')
   def error(*a,**kw):raise RuntimeError('Unexpected Umbrella exception')
   def autoplay(values):
@@ -53,7 +53,11 @@ class Dispatch(unittest.TestCase):
   calls=self.run_play([source(.3,hash='chosen')],resolve=False)
   self.assertEqual(calls,[('auto',['chosen']),('picker',['chosen'])])
  def test_no_session_retains_existing_autoplay(self):
-  self.assertEqual(self.run_play([source(5,hash='huge')],policy=False)[0],('auto',['huge']))
+  items=[source(10,'Real-Debrid','configured-best'),source(3,'AllDebrid','second'),source(.2,'TorBox','small')]
+  self.assertEqual(self.run_play(items,policy=False)[0],('auto',['configured-best','second','small']))
+ def test_manual_alldebrid_choice_does_not_switch_to_torbox_on_next_episode(self):
+  calls=self.run_play([source(.28,'TorBox','tb'),source(.29,'AllDebrid','ad')],service='AllDebrid')
+  self.assertEqual(calls[0],('auto',['ad']))
  def test_stale_prepared_url_is_rejected_before_playing_a_larger_source(self):
   calls=self.run_play([source(.3,hash='chosen')],prepared=True)
   self.assertEqual(calls,[('auto',['chosen']),('play','https://example.test/episode.mp4')])

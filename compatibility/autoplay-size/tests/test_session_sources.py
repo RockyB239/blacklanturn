@@ -19,10 +19,13 @@ class SessionSources(unittest.TestCase):
   actual=self.select(items,self.policy(chosen))
   self.assertIs(actual[0],chosen);self.assertEqual([x['hash'] for x in actual],['chosen','small'])
   self.assertEqual([x['hash'] for x in items],['huge','small','chosen'])
- def test_torbox_precedes_selected_alldebrid_without_adding_other_services(self):
+ def test_selected_alldebrid_stays_alldebrid_even_when_torbox_is_available(self):
   policy=self.policy(source(.3,'AllDebrid'))
   result=self.select([source(.29,'AllDebrid','ad'),source(.28,'TorBox','tb'),source(.3,'Real-Debrid','rd')],policy)
-  self.assertEqual([x['hash'] for x in result],['tb','ad'])
+  self.assertEqual([x['hash'] for x in result],['ad'])
+ def test_any_manually_selected_service_is_kept_without_a_brand_preference(self):
+  result=self.select([source(.28,'TorBox','tb'),source(.27,'Real-Debrid','rd'),source(.29,'AllDebrid','ad')],self.policy(source(.3,'Real-Debrid')))
+  self.assertEqual([x['hash'] for x in result],['rd'])
  def test_selected_torbox_does_not_silently_fall_back_to_alldebrid(self):
   self.assertEqual(self.select([source(.2,'AllDebrid')],self.policy()),[])
  def test_unknown_nonfinite_oversized_uncached_and_folders_never_autoplay(self):

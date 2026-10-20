@@ -4,7 +4,7 @@ Mac-only local changes, based on published Build 1.1.14 / Installer 1.0.19 plus 
 
 ## Behavior
 
-With TV autoplay enabled, a successful manual episode source choice supplies a runtime-only show/season size ceiling for later episodes. Prefer TorBox, then the manually chosen service; a manually chosen TorBox source never silently switches to AllDebrid. Keep an available release/pack match ahead of other similar-or-smaller candidates. Exclude unknown, nonpositive, nonfinite, uncached and folder results; try at most three candidates then show the existing picker. Explicit source selection overrides this policy. Stop/end-of-queue clears it; six-hour expiry is a backstop.
+With TV autoplay enabled, a successful manual episode source choice supplies a runtime-only show/season size ceiling for later episodes. Follow only the manually chosen debrid service, with no hardcoded TorBox preference. Normal autoplay without a manual choice keeps its existing configured source ranking. Keep an available release/pack match ahead of other similar-or-smaller candidates. Exclude unknown, nonpositive, nonfinite, uncached and folder results; try at most three candidates then show the existing picker. Explicit source selection overrides this policy. Stop/end-of-queue clears it; six-hour expiry is a backstop.
 
 Both foreground selection and background preResolve consume the same policy. Prepared URLs carry the policy stamp and are rechecked before publication and consumption, rejecting a resolution completed after a smaller manual choice. Resolver fallback cannot increase the selected ceiling or widen its permitted service. Existing permanent preferred-pack behavior remains an additional constraint. No new per-source network searches are introduced. Pack sizes retain the provider's existing per-episode estimates.
 
@@ -12,7 +12,7 @@ Controller polish: selected show folders open first; episodes and films retain P
 
 ## Verification
 
-665 controller tests, 19 policy/dispatch/race/Stop tests and 87 current progress regressions passed. Independent review found the prepared-URL race, unknown-size resolver-fallback guard loss and overbroad focus preservation; failing regressions were added and fixed.
+665 controller tests, 21 policy/dispatch/race/Stop tests and 87 current progress regressions passed. Independent review found the prepared-URL race, unknown-size resolver-fallback guard loss and overbroad focus preservation; failing regressions were added and fixed.
 
 Native Mac matching selected the identical cached TorBox 720p release (estimated 0.1233 GB per episode), with approximately 0.0103 ms mean matching overhead. Same-file starts, alternating baseline/revised, were 7.409 / 3.385 / 2.641 / 2.221 seconds. The first run was cold; this is no proof of a speed increase. Source/URL identity was held constant to isolate playback from provider variation.
 
@@ -33,3 +33,7 @@ Before later rollout: update version and managed source manifests, preserve plat
 ## Recovery
 
 Fresh private recovery and host test scripts are retained in ../hotel-autoplay-mac-2026-10-19 (relative to this trial's top-level work directory); the original full settings/auth archive is private/settings-before.zip. To roll back code, quit Mac Kodi normally, restore private/live_review.before.py to addons/script.blacklanturn.preview/live_review.py and private/umbrella-{sources.py,source_preferences.py,player.py} to their original Umbrella module paths, then relaunch. Do not restore the old whole settings archive over the newly authorized TorBox connection. Stop to inspect if any installed hash differs from the saved trial manifest.
+
+## Provider-following correction
+
+User clarified that hotel TorBox use must not become a build-wide preference. The installed Mac policy now follows whichever debrid service the user manually selected. Native installed-module checks passed for TorBox, AllDebrid and Real-Debrid, including no cross-service fallback. Actual production play() tests confirm the configured provider/size ordering is untouched when no manual session exists. Matching the real 42-source snapshot averaged approximately 0.0096 ms. Fresh post-authorization settings backup and final comparison show zero settings/account/history changes. See provider-followup-verification.json; the original stream measurements remain historical evidence for the same TorBox case. This correction was not rolled out elsewhere.
