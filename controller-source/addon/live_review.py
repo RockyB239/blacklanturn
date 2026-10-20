@@ -4,6 +4,7 @@ from urllib.request import urlopen,Request
 from pathlib import Path
 from urllib.parse import urlencode,urlsplit,parse_qs
 import xbmc,xbmcgui,xbmcvfs,xbmcaddon
+import autoplay_session
 from live_core import directory_items,rating_line,PageHistory,valid_source,person_identity,mdblist_line,rating_badges,select_rating_badges,update_rating_sources,preview_candidates,PreviewAttempts,watch_state,clear_stale_preview,episode_identity,show_identity,title_details_params,merge_title_details,episode_heading,is_browse_folder
 from probe_core import HoverScroll
 from live_core import card_artwork,title_presentation
@@ -977,6 +978,7 @@ class LiveReview(YouTubeBrowser,xbmcgui.WindowXML):
     def update(self,item):
         with self.preview_dispatch_lock:
             self.selected=item;self.setProperty('hasSelection','true');self.dwell=time.monotonic();art=item.get('art',{})
+            self.setProperty('sourceSession',getattr(self,'source_session_label',lambda _: '')(item))
             self.setProperty('hero',art.get('fanart') or art.get('landscape') or art.get('poster',''))
             headline,episode_line=episode_heading(item)
             self.setProperty('title',headline);self.setProperty('episodeLine',episode_line)
@@ -1244,6 +1246,17 @@ class LiveReview(YouTubeBrowser,xbmcgui.WindowXML):
                 if request:
                     self.update(item);self.playback_return=self.capture_browse();self.playback_options=resume_options(item);self.playback_request=request;self.finish()
         finally:self.actions_open=False
+    def source_session_label(self,item,refresh=False):
+        now=time.monotonic();cached=getattr(self,'source_session_snapshot',None)
+        if refresh or cached is None or now-cached[0]>=2:
+            key='Window(12005).Property('+autoplay_session.PROPERTY+')'
+            cached=(now,gui_labels([key]).get(key,''));self.source_session_snapshot=cached
+        return autoplay_session.label(item,cached[1])
+    def reset_source_session(self):
+        autoplay_session.clear(xbmcgui.Window(12005))
+        self.source_session_snapshot=(time.monotonic(),'')
+        self.setProperty('sourceSession','')
+        xbmcgui.Dialog().notification('Playback','Normal autoplay restored',time=3000)
     def title_actions(self):
         focus=self.getFocusId()
         failed=any(value=='error' for value in getattr(self,'row_states',{}).values())
@@ -1269,6 +1282,7 @@ class LiveReview(YouTubeBrowser,xbmcgui.WindowXML):
             if command:options.append(('trakt','Trakt: Watched, progress & lists'))
             if self.rating_identity(item):options.append(('discover','Discover collections & creator credits'))
             if getattr(self,'youtube_home_visible',lambda:False)():options.append(('youtube_refresh','Refresh recommendations'))
+            if getattr(self,'source_session_label',lambda *a,**k: '')(item,refresh=True):options.append(('normal_autoplay','Return to normal autoplay'))
             if player_path:options.append(('default_player','Set default player…'))
             options.append(('refresh','Refresh watched status'))
         if failed:
@@ -1297,6 +1311,7 @@ class LiveReview(YouTubeBrowser,xbmcgui.WindowXML):
         elif action=='local':self.update(item);self.onClick(103)
         elif action=='player':self.choose_playback_player(item)
         elif action=='default_player':self.choose_playback_player(item,save_default=True)
+        elif action=='normal_autoplay':self.reset_source_session()
         elif action=='refresh':self.refresh_watch_status(sync=True)
         elif action=='retry':self.retry_lists()
         elif action=='trakt':

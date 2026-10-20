@@ -32,10 +32,10 @@ class SessionSources(unittest.TestCase):
   items=[source(x,hash=str(x)) for x in [None,0,-1,'bad',math.nan,math.inf,.31]]
   items.extend([dict(source(),source='uncached torrent'),source(cloud_folder=True)])
   self.assertEqual(self.select(items,self.policy()),[])
- def test_session_applies_only_to_later_episodes_in_same_show_season_and_expires(self):
+ def test_session_follows_later_seasons_of_same_show_and_expires(self):
   policy=self.policy()
   self.assertTrue(callable(getattr(p,'session_applies',None)),'Session scope check is missing')
-  cases=[({'tmdb':'2316','season':'1','episode':'2'},101,True),(META,101,False),({'tmdb':'999','season':'1','episode':'2'},101,False),({'tmdb':'2316','season':'2','episode':'1'},101,False),({'tmdb':'2316','season':'1','episode':'2'},21701,False)]
+  cases=[({'tmdb':'2316','season':'1','episode':'2'},101,True),(META,101,False),({'tmdb':'999','season':'1','episode':'2'},101,False),({'tmdb':'2316','season':'2','episode':'1'},101,True),({'tmdb':'2316','season':'1','episode':'2'},21701,False)]
   for meta,now,want in cases:self.assertEqual(p.session_applies(policy,meta,now),want)
  def test_invalid_manual_choice_does_not_create_automatic_policy(self):
   self.assertIsNone(self.policy(source(size=0)))
@@ -67,3 +67,9 @@ class ManualPolicySafety(unittest.TestCase):
   package=types.ModuleType('resources.lib.modules');package.control=types.SimpleNamespace(playerWindow=window)
   with patch.dict(sys.modules,{'resources':types.ModuleType('resources'),'resources.lib':types.ModuleType('resources.lib'),'resources.lib.modules':package}):p.remember_session(META,source(None,'AllDebrid','unknown'),source(.3,'TorBox','manual'))
   policy=json.loads(props[p.SESSION_PROPERTY]);self.assertEqual(policy['ceiling'],.3);self.assertEqual(policy['debrid'],'TorBox')
+
+class CorruptScope(unittest.TestCase):
+ def test_short_and_wrong_scope_is_ignored(self):
+  for scope in [[],['tmdb:2316'],None,1,{}]:
+   policy=p.session_policy(META,source(),100);policy['scope']=scope
+   self.assertFalse(p.session_applies(policy,dict(META,episode='2'),101))

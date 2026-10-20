@@ -104,8 +104,10 @@ def session_policy(meta, item, now):
 
 def session_applies(policy, meta, now):
     try:
-        return (isinstance(policy, dict) and policy.get('version') == 1 and list(scope(meta) or ()) == policy['scope']
-                and int(meta['episode']) > policy['episode']
+        return (isinstance(policy, dict) and policy.get('version') == 1
+                and isinstance(policy.get('scope'), (list, tuple)) and len(policy['scope']) == 2
+                and scope(meta) is not None and scope(meta)[0] == policy['scope'][0]
+                and (int(meta['season']), int(meta['episode'])) > (int(policy['scope'][1]), int(policy['episode']))
                 and 0 <= now - float(policy['created']) < 21600
                 and _positive_size({'size': policy['ceiling']}) is not None)
     except (KeyError, TypeError, ValueError):

@@ -15,14 +15,14 @@ class Window:
  def setProperty(self,key,value):self.props[key]=value
  def clearProperty(self,key):self.props.pop(key,None)
 class Dispatch(unittest.TestCase):
- def run_play(self,items,select=None,variant=None,policy=True,saved_pack=None,resolve=True,prepared=False,service='TorBox'):
-  calls=[];window=Window()
+ def run_play(self,items,select=None,variant=None,policy=True,saved_pack=None,resolve=True,prepared=False,service='TorBox',prepared_valid=False,reset_prepared=False):
+  calls=[];window=Window();self.notices=[];active={'policy':policy}
   if prepared:
-   for k,v in [('umbrella.preResolved_nextUrl','https://example.test/stale-large.mp4'),('prepared-policy','old-policy'),('umbrella.preResolved_season','1'),('umbrella.preResolved_episode','2'),('umbrella.preResolved_imdb','tt0386676'),('umbrella.preResolved_tmdb','2316')]:window.setProperty(k,v)
+   for k,v in [('umbrella.preResolved_nextUrl','https://example.test/stale-large.mp4'),('prepared-policy','policy-v1' if prepared_valid else 'old-policy'),('umbrella.preResolved_season','1'),('umbrella.preResolved_episode','2'),('umbrella.preResolved_imdb','tt0386676'),('umbrella.preResolved_tmdb','2316')]:window.setProperty(k,v)
   nextmeta=dict(META,episode='2',title='Diversity Day')
   pref=types.SimpleNamespace(get=lambda meta:saved_pack,matching=p.matching,
-   get_session=lambda meta:p.session_policy(META,source(.3,service),100) if policy else None,
-   session_candidates=p.session_candidates,session_stamp=lambda m:'policy-v1' if policy else '',PREPARED_PROPERTY='prepared-policy')
+   get_session=lambda meta:p.session_policy(META,source(.3,service),100) if active['policy'] else None,
+   session_candidates=p.session_candidates,session_stamp=lambda m:'policy-v1' if active['policy'] else '',PREPARED_PROPERTY='prepared-policy')
   def error(*a,**kw):raise RuntimeError('Unexpected Umbrella exception')
   def autoplay(values):
    calls.append(('auto',[i['hash'] for i in values]));return 'https://example.test/episode.mp4' if resolve else None
@@ -34,7 +34,11 @@ class Dispatch(unittest.TestCase):
   player=types.ModuleType('resources.lib.modules.player');player.Player=lambda:types.SimpleNamespace(play_source=lambda *a:calls.append(('play',a[-2])))
   package=types.ModuleType('resources.lib.modules');package.player=player
   mapping=types.ModuleType('resources.lib.modules.episode_mapping');mapping.preresolved_matches=lambda *a:True
-  ctrl=types.SimpleNamespace(playlist=types.SimpleNamespace(getposition=lambda:1,size=lambda:2),sleep=lambda _:None,infoLabel=lambda _: '',hide=lambda:None)
+  def sleep(ms):
+   if reset_prepared and ms==500:
+    active['policy']=False
+    for key in ['prepared-policy','umbrella.preResolved_nextUrl']:window.clearProperty(key)
+  ctrl=types.SimpleNamespace(playlist=types.SimpleNamespace(getposition=lambda:1,size=lambda:2),sleep=sleep,infoLabel=lambda _: '',hide=lambda:None,notification=lambda **kw:self.notices.append(kw))
   ns={'control':ctrl,'playerWindow':window,'homeWindow':window,'source_preferences':pref,
    'getSetting':lambda key:'1' if key=='play.mode.tv' else 'false','jsloads':json.loads,'jsdumps':json.dumps,'unquote':lambda s:s,
    'providerscache':types.SimpleNamespace(get=lambda *a:copy.deepcopy(items)),
@@ -46,9 +50,9 @@ class Dispatch(unittest.TestCase):
   calls=self.run_play([source(5,hash='huge'),source(.3,hash='chosen'),source(.2,hash='small')])
   self.assertEqual(calls,[('auto',['chosen','small']),('play','https://example.test/episode.mp4')])
  def test_no_size_match_returns_picker_without_attempting_larger_source(self):
-  self.assertEqual(self.run_play([source(5,hash='huge')]),[('picker',['huge'])])
+  self.assertEqual(self.run_play([source(5,hash='huge')]),[('picker',['huge'])]);self.assertIn('No matching source available',self.notices[0]['message'])
  def test_explicit_source_selection_overrides_session_preference(self):
-  self.assertEqual(self.run_play([source(5,hash='huge')],select='0'),[('picker',['huge'])])
+  self.assertEqual(self.run_play([source(5,hash='huge')],select='0'),[('picker',['huge'])]);self.assertEqual(self.notices,[])
  def test_failed_automatic_matches_return_picker(self):
   calls=self.run_play([source(.3,hash='chosen')],resolve=False)
   self.assertEqual(calls,[('auto',['chosen']),('picker',['chosen'])])
@@ -62,3 +66,12 @@ class Dispatch(unittest.TestCase):
   calls=self.run_play([source(.3,hash='chosen')],prepared=True)
   self.assertEqual(calls,[('auto',['chosen']),('play','https://example.test/episode.mp4')])
 if __name__=='__main__':unittest.main()
+
+class PreparedConsume(unittest.TestCase):
+ run_play=Dispatch.run_play
+ def test_prepared_url_plays_with_debug_logging_disabled(self):
+  calls=self.run_play([source(.3)],prepared=True,prepared_valid=True)
+  self.assertEqual(calls,[('play','https://example.test/stale-large.mp4')])
+ def test_reset_during_prepared_handoff_rechecks_choice_before_dispatch(self):
+  calls=self.run_play([source(5,hash='normal'),source(.3)],prepared=True,prepared_valid=True,reset_prepared=True)
+  self.assertEqual(calls,[('auto',['normal','chosen']),('play','https://example.test/episode.mp4')])

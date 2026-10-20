@@ -81,7 +81,8 @@ class Sources:
 				playerWindow.clearProperty('umbrella.preResolved_tmdb')
 			preResolved_nextUrl = playerWindow.getProperty('umbrella.preResolved_nextUrl')
 			prepared_meta = {'imdb': imdb, 'tmdb': tmdb, 'tvdb': tvdb, 'season': season, 'episode': episode}
-			if preResolved_nextUrl and playerWindow.getProperty(source_preferences.PREPARED_PROPERTY) != source_preferences.session_stamp(prepared_meta):
+			_prepared_stamp = playerWindow.getProperty(source_preferences.PREPARED_PROPERTY)
+			if preResolved_nextUrl and _prepared_stamp != source_preferences.session_stamp(prepared_meta):
 				playerWindow.clearProperty('umbrella.preResolved_nextUrl')
 				preResolved_nextUrl = ''
 			if preResolved_nextUrl != '' and not force_selection:
@@ -98,12 +99,14 @@ class Sources:
 				playerWindow.clearProperty('umbrella.preResolved_tmdb')
 				if _match:
 					control.sleep(500)
-					try: meta = jsloads(unquote(meta.replace('%22', '\\"')))
-					except: pass
-					if self.debuglog:
-						log_utils.log('Playing preResolved_nextUrl = %s' % preResolved_nextUrl, level=log_utils.LOGDEBUG)
-					from resources.lib.modules import player
-					return player.Player().play_source(title, year, season, episode, imdb, tmdb, tvdb, preResolved_nextUrl, meta)
+					# Reset can occur during the handoff wait; recheck before using the cached URL.
+					if _prepared_stamp == playerWindow.getProperty(source_preferences.PREPARED_PROPERTY) == source_preferences.session_stamp(prepared_meta):
+						try: meta = jsloads(unquote(meta.replace('%22', '\\"')))
+						except: pass
+						if self.debuglog:
+							log_utils.log('Playing preResolved_nextUrl = %s' % preResolved_nextUrl, level=log_utils.LOGDEBUG)
+						from resources.lib.modules import player
+						return player.Player().play_source(title, year, season, episode, imdb, tmdb, tvdb, preResolved_nextUrl, meta)
 				else:
 					if self.debuglog:
 						log_utils.log('preResolved_nextUrl mismatch (wanted S%sE%s imdb=%s, got S%sE%s imdb=%s) - discarding' % (season, episode, imdb, preResolved_season, preResolved_episode, preResolved_imdb), level=log_utils.LOGWARNING)
@@ -276,6 +279,7 @@ class Sources:
 					matches = source_preferences.session_candidates(items, session)
 					if matches: url = self.sourcesAutoPlay(matches)
 				if ((preference or session) and not url) or (not preference and select == '0'):
+					if session: control.notification(title='Playback', message='No matching source available. Choose a source to continue.')
 					control.sleep(200)
 					return self.sourceSelect(title, items, uncached_items, self.meta)
 				elif not preference and not session: url = self.sourcesAutoPlay(items)

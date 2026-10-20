@@ -1,17 +1,93 @@
 --- a/resources/lib/modules/player.py
 +++ b/resources/lib/modules/player.py
-@@ -1151,6 +1151,8 @@
+@@ -139,6 +139,7 @@
+ 		self.scrobble_sent = False
+ 		self.av_started_ran = False
+ 		self._playback_path = None
++		self._playback_playlist_position = None
+ 		self.media_type = None
+ 		self.DBID = None
+ 		self.offset = '0'
+@@ -921,6 +922,8 @@
+ 		if self.av_started_ran or self.media_type is None or self.onPlayBackStopped_ran or self.scrobble_sent: return
+ 		try: self._playback_path = self.getPlayingFile()
+ 		except: pass
++		try: self._playback_playlist_position = control.playlist.getposition()
++		except: self._playback_playlist_position = None
+ 		playerWindow.clearProperty('umbrella.playnext.transition')
+ 		self.watched_during_playback = False
+ 		self.watched_update_thread = None
+@@ -1149,8 +1152,30 @@
+ 
+ 	def onPlayBackStopped(self):
  		try:
- 			playnext_transition = playerWindow.getProperty('umbrella.playnext.transition') == 'true'
+-			playnext_transition = playerWindow.getProperty('umbrella.playnext.transition') == 'true'
++			# Finalized instances cannot clean up a later item's shared state.
++			if self.onPlayBackStopped_ran or self.scrobble_sent: return
++			if not self._progress_owns_playback():
++				# A delayed outgoing Stop still closes its own cached progress,
++				# without clearing the active item's session, queue or subtitles.
++				if self._playback_path:
++					self.onPlayBackStopped_ran = True
++					self.playbackStopped_triggered = False
++					self._sendFinishedItemState()
++				return
++			try:
++				current_pos = control.playlist.getposition()
++				playlist_size = control.playlist.size()
++				owned_pos = getattr(self, '_playback_playlist_position', None)
++				cursor_advanced = isinstance(owned_pos, int) and 0 <= owned_pos < current_pos < playlist_size
++				has_next_queued = current_pos != -1 and playlist_size > current_pos + 1
++			except:
++				cursor_advanced = has_next_queued = False
++			# Still-watching can pause before EOF without the normal transition flag.
++			# Kodi may already point at the queued item when this item's Stop arrives.
++			playnext_transition = cursor_advanced or playerWindow.getProperty('umbrella.playnext.transition') == 'true'
  			if not playnext_transition:
 +				playerWindow.clearProperty('BlackLanturn.SourceSession.v1')
 +				playerWindow.clearProperty('umbrella.preResolved_sourceSession')
  				playerWindow.clearProperty('umbrella.preResolved_nextUrl')
  				playerWindow.clearProperty('umbrella.preResolved_season')
  				playerWindow.clearProperty('umbrella.preResolved_episode')
-@@ -1263,6 +1265,8 @@
+@@ -1159,11 +1184,6 @@
+ 				playerWindow.clearProperty('umbrella.playlistStart_position')
+ 			homeWindow.clearProperty('umbrella.window_keep_alive')
+ 			clear_local_bookmarks()
+-			try:
+-				current_pos = control.playlist.getposition()
+-				has_next_queued = current_pos != -1 and control.playlist.size() > current_pos + 1
+-			except:
+-				has_next_queued = False
+ 			if not playnext_transition and not has_next_queued:
+ 				control.playlist.clear()
+ 			if (not self.onPlayBackStopped_ran or (self.playbackStopped_triggered and not self.onPlayBackStopped_ran)) and not self.scrobble_sent: # Kodi callback unreliable and often not issued
+@@ -1203,6 +1223,10 @@
+ 
+ 	def onPlayBackEnded(self):
+ 		try:
++			# Kodi broadcasts the outgoing item EOF to the already-created next
++			# Player too. It has not acquired a file yet and must remain ready
++			# for its own AVStarted and progress tracking.
++			if not self._playback_path: return
+ 			# A delayed end event from the previous playlist item can arrive after
+ 			# this item's AVStarted. Do not close the session still playing here.
+ 			if self._playback_path and self.isPlayingVideo():
+@@ -1255,14 +1279,19 @@
+ 				playingfile = False
+ 			playlist_position = control.playlist.getposition()
+ 			playlist_size = control.playlist.size()
+-			has_next_queued = playlist_position >= 0 and playlist_position + 1 < playlist_size
++			owned_pos = getattr(self, '_playback_playlist_position', None)
++			owned_has_next = isinstance(owned_pos, int) and 0 <= owned_pos < playlist_size - 1
++			has_next_queued = owned_has_next or (playlist_position >= 0 and playlist_position + 1 < playlist_size)
+ 			log_utils.log('onPlayBackEnded Playlist Position: %s Playlist Count: %s Has Next: %s isPlaying: %s' % (playlist_position, playlist_size, has_next_queued, playingfile), level=log_utils.LOGDEBUG)
+ 			# Kodi can briefly report position 0 with no active file between plugin
+ 			# playlist items. Position 0 is not a reason to clear when position 1 is
+ 			# the next episode; doing so breaks continuous playback after the second
  			# episode even though the Play Next window found and displayed episode 3.
- 			if not playingfile and not has_next_queued and (playlist_size <= 1 or playlist_position >= playlist_size - 1):
+-			if not playingfile and not has_next_queued and (playlist_size <= 1 or playlist_position >= playlist_size - 1):
++			owned_was_last = isinstance(owned_pos, int) and owned_pos >= playlist_size - 1
++			if not playingfile and not has_next_queued and (playlist_size <= 1 or playlist_position >= playlist_size - 1 or owned_was_last):
  				control.playlist.clear()
 +				playerWindow.clearProperty('BlackLanturn.SourceSession.v1')
 +				playerWindow.clearProperty('umbrella.preResolved_sourceSession')

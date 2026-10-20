@@ -10,7 +10,7 @@ from browse_controls import can_choose_genre
 
 
 class EpisodeOptions(unittest.TestCase):
-    def run_menu(self, resume=None, cancel=False):
+    def run_menu(self, resume=None, cancel=False, session_active=False):
         item = {
             'file': 'plugin://plugin.video.themoviedb.helper/?info=play&tmdb_type=tv&tmdb_id=712&season=1&episode=4',
             'title': 'Selected episode', 'filetype': 'file',
@@ -31,6 +31,7 @@ class EpisodeOptions(unittest.TestCase):
             stop_preview=lambda: events.append('stop-preview'), actions_open=False,
             capture_browse=lambda: {'focus': 900, 'position': 2},
             finish=lambda: events.append('finish'),
+            source_session_label=lambda *a,**kw:'Following selection' if session_active else '',
             browse_source=lambda: events.append('genre'), setFocusId=lambda cid: None,
         )
         state.update = lambda chosen: setattr(state, 'selected', chosen)
@@ -70,3 +71,8 @@ class EpisodeOptions(unittest.TestCase):
         self.assertEqual(state.config['Saved'], [])
         self.assertEqual(state.histories[0].pages, [('original-row', 2)])
         self.assertEqual(events, ['stop-preview'])
+
+    def test_active_source_reset_keeps_default_player_and_refresh_as_final_options(self):
+        _, _, menus = self.run_menu(cancel=True, session_active=True)
+        self.assertIn('Return to normal autoplay', menus[0])
+        self.assertEqual(menus[0][-2:], ['Set default player…', 'Refresh watched status'])

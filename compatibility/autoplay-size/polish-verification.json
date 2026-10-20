@@ -1,0 +1,98 @@
+{
+  "status": "Validated local Mac trial; unpublished",
+  "published_release_unchanged": {
+    "build": "1.1.14",
+    "installer": "1.0.19"
+  },
+  "other_devices": "Fire Stick deferred by user because hotel connection unavailable; Apple TV untouched",
+  "automated_checks": {
+    "controller": 671,
+    "autoplay_and_lifecycle": 36,
+    "current_progress_contracts": 87
+  },
+  "native_ui": {
+    "passed": true,
+    "synthetic_metadata_only": true,
+    "label": "Following your selection: TorBox \u00b7 up to 2 GB",
+    "cached_label_mean_ms": 0.13983916986035183,
+    "options": [
+      "Resume",
+      "Play using\u2026",
+      "Details",
+      "Save to My Stuff on this device",
+      "Trakt: Watched, progress & lists",
+      "Return to normal autoplay",
+      "Set default player\u2026",
+      "Refresh watched status"
+    ],
+    "artwork_watched_resume_and_preferences_preserved": true
+  },
+  "playback_callback_repair": {
+    "scope": "Ignore incoming-player EOF before acquisition; finalize outgoing cached progress without cleaning the next player; retain source choice when native cursor advances before outgoing callbacks",
+    "earlier_natural_run": "E2/E3/E4 reached EOF and E5 played; watched and Stop progress synchronized, but prepared URL gate failed. This led to the cursor ownership repair. That receipt is superseded, not reported as passing.",
+    "final_bounded_diagnostic": {
+      "passed": true,
+      "diagnostic_seek": {
+        "from": 3.604,
+        "to": 373.016,
+        "reason": "Bounded observation of handoff; earlier run already covered natural endings"
+      },
+      "stillwatching_default_pause_confirmed": true,
+      "saved_stillwatching_settings_unchanged": true,
+      "runtime_viewing_counter_simulation": "runtime-only: current item is third in viewing session; no user setting edited",
+      "eof_positions": [
+        {
+          "episode": 4,
+          "at": 241026.343743916,
+          "position": 1,
+          "size": 2
+        }
+      ],
+      "av_positions": [
+        {
+          "episode_hint": 4,
+          "position": 0,
+          "size": 2
+        },
+        {
+          "episode_hint": 5,
+          "position": 1,
+          "size": 3
+        },
+        {
+          "episode_hint": 5,
+          "position": 0,
+          "size": 2
+        }
+      ],
+      "manual_policy_retained_during_stable_next_playback": true,
+      "exact_prepared_url_match": true,
+      "stop_seconds": 70.119,
+      "actual_trakt_resume_seconds": 71.131,
+      "native_receipt_private": "prepared-diagnostic.json"
+    }
+  },
+  "youtube": {
+    "passed": true,
+    "product_code_changed": false,
+    "scope": "Inline 720p fade and 25 seconds of advancing automatic fullscreen 1080p VP9; no claim of 4K or long-session network stability"
+  },
+  "preservation": {
+    "passed": true,
+    "core_settings_compared": 280,
+    "addon_settings_files_compared": 16,
+    "all_four_saved_history_databases_healthy_and_rows_preserved": true,
+    "saved_rows_and_api_keys_unchanged": true,
+    "youtube_same_accounts_and_refresh_authorization": true,
+    "only_normal_youtube_access_token_renewal": true,
+    "installed_files_match_staged": true,
+    "original_entrypoint_restored": true,
+    "no_active_player": true
+  },
+  "limits": [
+    "Local trial only; published-controller release hash guards intentionally remain on published files and are not certified green by these scoped checks.",
+    "No claim of a statistically measured load-time improvement on hotel Wi-Fi. Source matching adds no new source searches; indicator reads are cached for two seconds.",
+    "Final callback repair was validated with a bounded seek followed by ordinary EOF, existing still-watching pause, next playback and real Trakt Stop/resume. Earlier natural endings are separately recorded; do not describe the final test as an uninterrupted three-episode run."
+  ],
+  "recovery": "Private post-authorization settings archive and original addon files retained; do not overwrite current authorizations with an older profile archive."
+}

@@ -5,17 +5,17 @@
   "changed_files": {
     "resources/lib/modules/sources.py": {
       "before_sha256": "a9594c0bcff75e2d19129be1cf18d56135a30a713ae786951e2550451675dc70",
-      "after_sha256": "b5bf2c2675ec4313e46502ee2c51193567651042f89f74e6afcaafadc92f33cd"
+      "after_sha256": "690f02fb962d5df0121904e532666bcd8ef10d9488cb9c11c34f8638e6340ac6"
     },
     "resources/lib/modules/source_preferences.py": {
       "before_sha256": "852845745d6f2e1c2e4cc814517687c9bce6f143bfdd956a58479df550503b93",
-      "after_sha256": "2f5f9c57e0c847b65780d8d34f1d935a2d9d63b067fef4804014bf1db70b5838"
+      "after_sha256": "2e9cd54e459951a1713cbf48cd41a42091759bf0aac866e47d4b331bdf220cf2"
     },
     "resources/lib/modules/player.py": {
       "before_sha256": "904b7eb226045610c213e5083a55d99b4462620b1089fb413a4e2e1b04f1b00c",
-      "after_sha256": "3edb0965e33d8108398f5b20752c31e4c044e892a134fc2cc039476b589e0ac9"
+      "after_sha256": "5766e60fe02858d5cd5b4d38c03cf8f8f3de9d5e8dbb1b3d85a468f922f2be0b"
     }
   },
   "settings_changes": "No playback preference changes; separately requested TorBox device authorization completed on Mac",
-  "source_identity_policy": "Runtime show/season session for later episodes: follow only manually selected debrid service and size ceiling; no hardcoded service preference. Normal autoplay without a manual choice retains existing configured source ranking. Unknown/uncached excluded; max three matches; picker fallback; prepared policy stamp; Stop/end clears session."
+  "source_identity_policy": "Runtime same-show session for later episodes and seasons: follow only the manually selected debrid service and size ceiling; no hardcoded provider preference. Normal autoplay keeps configured ranking. Unknown/uncached excluded; max three matches; explanatory picker fallback; prepared stamp checked again after handoff wait; Stop/end clears session; six-hour backstop."
 }
