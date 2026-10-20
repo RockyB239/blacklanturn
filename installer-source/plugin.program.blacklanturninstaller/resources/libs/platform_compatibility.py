@@ -75,11 +75,14 @@ def prepare(path, kodi, home=None):
                         preference_policy = policy.get('preferences_policy')
                         minimum = {'playback-trakt-1':'1.0.13', 'playback-trakt-youtube-1':'1.0.17',
                                    'playback-trakt-youtube-umbrella-1':'1.0.18',
-                                   'playback-trakt-youtube-umbrella-network-1':'1.0.19'}.get(preference_policy)
+                                   'playback-trakt-youtube-umbrella-network-1':'1.0.19',
+                                   'playback-trakt-youtube-umbrella-network-autoplay-1':'1.0.20'}.get(preference_policy)
                         if minimum is None or policy.get('installer_min_version') != minimum:
                             raise CompatibilityError('Update BlackLanturn Installer before installing this build.')
-                        managed_network = preference_policy == 'playback-trakt-youtube-umbrella-network-1'
-                        managed_umbrella = preference_policy in ('playback-trakt-youtube-umbrella-1', 'playback-trakt-youtube-umbrella-network-1')
+                        managed_network = preference_policy in ('playback-trakt-youtube-umbrella-network-1', 'playback-trakt-youtube-umbrella-network-autoplay-1')
+                        managed_umbrella = preference_policy in ('playback-trakt-youtube-umbrella-1', 'playback-trakt-youtube-umbrella-network-1', 'playback-trakt-youtube-umbrella-network-autoplay-1')
+                        if preference_policy == 'playback-trakt-youtube-umbrella-network-autoplay-1' and policy.get('autoplay_patch') != 'same-show-source-1':
+                            raise CompatibilityError('Update BlackLanturn Installer before installing this build.')
                         if managed_network and policy.get('network_patch') != 'request-reliability-privacy-1':
                             raise CompatibilityError('Update BlackLanturn Installer before installing this build.')
                         if managed_umbrella and (policy.get('umbrella_patch') != 'event-progress-3'

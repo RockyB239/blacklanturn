@@ -25,6 +25,8 @@ jobs:
         run: python -m unittest discover -s tests -v
       - name: Controller regression checks
         run: PYTHONPATH=controller-source/addon python -m unittest discover -s controller-source/tests -v
+      - name: Source-selection and playback lifecycle checks
+        run: python -m unittest discover -s compatibility/autoplay-size/tests -v
       - name: Native probe regression checks
         run: python -m unittest discover -s tools/device_validation -p 'test_*.py'
       - name: Rebuild and verify protected editions

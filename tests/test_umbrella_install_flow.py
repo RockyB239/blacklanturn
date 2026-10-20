@@ -17,7 +17,9 @@ class UmbrellaInstallFlow(unittest.TestCase):
  archive=compatibility.CompatibilityTests.archive;install_environment=compatibility.CompatibilityTests.install_environment;module=compatibility.CompatibilityTests.module
  def provider(self,patched=True):
   with zipfile.ZipFile(PROGRESS/'upstream-6.7.92.zip')as z:data={n.split('/',1)[1]:z.read(n)for n in z.namelist()if not n.endswith('/')}
-  if patched:data[PLAYER]=(PROGRESS/'duration-candidate/6.7.92/player.py').read_bytes()
+  if patched:
+   for candidate in (ROOT/'compatibility/autoplay-size/candidate').rglob('*.py'):
+    data[candidate.relative_to(ROOT/'compatibility/autoplay-size/candidate').as_posix()]=candidate.read_bytes()
   return data
  def packaged(self,change=None,policy=None):
   h=helper_fixture.ManagedTests();h.root=self.root
@@ -48,7 +50,7 @@ class UmbrellaInstallFlow(unittest.TestCase):
    p=h/name;p.parent.mkdir(parents=True,exist_ok=True);p.write_bytes(raw);return p
   put('userdata/guisettings.xml',b'<settings><setting id="locale.audiolanguage" default="true">English</setting></settings>')
   put('userdata/addon_data/plugin.video.themoviedb.helper/settings.xml',b'<settings><setting id="trakt_token">private-helper</setting></settings>')
-  self.credentials={'trakt.user.token':'private-trakt','trakt.refreshtoken':'private-trakt-refresh','realdebridtoken':'private-rd','premiumizetoken':'private-pm','alldebridtoken':'private-ad','simkltoken':'private-simkl','mdblist.token':'private-mdb','custom.user.token':'private-custom','floppy.token':'private-floppy','scrob.accesstoken':'private-scrob','punchplay.accesstoken':'private-punch'}
+  self.credentials={'torboxtoken':'private-torbox','torbox.username':'fixture','torbox.enable':'true','trakt.user.token':'private-trakt','trakt.refreshtoken':'private-trakt-refresh','realdebridtoken':'private-rd','premiumizetoken':'private-pm','alldebridtoken':'private-ad','simkltoken':'private-simkl','mdblist.token':'private-mdb','custom.user.token':'private-custom','floppy.token':'private-floppy','scrob.accesstoken':'private-scrob','punchplay.accesstoken':'private-punch'}
   vals=dict(self.credentials,**{'scrobble.source':'0','scrobble':'Local','indicators.alt':'2','indicators':'Simkl','remove.hdr':'true'})
   put('userdata/addon_data/'+ID+'/settings.xml',('<settings>'+''.join('<setting id="'+k+'" default="true">'+v+'</setting>'for k,v in vals.items())+'</settings>').encode())
   put('userdata/addon_data/plugin.video.youtube/settings.xml',b'<settings><setting id="youtube.api.key">private-youtube</setting><setting id="kodion.mpd.quality.selection">3</setting></settings>')

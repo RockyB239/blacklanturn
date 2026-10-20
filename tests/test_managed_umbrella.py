@@ -144,6 +144,43 @@ class ManagedUmbrellaTests(unittest.TestCase):
         (self.resources/'managed-umbrella.json').write_text(json.dumps(self.manifest))
         self.assertEqual(self.guard(home),UMBRELLA)
 
+    def full_tree_digest(self, files):
+        return hashlib.sha256(json.dumps(files, sort_keys=True, separators=(',', ':')).encode()).hexdigest()
+
+    def test_actual_installer_manifest_accepts_published_and_tested_complete_source(self):
+        self.m.__file__=str(LIB/'managed_addons.py')
+        for variant in ('published','tested'):
+            with self.subTest(variant=variant):
+                home=self.installed();addon=home/'addons'/UMBRELLA
+                if variant=='published':
+                    (addon/'resources/lib/modules/player.py').write_bytes((ROOT/'compatibility/umbrella-progress/duration-candidate/6.7.92/player.py').read_bytes())
+                else:
+                    candidate=ROOT/'compatibility/autoplay-size/candidate'
+                    for path in candidate.rglob('*.py'):(addon/path.relative_to(candidate)).write_bytes(path.read_bytes())
+                self.assertEqual(self.guard(home),UMBRELLA)
+                shutil.rmtree(home)
+
+    def test_complete_tree_policy_accepts_exact_reviewed_predecessor(self):
+        home=self.installed();addon=home/'addons'/UMBRELLA
+        old=dict(self.manifest['files'])
+        self.manifest['files']=dict(old, **{'resources/lib/modules/sources.py':'0'*64})
+        self.manifest['installed_tree_sha256']={'6.7.92':[self.full_tree_digest(old)]}
+        (self.resources/'managed-umbrella.json').write_text(json.dumps(self.manifest))
+        self.assertEqual(self.guard(home),UMBRELLA)
+
+    def test_complete_tree_policy_rejects_mixed_individually_reviewed_modules(self):
+        home=self.installed();addon=home/'addons'/UMBRELLA
+        old=dict(self.manifest['files']);new=dict(old)
+        alternate=b'# reviewed alternate player\n';new['resources/lib/modules/player.py']=hashlib.sha256(alternate).hexdigest()
+        new['resources/lib/modules/sources.py']='0'*64
+        self.manifest['installed_tree_sha256']={'6.7.92':[self.full_tree_digest(old),self.full_tree_digest(new)]}
+        self.manifest['installed_player_hashes']['6.7.92'].append(new['resources/lib/modules/player.py'])
+        (self.resources/'managed-umbrella.json').write_text(json.dumps(self.manifest))
+        (addon/'resources/lib/modules/player.py').write_bytes(alternate)
+        before={p.relative_to(home):p.read_bytes() for p in home.rglob('*') if p.is_file()}
+        with self.assertRaises(self.m.ProtectionError):self.guard(home)
+        self.assertEqual(before,{p.relative_to(home):p.read_bytes() for p in home.rglob('*') if p.is_file()})
+
     def test_future_version_fails_before_any_existing_files_change(self):
         home=self.installed(version='6.8.0');before={p.relative_to(home):p.read_bytes()for p in home.rglob('*')if p.is_file()}
         method=getattr(self.m,'verify_installed',None);self.assertTrue(callable(method),'Missing source guard')

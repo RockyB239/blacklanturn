@@ -347,6 +347,40 @@ def verify_display_defaults(z):
  config=json.loads(z.read('userdata/addon_data/script.blacklanturn.preview/rows.json'))
  assert config.get('RatingSources')==['rottentomatoes','metacritic','imdb','popcorn'],'Clean builds must default to four ratings with TMDb hidden'
 
+def verify_autoplay_acceptance(receipt, controller, umbrella):
+ """Current Mac evidence; historical three-device tests cannot certify this delta."""
+ assert receipt.get('passed') is True and receipt.get('device')=='Mac Kodi 21.3'
+ assert receipt.get('tested_commit')=='0b674a3be14cb48ed2fa336e6121fbb597a5f7de'
+ assert receipt.get('tested_controller')=='0.1.83' and controller.get('controller')=='0.1.84'
+ old_files=receipt['controller_files']
+ xml=(ROOT/'controller-source/addon/addon.xml').read_bytes()
+ assert hashlib.sha256(xml.replace(b'version="0.1.84"',b'version="0.1.83"')).hexdigest()==old_files['addon.xml'], 'Untested controller metadata change'
+ expected=dict(old_files, **{'addon.xml':hashlib.sha256(xml).hexdigest()})
+ assert controller['files']==expected, 'Controller implementation differs from naturally tested Mac'
+ required={
+  'addons/plugin.video.umbrella/'+n for n in ('resources/lib/modules/player.py','resources/lib/modules/sources.py','resources/lib/modules/source_preferences.py','umbrella.py','service.py')}
+ required.update('addons/script.blacklanturn.preview/'+n for n in ('default.py','live_review.py','autoplay_session.py','resources/skins/Default/1080i/LiveReview.xml'))
+ assert set(receipt['tested_files'])==required
+ for path,digest in receipt['tested_files'].items():
+  _,addon,relative=path.split('/',2)
+  actual=umbrella['files'][relative] if addon=='plugin.video.umbrella' else controller['files'][relative]
+  assert actual==digest, 'Packaged implementation differs from native evidence: '+path
+ assert umbrella.get('autoplay_patch')=='same-show-source-1'
+ assert receipt.get('natural_episodes_completed')==4 and receipt.get('native_eof_callbacks')==4
+ assert receipt.get('prepared_source_matches')==4 and receipt.get('simulated_viewing_count') is False
+ for field in ('sequence_without_seeking','season_transition','stillwatching_saved_preferences_unchanged',
+               'stillwatching_pause_confirmed','manual_service_and_ceiling_retained','trakt_completed_watched_partial_unwatched'):
+  assert receipt.get(field) is True, 'Missing natural Mac acceptance: '+field
+ for key in ('stop_seconds','resume_seconds'):
+  value=receipt.get(key);assert type(value) in (int,float) and isfinite(value) and value>=60
+ assert abs(receipt['stop_seconds']-receipt['resume_seconds'])<2
+ preservation=receipt['preservation']
+ for key in ('passed','untargeted_progress_unchanged','installed_files_unchanged'):
+  assert preservation.get(key) is True
+ assert preservation.get('core_settings')==280 and preservation.get('addon_settings_files')==16 and preservation.get('history_databases')==4
+ cleanup=receipt['test_cleanup'];assert cleanup.get('session_cleared') is True and cleanup.get('prepared_policy_cleared') is True and cleanup.get('queue_size')==0
+ assert receipt.get('other_devices_accessed') is False, 'Deferred devices must remain untouched'
+
 def verify(folder):
  verify_release112_acceptance(json.loads((ROOT/'controller-source/usability-release112-verification.json').read_text()),json.loads((ROOT/'controller-source/manifest83.json').read_text()),require_v2=True)
  verify_release111_acceptance(json.loads((ROOT/'controller-source/youtube-release111-verification.json').read_text()),json.loads((ROOT/'controller-source/manifest82.json').read_text()))
@@ -362,28 +396,33 @@ def verify(folder):
  verify_shared_network_acceptance(
   json.loads((ROOT/'compatibility/shared-requests/native-verification.json').read_text()),
   json.loads((SOURCE/'resources/managed-network.json').read_text()))
+ verify_autoplay_acceptance(
+  json.loads((ROOT/'compatibility/autoplay-size/natural-verification.json').read_text()),
+  json.loads((ROOT/'controller-source/manifest84.json').read_text()),
+  json.loads((SOURCE/'resources/managed-umbrella.json').read_text()))
  spec=importlib.util.spec_from_file_location('managed',SOURCE/'resources/libs/managed_addons.py');m=importlib.util.module_from_spec(spec);spec.loader.exec_module(m)
- with zipfile.ZipFile(folder/'plugin.program.blacklanturninstaller-1.0.19.zip') as z:
+ with zipfile.ZipFile(folder/'plugin.program.blacklanturninstaller-1.0.20.zip') as z:
   assert z.testzip() is None
   installer={n:z.read(n) for n in z.namelist()}
   assert all(n.startswith('plugin.program.blacklanturninstaller/') for n in installer)
   expected_installer={'plugin.program.blacklanturninstaller/'+str(p.relative_to(SOURCE)):p.read_bytes() for p in SOURCE.rglob('*') if p.is_file() and '__pycache__' not in p.parts and not p.name.endswith(('.pyc','.DS_Store'))}
   assert installer==expected_installer,'Installer ZIP differs from reviewed source'
  for ed in ('General','Apple-TV-Mac'):
-  with zipfile.ZipFile(folder/f'BlackLanturn-{ed}-Kodi21-1.1.14.zip') as z:
+  with zipfile.ZipFile(folder/f'BlackLanturn-{ed}-Kodi21-1.1.15.zip') as z:
    assert z.testzip() is None;m.verify_archive(z,umbrella=True,network=True);verify_playback_defaults(z);verify_display_defaults(z)
    p=json.loads(z.read('userdata/blacklanturn-build.json'))
-   assert p['schema']==3 and p['preferences_policy']=='playback-trakt-youtube-umbrella-network-1' and p['helper_patch']=='empty-cache-1' and p['installer_min_version']=='1.0.19'
-   assert p['build_version']=='1.1.14' and p['network_patch']=='request-reliability-privacy-1' and p['umbrella_version']=='6.7.92' and p['umbrella_patch']=='event-progress-3'
-   assert p['controller_version']=='0.1.83' and p['helper_search_patch']=='search-batch-1' and p['helper_playback_patch']=='sampled-progress-1'
+   assert p['schema']==3 and p['preferences_policy']=='playback-trakt-youtube-umbrella-network-autoplay-1' and p['helper_patch']=='empty-cache-1' and p['installer_min_version']=='1.0.20'
+   assert p['build_version']=='1.1.15' and p['network_patch']=='request-reliability-privacy-1' and p['umbrella_version']=='6.7.92' and p['umbrella_patch']=='event-progress-3'
+   assert p['controller_version']=='0.1.84' and p['helper_search_patch']=='search-batch-1' and p['helper_playback_patch']=='sampled-progress-1'
    gui={n.get('id'):n.text for n in ET.fromstring(z.read('userdata/guisettings.xml'))}
    assert {k:gui[k] for k in ('filecache.memorysize','filecache.readfactor','filecache.buffermode','filecache.chunksize')}=={'filecache.memorysize':'64','filecache.readfactor':'400','filecache.buffermode':'4','filecache.chunksize':'131072'}
    assert next(n.text for n in ET.fromstring(z.read('userdata/addon_data/plugin.video.themoviedb.helper/settings.xml')) if n.get('id')=='artwork_quality')=='1'
-   expected=json.loads((ROOT/'controller-source/manifest83.json').read_text())['files']
+   assert p['autoplay_patch']=='same-show-source-1'
+   expected=json.loads((ROOT/'controller-source/manifest84.json').read_text())['files']
    actual={n[len('addons/script.blacklanturn.preview/'):]:hashlib.sha256(z.read(n)).hexdigest() for n in z.namelist() if n.startswith('addons/script.blacklanturn.preview/')}
    assert actual==expected
    for n,d in installer.items():assert z.read('addons/'+n)==d,'Installer mismatch'
    assert z.read('addons/plugin.program.blacklanturninstaller/resources/libs/managed_addons.py')==(SOURCE/'resources/libs/managed_addons.py').read_bytes()
- print('PASS: both packages, protected schema, exact installer, full managed Helper/Umbrella manifests and three-device progress evidence')
+ print('PASS: both packages, protected schema, exact installer, full managed Helper/Umbrella manifests historical progress evidence and exact-source natural Mac autoplay acceptance; Fire/Apple rollout deferred')
 if __name__=='__main__':
  p=argparse.ArgumentParser();p.add_argument('artifacts',type=Path);verify(p.parse_args().artifacts)

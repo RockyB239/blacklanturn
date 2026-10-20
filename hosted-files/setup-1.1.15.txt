@@ -1,0 +1,11 @@
+BlackLanturn 1.1.15 — Kodi 21.3 Omega
+
+Install BlackLanturn Installer 1.0.20 from BlackLanturn Repository, then choose the edition for your device. Use Standard install to preserve selected accounts and supported playback settings. Account-only reset is a separate, deliberate reset to clean build defaults.
+
+Title Options now prioritize Play/Resume, Play using, Details, local My Stuff and Trakt, followed by player and watched-status controls. Source selection shows its temporary preference and offers Return to normal autoplay. Slow-network retries retain existing rows and focus.
+
+When you manually choose an episode source, Play Next can follow that service and size ceiling for the same show, including later seasons. Normal autoplay keeps your configured ranking. A missing compatible source opens source selection. The temporary choice clears on Stop and is never a new global service preference.
+
+Both editions retain shared reliability/privacy fixes and their platform-specific playback workarounds, artwork, tracking, language/subtitle, quality and four-rating defaults. Lightweight YouTube preview and automatic full-screen quality settings are retained.
+
+The exact new playback implementation completed four natural episodes across a season boundary on Mac, with source carryover, watched sync and early Stop/Trakt resume verified. Fire Stick and Apple TV device updates and new native acceptance are deferred. This package release does not update an existing personal device by itself.

@@ -936,7 +936,7 @@
     "resources/lib/modules/newsinfo.py": "60e6686c14f52318da5a26d8ce1e3d725d2732200a2dda50f688689d409a57b6",
     "resources/lib/modules/opensubs.py": "6e6393893df879434967146cb5fb7c4ba441e1cf1766b0033ea62a418b01e819",
     "resources/lib/modules/playcount.py": "b0d3ec31caa2520293b2734b2ff7db2ac8c98cd5bf693774375544e592f6ddb8",
-    "resources/lib/modules/player.py": "904b7eb226045610c213e5083a55d99b4462620b1089fb413a4e2e1b04f1b00c",
+    "resources/lib/modules/player.py": "5766e60fe02858d5cd5b4d38c03cf8f8f3de9d5e8dbb1b3d85a468f922f2be0b",
     "resources/lib/modules/playlist.py": "29183d423fee3ca501dbff723ad01860e2b68fa7bd7e08cb35de6cd5897dd54f",
     "resources/lib/modules/plex.py": "bcb7dc03ec740279c30f07b59a560e1d7c35e250a396c01b26e8ece575e8fa9d",
     "resources/lib/modules/progress_identity.py": "499376f77f0e6a617ce09692a7bd740210ca0ba3150b549f34c3cc7afd1598df",
@@ -952,9 +952,9 @@
     "resources/lib/modules/service_settings.py": "969f64d5b32611d0e2f1b9ad36d93f97cb2fca9d8b66299118b3d185fea6b2a2",
     "resources/lib/modules/simkl.py": "2d3151d10216c411220a1205317e90083c1ec481169adff8d3bb6f1baab59ab9",
     "resources/lib/modules/skin_packs.py": "219e8b937baf64d9f34ca22ef5d90112aef38a256d75635afcb881122e91625a",
-    "resources/lib/modules/source_preferences.py": "852845745d6f2e1c2e4cc814517687c9bce6f143bfdd956a58479df550503b93",
+    "resources/lib/modules/source_preferences.py": "2e9cd54e459951a1713cbf48cd41a42091759bf0aac866e47d4b331bdf220cf2",
     "resources/lib/modules/source_utils.py": "1dd2455bfee924c809874bc46e3d534c20bc5654d9582e4479c0b3b4802a5b66",
-    "resources/lib/modules/sources.py": "a9594c0bcff75e2d19129be1cf18d56135a30a713ae786951e2550451675dc70",
+    "resources/lib/modules/sources.py": "690f02fb962d5df0121904e532666bcd8ef10d9488cb9c11c34f8638e6340ac6",
     "resources/lib/modules/string_tools.py": "9921cb095aeaf6cecf24b2794605b56a7ca6ab8c80bc033e2d71bf6c3219da84",
     "resources/lib/modules/tmdb4.py": "68cf9432d7dd70b4f0c0a5ef40718e7a68c959716cf07910c4a70f750ddcb978",
     "resources/lib/modules/tools.py": "b109175b832946c218ffd79cb34f09ef8824907e670f7465729b254c883f7710",
@@ -1695,7 +1695,8 @@
     ],
     "6.7.92": [
       "2e3397e4ea496690edb1b2db023d47c5c3f040cc21e7f86ec5a5800e1f9f6889",
-      "904b7eb226045610c213e5083a55d99b4462620b1089fb413a4e2e1b04f1b00c"
+      "904b7eb226045610c213e5083a55d99b4462620b1089fb413a4e2e1b04f1b00c",
+      "5766e60fe02858d5cd5b4d38c03cf8f8f3de9d5e8dbb1b3d85a468f922f2be0b"
     ]
   },
   "legacy_files": {
@@ -3378,5 +3379,17 @@
       "service.py": "94272cc430f6303bac8163c08ec6f7743c3bab37e077e00810ff05f002a38390",
       "umbrella.py": "52061b184ad901c093736b78df050104ab88ae23ba0d0e853d0cd69748a024fa"
     }
+  },
+  "autoplay_patch": "same-show-source-1",
+  "installed_tree_sha256": {
+    "6.7.92": [
+      "80d326c03fb3243fe7620e8331cd7642eef85855e2d8982d2d2d4525bd7895f5",
+      "d707058c7cd50d38ad8bff2a228c8d09d776769c2b7445adf1a51cdfee59a5de",
+      "0ed60e8c43a8d0ed3462691b9f701b8d8c2d092a366757b071a8ebf064552084"
+    ],
+    "6.7.90": [
+      "ce3ba2cfabb7d6fce1d368246e5afdae46b2cebbebeab62575760b96e1e6f15a",
+      "21e3bfc2007dd9d6fa019854ccb700c58e430fdd48ec7bdef61481b67b19dda9"
+    ]
   }
 }

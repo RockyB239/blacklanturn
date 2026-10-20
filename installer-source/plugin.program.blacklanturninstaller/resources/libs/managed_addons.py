@@ -94,7 +94,12 @@ def verify_installed(home, network=False):
         expected = (manifest['files'] if version == manifest['version']
                     else manifest.get('legacy_files', {}).get(version))
         player = 'resources/lib/modules/player.py'
-        if (not expected or actual.get(player) not in manifest['installed_player_hashes'].get(version, ())
+        if 'installed_tree_sha256' in manifest:
+            # Entire reviewed trees, not interchangeable per-file patch sets.
+            digest = hashlib.sha256(json.dumps(actual, sort_keys=True, separators=(',', ':')).encode()).hexdigest()
+            if digest not in manifest['installed_tree_sha256'].get(version, ()):
+                raise ProtectionError(message)
+        elif (not expected or actual.get(player) not in manifest['installed_player_hashes'].get(version, ())
                 or {k:v for k,v in actual.items() if k != player} != {k:v for k,v in expected.items() if k != player}):
             raise ProtectionError(message)
     except (OSError, ValueError, KeyError, E.ParseError) as exc:

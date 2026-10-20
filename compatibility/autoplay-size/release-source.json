@@ -1,0 +1,9 @@
+{
+  "patch": "same-show-source-1",
+  "tested_commit": "0b674a3be14cb48ed2fa336e6121fbb597a5f7de",
+  "files": {
+    "resources/lib/modules/source_preferences.py": "2e9cd54e459951a1713cbf48cd41a42091759bf0aac866e47d4b331bdf220cf2",
+    "resources/lib/modules/sources.py": "690f02fb962d5df0121904e532666bcd8ef10d9488cb9c11c34f8638e6340ac6",
+    "resources/lib/modules/player.py": "5766e60fe02858d5cd5b4d38c03cf8f8f3de9d5e8dbb1b3d85a468f922f2be0b"
+  }
+}
