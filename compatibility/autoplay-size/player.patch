@@ -1,0 +1,20 @@
+--- a/resources/lib/modules/player.py
++++ b/resources/lib/modules/player.py
+@@ -1151,6 +1151,8 @@
+ 		try:
+ 			playnext_transition = playerWindow.getProperty('umbrella.playnext.transition') == 'true'
+ 			if not playnext_transition:
++				playerWindow.clearProperty('BlackLanturn.SourceSession.v1')
++				playerWindow.clearProperty('umbrella.preResolved_sourceSession')
+ 				playerWindow.clearProperty('umbrella.preResolved_nextUrl')
+ 				playerWindow.clearProperty('umbrella.preResolved_season')
+ 				playerWindow.clearProperty('umbrella.preResolved_episode')
+@@ -1263,6 +1265,8 @@
+ 			# episode even though the Play Next window found and displayed episode 3.
+ 			if not playingfile and not has_next_queued and (playlist_size <= 1 or playlist_position >= playlist_size - 1):
+ 				control.playlist.clear()
++				playerWindow.clearProperty('BlackLanturn.SourceSession.v1')
++				playerWindow.clearProperty('umbrella.preResolved_sourceSession')
+ 			if getSetting('crefresh') == 'true' and not has_next_queued:
+ 				request_id = str(time.time_ns())
+ 				homeWindow.setProperty('umbrella.container_refresh_request', request_id)

@@ -1,0 +1,124 @@
+{
+  "status": "Mac-only trial verified; not published",
+  "build": "1.1.14",
+  "installer": "1.0.19",
+  "controller_version": "0.1.83 with local trial files",
+  "controller_sha256": "bb60a1c6ac05a09b8952cf0e9bb55fb6fda49b30f1b1c1975fa5eee74e9115a0",
+  "source_match_mean_ms": 0.01034455409971997,
+  "selected_source_gb_estimate": 0.12333333333333334,
+  "selected_quality": "720p",
+  "selected_service": "TorBox",
+  "selected_source_identity": "25a277521eb16e6c1ad01ff6269b713623fcc25ead7bd26032bd0d3726ae0395",
+  "paired_same_file_stream_starts": [
+    {
+      "version": "before",
+      "seconds": 7.409
+    },
+    {
+      "version": "after",
+      "seconds": 3.385
+    },
+    {
+      "version": "before",
+      "seconds": 2.641
+    },
+    {
+      "version": "after",
+      "seconds": 2.221
+    }
+  ],
+  "next_episode": {
+    "stage": "completed",
+    "passed": true,
+    "next_scrape_seconds": 8.102,
+    "next_source_count": 38,
+    "same_pack_and_debrid": true,
+    "chosen_ceiling_gb": 0.12333333333333334,
+    "next_size_estimate_gb": 0.12333333333333334,
+    "next_debrid": "TorBox",
+    "prepare_seconds": 3.227,
+    "handoff_seconds": 2.233,
+    "prepared_url_consumed_exactly": true,
+    "policy_stamp_verified": true,
+    "second_episode_playing": true,
+    "tracking_boundary": "Actual source scrape, selection, background preResolve and play() consumption; player.play_source redirected to native untracked playback to preserve Trakt progress."
+  },
+  "native_ui": {
+    "failure_retained_rows": true,
+    "failure_retained_focus": true,
+    "retry_retained_focus": true,
+    "retry_preserved_selected_item": true,
+    "explicit_open_focuses_child_row": true,
+    "provider_timings": {
+      "movies": {
+        "seconds": [
+          0.097,
+          0.0991,
+          0.1441
+        ],
+        "counts": [
+          21,
+          21,
+          21
+        ]
+      },
+      "youtube": {
+        "seconds": [
+          0.2512,
+          0.2885,
+          0.2668
+        ],
+        "counts": [
+          51,
+          51,
+          51
+        ]
+      }
+    }
+  },
+  "preservation": {
+    "passed": true,
+    "core_settings_differences": [],
+    "existing_authorizations_preserved": true,
+    "requested_TorBox_authorization_added": true,
+    "history_databases_healthy_and_rows_unchanged": 4,
+    "entrypoint_restored": true
+  },
+  "tests": {
+    "controller": {
+      "passed": 665
+    },
+    "source_policy_and_dispatch": {
+      "passed": 19
+    },
+    "current_progress_contract_against_trial_player": {
+      "passed": 87
+    },
+    "release_suite": {
+      "passed": 468,
+      "failed": 2,
+      "failures": [
+        "test_repaired_search_release.RepairedRelease.test_controller_has_reviewed_repair_and_preview_safety",
+        "test_umbrella_build_contract.UmbrellaBuildContract.test_both_actual_builds_keep_controller83_defaults_and_only_reviewed_provider_changes"
+      ],
+      "reason": "Published controller source hash intentionally unchanged for local trial"
+    },
+    "legacy_progress_harness_against_frozen_current_player": {
+      "baseline_and_candidate_same_failures": 2,
+      "failure": "OriginalProgressContract.test_seek_to_zero_then_stop_does_not_restore_prior_position (apple/fire subtests)",
+      "reason": "Older fixture expects pre-zero-reset scrobble semantics; 87 current zero/duration regressions pass against trial player"
+    }
+  },
+  "youtube_acceptance": {
+    "first_pass": "720p inline and automatic 1080p fullscreen, same video, history disabled; 25 second fullscreen playback",
+    "second_pass": "45 second preview plus approximately one second fade observed; repeat fullscreen stopped after missing player-context metadata; logs include stream timeouts",
+    "remaining": "Repeat sustained fullscreen/4K acceptance on stable network; no quality or VPN settings changed"
+  },
+  "limits": [
+    "Pack size is the existing estimated per-episode value, not a guaranteed actual file byte count or bitrate.",
+    "Paired starts reuse one resolved URL and exclude provider resolution/manual picker wait; tiny samples affected by warm caches and hotel VPN/network.",
+    "Next-episode source preparation and consumption are real; final player handoff used untracked native playback to preserve Trakt progress.",
+    "Fire Stick and Apple TV not accessed. Installer, catalog, build ZIPs and hosted release unchanged.",
+    "Promotion later must version controller and update managed Umbrella source manifests to include these verified files; do not overwrite current authorizations."
+  ]
+}

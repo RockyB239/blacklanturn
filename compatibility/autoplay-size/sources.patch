@@ -1,0 +1,73 @@
+--- a/resources/lib/modules/sources.py
++++ b/resources/lib/modules/sources.py
+@@ -80,6 +80,10 @@
+ 				playerWindow.clearProperty('umbrella.preResolved_imdb')
+ 				playerWindow.clearProperty('umbrella.preResolved_tmdb')
+ 			preResolved_nextUrl = playerWindow.getProperty('umbrella.preResolved_nextUrl')
++			prepared_meta = {'imdb': imdb, 'tmdb': tmdb, 'tvdb': tvdb, 'season': season, 'episode': episode}
++			if preResolved_nextUrl and playerWindow.getProperty(source_preferences.PREPARED_PROPERTY) != source_preferences.session_stamp(prepared_meta):
++				playerWindow.clearProperty('umbrella.preResolved_nextUrl')
++				preResolved_nextUrl = ''
+ 			if preResolved_nextUrl != '' and not force_selection:
+ 				preResolved_season = playerWindow.getProperty('umbrella.preResolved_season')
+ 				preResolved_episode = playerWindow.getProperty('umbrella.preResolved_episode')
+@@ -262,14 +266,19 @@
+ 			self.ids = {'imdb': self.imdb, 'tmdb': self.tmdb, 'tvdb': self.tvdb}
+ 			if len(items) > 0:
+ 				preference = source_preferences.get(self.meta) if not force_selection else None
++				session = source_preferences.get_session(self.meta) if not force_selection and select != '0' else None
+ 				url = None
+ 				if preference:
+ 					matches = source_preferences.matching(items, preference)
++					if session: matches = source_preferences.session_candidates(matches, session)
+ 					if matches: url = self.sourcesAutoPlay(matches)
+-				if (preference and not url) or (not preference and select == '0'):
++				elif session:
++					matches = source_preferences.session_candidates(items, session)
++					if matches: url = self.sourcesAutoPlay(matches)
++				if ((preference or session) and not url) or (not preference and select == '0'):
+ 					control.sleep(200)
+ 					return self.sourceSelect(title, items, uncached_items, self.meta)
+-				elif not preference: url = self.sourcesAutoPlay(items)
++				elif not preference and not session: url = self.sourcesAutoPlay(items)
+ 			if url == 'close://' or url is None:
+ 				self.url = url
+ 				return self.errorForSources()
+@@ -521,6 +530,8 @@
+ 						try: progressDialog.close()
+ 						except: pass
+ 						del progressDialog
++					if self.enable_playnext and getSetting('play.mode.tv') != '0':
++						source_preferences.remember_session(meta, resolve_items[i], chosen_source[0])
+ 					from resources.lib.modules import player
+ 					player.Player().play_source(
+ 						title,
+@@ -849,8 +860,12 @@
+ 	def preResolve(self, next_sources, next_meta):
+ 		playerWindow.clearProperty('umbrella.preResolved_nextUrl')
+ 		try:
++			prepared_stamp = source_preferences.session_stamp(next_meta)
+ 			preference = source_preferences.get(next_meta)
+ 			if preference: next_sources = source_preferences.matching(next_sources, preference)
++			if getSetting('play.mode.tv') != '0':
++				session = source_preferences.get_session(next_meta)
++				if session: next_sources = source_preferences.session_candidates(next_sources, session)
+ 			next_sources = [i for i in next_sources if not i.get('cloud_folder')]
+ 			if not next_sources: raise Exception()
+ 			homeWindow.setProperty(self.metaProperty, jsdumps(next_meta))
+@@ -882,11 +897,14 @@
+ 							control.sleep(500)
+ 							player_hasVideo = control.condVisibility('Player.HasVideo')
+ 							if player_hasVideo: # do not setPropery if user stops playback quickly because "onPlayBackStopped" is already called and won't be able to clear it.
+-								playerWindow.setProperty('umbrella.preResolved_nextUrl', url)
++								if source_preferences.session_stamp(next_meta) != prepared_stamp:
++									return playerWindow.clearProperty('umbrella.preResolved_nextUrl')
+ 								playerWindow.setProperty('umbrella.preResolved_season', str(next_meta.get('season', '')))
+ 								playerWindow.setProperty('umbrella.preResolved_episode', str(next_meta.get('episode', '')))
+ 								playerWindow.setProperty('umbrella.preResolved_imdb', str(next_meta.get('imdb', '')))
+ 								playerWindow.setProperty('umbrella.preResolved_tmdb', str(next_meta.get('tmdb', '')))
++								playerWindow.setProperty(source_preferences.PREPARED_PROPERTY, prepared_stamp)
++								playerWindow.setProperty('umbrella.preResolved_nextUrl', url)
+ 								if self.debuglog:
+ 									log_utils.log('preResolved_nextUrl : %s' % url, level=log_utils.LOGDEBUG)
+ 							else:

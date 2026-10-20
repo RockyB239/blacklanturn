@@ -85,3 +85,30 @@ class PageFailures(unittest.TestCase):
         self.assertEqual(len(sleeps),1)
 
 if __name__=='__main__':unittest.main()
+
+class RetryFocus(unittest.TestCase):
+    state=PageFailures.state
+    def test_retry_completion_does_not_steal_focus_from_a_different_row(self):
+        queue=[];focus=[900]
+        class Thread(InlineThread):
+            def start(self):queue.append(self.target)
+        obj,props,applied,method=self.state(lambda p:[{'file':p}],Thread)
+        obj.getFocusId=lambda:focus[0]
+        obj.setFocusId=lambda cid:focus.__setitem__(0,cid)
+        obj.rows[1]=[{'file':'second-original'}];obj.paths[1]='plugin://plugin.video.example/second'
+        obj.row_states={1:'error'};obj.load_path=lambda n,*args,**kwargs:method(obj,n,*args,**kwargs)
+        extract(ROOT/'live_review.py','retry_lists',{},'LiveReview')(obj)
+        queue[0]()
+        self.assertEqual(focus[0],900,'Background retry stole the selected row')
+
+
+class ExplicitOpenFocus(unittest.TestCase):
+    state=PageFailures.state
+    def test_hero_open_from_second_row_focuses_loaded_child_row(self):
+        obj,props,applied,load=self.state(lambda path:[{'file':'child-episode'}])
+        focus=[901];obj.getFocusId=lambda:focus[0];obj.setFocusId=lambda cid:focus.__setitem__(0,cid)
+        obj.selected={'file':'plugin://plugin.video.example/seasons','title':'Show','filetype':'directory'}
+        obj.load_path=lambda n,*args,**kwargs:load(obj,n,*args,**kwargs)
+        extract(ROOT/'live_review.py','onClick',{'discovery_result':lambda item:None},'LiveReview')(obj,101)
+        self.assertEqual(obj.paths[0],'plugin://plugin.video.example/seasons')
+        self.assertEqual(focus[0],900,'Explicit Open must focus the child results')

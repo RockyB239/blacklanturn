@@ -1,0 +1,21 @@
+{
+  "status": "Mac-only unpublished trial",
+  "base_release": "1.1.14",
+  "installer_unchanged": "1.0.19",
+  "changed_files": {
+    "resources/lib/modules/sources.py": {
+      "before_sha256": "a9594c0bcff75e2d19129be1cf18d56135a30a713ae786951e2550451675dc70",
+      "after_sha256": "b5bf2c2675ec4313e46502ee2c51193567651042f89f74e6afcaafadc92f33cd"
+    },
+    "resources/lib/modules/source_preferences.py": {
+      "before_sha256": "852845745d6f2e1c2e4cc814517687c9bce6f143bfdd956a58479df550503b93",
+      "after_sha256": "ddb80faf3cb90d14b160b4183ce01e072212be8b5c160b8f05e2e10b0be03bbf"
+    },
+    "resources/lib/modules/player.py": {
+      "before_sha256": "904b7eb226045610c213e5083a55d99b4462620b1089fb413a4e2e1b04f1b00c",
+      "after_sha256": "3edb0965e33d8108398f5b20752c31e4c044e892a134fc2cc039476b589e0ac9"
+    }
+  },
+  "settings_changes": "No playback preference changes; separately requested TorBox device authorization completed on Mac",
+  "source_identity_policy": "Current show/season, later episodes only, selected size ceiling, TorBox then manually selected service; no automatic service expansion; max three candidates; cached results only; unknown-size/uncached excluded; prepared URL policy stamp; explicit Stop/end clears session"
+}

@@ -1041,7 +1041,7 @@ class LiveReview(YouTubeBrowser,xbmcgui.WindowXML):
                 event('critic_ratings_unavailable',error_type=type(exc).__name__,status=getattr(exc,'code',None),reason=reason)
             finally:self.rating_busy=False
         threading.Thread(target=work,name='BlackLanturnSelectedRatings',daemon=True).start()
-    def load_path(self,n,path,label=None,back=False,position=0):
+    def load_path(self,n,path,label=None,back=False,position=0,preserve_focus=False):
         if not valid_source(path):return
         if getattr(self,'section','')=='YouTube':
             self.youtube_content_revision=object();self.youtube_job=None;self.youtube_update=None;self.youtube_refreshing=False
@@ -1053,6 +1053,7 @@ class LiveReview(YouTubeBrowser,xbmcgui.WindowXML):
         if not hasattr(self,'loading_paths'):self.loading_paths={}
         self.loading_paths[n]=(generation,token);self.stop_preview()
         previous=self.paths[n];previous_position=self.getControl(900+n).getSelectedPosition()
+        focus_before=getattr(self,'getFocusId',lambda:900+n)()
         if not self.rows[n]:self.setProperty('rowState'+str(n),'loading');self.setProperty('rowMessage'+str(n),'Loading provider page…')
         self.setProperty('notice','Loading provider page…')
         cache=getattr(self,'result_cache',None);revision=cache.revision if cache is not None else None
@@ -1081,7 +1082,7 @@ class LiveReview(YouTubeBrowser,xbmcgui.WindowXML):
                         # deferred automatic result, including same-path back/retry.
                         self.row_cache.pop(self.row_offset+n,None)
                         self.apply_row(n,files,label or self.getProperty('row'+str(n)),position,display_position=back)
-                        if not getattr(self,'search_state',None) or self.getFocusId() in (0,900,901):self.setFocusId(900+n if self.rows[n] else 600 if self.search_state or self.episode_browser_context else 50)
+                        if (not preserve_focus and (not getattr(self,'search_state',None) or self.getFocusId() in (0,900,901))) or (preserve_focus and focus_before==900+n and getattr(self,'getFocusId',lambda:focus_before)()==focus_before):self.setFocusId(900+n if self.rows[n] else 600 if getattr(self,'search_state',None) or getattr(self,'episode_browser_context',None) else 50)
                         event('page_loaded',row=n,count=len(files),back=back)
             except Exception as exc:
                 with self.preview_dispatch_lock:
@@ -1262,7 +1263,7 @@ class LiveReview(YouTubeBrowser,xbmcgui.WindowXML):
         if discovery:options.append(('open_discovery',discovery['button']))
         elif item:
             saved=any(x.get('file')==item.get('file') for x in self.config['Saved'])
-            if item.get('filetype')!='directory' and item.get('type')!='addon':options.append(('play','Resume' if resume_options(item) else 'Play'))
+            options.append(('play','Open' if item.get('filetype')=='directory' or item.get('type')=='addon' else 'Resume' if resume_options(item) else 'Play'))
             if player_path:options.append(('player','Play using…'))
             options.extend([('details','Details'),('local','Remove from My Stuff on this device' if saved else 'Save to My Stuff on this device')])
             if command:options.append(('trakt','Trakt: Watched, progress & lists'))
@@ -1893,8 +1894,8 @@ class LiveReview(YouTubeBrowser,xbmcgui.WindowXML):
                 failed=self.failed_paths.get(n)
                 if failed:
                     if failed['back'] and failed['path']!=self.paths[n]:self.histories[n].pop()
-                    self.load_path(n,**failed)
-                else:self.load_path(n,path,back=True,position=self.getControl(900+n).getSelectedPosition())
+                    self.load_path(n,**failed,preserve_focus=True)
+                else:self.load_path(n,path,back=True,position=self.getControl(900+n).getSelectedPosition(),preserve_focus=True)
     def discover_more(self,item):
         self.actions_open=True
         try:
@@ -2047,6 +2048,7 @@ class LiveReview(YouTubeBrowser,xbmcgui.WindowXML):
             if match is None:saved.append(self.selected)
             else:saved.pop(match)
             self.save();self.update(self.selected)
+            self.setProperty('notice',('Saved on this device' if match is None else 'Removed from this device')+' · Use Trakt for an account watchlist')
         elif cid==10:
             if getattr(self,'section','')=='YouTube':self.select_youtube_tab('search')
             else:self.open_search()
