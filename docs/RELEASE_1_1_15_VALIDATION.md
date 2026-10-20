@@ -1,6 +1,6 @@
 # Release 1.1.15 validation
 
-Status: staged candidate; publication and anonymous public readback pending.
+Status: published release assets and validated source. The live installer catalog identifies the active distribution version; this is not a personal-device upgrade receipt.
 
 Both editions include the exact Options/retained-row retry implementation and three Umbrella modules tested in local commit `0b674a3`. Controller 0.1.84 differs from that tested controller only in addon version metadata. Installer 1.0.20 and the new `same-show-source-1` marker prevent an older installer from reaching cleanup with an unsupported payload.
 
@@ -34,3 +34,9 @@ Controller, source/lifecycle, current progress, native-probe, full installer con
 - Private-value egress check found no matches for 16 private credential values across changed source and all three archives; one already-public baseline default was excluded.
 - Independent whole-branch review found no Critical/Important or material minor findings and independently passed 30 focused integration tests plus package/metadata/source checks.
 - git diff --check passed. No personal device was changed during release packaging.
+
+## Publication evidence
+
+Public release: https://github.com/RockyB239/blacklanturn/releases/tag/v1.1.15 . Exact source/tag commit: `47c8d89274e408251345654d36453e4e4b7ed9b4`. Candidate CI39514383332 and tag CI39514717161 passed. The server SHA256 digests and sizes match all three frozen artifacts. Complete unauthenticated downloads passed exact hash, length and ZIP CRC verification for both builds and Installer20. Previous releases and recovery copies remain retained.
+
+The reviewed catalog, metadata and wrapped Installer20 are activated through main/Pages only after those asset checks. Public Pages byte verification is a separate final distribution checkpoint; the current live catalog is authoritative. New Fire Stick/Apple TV device installation and acceptance remain excluded until home.

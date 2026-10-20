@@ -41,7 +41,7 @@ Files: tools/build_release.py, tools/verify_release.py, controller manifest84, c
 
 Files: hosted catalogs/setup15, addons.xml/md5, wrapped Installer20, release validation and project-status docs.
 - [x] Review entire branch and complete final syntax, privacy, CRC, dependency, managed manifest and preservation checks.
-- [ ] Publish exact reviewed source/assets with CI green, then activate catalog/Pages.
+- [x] Publish exact reviewed source/assets with CI green, then activate catalog/Pages.
 - [ ] Verify anonymous asset bytes, metadata MD5, catalogs, installer ZIP and repository links.
 - [ ] Report release versions, preserved state, test coverage and deferred Fire/Apple device updates.
 
@@ -53,3 +53,5 @@ Task 1 complete: real Standard and account-only preservation plus exact-tree pre
 Ruling: retain historical release gate ordering before adding the exact-source Mac gate, so historical failure contracts remain intact. Current progress contracts use the maintained zero-resume suite rather than the superseded rejected zero-percent pause contract. No playback implementation was changed during packaging.
 
 Task 2 complete: 572/671/36/16 checks pass, including 87 current progress contracts. Full verifier, reproducibility, 14-path public-baseline comparison and private-value egress checks pass. Independent review passed30 focused tests with no blockers. Task3 pending CI/publication/public readback; device deployment remains excluded.
+
+Task3 publication checkpoint: source47c8d89 candidate/tag CI39514383332/39514717161 pass. Release v1.1.15 is public and all three anonymous downloads match frozen SHA256/size/CRC. Reviewed main/Pages catalog activation and exact public byte readback are the final distribution step; device updates remain excluded.
