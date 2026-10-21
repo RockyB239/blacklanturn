@@ -56,8 +56,8 @@ def apply_umbrella(data):
 def build(baselines,output):
  output.mkdir(parents=True,exist_ok=True)
  installer={str(p.relative_to(SOURCE)):p.read_bytes() for p in SOURCE.rglob('*') if p.is_file() and '__pycache__' not in p.parts and not p.name.endswith(('.pyc','.DS_Store'))}
- assert ET.fromstring(installer['addon.xml']).get('version')=='1.0.20'
- zipwrite(output/'plugin.program.blacklanturninstaller-1.0.20.zip',{'plugin.program.blacklanturninstaller/'+n:d for n,d in installer.items()})
+ assert ET.fromstring(installer['addon.xml']).get('version')=='1.0.21'
+ zipwrite(output/'plugin.program.blacklanturninstaller-1.0.21.zip',{'plugin.program.blacklanturninstaller/'+n:d for n,d in installer.items()})
  spec=importlib.util.spec_from_file_location('managed',SOURCE/'resources/libs/managed_addons.py');managed=importlib.util.module_from_spec(spec);spec.loader.exec_module(managed)
  for edition,expected in BASE_HASHES.items():
   source=baselines/f'BlackLanturn-{edition}-Kodi21-1.1.2.zip';assert sha(source.read_bytes())==expected,'Baseline changed'
@@ -125,7 +125,7 @@ def build(baselines,output):
   out=output/f'BlackLanturn-{edition}-Kodi21-1.1.15.zip';zipwrite(out,data)
   with zipfile.ZipFile(out) as z:managed.verify_archive(z, umbrella=True, network=True)
   files={n:sha(d) for n,d in sorted(data.items())}
-  report={'file':out.name,'sha256':sha(out.read_bytes()),'bytes':out.stat().st_size,'files':len(data),'changed_paths':sorted(changed),'helper':'6.17.9 + empty-cache-1 + search-batch-1 + sampled-progress-1','installer':'1.0.20','umbrella':'6.7.92 + event-progress-3','schema':3,'settings_and_rows':'clean 1.1.2 plus exact playback-provider, automatic YouTube quality, watch-indicator, 64MB/4x buffer and High artwork defaults','native_binaries':0}
+  report={'file':out.name,'sha256':sha(out.read_bytes()),'bytes':out.stat().st_size,'files':len(data),'changed_paths':sorted(changed),'helper':'6.17.9 + empty-cache-1 + search-batch-1 + sampled-progress-1','installer':'1.0.21','umbrella':'6.7.92 + event-progress-3','schema':3,'settings_and_rows':'clean 1.1.2 plus exact playback-provider, automatic YouTube quality, watch-indicator, 64MB/4x buffer and High artwork defaults','native_binaries':0}
   (output/(edition+'-package.json')).write_text(json.dumps(report,indent=2));(output/(edition+'-manifest.json')).write_text(json.dumps(files,indent=2));print(json.dumps(report),flush=True)
 if __name__=='__main__':
  p=argparse.ArgumentParser();p.add_argument('--baselines',type=Path,required=True);p.add_argument('--output',type=Path,required=True);a=p.parse_args();build(a.baselines,a.output)

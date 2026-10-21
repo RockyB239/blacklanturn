@@ -1,0 +1,36 @@
+{
+  "status": "selected design 1; local candidate only; unpublished and uninstalled",
+  "design": "Minimal charcoal frame with cyan edge",
+  "master_sha256": "6af22937824d2ada9b5917163d36633e4eb20f7277682ea00e0d994371b50464",
+  "icon_sha256": "0c5f1885226d28aa8052f17cb2137ebd494cacb2216daa9824bb605c93b4f4de",
+  "icon_dimensions": [
+    512,
+    512
+  ],
+  "packages": [
+    {
+      "id": "repository.blacklanturn",
+      "provisional_version": "1.0.6",
+      "base_sha256": "3c5d119911dacb4f20f03f59e07b7978e3d509938ea01f46aa984aecbef89491",
+      "file": "repository.blacklanturn-1.0.6.zip",
+      "sha256": "b7307d60bbfb507848ece7dc039eb20a0501a16e7d8a5f47a9c176c5aeb576be",
+      "changed_files": [
+        "repository.blacklanturn/addon.xml",
+        "repository.blacklanturn/icon.png"
+      ],
+      "all_other_files_exact": true
+    },
+    {
+      "id": "plugin.program.blacklanturninstaller",
+      "provisional_version": "1.0.21",
+      "base_sha256": "f2ab32e87074c1dd333bc6ec3ba16b93a7286f523fd45c0813b6d646fe70e3da",
+      "file": "plugin.program.blacklanturninstaller-1.0.21.zip",
+      "sha256": "1850230644b8a1f5373f9990aaf715ad4715fcdf9851878877fbdfa345003213",
+      "changed_files": [
+        "plugin.program.blacklanturninstaller/addon.xml",
+        "plugin.program.blacklanturninstaller/icon.png"
+      ],
+      "all_other_files_exact": true
+    }
+  ]
+}

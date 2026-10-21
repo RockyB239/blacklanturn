@@ -401,7 +401,7 @@ def verify(folder):
   json.loads((ROOT/'controller-source/manifest84.json').read_text()),
   json.loads((SOURCE/'resources/managed-umbrella.json').read_text()))
  spec=importlib.util.spec_from_file_location('managed',SOURCE/'resources/libs/managed_addons.py');m=importlib.util.module_from_spec(spec);spec.loader.exec_module(m)
- with zipfile.ZipFile(folder/'plugin.program.blacklanturninstaller-1.0.20.zip') as z:
+ with zipfile.ZipFile(folder/'plugin.program.blacklanturninstaller-1.0.21.zip') as z:
   assert z.testzip() is None
   installer={n:z.read(n) for n in z.namelist()}
   assert all(n.startswith('plugin.program.blacklanturninstaller/') for n in installer)

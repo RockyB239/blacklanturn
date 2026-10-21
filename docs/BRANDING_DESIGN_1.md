@@ -1,0 +1,9 @@
+# Design 1 branding release — 2026-10-20
+
+Approved minimal charcoal frame and cyan orbital lantern. Repository1.0.6 and Installer1.0.21 change only icon.png and their addon version metadata from Repository1.0.5 / Installer1.0.20. Existing repository endpoints, runtime code, layouts, preservation defaults and managed-addon policies are unchanged. The Installer navigation header already consumes its addon icon.
+
+The selected512px RGBA runtime asset is source-controlled in both addon source folders. Rebuild tooling and version assertions now select Installer1.0.21, preserving the branding in future packaging. The immutable published Build1.1.15 payloads and catalog are unchanged. Their Installer minimum remains1.0.20 because21 adds no behavior or compatibility requirement. No existing published ZIP is overwritten except the deliberate unversioned repository bootstrap alias.
+
+Package proof: BRANDING_DESIGN_1_PACKAGE_VERIFICATION.json. This records candidate byte comparisons and ZIP validation, not public availability or native acceptance; those are verified separately after publication and Mac installation.
+
+Recovery: reinstall the preserved Repository1.0.5 and Installer1.0.20 packages. No build reinstall, account reset or playback preference change is required. Fire Stick and Apple TV rollout is deferred until home.

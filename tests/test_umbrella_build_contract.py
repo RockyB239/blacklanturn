@@ -7,7 +7,7 @@ spec=importlib.util.spec_from_file_location('umbrella_build',ROOT/'tools/build_r
 P='addons/plugin.video.umbrella/';PROGRESS=ROOT/'compatibility/umbrella-progress'
 class UmbrellaBuildContract(unittest.TestCase):
  def test_installer18_source_metadata_is_local_only(self):
-  self.assertEqual(E.parse(SOURCE/'addon.xml').getroot().get('version'),'1.0.20')
+  self.assertEqual(E.parse(SOURCE/'addon.xml').getroot().get('version'),'1.0.21')
  def test_official_full_tree_overlay_preserves_nonprovider_data(self):
   apply=getattr(BUILD,'apply_umbrella',None);self.assertTrue(callable(apply),'Missing pinned official92 overlay')
   data={P+'obsolete.py':b'obsolete90','userdata/addon_data/plugin.video.umbrella/settings.xml':b'private preferences','addons/other/code.py':b'untouched'}
@@ -36,7 +36,7 @@ class UmbrellaBuildContract(unittest.TestCase):
   self.assertTrue(baselines.is_dir(),'Pinned clean build baselines unavailable')
   with tempfile.TemporaryDirectory()as folder:
    BUILD.build(baselines,Path(folder))
-   self.assertTrue((Path(folder)/'plugin.program.blacklanturninstaller-1.0.20.zip').is_file())
+   self.assertTrue((Path(folder)/'plugin.program.blacklanturninstaller-1.0.21.zip').is_file())
    replay=Path(folder)/'replay'
    result=subprocess.run([sys.executable,'-I','-B',str(ROOT/'tools/build_release.py'),'--baselines',str(baselines),'--output',str(replay)],capture_output=True,text=True)
    self.assertEqual(result.returncode,0,result.stderr)

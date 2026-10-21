@@ -126,3 +126,8 @@ Installer1.0.18 and full managed Umbrella6.7.92/event-progress-3 repair immediat
 The approved source-selection/Options changes are integrated in both clean editions with controller 0.1.84, full managed Umbrella source matching and Installer20 compatibility gating. Exact natural Mac episode/season rollover, prepared-source carryover, watched and early Stop/resume checks passed with settings/accounts preserved. See RELEASE_1_1_15_VALIDATION.md for package and promotion status. No Fire Stick or Apple TV device update is part of this release operation; those remain deferred until home.
 
 Release v1.1.15 is published at source47c8d89, with candidate/tag CI39514383332/39514717161 green and three complete anonymous asset downloads matching frozen hashes/CRC. Main/Pages activation follows asset acceptance; the live catalog identifies the active distribution. Both editions preserve existing platform defaults/workarounds, and Fire/Apple device rollout remains deferred.
+
+
+## Design1 branding — Repository1.0.6 / Installer1.0.21
+
+Approved asset-only branding update. Runtime behavior and Build1.1.15 remain unchanged. Source/package comparisons, recovery and rollout boundaries are documented in BRANDING_DESIGN_1.md. Native Mac/publication acceptance is recorded separately. Fire Stick and Apple TV remain untouched.
