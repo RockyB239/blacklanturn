@@ -32,6 +32,6 @@
 - [x] Add immutable manifest85, sanitized native receipt and source-bound verifier; integrate the skin overlay in both deterministic build paths. Keep Installer21 behavior unchanged.
 - [x] Pass controller, full installer/release, source lifecycle and native-probe suites; rebuild twice, compare with public1.1.15, verify privacy and preservation fixtures.
 - [x] Obtain independent focused review and resolve findings.
-- [ ] Commit/tag/push release source; require CI success; upload artifacts and verify anonymous hashes/length/CRC.
+- [x] Commit/tag/push release source; require CI success; upload artifacts and verify anonymous hashes/length/CRC.
 - [ ] Activate both catalogs/setup notes on main/Pages only after artifact checks; verify exact public catalog/installer bytes.
 - [ ] Provide one Fire Stick checkpoint: open Installer Save Data and confirm preservation controls before selecting the release.

@@ -1,6 +1,6 @@
 # Release 1.1.16 validation
 
-Status: validated source and local packages; publication/readback recorded below when completed. This is not a Fire Stick installation receipt.
+Status: published release assets and validated source. The installer catalog activation follows verified public download checks. This is not a Fire Stick installation receipt.
 
 ## Scope and behavior
 
@@ -34,3 +34,9 @@ Final hashes, delta/privacy checks, CI and public readbacks are recorded after v
 - `plugin.program.blacklanturninstaller-1.0.21.zip`: SHA256 `1850230644b8a1f5373f9990aaf715ad4715fcdf9851878877fbdfa345003213`, 3927837 bytes.
 
 Both editions have exactly18 changed paths relative to anonymously verified public1.1.15. The remaining source, platform workarounds and all userdata except release marker/README/two clean controller defaults are byte-identical. Installer21 ZIP is exact. The complete package verifier passed; deterministic rebuild contracts passed. Known-private-value scan checked16 private values plus one excluded already-public baseline default across changed source and all three archives, with no findings. No personal files are packaged.
+
+## Publication evidence
+
+Public release: https://github.com/RockyB239/blacklanturn/releases/tag/v1.1.16 . Exact release source: d4dd4a8a4cf3eb27c0ade8a6ba2c5fab24e6cde5. GitHub CI39596159732 passed for that source. All three server SHA256 digests and sizes match the frozen artifacts. Complete anonymous downloads of both editions and the unchanged Installer21 passed exact hash, length and ZIP CRC checks. Prior releases remain retained.
+
+The reviewed builds-v2 catalog advances both editions to1.1.16 only after those asset checks. Installer metadata21, Repository6, repository ZIPs and branding download assets remain exact. The final Pages readback is retained separately in work/youtube-end-release-2026-10-21/public-pages-verification.json and must pass before the user is instructed to install. Fire Stick installation remains user-operated and pending; no personal device is changed by publication.

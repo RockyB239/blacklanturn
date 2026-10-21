@@ -135,4 +135,4 @@ Approved asset-only branding update. Runtime behavior and Build1.1.15 remain unc
 
 ## 2026-10-21: YouTube end-screen release 1.1.16
 
-Both editions are prepared with Controller0.1.85 and skin0.1.39. Installer1.0.21 and Repository1.0.6 remain unchanged. The feature and Back-button override are source-bound to native Mac tests; the user requests publication so they can Standard-update and test the Fire Stick at the hotel. No Fire/Apple device update or new native acceptance is claimed. See RELEASE_1_1_16_VALIDATION.md for preservation, exact packages, CI and publication evidence.
+Both editions are published with Controller0.1.85 and skin0.1.39. Installer1.0.21 and Repository1.0.6 remain unchanged. The feature and Back-button override are source-bound to native Mac tests; the user requests publication so they can Standard-update and test the Fire Stick at the hotel. No Fire/Apple device update or new native acceptance is claimed. See RELEASE_1_1_16_VALIDATION.md for preservation, exact packages, CI and publication evidence.
