@@ -1,5 +1,5 @@
 """Account-scoped YouTube navigation; provider owns credentials and playback."""
-import hashlib,re
+import hashlib,re,math
 from urllib.parse import urlsplit,parse_qs,urlencode
 
 BASE='plugin://plugin.video.youtube'
@@ -90,3 +90,62 @@ def resume_allowed(state,connected,identity):
     if not isinstance(state,dict):return True
     if state.get('section')=='YouTube' and (not connected or not identity or state.get('youtube_identity')!=identity):return False
     return all(resume_allowed(s,connected,identity) for s in state.get('discovery_stack',[])) and resume_allowed(state.get('search_origin'),connected,identity)
+
+def end_suggestions(items,current_id):
+    """Keep YouTube's ranking, with three distinct playable alternatives."""
+    seen={current_id};result=[]
+    for item in items:
+        ident=video_id(item)
+        if not ident or ident in seen:continue
+        seen.add(ident);result.append(item)
+        if len(result)==3:break
+    return result
+
+def show_end_screen(reason,config,owner,ready):
+    return bool(reason=='ended' and config.get('YouTubeEndSuggestions',True) and owner and ready)
+
+class YouTubeEndState:
+    """Two-step Back and one-shot opt-in autoplay; no clock or GUI side effects."""
+    def __init__(self,items,autoplay,now):
+        self.items=list(items);self.visible=True;self.finished=False
+        self.deadline=None;self.autoplay=False;self.set_autoplay(autoplay,now)
+    def interact(self):self.deadline=None
+    def set_autoplay(self,enabled,now):
+        self.autoplay=bool(enabled)
+        self.deadline=now+15 if enabled and self.visible and self.items and not self.finished else None
+    def back(self):
+        self.interact()
+        if self.visible:self.visible=False;return 'dismiss'
+        self.finished=True;return 'exit'
+    def choose(self,index):
+        if self.finished or not self.visible or not 0<=index<len(self.items):return None
+        self.finished=True;self.deadline=None;return self.items[index]
+    def tick(self,now):
+        if self.visible and not self.finished and self.deadline is not None and now>=self.deadline:return self.choose(0)
+        return None
+
+def save_end_preference(path,key,value):
+    """Merge only the selected end-screen switch into the latest saved config."""
+    import json,os,tempfile
+    from pathlib import Path
+    path=Path(path)
+    if key not in ('YouTubeEndSuggestions','YouTubeEndAutoplay'):raise ValueError('Invalid YouTube preference')
+    config=json.loads(path.read_text())
+    if not isinstance(config,dict):raise ValueError('Invalid saved configuration')
+    config[key]=bool(value)
+    fd,name=tempfile.mkstemp(prefix='youtube-end-',suffix='.tmp',dir=str(path.parent))
+    try:
+        with os.fdopen(fd,'w') as stream:
+            json.dump(config,stream,indent=2);stream.flush();os.fsync(stream.fileno())
+        os.replace(name,path)
+    finally:
+        if os.path.exists(name):os.unlink(name)
+    return config
+
+def end_card_height(screen_width,screen_height):
+    # WindowXML coordinates stretch with window aspect; keep artwork physically16:9.
+    try:
+        width=float(screen_width);height=float(screen_height)
+        if not math.isfinite(width) or not math.isfinite(height) or width<=0 or height<=0:return 299
+        return max(1,round(532*width/1920*1080/height*9/16))
+    except (ValueError,TypeError,ZeroDivisionError):return 299

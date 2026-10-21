@@ -17,7 +17,9 @@ class BackendSettings(xbmcgui.WindowXMLDialog):
   items=[]
   for action,title,help in rows:
    if action=='youtube_previews':help='Current mode: '+('Automatic' if self.config.get('YouTubePreviews',True) else 'Manual')
-   if action=='preview_mode':help='Current mode: '+('Automatic' if self.config.get('PreviewMode',self.preview_mode)=='auto' else 'Manual')
+   if action=='youtube_end_suggestions':help='Next-video suggestions: '+('On' if self.config.get('YouTubeEndSuggestions',True) else 'Off')
+   elif action=='youtube_end_autoplay':help='Next-video autoplay: '+('On' if self.config.get('YouTubeEndAutoplay',False) else 'Off')+'  ·  Requires suggestions to be enabled'
+   elif action=='preview_mode':help='Current mode: '+('Automatic' if self.config.get('PreviewMode',self.preview_mode)=='auto' else 'Manual')
    elif action=='preview_delay':help='Current delay: '+str(self.config.get('PreviewDelay',5))+' seconds'
    elif action=='preview_language':help='Current preference: '+('English first, other languages as fallback' if self.config.get('PreviewLanguage','en')=='en' else 'Provider order')
    elif action=='title_logos':help='Title logos: '+('On' if self.config.get('TitleLogos',True) else 'Off')+'  ·  Plain titles remain the fallback'

@@ -222,7 +222,10 @@ class LiveReview(YouTubeBrowser,xbmcgui.WindowXML):
             playback_resume=getattr(self,'resume_playback',None)
             if playback_resume:
                 restored=self.restore_browse(playback_resume)
-                if restored is not False and current():self.refresh_watch_status(sync=getattr(self,'section','')!='YouTube',browse_state=playback_resume)
+                if restored is not False and current():
+                    channel=playback_resume.get('_youtube_end_channel')
+                    if channel:self.load_path(0,channel['file'],'More from this channel')
+                    else:self.refresh_watch_status(sync=getattr(self,'section','')!='YouTube',browse_state=playback_resume)
                 return
             self.setProperty('loadingStatus','Preparing your integrations…')
             if not getattr(self,'resume_backend',None):initialize_addons()
@@ -1747,6 +1750,9 @@ class LiveReview(YouTubeBrowser,xbmcgui.WindowXML):
             if chosen is not None:
                 self.config['RatingSources']=update_rating_sources(current,[RATING_OPTIONS[n][0] for n in chosen]);self.save()
                 if self.selected:self.update(self.selected)
+        elif action in ('youtube_end_suggestions','youtube_end_autoplay'):
+            key='YouTubeEndSuggestions' if action=='youtube_end_suggestions' else 'YouTubeEndAutoplay'
+            self.config[key]=not self.config.get(key,key=='YouTubeEndSuggestions');self.save()
         elif action=='youtube_previews':
             self.stop_preview();self.config['YouTubePreviews']=not self.config.get('YouTubePreviews',True);self.save()
             if self.section=='YouTube':

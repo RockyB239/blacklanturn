@@ -19,7 +19,23 @@ def run_live_review():
         w.doModal();request=getattr(w,'core_settings_request',None);playback=getattr(w,'playback_request',None);state=getattr(w,'playback_return',None);options=getattr(w,'playback_options',{});w.alive=False;del w
         if playback:
             from playback_runtime import play_and_wait
-            if not play_and_wait(playback,owner_skin,options,(state or {}).get('selected')):return
+            from youtube_core import video_id
+            target=(state or {}).get('selected') or {}
+            while True:
+                session=None
+                if video_id({'file':playback}):
+                    from youtube_end import YouTubeEndSession
+                    session=YouTubeEndSession(target,owner_skin)
+                try:
+                    returned=play_and_wait(playback,owner_skin,options,target,youtube_end=session) if session is not None else play_and_wait(playback,owner_skin,options,target)
+                    if not returned:return
+                    choice=session.prompt() if session is not None else None
+                finally:
+                    if session is not None:session.close()
+                if not choice:break
+                if choice['action']=='channel':
+                    state=dict(state or {},_youtube_end_channel=choice['item']);break
+                target=choice['item'];playback=target['file'];options={}
             record('playback_return_ready');resume=None;playback_resume=state;continue
         if not request:return
         gate=CoreSettingsReturn(time.monotonic())

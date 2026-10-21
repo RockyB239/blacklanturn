@@ -30,13 +30,14 @@ class UmbrellaBuildContract(unittest.TestCase):
    candidate=p/'duration-candidate/6.7.92/player.py';candidate.parent.mkdir(parents=True);candidate.write_bytes(b'foreign candidate player')
    with patch.object(BUILD,'ROOT',root),self.assertRaisesRegex(AssertionError,'Reviewed Umbrella player changed'):BUILD.apply_umbrella(data)
    self.assertEqual(data,{'userdata/keep':b'original'})
- def test_both_actual_builds_keep_controller84_defaults_and_only_reviewed_provider_changes(self):
+ def test_both_actual_builds_keep_controller85_defaults_and_only_reviewed_provider_changes(self):
   baselines=ROOT/'baselines'
   if not baselines.is_dir():baselines=ROOT.parents[1]/'helper-managed-release-1.1.2/artifacts'
   self.assertTrue(baselines.is_dir(),'Pinned clean build baselines unavailable')
   with tempfile.TemporaryDirectory()as folder:
    BUILD.build(baselines,Path(folder))
    self.assertTrue((Path(folder)/'plugin.program.blacklanturninstaller-1.0.21.zip').is_file())
+   self.assertEqual((Path(folder)/'plugin.program.blacklanturninstaller-1.0.21.zip').read_bytes(),(ROOT/'plugin.program.blacklanturninstaller/plugin.program.blacklanturninstaller-1.0.21.zip').read_bytes())
    replay=Path(folder)/'replay'
    result=subprocess.run([sys.executable,'-I','-B',str(ROOT/'tools/build_release.py'),'--baselines',str(baselines),'--output',str(replay)],capture_output=True,text=True)
    self.assertEqual(result.returncode,0,result.stderr)
@@ -45,15 +46,15 @@ class UmbrellaBuildContract(unittest.TestCase):
    self.assertEqual(first,second,'Build outputs are not reproducible')
    with zipfile.ZipFile(PROGRESS/'upstream-6.7.92.zip')as z:upstream={n.split('/',1)[1]:z.read(n)for n in z.namelist()if not n.endswith('/')}
    for edition in ('Apple-TV-Mac','General'):
-    with self.subTest(edition=edition),zipfile.ZipFile(Path(folder)/('BlackLanturn-'+edition+'-Kodi21-1.1.15.zip'))as z:
+    with self.subTest(edition=edition),zipfile.ZipFile(Path(folder)/('BlackLanturn-'+edition+'-Kodi21-1.1.16.zip'))as z:
      target={n[len(P):]:z.read(n)for n in z.namelist()if n.startswith(P)}
      self.assertEqual(set(target),set(upstream))
      self.assertEqual({n for n in upstream if target[n]!=upstream[n]}, {'resources/lib/modules/'+n for n in ('player.py','sources.py','source_preferences.py')})
      self.assertEqual(hashlib.sha256(target['resources/lib/modules/player.py']).hexdigest(),'5766e60fe02858d5cd5b4d38c03cf8f8f3de9d5e8dbb1b3d85a468f922f2be0b')
      marker=json.loads(z.read('userdata/blacklanturn-build.json'))
      self.assertEqual(marker['preferences_policy'],'playback-trakt-youtube-umbrella-network-autoplay-1');self.assertEqual(marker['installer_min_version'],'1.0.20')
-     self.assertEqual(marker['build_version'],'1.1.15');self.assertEqual(marker['umbrella_patch'],'event-progress-3');self.assertEqual(marker['controller_version'],'0.1.84')
-     controller=json.loads((ROOT/'controller-source/manifest84.json').read_text())['files']
+     self.assertEqual(marker['build_version'],'1.1.16');self.assertEqual(marker['umbrella_patch'],'event-progress-3');self.assertEqual(marker['controller_version'],'0.1.85')
+     controller=json.loads((ROOT/'controller-source/manifest85.json').read_text())['files']
      actual={n[len('addons/script.blacklanturn.preview/'):]:hashlib.sha256(z.read(n)).hexdigest()for n in z.namelist()if n.startswith('addons/script.blacklanturn.preview/')}
      self.assertEqual(actual,controller)
      defaults=json.loads((SOURCE/'resources/playback-defaults.json').read_text())

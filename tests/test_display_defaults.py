@@ -7,10 +7,10 @@ def load(name,path):
 class DisplayDefaults(unittest.TestCase):
  def test_sanitized_five_rating_config_gets_four_without_losing_other_build_choices(self):
   m=load('build_display',ROOT/'tools/build_release.py');key='userdata/addon_data/script.blacklanturn.preview/rows.json'
-  data={key:json.dumps({'RatingSources':['rottentomatoes','metacritic','imdb','popcorn','themoviedatabase'],'PreviewMode':'manual','Saved':[]}).encode(),'userdata/other.txt':b'keep'}
+  data={key:json.dumps({'RatingSources':['rottentomatoes','metacritic','imdb','popcorn','themoviedatabase'],'PreviewMode':'manual','Saved':[],'YouTubeEndSuggestions':True,'YouTubeEndAutoplay':False}).encode(),'userdata/other.txt':b'keep'}
   self.assertTrue(callable(getattr(m,"apply_display_defaults",None)),"Build lacks an explicit four-rating default step")
   m.apply_display_defaults(data)
-  self.assertEqual(json.loads(data[key]),{'RatingSources':['rottentomatoes','metacritic','imdb','popcorn'],'PreviewMode':'manual','Saved':[]})
+  self.assertEqual(json.loads(data[key]),{'RatingSources':['rottentomatoes','metacritic','imdb','popcorn'],'PreviewMode':'manual','Saved':[],'YouTubeEndSuggestions':True,'YouTubeEndAutoplay':False})
   self.assertEqual(data['userdata/other.txt'],b'keep')
  def archive(self,ratings):
   stream=io.BytesIO()

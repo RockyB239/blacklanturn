@@ -303,3 +303,48 @@ def resolve_preview(path,current):
         if not current() or item is None:return None
         if urlsplit(item.getPath()).scheme not in ('http','https'):raise ValueError('Preview did not resolve to a stream')
         return PreparedPreview(item,context.effects,current)
+
+class _AccountWatchNext:
+    """Override one read on a proxy; never mutate the installed add-on/client."""
+    def __init__(self,client):self.client=client
+    def __getattr__(self,name):return getattr(self.client,name)
+    def api_request(self,*args,**kwargs):
+        if kwargs.get('path')=='next':kwargs.update(do_auth=True,cache=False,notify=False,raise_exc=False)
+        return self.client.api_request(*args,**kwargs)
+    def get_related_videos(self,*args,**kwargs):
+        return type(self.client).get_related_videos(self,*args,**kwargs)
+
+def watch_next(client,ident,current):
+    if not current():return {},'related'
+    if client.logged_in:
+        try:raw=_AccountWatchNext(client).get_related_videos(video_id=ident,retry=1)
+        except Exception:raw={}
+        if not current():return {},'related'
+        if isinstance(raw,dict) and raw.get('items'):return raw,'account'
+    if not current():return {},'related'
+    return client.get_related_videos(video_id=ident),'related'
+
+def load_end_suggestions(ident,current=lambda:True):
+    """One native Watch Next read; keep its ranking and resolve only three cards."""
+    import re
+    from youtube_core import end_suggestions
+    if not re.fullmatch(r'[A-Za-z0-9_-]{11}',ident) or not current():return []
+    with _session(current) as runtime:
+        client=runtime.provider.get_client(runtime.context)
+        raw,source=watch_next(client,ident,current)
+        if not current() or _identity()!=runtime.identity:return []
+        if not isinstance(raw,dict) or not isinstance(raw.get('items'),list):return []
+        entries=[];seen={ident}
+        for entry in raw['items']:
+            if not isinstance(entry,dict):continue
+            key=entry.get('id')
+            if entry.get('kind')!='youtube#video' or not isinstance(key,str) or not re.fullmatch(r'[A-Za-z0-9_-]{11}',key) or key in seen:continue
+            seen.add(key);entries.append(entry)
+            if len(entries)==3:break
+        files=_resolve_entries(runtime,entries,current)
+        channels={x['id']:(x.get('snippet') or {}).get('channelId','') for x in entries}
+        for item in files:
+            item['_youtube_suggestion_source']=source
+            channel=channels.get(video_id(item),'')
+            if re.fullmatch(r'UC[A-Za-z0-9_-]{22}',channel or ''):item['_youtube_channel']=channel
+        return end_suggestions(files,ident) if current() and _identity()==runtime.identity else []

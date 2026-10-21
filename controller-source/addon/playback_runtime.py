@@ -1,7 +1,7 @@
 """Run providers after releasing WindowXML, then return without stealing focus."""
 import json,time,threading
 import xbmc,xbmcgui
-from playback_core import PlaybackReturnGate,ResumeHandoff,action_identity
+from playback_core import PlaybackReturnGate,ResumeHandoff,action_identity,YouTubeExitGuard
 from playback_info import playback_info_fields,playback_identity,name
 
 def integration_busy():
@@ -53,10 +53,20 @@ class PlaybackInfoSession:
     def close(self):
         self.alive=False;self.clear()
 
-def play_and_wait(path,owner_skin,options=None,target=None):
-    monitor=xbmc.Monitor();player=xbmc.Player();gate=PlaybackReturnGate(time.monotonic())
+class HandoffPlayer(xbmc.Player):
+    def __init__(self):super().__init__();self.reason=''
+    def onPlayBackEnded(self):self.reason='ended'
+    def onPlayBackStopped(self):self.reason='stopped'
+    def onPlayBackError(self):self.reason='error'
+
+def play_and_wait(path,owner_skin,options=None,target=None,youtube_end=None):
+    monitor=xbmc.Monitor();player=HandoffPlayer() if youtube_end is not None else xbmc.Player();gate=PlaybackReturnGate(time.monotonic())
     resume=ResumeHandoff(target if options else None);info=PlaybackInfoSession(target)
+    from youtube_core import video_id
+    youtube_exit=YouTubeExitGuard(video_id({'file':path}) is not None)
     home=xbmcgui.Window(10000);home.setProperty('BlackLanturn.Handoff.Status','Finding playback…')
+    exit_property='BlackLanturn.YouTube.FullscreenExit';back_property='BlackLanturn.YouTube.BackRequested'
+    home.clearProperty(exit_property);home.clearProperty(back_property)
     def rpc(method,params):return json.loads(xbmc.executeJSONRPC(json.dumps({'jsonrpc':'2.0','id':1,'method':method,'params':params}))).get('result',{})
     try:
         params={'item':{'file':path}}
@@ -67,6 +77,22 @@ def play_and_wait(path,owner_skin,options=None,target=None):
             return xbmc.getSkinDir()==owner_skin
         while not monitor.abortRequested():
             playing=player.isPlayingVideo();now=time.monotonic()
+            if youtube_exit.enabled:
+                owner=xbmc.getSkinDir()==owner_skin;window=xbmcgui.getCurrentWindowId()
+                try:source=player.getPlayingFile() if playing else ''
+                except RuntimeError:source=''
+                youtube_exit.observe(playing,window==12005,source,owner)
+                requested=home.getProperty(back_property)=='1'
+                if requested:
+                    home.clearProperty(back_property);home.clearProperty(exit_property)
+                    if youtube_exit.consume_back(True,playing,source,owner):
+                        # Post Stop without holding Python's GIL while the YouTube proxy closes.
+                        xbmc.executebuiltin('PlayerControl(Stop)',False);playing=False
+                    elif playing and owner and window==10000:
+                        xbmc.executebuiltin('ActivateWindow(fullscreenvideo)')
+                if youtube_end is not None:youtube_end.observe(player,playing,source,window)
+                if youtube_exit.armed:home.setProperty(exit_property,'1')
+                else:home.clearProperty(exit_property)
             if playing and xbmc.getSkinDir()==owner_skin and now-info.last_poll>=1:
                 home.clearProperty('BlackLanturn.Handoff.Status');info.last_poll=now
                 try:
@@ -87,11 +113,14 @@ def play_and_wait(path,owner_skin,options=None,target=None):
                 if gate.played:home.setProperty('BlackLanturn.Handoff.Status','Returning to your title…')
             result=gate.tick(player.isPlaying(),integration_busy(),xbmcgui.getCurrentWindowId()==10000,
                              now,owner=xbmc.getSkinDir()==owner_skin)
-            if result!='wait':return result=='return'
+            if result!='wait':
+                if youtube_end is not None:youtube_end.reason=player.reason
+                return result=='return'
             if monitor.waitForAbort(.2):return False
         return False
     finally:
         info.close();home.clearProperty('BlackLanturn.Handoff.Status')
+        home.clearProperty(exit_property);home.clearProperty(back_property)
 
 def wait_for_helper(alive):
     """RunScript is asynchronous; allow launch then wait for actual completion."""

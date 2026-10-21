@@ -1,0 +1,12 @@
+BlackLanturn 1.1.16 — Kodi 21.3 Omega
+
+General: Fire TV / Android. Apple TV & Mac: retain the separate Apple edition.
+Controller 0.1.85; skin 0.1.39; Installer 1.0.21; Repository 1.0.6.
+
+YouTube now offers three next-video suggestions after a video ends. It requests signed-in Watch Next first, then related videos if needed. Suggestions can be disabled. Autoplay defaults Off; if enabled it waits 15 seconds and navigation cancels. Back hides suggestions, then Back again returns to YouTube. Video options include details, local My Stuff and more from the channel. New native acceptance is Mac only; Fire Stick user testing follows publication. No formal before/after playback-performance claim.
+
+For an existing setup, use Standard. In Save Data, confirm Install mode: Standard. Set Save Trakt, Save Debrid and Save Login Info ON. Set Keep guisettings.xml ON to retain complete Kodi preferences, and keep Sources.xml, Favourites.xml, Advancedsettings.xml and playercorefactory.xml ON when retaining your current setup. Keep Profiles.xml ON if you use additional profiles. Existing controller rows, saved items and supported playback/Trakt/YouTube settings are preserved automatically in Standard mode. Other unselected user data is replaced. Account-only reset is a reset of preferences and is not the preservation update mode.
+
+Stop playback before updating. Confirm the final dialog says Mode: Standard and the account switches are ON. Wait for download, verification, extraction and restoration to finish; use the installer's restart prompt. Reopen Kodi, confirm Build 1.1.16 and verify your accounts remain connected. A failed preflight should leave the current setup in place; retain any pending recovery data and report the exact message rather than choosing a reset.
+
+Both editions retain platform-specific workarounds, automatic fullscreen YouTube quality up to 4K, lightweight inline previews, source-size/service choices for the same show, managed progress fixes, four rating defaults, interface-language audio and forced-only subtitles. Native playback components stay device-specific.

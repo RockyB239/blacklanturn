@@ -353,7 +353,8 @@ def verify_autoplay_acceptance(receipt, controller, umbrella):
  assert receipt.get('tested_commit')=='0b674a3be14cb48ed2fa336e6121fbb597a5f7de'
  assert receipt.get('tested_controller')=='0.1.83' and controller.get('controller')=='0.1.84'
  old_files=receipt['controller_files']
- xml=(ROOT/'controller-source/addon/addon.xml').read_bytes()
+ xml=(ROOT/'controller-source/historical-addon84.xml').read_bytes()
+ assert hashlib.sha256(xml).hexdigest()==controller['files']['addon.xml'],'Historical controller metadata drift'
  assert hashlib.sha256(xml.replace(b'version="0.1.84"',b'version="0.1.83"')).hexdigest()==old_files['addon.xml'], 'Untested controller metadata change'
  expected=dict(old_files, **{'addon.xml':hashlib.sha256(xml).hexdigest()})
  assert controller['files']==expected, 'Controller implementation differs from naturally tested Mac'
@@ -381,6 +382,23 @@ def verify_autoplay_acceptance(receipt, controller, umbrella):
  cleanup=receipt['test_cleanup'];assert cleanup.get('session_cleared') is True and cleanup.get('prepared_policy_cleared') is True and cleanup.get('queue_size')==0
  assert receipt.get('other_devices_accessed') is False, 'Deferred devices must remain untouched'
 
+def verify_youtube_end_acceptance(receipt, manifest):
+ """Bind the new delta to actual Mac acceptance without inventing remote tests."""
+ assert receipt.get('schema')==1 and receipt.get('feature')=='youtube-end-1' and receipt.get('passed') is True
+ assert receipt.get('devices')==['mac'] and receipt.get('runtime')=='21.3','New native evidence is Mac only'
+ assert receipt.get('tested_controller')=='0.1.84' and receipt.get('release_controller')==manifest.get('controller')=='0.1.85'
+ xml=(ROOT/'controller-source/addon/addon.xml').read_bytes()
+ files={p.relative_to(ROOT/'controller-source/addon').as_posix():hashlib.sha256(p.read_bytes()).hexdigest() for p in (ROOT/'controller-source/addon').rglob('*') if p.is_file() and '__pycache__' not in p.parts and p.suffix not in ('.pyc','.pyo')}
+ assert files==manifest['files'],'Release controller differs from manifest'
+ tested=dict(files);tested['addon.xml']=hashlib.sha256(xml.replace(b'version="0.1.85"',b'version="0.1.84"',1)).hexdigest()
+ assert tested==receipt['files'],'Release source differs from native-tested candidate'
+ assert receipt.get('skin_Home_sha256')==manifest['skin']['Home.xml']==hashlib.sha256((ROOT/'controller-source/skin-overrides/Home.xml').read_bytes()).hexdigest()
+ for key in ('natural_end','autoplay_started','back_hides_and_cancels','second_back_restores_row','disabled_skips_request','pointer_cancels','details_save_channel','settings_authorizations_preserved'):
+  assert receipt['acceptance'].get(key) is True,'Missing Mac end-screen acceptance: '+key
+ delay=receipt.get('autoplay_delay_seconds');assert type(delay) in (int,float) and isfinite(delay) and 15<=delay<17
+ assert receipt.get('account_request_recognized') is True and receipt.get('exact_youtube_com_ranking_claimed') is False
+ preserved=receipt['preservation'];assert preserved.get('core_preferences')==280 and preserved.get('protected_files')==301 and preserved.get('healthy_history_databases')==4 and preserved.get('unrelated_history_preserved') is True
+
 def verify(folder):
  verify_release112_acceptance(json.loads((ROOT/'controller-source/usability-release112-verification.json').read_text()),json.loads((ROOT/'controller-source/manifest83.json').read_text()),require_v2=True)
  verify_release111_acceptance(json.loads((ROOT/'controller-source/youtube-release111-verification.json').read_text()),json.loads((ROOT/'controller-source/manifest82.json').read_text()))
@@ -400,6 +418,7 @@ def verify(folder):
   json.loads((ROOT/'compatibility/autoplay-size/natural-verification.json').read_text()),
   json.loads((ROOT/'controller-source/manifest84.json').read_text()),
   json.loads((SOURCE/'resources/managed-umbrella.json').read_text()))
+ verify_youtube_end_acceptance(json.loads((ROOT/'controller-source/youtube-end-native-verification.json').read_text()),json.loads((ROOT/'controller-source/manifest85.json').read_text()))
  spec=importlib.util.spec_from_file_location('managed',SOURCE/'resources/libs/managed_addons.py');m=importlib.util.module_from_spec(spec);spec.loader.exec_module(m)
  with zipfile.ZipFile(folder/'plugin.program.blacklanturninstaller-1.0.21.zip') as z:
   assert z.testzip() is None
@@ -408,21 +427,27 @@ def verify(folder):
   expected_installer={'plugin.program.blacklanturninstaller/'+str(p.relative_to(SOURCE)):p.read_bytes() for p in SOURCE.rglob('*') if p.is_file() and '__pycache__' not in p.parts and not p.name.endswith(('.pyc','.DS_Store'))}
   assert installer==expected_installer,'Installer ZIP differs from reviewed source'
  for ed in ('General','Apple-TV-Mac'):
-  with zipfile.ZipFile(folder/f'BlackLanturn-{ed}-Kodi21-1.1.15.zip') as z:
+  with zipfile.ZipFile(folder/f'BlackLanturn-{ed}-Kodi21-1.1.16.zip') as z:
    assert z.testzip() is None;m.verify_archive(z,umbrella=True,network=True);verify_playback_defaults(z);verify_display_defaults(z)
    p=json.loads(z.read('userdata/blacklanturn-build.json'))
    assert p['schema']==3 and p['preferences_policy']=='playback-trakt-youtube-umbrella-network-autoplay-1' and p['helper_patch']=='empty-cache-1' and p['installer_min_version']=='1.0.20'
-   assert p['build_version']=='1.1.15' and p['network_patch']=='request-reliability-privacy-1' and p['umbrella_version']=='6.7.92' and p['umbrella_patch']=='event-progress-3'
-   assert p['controller_version']=='0.1.84' and p['helper_search_patch']=='search-batch-1' and p['helper_playback_patch']=='sampled-progress-1'
+   assert p['build_version']=='1.1.16' and p['network_patch']=='request-reliability-privacy-1' and p['umbrella_version']=='6.7.92' and p['umbrella_patch']=='event-progress-3'
+   assert p['controller_version']=='0.1.85' and p['helper_search_patch']=='search-batch-1' and p['helper_playback_patch']=='sampled-progress-1'
    gui={n.get('id'):n.text for n in ET.fromstring(z.read('userdata/guisettings.xml'))}
    assert {k:gui[k] for k in ('filecache.memorysize','filecache.readfactor','filecache.buffermode','filecache.chunksize')}=={'filecache.memorysize':'64','filecache.readfactor':'400','filecache.buffermode':'4','filecache.chunksize':'131072'}
    assert next(n.text for n in ET.fromstring(z.read('userdata/addon_data/plugin.video.themoviedb.helper/settings.xml')) if n.get('id')=='artwork_quality')=='1'
    assert p['autoplay_patch']=='same-show-source-1'
-   expected=json.loads((ROOT/'controller-source/manifest84.json').read_text())['files']
+   expected=json.loads((ROOT/'controller-source/manifest85.json').read_text())['files']
    actual={n[len('addons/script.blacklanturn.preview/'):]:hashlib.sha256(z.read(n)).hexdigest() for n in z.namelist() if n.startswith('addons/script.blacklanturn.preview/')}
    assert actual==expected
+   skin=json.loads((ROOT/'controller-source/manifest85.json').read_text())['skin']
+   assert hashlib.sha256(z.read('addons/skin.blacklanturn.preview/xml/Home.xml')).hexdigest()==skin['Home.xml']
+   assert ET.fromstring(z.read('addons/skin.blacklanturn.preview/addon.xml')).get('version')==skin['version']
+   assert p['youtube_end_patch']=='youtube-end-1' and p['skin_version']==skin['version']
+   config=json.loads(z.read('userdata/addon_data/script.blacklanturn.preview/rows.json'))
+   assert config.get('YouTubeEndSuggestions') is True and config.get('YouTubeEndAutoplay') is False
    for n,d in installer.items():assert z.read('addons/'+n)==d,'Installer mismatch'
    assert z.read('addons/plugin.program.blacklanturninstaller/resources/libs/managed_addons.py')==(SOURCE/'resources/libs/managed_addons.py').read_bytes()
- print('PASS: both packages, protected schema, exact installer, full managed Helper/Umbrella manifests historical progress evidence and exact-source natural Mac autoplay acceptance; Fire/Apple rollout deferred')
+ print('PASS: both packages, protected schema, exact installer, full managed Helper/Umbrella manifests historical progress evidence and historical natural Mac autoplay acceptance and exact-source Mac YouTube end-screen acceptance; Fire/Apple native feature testing pending')
 if __name__=='__main__':
  p=argparse.ArgumentParser();p.add_argument('artifacts',type=Path);verify(p.parse_args().artifacts)

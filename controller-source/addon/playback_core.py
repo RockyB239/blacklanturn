@@ -77,3 +77,24 @@ class PlaybackReturnGate:
         if self.quiet_since is None:self.quiet_since=now
         if now-self.quiet_since<2 or (not self.played and now-self.started<15):return 'wait'
         return 'return'
+
+class YouTubeExitGuard:
+    """A Home return can stop only the fullscreen source owned by this handoff."""
+    def __init__(self,enabled):
+        self.enabled=bool(enabled);self.source=None;self.armed=False;self.finished=False
+    def observe(self,playing,fullscreen,source,owner):
+        if not self.enabled or not owner:
+            self.armed=False;return
+        if not playing:
+            if self.source:self.finished=True
+            self.armed=False;return
+        if self.source and source!=self.source:
+            self.finished=True;self.armed=False;return
+        if not self.finished and fullscreen and source:
+            if self.source is None:self.source=source
+            self.armed=True
+    def consume_back(self,requested,playing,source,owner):
+        if not requested:return False
+        stop=bool(self.enabled and self.armed and playing and owner and source and source==self.source)
+        self.armed=False;self.finished=True
+        return stop

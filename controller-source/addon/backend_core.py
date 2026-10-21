@@ -9,7 +9,9 @@ SETTINGS_GROUPS=[
   ('preview_mode','Movie & show automatic previews','Switch movie and show previews between automatic and manual.'),
   ('preview_delay','Preview delay','Wait before starting a preview on a selected title.'),
   ('preview_language','Preview language','Prefer English and dubbed previews; retain other-language fallbacks.'),
-  ('youtube_previews','YouTube automatic previews','Preview the highlighted YouTube video without changing watch history.')]),
+  ('youtube_previews','YouTube automatic previews','Preview the highlighted YouTube video without changing watch history.'),
+  ('youtube_end_suggestions','YouTube next-video suggestions','Show related videos after playback ends; Back hides them, then exits.'),
+  ('youtube_end_autoplay','YouTube next-video autoplay','Play the first suggestion after a cancellable 15-second countdown.')]),
  ('Ratings','Choose your scores and their order below the description.',[
   ('ratings','Rating sources','Show or hide critic and audience scores.'),
   ('rating_order','Rating order','Move enabled scores left or right.')]),
