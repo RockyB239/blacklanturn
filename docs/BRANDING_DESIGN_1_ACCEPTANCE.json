@@ -1,0 +1,75 @@
+{
+  "passed": true,
+  "date": "2026-10-20",
+  "code_commit": "2cde80509a35cb5cb5ce7626c5c861b1a250b3f5",
+  "repository": "1.0.6",
+  "installer": "1.0.21",
+  "design": 1,
+  "published_build": "1.1.15 unchanged",
+  "public_downloads_match": {
+    "addons.xml": {
+      "sha256": "7a009578b48a6a22d4a9f9a94b79e12d7531c284e19cb9142b5aa24255c064ad",
+      "bytes": 2011,
+      "matches_release": true
+    },
+    "addons.xml.md5": {
+      "sha256": "a400438da313d3d2e343b4681e438fe94a7096aafbe3311a27b87e4a28db7ab3",
+      "bytes": 32,
+      "matches_release": true
+    },
+    "index.html": {
+      "sha256": "4e95da3ee0229c90a49bfbe731188d3abc30b78d9b583a040ad54644626885ac",
+      "bytes": 637,
+      "matches_release": true
+    },
+    "repository.blacklanturn.zip": {
+      "sha256": "b7307d60bbfb507848ece7dc039eb20a0501a16e7d8a5f47a9c176c5aeb576be",
+      "bytes": 342192,
+      "matches_release": true
+    },
+    "repository.blacklanturn/repository.blacklanturn-1.0.6.zip": {
+      "sha256": "b7307d60bbfb507848ece7dc039eb20a0501a16e7d8a5f47a9c176c5aeb576be",
+      "bytes": 342192,
+      "matches_release": true
+    },
+    "plugin.program.blacklanturninstaller/plugin.program.blacklanturninstaller-1.0.21.zip": {
+      "sha256": "1850230644b8a1f5373f9990aaf715ad4715fcdf9851878877fbdfa345003213",
+      "bytes": 3927837,
+      "matches_release": true
+    }
+  },
+  "ci": {
+    "candidate": 39525686031,
+    "main": 39526052867,
+    "pages": 39526052035,
+    "conclusion": "success"
+  },
+  "mac": {
+    "native_zip_updates": true,
+    "exact_installed_packages": true,
+    "visual_repository_icon": true,
+    "visual_installer_header": true,
+    "normal_quit_relaunch": true,
+    "core_settings_preserved": 280,
+    "protected_configuration_files_checked": 294,
+    "history_databases_healthy_and_unchanged": 4,
+    "other_addon_files_exact": 19905,
+    "authorization_values_preserved": true,
+    "default_screensaver_serialization_only": true,
+    "no_active_player": true
+  },
+  "recovery_during_install": {
+    "unexpected_native_crash": "Kodi GUI Control.setWidth during live language-addon skin reload after unrelated addon auto-updates",
+    "unrelated_addons_restored_exactly": [
+      "resource.language.en_us 11.0.82",
+      "script.module.cocoscrapers 1.0.39",
+      "script.module.infotagger 0.0.9"
+    ],
+    "update_preference_restored": 1,
+    "native_crash_code_patched": false,
+    "later_normal_restart_passed": true
+  },
+  "fire_stick_accessed": false,
+  "apple_tv_accessed": false,
+  "temporary_staging_removed": true
+}

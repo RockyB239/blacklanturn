@@ -7,3 +7,9 @@ The selected512px RGBA runtime asset is source-controlled in both addon source f
 Package proof: BRANDING_DESIGN_1_PACKAGE_VERIFICATION.json. This records candidate byte comparisons and ZIP validation, not public availability or native acceptance; those are verified separately after publication and Mac installation.
 
 Recovery: reinstall the preserved Repository1.0.5 and Installer1.0.20 packages. No build reinstall, account reset or playback preference change is required. Fire Stick and Apple TV rollout is deferred until home.
+
+## Publication and Mac acceptance
+
+Release source2cde805 passed candidate/main verification and Pages deployment. All six anonymous public downloads matched exact packaged bytes. Kodi’s native ZIP update installed Repository1.0.6 and Installer1.0.21; both icons were visually confirmed. A normal Quit/relaunch preserved280 active core settings,294 protected configuration files, all saved authorization values, four local history databases and19,905 other addon files. See BRANDING_DESIGN_1_ACCEPTANCE.json.
+
+During initial Repository refresh, unrelated automatic updates replaced the language pack, CocoScrapers and InfoTagger; a native GUI resize crash followed during skin reload. Those three addons were restored from immutable Build1.1.15 bytes proven to match the fresh baseline. The temporary update guard was removed/restored through the native settings API. The native crash itself was not code-patched in this asset-only release. The later ordinary restart and preservation checks passed. Fire Stick and Apple TV were not accessed.
