@@ -32,6 +32,7 @@ from preview_geometry import preview_fill_viewmode,preview_display_aspect,Previe
 from preview_bars import PreviewBarScan,PreviewFramingCache,top_aligned_viewmode,framing_key
 from live_core import caption_fit_step,my_stuff_rows,row_items
 from discovery_core import migrate_pages,collection_pages,page_rows,window_shift
+from discovery_order import order_discovery_row
 from addon_catalog import catalogue_items,catalogue_category
 from navigation_core import migrate_navigation,visible_navigation,resolve_destination,edit_navigation,status_settings,default_icon,ICON_CHOICES,KODI_DESTINATIONS,SECTIONS,sidebar_items,sidebar_layout
 ROOT=Path(__file__).resolve().parent
@@ -699,7 +700,7 @@ class LiveReview(YouTubeBrowser,xbmcgui.WindowXML):
                     self.snapshot_rows[n]=True
                     pending.append((n,dict(definitions[n],path=cached['path'],label=cached['label'],position=cached['position'],_snapshot_refresh=True)))
             else:
-                definition=dict(definitions[n])
+                definition=dict(definitions[n]);definition['_ranked_start']=not bool(cached) and bool(definition.get('discovery_order'))
                 if cached:
                     definition.update(path=cached['path'],label=cached['label'],position=cached['position'],_display_position=True)
                     failed=cached.get('failed')
@@ -709,7 +710,7 @@ class LiveReview(YouTubeBrowser,xbmcgui.WindowXML):
                 self.paths[n]=definition['path'];self.histories[n]=cached['history'] if cached else PageHistory()
                 retained,refresh=self.retained_row_items(definition)
                 if retained is not None:
-                    self.apply_row(n,retained,definition['label'],definition.get('position',0),**({'display_position':True} if definition.get('_display_position') else {}))
+                    self.apply_row(n,retained,definition['label'],definition.get('position',0),**({'ranked_start':True} if definition.get('_ranked_start') else {}),**({'display_position':True} if definition.get('_display_position') else {}))
                     if refresh:
                         self.snapshot_rows[n]=True;definition['_snapshot_refresh']=True;pending.append((n,definition))
                     continue
@@ -743,7 +744,7 @@ class LiveReview(YouTubeBrowser,xbmcgui.WindowXML):
                         with self.preview_dispatch_lock:
                             if current(n,definition):
                                 if definition.get('_snapshot_refresh'):self.apply_refreshed_row(n,files,definition['label'])
-                                else:self.apply_row(n,files,definition['label'],definition.get('position',0),**({'display_position':True} if definition.get('_display_position') else {}))
+                                else:self.apply_row(n,files,definition['label'],definition.get('position',0),**({'ranked_start':True} if definition.get('_ranked_start') else {}),**({'display_position':True} if definition.get('_display_position') else {}))
                                 if definition.get('_failed_page'):
                                     retained=definition['_failed_page'];self.failed_paths[n]=retained['request'];self.row_states[n]='error'
                                     self.setProperty('rowState'+str(n),'ready' if files else 'error');self.setProperty('rowMessage'+str(n),retained['message'])
@@ -942,12 +943,20 @@ class LiveReview(YouTubeBrowser,xbmcgui.WindowXML):
         offset=window_shift(self.row_offset,slot,direction,len(self.page_definitions))
         if offset is None:return False
         self.show_row_window(offset,slot);return True
-    def apply_row(self,n,files,label,position=0,update_selected=True,display_position=False):
+    def prepare_discovery_order(self,n,files):
+        return order_discovery_row(self,n,files)
+    def apply_row(self,n,files,label,position=0,update_selected=True,display_position=False,ranked_start=False):
         with self.preview_dispatch_lock:
             original=files[position] if 0<=position<len(files) else None
             if getattr(self,'section','')=='YouTube' and hasattr(self,'prepare_youtube_row'):files=self.prepare_youtube_row(n,files)
             metadata=getattr(self,'anime_metadata',None)
             if metadata and should_exclude_anime(self,self.paths[n]):files=metadata.without_anime(files)
+            if hasattr(self,"prepare_discovery_order"):
+                ordered=self.prepare_discovery_order(n,files)
+                # A newly opened page starts at its ranked head. Explicit
+                # selections, Back and watched refresh retain their title.
+                if ordered is not files and ranked_start and position==0 and not display_position:original=None
+                files=ordered
             files,position=page_cards(files,self.histories[n],self.paths[n],position,display_position=display_position)
             if original and not display_position:position=restored_position(files,original,position)
             if hasattr(self,'snapshot_rows'):self.snapshot_rows[n]=False
@@ -1086,7 +1095,7 @@ class LiveReview(YouTubeBrowser,xbmcgui.WindowXML):
                         # Explicit navigation replaces the old visible owner and its
                         # deferred automatic result, including same-path back/retry.
                         self.row_cache.pop(self.row_offset+n,None)
-                        self.apply_row(n,files,label or self.getProperty('row'+str(n)),position,display_position=back)
+                        self.apply_row(n,files,label or self.getProperty('row'+str(n)),position,display_position=back,ranked_start=not back)
                         if (not preserve_focus and (not getattr(self,'search_state',None) or self.getFocusId() in (0,900,901))) or (preserve_focus and focus_before==900+n and getattr(self,'getFocusId',lambda:focus_before)()==focus_before):self.setFocusId(900+n if self.rows[n] else 600 if getattr(self,'search_state',None) or getattr(self,'episode_browser_context',None) else 50)
                         event('page_loaded',row=n,count=len(files),back=back)
             except Exception as exc:

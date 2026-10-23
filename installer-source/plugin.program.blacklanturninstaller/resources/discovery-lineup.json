@@ -1,0 +1,2668 @@
+{
+  "schema": 1,
+  "revision": "discovery-first-page-1",
+  "defaults": {
+    "Movies": [
+      {
+        "label": "Recommended for you",
+        "path": "plugin://plugin.video.themoviedb.helper/?info=trakt_recommendations&tmdb_type=movie&nextpage=true&widget=true",
+        "enabled": true
+      },
+      {
+        "label": "Trending this week",
+        "path": "plugin://plugin.video.themoviedb.helper/?info=trending_week&tmdb_type=movie&nextpage=true&widget=true",
+        "enabled": true,
+        "discovery_order": {
+          "enabled": true
+        }
+      },
+      {
+        "label": "Recently released",
+        "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=movie&nextpage=true&widget=true&with_id=true&include_adult=false&sort_by=popularity.desc&primary_release_date.gte=t-365&primary_release_date.lte=t%2B0",
+        "enabled": true,
+        "discovery_order": {
+          "enabled": true
+        }
+      },
+      {
+        "label": "Action",
+        "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=movie&nextpage=true&widget=true&with_id=true&include_adult=false&with_genres=28&sort_by=popularity.desc",
+        "enabled": true,
+        "discovery_order": {
+          "enabled": true,
+          "role": "genre"
+        }
+      },
+      {
+        "label": "Comedy",
+        "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=movie&nextpage=true&widget=true&with_id=true&include_adult=false&with_genres=35&sort_by=popularity.desc",
+        "enabled": true,
+        "discovery_order": {
+          "enabled": true,
+          "role": "genre"
+        }
+      },
+      {
+        "label": "Crime",
+        "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=movie&nextpage=true&widget=true&with_id=true&include_adult=false&with_genres=80&sort_by=popularity.desc",
+        "enabled": true,
+        "discovery_order": {
+          "enabled": true,
+          "role": "genre"
+        }
+      },
+      {
+        "label": "Sci-Fi",
+        "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=movie&nextpage=true&widget=true&with_id=true&include_adult=false&with_genres=878&sort_by=popularity.desc",
+        "enabled": true,
+        "discovery_order": {
+          "enabled": true,
+          "role": "genre"
+        }
+      },
+      {
+        "label": "Drama",
+        "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=movie&nextpage=true&widget=true&with_id=true&include_adult=false&with_genres=18&sort_by=popularity.desc",
+        "enabled": true,
+        "discovery_order": {
+          "enabled": true,
+          "role": "genre"
+        }
+      },
+      {
+        "label": "Adventure",
+        "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=movie&nextpage=true&widget=true&with_id=true&include_adult=false&sort_by=popularity.desc&primary_release_date.lte=t-365&with_genres=12&without_genres=28&vote_average.gte=6.5&vote_count.gte=100",
+        "enabled": true,
+        "discovery_order": {
+          "enabled": true,
+          "role": "genre"
+        }
+      },
+      {
+        "label": "Horror",
+        "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=movie&nextpage=true&widget=true&with_id=true&include_adult=false&sort_by=popularity.desc&primary_release_date.lte=t-365&with_genres=27&vote_average.gte=6.3&vote_count.gte=100",
+        "enabled": true,
+        "discovery_order": {
+          "enabled": true,
+          "role": "genre"
+        }
+      },
+      {
+        "label": "Mystery",
+        "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=movie&nextpage=true&widget=true&with_id=true&include_adult=false&with_genres=9648&sort_by=popularity.desc",
+        "enabled": true,
+        "discovery_order": {
+          "enabled": true,
+          "role": "genre"
+        }
+      },
+      {
+        "label": "Fantasy",
+        "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=movie&nextpage=true&widget=true&with_id=true&include_adult=false&sort_by=popularity.desc&primary_release_date.lte=t-365&with_genres=14&without_genres=878&vote_average.gte=6.5&vote_count.gte=100&vote_count.lte=10000",
+        "enabled": true,
+        "discovery_order": {
+          "enabled": true,
+          "role": "genre",
+          "max_votes": 10000
+        }
+      },
+      {
+        "label": "Thrillers",
+        "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=movie&nextpage=true&widget=true&with_id=true&include_adult=false&with_genres=53&without_genres=28%2C27&sort_by=popularity.desc&primary_release_date.lte=t-365&vote_average.gte=6.7&vote_count.gte=300&vote_count.lte=5000",
+        "enabled": true,
+        "discovery_order": {
+          "enabled": true,
+          "role": "genre",
+          "max_votes": 5000
+        }
+      },
+      {
+        "label": "Animation",
+        "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=movie&nextpage=true&widget=true&with_id=true&include_adult=false&sort_by=popularity.desc&primary_release_date.lte=t-365&with_genres=16&without_genres=14&vote_average.gte=6.8&vote_count.gte=200&vote_count.lte=10000",
+        "enabled": true,
+        "discovery_order": {
+          "enabled": true,
+          "role": "genre",
+          "max_votes": 10000
+        }
+      },
+      {
+        "label": "Documentaries",
+        "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=movie&nextpage=true&widget=true&with_id=true&include_adult=false&with_genres=99&sort_by=popularity.desc",
+        "enabled": true,
+        "discovery_order": {
+          "enabled": true,
+          "role": "genre"
+        }
+      },
+      {
+        "label": "Westerns",
+        "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=movie&nextpage=true&widget=true&with_id=true&include_adult=false&with_genres=37&sort_by=popularity.desc",
+        "enabled": true,
+        "discovery_order": {
+          "enabled": true,
+          "role": "genre"
+        }
+      },
+      {
+        "label": "International",
+        "path": "plugin://plugin.video.themoviedb.helper/?info=trakt_popular&tmdb_type=movie&nextpage=true&widget=true&countries=gb%2Ckr%2Cjp%2Cfr%2Ces%2Cde%2Cin%2Cse%2Cno%2Cdk%2Cfi%2Cis%2Cmx%2Cit%2Cbr%2Chk%2Ccn%2Ctw%2Cau%2Cca",
+        "enabled": true,
+        "discovery_order": {
+          "enabled": true
+        }
+      },
+      {
+        "label": "More to discover",
+        "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=movie&nextpage=true&widget=true&with_id=true&include_adult=false&sort_by=popularity.desc&primary_release_date.lte=t-365&vote_average.gte=7&vote_count.gte=100&vote_count.lte=3000",
+        "enabled": true,
+        "discovery_order": {
+          "enabled": true,
+          "max_votes": 3000
+        }
+      },
+      {
+        "label": "Classics worth revisiting",
+        "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=movie&nextpage=true&widget=true&with_id=true&include_adult=false&sort_by=vote_average.desc&primary_release_date.lte=1999-12-31&vote_count.gte=500",
+        "enabled": true,
+        "discovery_order": {
+          "enabled": true
+        }
+      }
+    ],
+    "Shows": [
+      {
+        "label": "Recommended for you",
+        "path": "plugin://plugin.video.themoviedb.helper/?info=trakt_recommendations&tmdb_type=tv&nextpage=true&widget=true",
+        "enabled": true
+      },
+      {
+        "label": "Trending this week",
+        "path": "plugin://plugin.video.themoviedb.helper/?info=trending_week&tmdb_type=tv&nextpage=true&widget=true",
+        "enabled": true,
+        "discovery_order": {
+          "enabled": true
+        }
+      },
+      {
+        "label": "New series",
+        "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=tv&nextpage=true&widget=true&with_id=true&include_adult=false&sort_by=popularity.desc&first_air_date.gte=t-730&first_air_date.lte=t%2B0",
+        "enabled": true,
+        "discovery_order": {
+          "enabled": true
+        }
+      },
+      {
+        "label": "Action & Adventure",
+        "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=tv&nextpage=true&widget=true&with_id=true&include_adult=false&with_genres=10759&sort_by=popularity.desc",
+        "enabled": true,
+        "discovery_order": {
+          "enabled": true,
+          "role": "genre"
+        }
+      },
+      {
+        "label": "Comedy",
+        "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=tv&nextpage=true&widget=true&with_id=true&include_adult=false&with_genres=35&sort_by=popularity.desc",
+        "enabled": true,
+        "discovery_order": {
+          "enabled": true,
+          "role": "genre"
+        }
+      },
+      {
+        "label": "Crime",
+        "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=tv&nextpage=true&widget=true&with_id=true&include_adult=false&with_genres=80&sort_by=popularity.desc",
+        "enabled": true,
+        "discovery_order": {
+          "enabled": true,
+          "role": "genre"
+        }
+      },
+      {
+        "label": "Sci-Fi & Fantasy",
+        "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=tv&nextpage=true&widget=true&with_id=true&include_adult=false&with_genres=10765&sort_by=popularity.desc",
+        "enabled": true,
+        "discovery_order": {
+          "enabled": true,
+          "role": "genre"
+        }
+      },
+      {
+        "label": "Drama",
+        "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=tv&nextpage=true&widget=true&with_id=true&include_adult=false&with_genres=18&without_genres=80%2C9648%2C10759&sort_by=popularity.desc&first_air_date.lte=t-365&vote_average.gte=7.3&vote_count.gte=80&vote_count.lte=2500",
+        "enabled": true,
+        "discovery_order": {
+          "enabled": true,
+          "role": "genre",
+          "max_votes": 2500
+        }
+      },
+      {
+        "label": "Horror",
+        "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=tv&nextpage=true&widget=true&with_id=true&include_adult=false&with_keywords=295907%7C250593%7C12377%7C3358%7C161261&with_separator=OR&without_genres=16%2C10751%2C10762%2C10764%2C10767&sort_by=popularity.desc&first_air_date.lte=t%2B0&vote_count.gte=30",
+        "enabled": true,
+        "discovery_order": {
+          "enabled": true,
+          "role": "genre",
+          "exclude_ids": [
+            "tv:126027",
+            "tv:14009",
+            "tv:15260",
+            "tv:17174",
+            "tv:2661",
+            "tv:605",
+            "tv:926"
+          ]
+        }
+      },
+      {
+        "label": "Mystery",
+        "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=tv&nextpage=true&widget=true&with_id=true&include_adult=false&sort_by=popularity.desc&first_air_date.lte=t-365&with_genres=9648&without_genres=80&vote_average.gte=7&vote_count.gte=30",
+        "enabled": true,
+        "discovery_order": {
+          "enabled": true,
+          "role": "genre"
+        }
+      },
+      {
+        "label": "Animation",
+        "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=tv&nextpage=true&widget=true&with_id=true&include_adult=false&with_genres=16&sort_by=popularity.desc",
+        "enabled": true,
+        "discovery_order": {
+          "enabled": true,
+          "role": "genre"
+        }
+      },
+      {
+        "label": "Documentaries",
+        "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=tv&nextpage=true&widget=true&with_id=true&include_adult=false&with_genres=99&sort_by=popularity.desc",
+        "enabled": true,
+        "discovery_order": {
+          "enabled": true,
+          "role": "genre"
+        }
+      },
+      {
+        "label": "Reality",
+        "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=tv&nextpage=true&widget=true&with_id=true&include_adult=false&with_genres=10764&sort_by=popularity.desc",
+        "enabled": true,
+        "discovery_order": {
+          "enabled": true,
+          "role": "genre"
+        }
+      },
+      {
+        "label": "International",
+        "path": "plugin://plugin.video.themoviedb.helper/?info=trakt_popular&tmdb_type=tv&nextpage=true&widget=true&countries=gb%2Ckr%2Cjp%2Cfr%2Ces%2Cde%2Cin%2Cse%2Cno%2Cdk%2Cfi%2Cis%2Cmx%2Cit%2Cbr%2Chk%2Ccn%2Ctw%2Cau%2Cca",
+        "enabled": true,
+        "discovery_order": {
+          "enabled": true
+        }
+      },
+      {
+        "label": "More to discover",
+        "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=tv&nextpage=true&widget=true&with_id=true&include_adult=false&sort_by=vote_count.desc&first_air_date.lte=t-365&vote_average.gte=7.3&vote_count.gte=300&vote_count.lte=2000",
+        "enabled": true,
+        "discovery_order": {
+          "enabled": true,
+          "max_votes": 2000
+        }
+      },
+      {
+        "label": "Classic TV",
+        "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=tv&nextpage=true&widget=true&with_id=true&include_adult=false&sort_by=vote_average.desc&first_air_date.lte=1999-12-31&vote_count.gte=500",
+        "enabled": true,
+        "discovery_order": {
+          "enabled": true
+        }
+      }
+    ],
+    "Genres": [
+      {
+        "id": "bl-movies-action",
+        "label": "Action",
+        "section": "Movies",
+        "enabled": true,
+        "rows": [
+          {
+            "label": "Recent releases",
+            "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=movie&nextpage=true&widget=true&with_id=true&include_adult=false&with_genres=28&sort_by=popularity.desc&primary_release_date.gte=t-730&primary_release_date.lte=t%2B0",
+            "enabled": true,
+            "discovery_order": {
+              "enabled": true,
+              "role": "recent"
+            }
+          },
+          {
+            "label": "Spies & covert operations",
+            "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=movie&nextpage=true&widget=true&with_id=true&sort_by=popularity.desc&include_adult=false&with_genres=28&with_keywords=470",
+            "enabled": true,
+            "discovery_order": {
+              "enabled": true,
+              "role": "theme"
+            }
+          },
+          {
+            "label": "Martial arts",
+            "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=movie&nextpage=true&widget=true&with_id=true&sort_by=popularity.desc&include_adult=false&with_genres=28&with_keywords=779",
+            "enabled": true,
+            "discovery_order": {
+              "enabled": true,
+              "role": "theme"
+            }
+          },
+          {
+            "label": "Heists & getaways",
+            "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=movie&nextpage=true&widget=true&with_id=true&include_adult=false&sort_by=popularity.desc&primary_release_date.lte=t%2B0&vote_count.gte=20&with_genres=28&with_keywords=10051",
+            "enabled": true,
+            "discovery_order": {
+              "enabled": true,
+              "role": "theme"
+            }
+          },
+          {
+            "label": "Revenge & rescue",
+            "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=movie&nextpage=true&widget=true&with_id=true&sort_by=popularity.desc&include_adult=false&with_genres=28&with_keywords=9748",
+            "enabled": true,
+            "discovery_order": {
+              "enabled": true,
+              "role": "theme"
+            }
+          },
+          {
+            "label": "Superheroes",
+            "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=movie&nextpage=true&widget=true&with_id=true&sort_by=popularity.desc&include_adult=false&with_genres=28&with_keywords=9715",
+            "enabled": true,
+            "discovery_order": {
+              "enabled": true,
+              "role": "theme"
+            }
+          },
+          {
+            "label": "More to discover",
+            "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=movie&nextpage=true&widget=true&with_id=true&include_adult=false&with_genres=28&sort_by=popularity.desc&primary_release_date.lte=t-365&vote_average.gte=6.5&vote_count.gte=100&vote_count.lte=3000",
+            "enabled": true,
+            "discovery_order": {
+              "enabled": true,
+              "max_votes": 3000,
+              "role": "more"
+            }
+          },
+          {
+            "label": "Classics worth revisiting",
+            "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=movie&nextpage=true&widget=true&with_id=true&include_adult=false&with_genres=28&sort_by=vote_average.desc&primary_release_date.lte=1999-12-31&vote_count.gte=100",
+            "enabled": true,
+            "discovery_order": {
+              "enabled": true,
+              "role": "classic"
+            }
+          }
+        ]
+      },
+      {
+        "id": "bl-movies-adventure",
+        "label": "Adventure",
+        "section": "Movies",
+        "enabled": true,
+        "rows": [
+          {
+            "label": "Recent releases",
+            "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=movie&nextpage=true&widget=true&with_id=true&include_adult=false&with_genres=12&sort_by=popularity.desc&primary_release_date.gte=t-730&primary_release_date.lte=t%2B0",
+            "enabled": true,
+            "discovery_order": {
+              "enabled": true,
+              "role": "recent"
+            }
+          },
+          {
+            "label": "Treasure hunts",
+            "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=movie&nextpage=true&widget=true&with_id=true&sort_by=popularity.desc&include_adult=false&with_genres=12&with_keywords=6956",
+            "enabled": true,
+            "discovery_order": {
+              "enabled": true,
+              "role": "theme"
+            }
+          },
+          {
+            "label": "Survival journeys",
+            "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=movie&nextpage=true&widget=true&with_id=true&include_adult=false&sort_by=popularity.desc&primary_release_date.lte=t%2B0&vote_count.gte=20&with_genres=12&with_keywords=10349&without_genres=16",
+            "enabled": true,
+            "discovery_order": {
+              "enabled": true,
+              "role": "theme"
+            }
+          },
+          {
+            "label": "Pirates & high-seas adventures",
+            "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=movie&nextpage=true&widget=true&with_id=true&include_adult=false&sort_by=popularity.desc&primary_release_date.lte=t%2B0&vote_count.gte=20&with_genres=12&with_keywords=12988%7C208649&with_separator=OR",
+            "enabled": true,
+            "discovery_order": {
+              "enabled": true,
+              "role": "theme"
+            }
+          },
+          {
+            "label": "Historical adventures",
+            "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=movie&nextpage=true&widget=true&with_id=true&include_adult=false&sort_by=popularity.desc&primary_release_date.lte=t%2B0&vote_count.gte=20&with_genres=12%2C36",
+            "enabled": true,
+            "discovery_order": {
+              "enabled": true,
+              "role": "theme"
+            }
+          },
+          {
+            "label": "More to discover",
+            "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=movie&nextpage=true&widget=true&with_id=true&include_adult=false&with_genres=12&sort_by=popularity.desc&primary_release_date.lte=t-365&vote_average.gte=6.5&vote_count.gte=100&vote_count.lte=3000",
+            "enabled": true,
+            "discovery_order": {
+              "enabled": true,
+              "max_votes": 3000,
+              "role": "more"
+            }
+          },
+          {
+            "label": "Classics worth revisiting",
+            "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=movie&nextpage=true&widget=true&with_id=true&include_adult=false&with_genres=12&sort_by=vote_average.desc&primary_release_date.lte=1999-12-31&vote_count.gte=100",
+            "enabled": true,
+            "discovery_order": {
+              "enabled": true,
+              "role": "classic"
+            }
+          }
+        ]
+      },
+      {
+        "id": "bl-movies-comedy",
+        "label": "Comedy",
+        "section": "Movies",
+        "enabled": true,
+        "rows": [
+          {
+            "label": "Recent releases",
+            "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=movie&nextpage=true&widget=true&with_id=true&include_adult=false&with_genres=35&sort_by=popularity.desc&primary_release_date.gte=t-730&primary_release_date.lte=t%2B0",
+            "enabled": true,
+            "discovery_order": {
+              "enabled": true,
+              "role": "recent"
+            }
+          },
+          {
+            "label": "Romantic comedies",
+            "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=movie&nextpage=true&widget=true&with_id=true&sort_by=popularity.desc&include_adult=false&with_genres=35%2C10749",
+            "enabled": true,
+            "discovery_order": {
+              "enabled": true,
+              "role": "theme"
+            }
+          },
+          {
+            "label": "Dark comedy & satire",
+            "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=movie&nextpage=true&widget=true&with_id=true&include_adult=false&sort_by=popularity.desc&primary_release_date.lte=t%2B0&vote_count.gte=20&with_genres=35&with_keywords=10123%7C8201&with_separator=OR",
+            "enabled": true,
+            "discovery_order": {
+              "enabled": true,
+              "role": "theme"
+            }
+          },
+          {
+            "label": "Buddy comedies",
+            "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=movie&nextpage=true&widget=true&with_id=true&sort_by=popularity.desc&include_adult=false&with_genres=35&with_keywords=167541",
+            "enabled": true,
+            "discovery_order": {
+              "enabled": true,
+              "role": "theme"
+            }
+          },
+          {
+            "label": "Stand-up specials",
+            "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=movie&nextpage=true&widget=true&with_id=true&sort_by=popularity.desc&include_adult=false&with_genres=35&with_keywords=9716",
+            "enabled": true,
+            "discovery_order": {
+              "enabled": true,
+              "role": "theme"
+            }
+          },
+          {
+            "label": "More to discover",
+            "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=movie&nextpage=true&widget=true&with_id=true&include_adult=false&with_genres=35&sort_by=popularity.desc&primary_release_date.lte=t-365&vote_average.gte=6.5&vote_count.gte=100&vote_count.lte=3000",
+            "enabled": true,
+            "discovery_order": {
+              "enabled": true,
+              "max_votes": 3000,
+              "role": "more"
+            }
+          },
+          {
+            "label": "Classics worth revisiting",
+            "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=movie&nextpage=true&widget=true&with_id=true&include_adult=false&with_genres=35&sort_by=vote_average.desc&primary_release_date.lte=1999-12-31&vote_count.gte=100",
+            "enabled": true,
+            "discovery_order": {
+              "enabled": true,
+              "role": "classic"
+            }
+          }
+        ]
+      },
+      {
+        "id": "bl-movies-crime",
+        "label": "Crime",
+        "section": "Movies",
+        "enabled": true,
+        "rows": [
+          {
+            "label": "Recent releases",
+            "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=movie&nextpage=true&widget=true&with_id=true&include_adult=false&with_genres=80&sort_by=popularity.desc&primary_release_date.gte=t-730&primary_release_date.lte=t%2B0",
+            "enabled": true,
+            "discovery_order": {
+              "enabled": true,
+              "role": "recent"
+            }
+          },
+          {
+            "label": "Heists",
+            "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=movie&nextpage=true&widget=true&with_id=true&sort_by=popularity.desc&include_adult=false&with_genres=80&with_keywords=10051",
+            "enabled": true,
+            "discovery_order": {
+              "enabled": true,
+              "role": "theme"
+            }
+          },
+          {
+            "label": "Gangs & organized crime",
+            "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=movie&nextpage=true&widget=true&with_id=true&include_adult=false&sort_by=popularity.desc&primary_release_date.lte=t%2B0&vote_count.gte=20&with_genres=80&with_keywords=3149%7C10291&with_separator=OR",
+            "enabled": true,
+            "discovery_order": {
+              "enabled": true,
+              "role": "theme"
+            }
+          },
+          {
+            "label": "Investigations & detectives",
+            "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=movie&nextpage=true&widget=true&with_id=true&sort_by=popularity.desc&include_adult=false&with_genres=80&with_keywords=703",
+            "enabled": true,
+            "discovery_order": {
+              "enabled": true,
+              "role": "theme"
+            }
+          },
+          {
+            "label": "Serial killers",
+            "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=movie&nextpage=true&widget=true&with_id=true&sort_by=popularity.desc&include_adult=false&with_genres=80&with_keywords=10714",
+            "enabled": true,
+            "discovery_order": {
+              "enabled": true,
+              "role": "theme"
+            }
+          },
+          {
+            "label": "More to discover",
+            "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=movie&nextpage=true&widget=true&with_id=true&include_adult=false&with_genres=80&sort_by=popularity.desc&primary_release_date.lte=t-365&vote_average.gte=6.5&vote_count.gte=100&vote_count.lte=3000",
+            "enabled": true,
+            "discovery_order": {
+              "enabled": true,
+              "max_votes": 3000,
+              "role": "more"
+            }
+          },
+          {
+            "label": "Classics worth revisiting",
+            "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=movie&nextpage=true&widget=true&with_id=true&include_adult=false&with_genres=80&sort_by=vote_average.desc&primary_release_date.lte=1999-12-31&vote_count.gte=100",
+            "enabled": true,
+            "discovery_order": {
+              "enabled": true,
+              "role": "classic"
+            }
+          }
+        ]
+      },
+      {
+        "id": "bl-movies-drama",
+        "label": "Drama",
+        "section": "Movies",
+        "enabled": true,
+        "rows": [
+          {
+            "label": "Recent releases",
+            "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=movie&nextpage=true&widget=true&with_id=true&include_adult=false&with_genres=18&sort_by=popularity.desc&primary_release_date.gte=t-730&primary_release_date.lte=t%2B0",
+            "enabled": true,
+            "discovery_order": {
+              "enabled": true,
+              "role": "recent"
+            }
+          },
+          {
+            "label": "Family stories",
+            "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=movie&nextpage=true&widget=true&with_id=true&include_adult=false&sort_by=popularity.desc&primary_release_date.lte=t%2B0&vote_count.gte=20&with_genres=18&with_keywords=12279",
+            "enabled": true,
+            "discovery_order": {
+              "enabled": true,
+              "role": "theme"
+            }
+          },
+          {
+            "label": "Period & historical drama",
+            "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=movie&nextpage=true&widget=true&with_id=true&include_adult=false&sort_by=popularity.desc&primary_release_date.lte=t%2B0&vote_count.gte=20&with_genres=18&with_keywords=15060%7C192772&with_separator=OR",
+            "enabled": true,
+            "discovery_order": {
+              "enabled": true,
+              "role": "theme"
+            }
+          },
+          {
+            "label": "Based on real lives",
+            "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=movie&nextpage=true&widget=true&with_id=true&sort_by=popularity.desc&include_adult=false&with_genres=18&with_keywords=5565",
+            "enabled": true,
+            "discovery_order": {
+              "enabled": true,
+              "role": "theme"
+            }
+          },
+          {
+            "label": "Coming of age",
+            "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=movie&nextpage=true&widget=true&with_id=true&sort_by=popularity.desc&include_adult=false&with_genres=18&with_keywords=10683",
+            "enabled": true,
+            "discovery_order": {
+              "enabled": true,
+              "role": "theme"
+            }
+          },
+          {
+            "label": "Political drama",
+            "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=movie&nextpage=true&widget=true&with_id=true&sort_by=popularity.desc&include_adult=false&with_genres=18&with_keywords=298528",
+            "enabled": true,
+            "discovery_order": {
+              "enabled": true,
+              "role": "theme"
+            }
+          },
+          {
+            "label": "More to discover",
+            "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=movie&nextpage=true&widget=true&with_id=true&include_adult=false&with_genres=18&sort_by=popularity.desc&primary_release_date.lte=t-365&vote_average.gte=6.5&vote_count.gte=100&vote_count.lte=3000",
+            "enabled": true,
+            "discovery_order": {
+              "enabled": true,
+              "max_votes": 3000,
+              "role": "more"
+            }
+          },
+          {
+            "label": "Classics worth revisiting",
+            "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=movie&nextpage=true&widget=true&with_id=true&include_adult=false&with_genres=18&sort_by=vote_average.desc&primary_release_date.lte=1999-12-31&vote_count.gte=100",
+            "enabled": true,
+            "discovery_order": {
+              "enabled": true,
+              "role": "classic"
+            }
+          }
+        ]
+      },
+      {
+        "id": "bl-movies-horror",
+        "label": "Horror",
+        "section": "Movies",
+        "enabled": true,
+        "rows": [
+          {
+            "label": "Recent releases",
+            "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=movie&nextpage=true&widget=true&with_id=true&include_adult=false&with_genres=27&sort_by=popularity.desc&primary_release_date.gte=t-730&primary_release_date.lte=t%2B0",
+            "enabled": true,
+            "discovery_order": {
+              "enabled": true,
+              "role": "recent"
+            }
+          },
+          {
+            "label": "Slashers",
+            "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=movie&nextpage=true&widget=true&with_id=true&sort_by=popularity.desc&include_adult=false&with_genres=27&with_keywords=12339",
+            "enabled": true,
+            "discovery_order": {
+              "enabled": true,
+              "role": "theme"
+            }
+          },
+          {
+            "label": "Creature Features",
+            "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=movie&nextpage=true&widget=true&with_id=true&sort_by=popularity.desc&include_adult=false&with_genres=27&with_keywords=1299",
+            "enabled": true,
+            "discovery_order": {
+              "enabled": true,
+              "role": "theme"
+            }
+          },
+          {
+            "label": "Hauntings & possession",
+            "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=movie&nextpage=true&widget=true&with_id=true&include_adult=false&sort_by=popularity.desc&primary_release_date.lte=t%2B0&vote_count.gte=20&with_genres=27&with_keywords=3358%7C161261&with_separator=OR",
+            "enabled": true,
+            "discovery_order": {
+              "enabled": true,
+              "role": "theme"
+            }
+          },
+          {
+            "label": "Psychological horror",
+            "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=movie&nextpage=true&widget=true&with_id=true&include_adult=false&sort_by=popularity.desc&primary_release_date.lte=t%2B0&vote_count.gte=20&with_genres=27&with_keywords=295907",
+            "enabled": true,
+            "discovery_order": {
+              "enabled": true,
+              "role": "theme"
+            }
+          },
+          {
+            "label": "More to discover",
+            "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=movie&nextpage=true&widget=true&with_id=true&include_adult=false&with_genres=27&sort_by=popularity.desc&primary_release_date.lte=t-365&vote_average.gte=6.3&vote_count.gte=100&vote_count.lte=3000",
+            "enabled": true,
+            "discovery_order": {
+              "enabled": true,
+              "max_votes": 3000,
+              "role": "more"
+            }
+          },
+          {
+            "label": "Classics worth revisiting",
+            "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=movie&nextpage=true&widget=true&with_id=true&include_adult=false&with_genres=27&sort_by=vote_average.desc&primary_release_date.lte=1999-12-31&vote_count.gte=100",
+            "enabled": true,
+            "discovery_order": {
+              "enabled": true,
+              "role": "classic"
+            }
+          }
+        ]
+      },
+      {
+        "id": "bl-movies-thriller",
+        "label": "Thriller",
+        "section": "Movies",
+        "enabled": true,
+        "rows": [
+          {
+            "label": "Recent releases",
+            "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=movie&nextpage=true&widget=true&with_id=true&include_adult=false&with_genres=53&sort_by=popularity.desc&primary_release_date.gte=t-730&primary_release_date.lte=t%2B0",
+            "enabled": true,
+            "discovery_order": {
+              "enabled": true,
+              "role": "recent"
+            }
+          },
+          {
+            "label": "Psychological thrillers",
+            "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=movie&nextpage=true&widget=true&with_id=true&sort_by=popularity.desc&include_adult=false&with_genres=53&with_keywords=12565",
+            "enabled": true,
+            "discovery_order": {
+              "enabled": true,
+              "role": "theme"
+            }
+          },
+          {
+            "label": "Crime thrillers",
+            "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=movie&nextpage=true&widget=true&with_id=true&sort_by=popularity.desc&include_adult=false&with_genres=53%2C80",
+            "enabled": true,
+            "discovery_order": {
+              "enabled": true,
+              "role": "theme"
+            }
+          },
+          {
+            "label": "Survival thrillers",
+            "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=movie&nextpage=true&widget=true&with_id=true&sort_by=popularity.desc&include_adult=false&with_genres=53&with_keywords=10349",
+            "enabled": true,
+            "discovery_order": {
+              "enabled": true,
+              "role": "theme"
+            }
+          },
+          {
+            "label": "Conspiracies & cover-ups",
+            "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=movie&nextpage=true&widget=true&with_id=true&include_adult=false&sort_by=popularity.desc&primary_release_date.lte=t%2B0&vote_count.gte=20&with_genres=53&with_keywords=10410%7C298528&with_separator=OR",
+            "enabled": true,
+            "discovery_order": {
+              "enabled": true,
+              "role": "theme"
+            }
+          },
+          {
+            "label": "More to discover",
+            "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=movie&nextpage=true&widget=true&with_id=true&include_adult=false&with_genres=53&sort_by=popularity.desc&primary_release_date.lte=t-365&vote_average.gte=6.5&vote_count.gte=100&vote_count.lte=3000",
+            "enabled": true,
+            "discovery_order": {
+              "enabled": true,
+              "max_votes": 3000,
+              "role": "more"
+            }
+          },
+          {
+            "label": "Classics worth revisiting",
+            "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=movie&nextpage=true&widget=true&with_id=true&include_adult=false&with_genres=53&sort_by=vote_average.desc&primary_release_date.lte=1999-12-31&vote_count.gte=100",
+            "enabled": true,
+            "discovery_order": {
+              "enabled": true,
+              "role": "classic"
+            }
+          }
+        ]
+      },
+      {
+        "id": "bl-movies-mystery",
+        "label": "Mystery",
+        "section": "Movies",
+        "enabled": true,
+        "rows": [
+          {
+            "label": "Recent releases",
+            "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=movie&nextpage=true&widget=true&with_id=true&include_adult=false&with_genres=9648&sort_by=popularity.desc&primary_release_date.gte=t-730&primary_release_date.lte=t%2B0",
+            "enabled": true,
+            "discovery_order": {
+              "enabled": true,
+              "role": "recent"
+            }
+          },
+          {
+            "label": "Whodunits & murder mysteries",
+            "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=movie&nextpage=true&widget=true&with_id=true&include_adult=false&sort_by=popularity.desc&primary_release_date.lte=t%2B0&vote_count.gte=20&with_genres=9648&with_keywords=12570%7C207046&with_separator=OR",
+            "enabled": true,
+            "discovery_order": {
+              "enabled": true,
+              "role": "theme"
+            }
+          },
+          {
+            "label": "Missing persons",
+            "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=movie&nextpage=true&widget=true&with_id=true&sort_by=popularity.desc&include_adult=false&with_genres=9648&with_keywords=156091",
+            "enabled": true,
+            "discovery_order": {
+              "enabled": true,
+              "role": "theme"
+            }
+          },
+          {
+            "label": "Conspiracies & secrets",
+            "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=movie&nextpage=true&widget=true&with_id=true&sort_by=popularity.desc&include_adult=false&with_genres=9648&with_keywords=10410",
+            "enabled": true,
+            "discovery_order": {
+              "enabled": true,
+              "role": "theme"
+            }
+          },
+          {
+            "label": "Supernatural mysteries",
+            "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=movie&nextpage=true&widget=true&with_id=true&include_adult=false&sort_by=popularity.desc&primary_release_date.lte=t%2B0&vote_count.gte=20&with_genres=9648&with_keywords=6152&without_genres=16%2C10751",
+            "enabled": true,
+            "discovery_order": {
+              "enabled": true,
+              "role": "theme"
+            }
+          },
+          {
+            "label": "More to discover",
+            "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=movie&nextpage=true&widget=true&with_id=true&include_adult=false&with_genres=9648&sort_by=popularity.desc&primary_release_date.lte=t-365&vote_average.gte=6.5&vote_count.gte=100&vote_count.lte=3000",
+            "enabled": true,
+            "discovery_order": {
+              "enabled": true,
+              "max_votes": 3000,
+              "role": "more"
+            }
+          },
+          {
+            "label": "Classics worth revisiting",
+            "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=movie&nextpage=true&widget=true&with_id=true&include_adult=false&with_genres=9648&sort_by=vote_average.desc&primary_release_date.lte=1999-12-31&vote_count.gte=100",
+            "enabled": true,
+            "discovery_order": {
+              "enabled": true,
+              "role": "classic"
+            }
+          }
+        ]
+      },
+      {
+        "id": "bl-movies-sci-fi",
+        "label": "Sci-Fi",
+        "section": "Movies",
+        "enabled": true,
+        "rows": [
+          {
+            "label": "Recent releases",
+            "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=movie&nextpage=true&widget=true&with_id=true&include_adult=false&with_genres=878&sort_by=popularity.desc&primary_release_date.gte=t-730&primary_release_date.lte=t%2B0",
+            "enabled": true,
+            "discovery_order": {
+              "enabled": true,
+              "role": "recent"
+            }
+          },
+          {
+            "label": "Space exploration",
+            "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=movie&nextpage=true&widget=true&with_id=true&include_adult=false&sort_by=popularity.desc&primary_release_date.lte=t%2B0&vote_count.gte=20&with_genres=878&with_keywords=3801&without_keywords=9715",
+            "enabled": true,
+            "discovery_order": {
+              "enabled": true,
+              "role": "theme"
+            }
+          },
+          {
+            "label": "Alien encounters",
+            "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=movie&nextpage=true&widget=true&with_id=true&sort_by=popularity.desc&include_adult=false&with_genres=878&with_keywords=9951",
+            "enabled": true,
+            "discovery_order": {
+              "enabled": true,
+              "role": "theme"
+            }
+          },
+          {
+            "label": "Time travel",
+            "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=movie&nextpage=true&widget=true&with_id=true&sort_by=popularity.desc&include_adult=false&with_genres=878&with_keywords=4379",
+            "enabled": true,
+            "discovery_order": {
+              "enabled": true,
+              "role": "theme"
+            }
+          },
+          {
+            "label": "Dystopian futures",
+            "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=movie&nextpage=true&widget=true&with_id=true&sort_by=popularity.desc&include_adult=false&with_genres=878&with_keywords=4565",
+            "enabled": true,
+            "discovery_order": {
+              "enabled": true,
+              "role": "theme"
+            }
+          },
+          {
+            "label": "Artificial intelligence",
+            "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=movie&nextpage=true&widget=true&with_id=true&sort_by=popularity.desc&include_adult=false&with_genres=878&with_keywords=310",
+            "enabled": true,
+            "discovery_order": {
+              "enabled": true,
+              "role": "theme",
+              "exclude_ids": [
+                "movie:157336"
+              ]
+            }
+          },
+          {
+            "label": "More to discover",
+            "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=movie&nextpage=true&widget=true&with_id=true&include_adult=false&with_genres=878&sort_by=popularity.desc&primary_release_date.lte=t-365&vote_average.gte=6.5&vote_count.gte=100&vote_count.lte=3000",
+            "enabled": true,
+            "discovery_order": {
+              "enabled": true,
+              "max_votes": 3000,
+              "role": "more"
+            }
+          },
+          {
+            "label": "Classics worth revisiting",
+            "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=movie&nextpage=true&widget=true&with_id=true&include_adult=false&with_genres=878&sort_by=vote_average.desc&primary_release_date.lte=1999-12-31&vote_count.gte=100",
+            "enabled": true,
+            "discovery_order": {
+              "enabled": true,
+              "role": "classic"
+            }
+          }
+        ]
+      },
+      {
+        "id": "bl-movies-fantasy",
+        "label": "Fantasy",
+        "section": "Movies",
+        "enabled": true,
+        "rows": [
+          {
+            "label": "Recent releases",
+            "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=movie&nextpage=true&widget=true&with_id=true&include_adult=false&with_genres=14&sort_by=popularity.desc&primary_release_date.gte=t-730&primary_release_date.lte=t%2B0",
+            "enabled": true,
+            "discovery_order": {
+              "enabled": true,
+              "role": "recent"
+            }
+          },
+          {
+            "label": "Myths & legends",
+            "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=movie&nextpage=true&widget=true&with_id=true&include_adult=false&sort_by=popularity.desc&primary_release_date.lte=t%2B0&vote_count.gte=20&with_genres=14&with_keywords=2035",
+            "enabled": true,
+            "discovery_order": {
+              "enabled": true,
+              "role": "theme"
+            }
+          },
+          {
+            "label": "Swords & sorcery",
+            "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=movie&nextpage=true&widget=true&with_id=true&sort_by=popularity.desc&include_adult=false&with_genres=14&with_keywords=234213",
+            "enabled": true,
+            "discovery_order": {
+              "enabled": true,
+              "role": "theme"
+            }
+          },
+          {
+            "label": "Dark fantasy",
+            "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=movie&nextpage=true&widget=true&with_id=true&sort_by=popularity.desc&include_adult=false&with_genres=14&with_keywords=177895",
+            "enabled": true,
+            "discovery_order": {
+              "enabled": true,
+              "role": "theme"
+            }
+          },
+          {
+            "label": "Fairy-tale worlds",
+            "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=movie&nextpage=true&widget=true&with_id=true&sort_by=popularity.desc&include_adult=false&with_genres=14&with_keywords=3205",
+            "enabled": true,
+            "discovery_order": {
+              "enabled": true,
+              "role": "theme"
+            }
+          },
+          {
+            "label": "More to discover",
+            "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=movie&nextpage=true&widget=true&with_id=true&include_adult=false&with_genres=14&sort_by=popularity.desc&primary_release_date.lte=t-365&vote_average.gte=6.5&vote_count.gte=100&vote_count.lte=3000",
+            "enabled": true,
+            "discovery_order": {
+              "enabled": true,
+              "max_votes": 3000,
+              "role": "more"
+            }
+          },
+          {
+            "label": "Classics worth revisiting",
+            "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=movie&nextpage=true&widget=true&with_id=true&include_adult=false&with_genres=14&sort_by=vote_average.desc&primary_release_date.lte=1999-12-31&vote_count.gte=100",
+            "enabled": true,
+            "discovery_order": {
+              "enabled": true,
+              "role": "classic"
+            }
+          }
+        ]
+      },
+      {
+        "id": "bl-movies-animation",
+        "label": "Animation",
+        "section": "Movies",
+        "enabled": true,
+        "rows": [
+          {
+            "label": "Recent releases",
+            "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=movie&nextpage=true&widget=true&with_id=true&include_adult=false&with_genres=16&sort_by=popularity.desc&primary_release_date.gte=t-730&primary_release_date.lte=t%2B0",
+            "enabled": true,
+            "discovery_order": {
+              "enabled": true,
+              "role": "recent"
+            }
+          },
+          {
+            "label": "Family animation",
+            "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=movie&nextpage=true&widget=true&with_id=true&sort_by=popularity.desc&include_adult=false&with_genres=16%2C10751",
+            "enabled": true,
+            "discovery_order": {
+              "enabled": true,
+              "role": "theme"
+            }
+          },
+          {
+            "label": "Anime films",
+            "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=movie&nextpage=true&widget=true&with_id=true&sort_by=popularity.desc&include_adult=false&with_genres=16&with_keywords=210024",
+            "enabled": true,
+            "discovery_order": {
+              "enabled": true,
+              "role": "theme"
+            }
+          },
+          {
+            "label": "Animation for grown-ups",
+            "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=movie&nextpage=true&widget=true&with_id=true&sort_by=popularity.desc&include_adult=false&with_genres=16&with_keywords=161919",
+            "enabled": true,
+            "discovery_order": {
+              "enabled": true,
+              "role": "theme"
+            }
+          },
+          {
+            "label": "Stop-motion",
+            "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=movie&nextpage=true&widget=true&with_id=true&sort_by=popularity.desc&include_adult=false&with_genres=16&with_keywords=10121",
+            "enabled": true,
+            "discovery_order": {
+              "enabled": true,
+              "role": "theme"
+            }
+          },
+          {
+            "label": "More to discover",
+            "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=movie&nextpage=true&widget=true&with_id=true&include_adult=false&with_genres=16&sort_by=popularity.desc&primary_release_date.lte=t-365&vote_average.gte=6.5&vote_count.gte=100&vote_count.lte=3000",
+            "enabled": true,
+            "discovery_order": {
+              "enabled": true,
+              "max_votes": 3000,
+              "role": "more"
+            }
+          },
+          {
+            "label": "Classics worth revisiting",
+            "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=movie&nextpage=true&widget=true&with_id=true&include_adult=false&with_genres=16&sort_by=vote_average.desc&primary_release_date.lte=1999-12-31&vote_count.gte=100",
+            "enabled": true,
+            "discovery_order": {
+              "enabled": true,
+              "role": "classic"
+            }
+          }
+        ]
+      },
+      {
+        "id": "bl-movies-documentary",
+        "label": "Documentary",
+        "section": "Movies",
+        "enabled": true,
+        "rows": [
+          {
+            "label": "Recent documentaries",
+            "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=movie&nextpage=true&widget=true&with_id=true&include_adult=false&with_genres=99&sort_by=popularity.desc&primary_release_date.gte=t-730&primary_release_date.lte=t%2B0",
+            "enabled": true,
+            "discovery_order": {
+              "enabled": true,
+              "role": "recent"
+            }
+          },
+          {
+            "label": "True crime",
+            "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=movie&nextpage=true&widget=true&with_id=true&sort_by=popularity.desc&include_adult=false&with_genres=99&with_keywords=33722",
+            "enabled": true,
+            "discovery_order": {
+              "enabled": true,
+              "role": "theme"
+            }
+          },
+          {
+            "label": "Nature & the environment",
+            "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=movie&nextpage=true&widget=true&with_id=true&sort_by=popularity.desc&include_adult=false&with_genres=99&with_keywords=18330",
+            "enabled": true,
+            "discovery_order": {
+              "enabled": true,
+              "role": "theme"
+            }
+          },
+          {
+            "label": "History",
+            "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=movie&nextpage=true&widget=true&with_id=true&sort_by=popularity.desc&include_adult=false&with_genres=99&with_keywords=282633",
+            "enabled": true,
+            "discovery_order": {
+              "enabled": true,
+              "role": "theme"
+            }
+          },
+          {
+            "label": "Sports stories",
+            "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=movie&nextpage=true&widget=true&with_id=true&sort_by=popularity.desc&include_adult=false&with_genres=99&with_keywords=6075",
+            "enabled": true,
+            "discovery_order": {
+              "enabled": true,
+              "role": "theme"
+            }
+          },
+          {
+            "label": "Music & musicians",
+            "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=movie&nextpage=true&widget=true&with_id=true&sort_by=popularity.desc&include_adult=false&with_genres=99&with_keywords=246377",
+            "enabled": true,
+            "discovery_order": {
+              "enabled": true,
+              "role": "theme"
+            }
+          },
+          {
+            "label": "More to discover",
+            "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=movie&nextpage=true&widget=true&with_id=true&include_adult=false&with_genres=99&sort_by=popularity.desc&primary_release_date.lte=t-365&vote_average.gte=6.5&vote_count.gte=100&vote_count.lte=3000",
+            "enabled": true,
+            "discovery_order": {
+              "enabled": true,
+              "max_votes": 3000,
+              "role": "more"
+            }
+          },
+          {
+            "label": "Landmark documentaries",
+            "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=movie&nextpage=true&widget=true&with_id=true&include_adult=false&with_genres=99&sort_by=vote_average.desc&primary_release_date.lte=1999-12-31&vote_count.gte=100",
+            "enabled": true,
+            "discovery_order": {
+              "enabled": true,
+              "role": "classic"
+            }
+          }
+        ]
+      },
+      {
+        "id": "bl-movies-westerns",
+        "label": "Westerns",
+        "section": "Movies",
+        "enabled": true,
+        "rows": [
+          {
+            "label": "Modern Westerns",
+            "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=movie&nextpage=true&widget=true&with_id=true&include_adult=false&sort_by=popularity.desc&primary_release_date.lte=t%2B0&vote_count.gte=20&with_genres=37&primary_release_date.gte=2000-01-01",
+            "enabled": true,
+            "discovery_order": {
+              "enabled": true,
+              "role": "theme"
+            }
+          },
+          {
+            "label": "Outlaws & gunslingers",
+            "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=movie&nextpage=true&widget=true&with_id=true&sort_by=popularity.desc&include_adult=false&with_genres=37&with_keywords=9503",
+            "enabled": true,
+            "discovery_order": {
+              "enabled": true,
+              "role": "theme"
+            }
+          },
+          {
+            "label": "Frontier stories",
+            "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=movie&nextpage=true&widget=true&with_id=true&include_adult=false&sort_by=popularity.desc&primary_release_date.lte=t%2B0&vote_count.gte=20&with_genres=37&with_keywords=9454",
+            "enabled": true,
+            "discovery_order": {
+              "enabled": true,
+              "role": "theme"
+            }
+          },
+          {
+            "label": "Spaghetti Westerns",
+            "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=movie&nextpage=true&widget=true&with_id=true&sort_by=popularity.desc&include_adult=false&with_genres=37&with_keywords=156212",
+            "enabled": true,
+            "discovery_order": {
+              "enabled": true,
+              "role": "theme"
+            }
+          },
+          {
+            "label": "More to discover",
+            "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=movie&nextpage=true&widget=true&with_id=true&include_adult=false&with_genres=37&sort_by=popularity.desc&primary_release_date.lte=t-365&vote_average.gte=6.5&vote_count.gte=100&vote_count.lte=3000",
+            "enabled": true,
+            "discovery_order": {
+              "enabled": true,
+              "max_votes": 3000,
+              "role": "more"
+            }
+          },
+          {
+            "label": "Classic Westerns",
+            "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=movie&nextpage=true&widget=true&with_id=true&include_adult=false&with_genres=37&sort_by=vote_average.desc&primary_release_date.lte=1999-12-31&vote_count.gte=100",
+            "enabled": true,
+            "discovery_order": {
+              "enabled": true,
+              "role": "classic"
+            }
+          }
+        ]
+      },
+      {
+        "id": "bl-shows-action-adventure",
+        "label": "Action & Adventure",
+        "section": "Shows",
+        "enabled": true,
+        "rows": [
+          {
+            "label": "New series",
+            "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=tv&nextpage=true&widget=true&with_id=true&include_adult=false&with_genres=10759&sort_by=popularity.desc&first_air_date.gte=t-730&first_air_date.lte=t%2B0",
+            "enabled": true,
+            "discovery_order": {
+              "enabled": true,
+              "role": "recent"
+            }
+          },
+          {
+            "label": "Spies & covert operations",
+            "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=tv&nextpage=true&widget=true&with_id=true&sort_by=popularity.desc&include_adult=false&with_genres=10759&with_keywords=470",
+            "enabled": true,
+            "discovery_order": {
+              "enabled": true,
+              "role": "theme"
+            }
+          },
+          {
+            "label": "Martial arts",
+            "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=tv&nextpage=true&widget=true&with_id=true&sort_by=popularity.desc&include_adult=false&with_genres=10759&with_keywords=779",
+            "enabled": true,
+            "discovery_order": {
+              "enabled": true,
+              "role": "theme"
+            }
+          },
+          {
+            "label": "Survival adventures",
+            "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=tv&nextpage=true&widget=true&with_id=true&sort_by=popularity.desc&include_adult=false&with_genres=10759&with_keywords=10349",
+            "enabled": true,
+            "discovery_order": {
+              "enabled": true,
+              "role": "theme"
+            }
+          },
+          {
+            "label": "Superheroes & extraordinary powers",
+            "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=tv&nextpage=true&widget=true&with_id=true&include_adult=false&sort_by=popularity.desc&first_air_date.lte=t%2B0&vote_count.gte=10&with_genres=10759&with_keywords=9715%7C33637&with_separator=OR",
+            "enabled": true,
+            "discovery_order": {
+              "enabled": true,
+              "role": "theme"
+            }
+          },
+          {
+            "label": "More to discover",
+            "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=tv&nextpage=true&widget=true&with_id=true&include_adult=false&with_genres=10759&sort_by=popularity.desc&first_air_date.lte=t-365&vote_average.gte=7&vote_count.gte=30&vote_count.lte=3000",
+            "enabled": true,
+            "discovery_order": {
+              "enabled": true,
+              "max_votes": 3000,
+              "role": "more"
+            }
+          },
+          {
+            "label": "Classic series",
+            "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=tv&nextpage=true&widget=true&with_id=true&include_adult=false&with_genres=10759&sort_by=vote_average.desc&first_air_date.lte=1999-12-31&vote_count.gte=100",
+            "enabled": true,
+            "discovery_order": {
+              "enabled": true,
+              "role": "classic"
+            }
+          }
+        ]
+      },
+      {
+        "id": "bl-shows-comedy",
+        "label": "Comedy",
+        "section": "Shows",
+        "enabled": true,
+        "rows": [
+          {
+            "label": "New series",
+            "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=tv&nextpage=true&widget=true&with_id=true&include_adult=false&with_genres=35&sort_by=popularity.desc&first_air_date.gte=t-730&first_air_date.lte=t%2B0",
+            "enabled": true,
+            "discovery_order": {
+              "enabled": true,
+              "role": "recent"
+            }
+          },
+          {
+            "label": "Workplace comedies",
+            "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=tv&nextpage=true&widget=true&with_id=true&sort_by=popularity.desc&include_adult=false&with_genres=35&with_keywords=210605",
+            "enabled": true,
+            "discovery_order": {
+              "enabled": true,
+              "role": "theme"
+            }
+          },
+          {
+            "label": "Family comedies",
+            "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=tv&nextpage=true&widget=true&with_id=true&include_adult=false&sort_by=popularity.desc&first_air_date.lte=t%2B0&vote_count.gte=10&with_genres=35%2C10751",
+            "enabled": true,
+            "discovery_order": {
+              "enabled": true,
+              "role": "theme"
+            }
+          },
+          {
+            "label": "Dark comedy & satire",
+            "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=tv&nextpage=true&widget=true&with_id=true&include_adult=false&sort_by=popularity.desc&first_air_date.lte=t%2B0&vote_count.gte=10&with_genres=35&with_keywords=10123%7C8201&with_separator=OR",
+            "enabled": true,
+            "discovery_order": {
+              "enabled": true,
+              "role": "theme"
+            }
+          },
+          {
+            "label": "Sketch comedy",
+            "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=tv&nextpage=true&widget=true&with_id=true&sort_by=popularity.desc&include_adult=false&with_genres=35&with_keywords=156203",
+            "enabled": true,
+            "discovery_order": {
+              "enabled": true,
+              "role": "theme"
+            }
+          },
+          {
+            "label": "Stand-up & comedy showcases",
+            "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=tv&nextpage=true&widget=true&with_id=true&include_adult=false&sort_by=popularity.desc&first_air_date.lte=t%2B0&vote_count.gte=10&with_genres=35&with_keywords=9716&without_genres=18",
+            "enabled": true,
+            "discovery_order": {
+              "enabled": true,
+              "role": "theme"
+            }
+          },
+          {
+            "label": "More to discover",
+            "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=tv&nextpage=true&widget=true&with_id=true&include_adult=false&with_genres=35&sort_by=popularity.desc&first_air_date.lte=t-365&vote_average.gte=7&vote_count.gte=30&vote_count.lte=3000",
+            "enabled": true,
+            "discovery_order": {
+              "enabled": true,
+              "max_votes": 3000,
+              "role": "more"
+            }
+          },
+          {
+            "label": "Classic series",
+            "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=tv&nextpage=true&widget=true&with_id=true&include_adult=false&with_genres=35&sort_by=vote_average.desc&first_air_date.lte=1999-12-31&vote_count.gte=100",
+            "enabled": true,
+            "discovery_order": {
+              "enabled": true,
+              "role": "classic"
+            }
+          }
+        ]
+      },
+      {
+        "id": "bl-shows-crime",
+        "label": "Crime",
+        "section": "Shows",
+        "enabled": true,
+        "rows": [
+          {
+            "label": "New series",
+            "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=tv&nextpage=true&widget=true&with_id=true&include_adult=false&with_genres=80&sort_by=popularity.desc&first_air_date.gte=t-730&first_air_date.lte=t%2B0",
+            "enabled": true,
+            "discovery_order": {
+              "enabled": true,
+              "role": "recent"
+            }
+          },
+          {
+            "label": "Investigations & detectives",
+            "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=tv&nextpage=true&widget=true&with_id=true&include_adult=false&sort_by=popularity.desc&first_air_date.lte=t%2B0&vote_count.gte=10&with_genres=80&with_keywords=268067%7C703&with_separator=OR",
+            "enabled": true,
+            "discovery_order": {
+              "enabled": true,
+              "role": "theme"
+            }
+          },
+          {
+            "label": "Gangs & organized crime",
+            "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=tv&nextpage=true&widget=true&with_id=true&sort_by=popularity.desc&include_adult=false&with_genres=80&with_keywords=10291",
+            "enabled": true,
+            "discovery_order": {
+              "enabled": true,
+              "role": "theme"
+            }
+          },
+          {
+            "label": "Serial-killer dramas",
+            "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=tv&nextpage=true&widget=true&with_id=true&sort_by=popularity.desc&include_adult=false&with_genres=80&with_keywords=10714",
+            "enabled": true,
+            "discovery_order": {
+              "enabled": true,
+              "role": "theme"
+            }
+          },
+          {
+            "label": "True-crime series",
+            "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=tv&nextpage=true&widget=true&with_id=true&sort_by=popularity.desc&include_adult=false&with_genres=80&with_keywords=33722",
+            "enabled": true,
+            "discovery_order": {
+              "enabled": true,
+              "role": "theme"
+            }
+          },
+          {
+            "label": "More to discover",
+            "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=tv&nextpage=true&widget=true&with_id=true&include_adult=false&with_genres=80&sort_by=popularity.desc&first_air_date.lte=t-365&vote_average.gte=7&vote_count.gte=30&vote_count.lte=3000",
+            "enabled": true,
+            "discovery_order": {
+              "enabled": true,
+              "max_votes": 3000,
+              "role": "more"
+            }
+          },
+          {
+            "label": "Classic series",
+            "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=tv&nextpage=true&widget=true&with_id=true&include_adult=false&with_genres=80&sort_by=vote_average.desc&first_air_date.lte=1999-12-31&vote_count.gte=100",
+            "enabled": true,
+            "discovery_order": {
+              "enabled": true,
+              "role": "classic"
+            }
+          }
+        ]
+      },
+      {
+        "id": "bl-shows-drama",
+        "label": "Drama",
+        "section": "Shows",
+        "enabled": true,
+        "rows": [
+          {
+            "label": "New series",
+            "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=tv&nextpage=true&widget=true&with_id=true&include_adult=false&with_genres=18&sort_by=popularity.desc&first_air_date.gte=t-730&first_air_date.lte=t%2B0",
+            "enabled": true,
+            "discovery_order": {
+              "enabled": true,
+              "role": "recent"
+            }
+          },
+          {
+            "label": "Family stories",
+            "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=tv&nextpage=true&widget=true&with_id=true&sort_by=popularity.desc&include_adult=false&with_genres=18&with_keywords=12279",
+            "enabled": true,
+            "discovery_order": {
+              "enabled": true,
+              "role": "theme"
+            }
+          },
+          {
+            "label": "Period drama",
+            "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=tv&nextpage=true&widget=true&with_id=true&sort_by=popularity.desc&include_adult=false&with_genres=18&with_keywords=15060",
+            "enabled": true,
+            "discovery_order": {
+              "enabled": true,
+              "role": "theme"
+            }
+          },
+          {
+            "label": "Medical drama",
+            "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=tv&nextpage=true&widget=true&with_id=true&sort_by=popularity.desc&include_adult=false&with_genres=18&with_keywords=208788",
+            "enabled": true,
+            "discovery_order": {
+              "enabled": true,
+              "role": "theme"
+            }
+          },
+          {
+            "label": "Political drama",
+            "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=tv&nextpage=true&widget=true&with_id=true&sort_by=popularity.desc&include_adult=false&with_genres=18&with_keywords=298528",
+            "enabled": true,
+            "discovery_order": {
+              "enabled": true,
+              "role": "theme"
+            }
+          },
+          {
+            "label": "Coming of age",
+            "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=tv&nextpage=true&widget=true&with_id=true&sort_by=popularity.desc&include_adult=false&with_genres=18&with_keywords=10683",
+            "enabled": true,
+            "discovery_order": {
+              "enabled": true,
+              "role": "theme"
+            }
+          },
+          {
+            "label": "More to discover",
+            "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=tv&nextpage=true&widget=true&with_id=true&include_adult=false&with_genres=18&sort_by=popularity.desc&first_air_date.lte=t-365&vote_average.gte=7&vote_count.gte=30&vote_count.lte=3000",
+            "enabled": true,
+            "discovery_order": {
+              "enabled": true,
+              "max_votes": 3000,
+              "role": "more"
+            }
+          },
+          {
+            "label": "Classic series",
+            "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=tv&nextpage=true&widget=true&with_id=true&include_adult=false&with_genres=18&sort_by=vote_average.desc&first_air_date.lte=1999-12-31&vote_count.gte=100",
+            "enabled": true,
+            "discovery_order": {
+              "enabled": true,
+              "role": "classic"
+            }
+          }
+        ]
+      },
+      {
+        "id": "bl-shows-horror",
+        "label": "Horror",
+        "section": "Shows",
+        "enabled": true,
+        "rows": [
+          {
+            "label": "New series",
+            "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=tv&nextpage=true&widget=true&with_id=true&include_adult=false&with_keywords=295907%7C250593%7C12377%7C3358%7C161261&with_separator=OR&without_genres=16%2C10751%2C10762%2C10764%2C10767&sort_by=popularity.desc&first_air_date.lte=t%2B0&vote_count.gte=30&first_air_date.gte=t-730",
+            "enabled": true,
+            "discovery_order": {
+              "enabled": true,
+              "role": "recent",
+              "exclude_ids": [
+                "tv:126027",
+                "tv:14009",
+                "tv:15260",
+                "tv:17174",
+                "tv:2661",
+                "tv:605",
+                "tv:926"
+              ]
+            }
+          },
+          {
+            "label": "Hauntings & possession",
+            "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=tv&nextpage=true&widget=true&with_id=true&include_adult=false&sort_by=popularity.desc&first_air_date.lte=t%2B0&vote_count.gte=10&with_keywords=3358%7C161261&without_genres=16%2C35%2C10751%2C10762%2C10764%2C10767&with_separator=OR",
+            "enabled": true,
+            "discovery_order": {
+              "enabled": true,
+              "role": "theme",
+              "exclude_ids": [
+                "tv:126027",
+                "tv:14009",
+                "tv:15260",
+                "tv:17174",
+                "tv:2661",
+                "tv:605",
+                "tv:926"
+              ]
+            }
+          },
+          {
+            "label": "Zombie outbreaks",
+            "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=tv&nextpage=true&widget=true&with_id=true&include_adult=false&sort_by=popularity.desc&first_air_date.lte=t%2B0&vote_count.gte=10&with_keywords=12377&without_genres=16%2C10751%2C10762%2C10764%2C10767",
+            "enabled": true,
+            "discovery_order": {
+              "enabled": true,
+              "role": "theme",
+              "exclude_ids": [
+                "tv:126027",
+                "tv:14009",
+                "tv:15260",
+                "tv:17174",
+                "tv:2661",
+                "tv:605",
+                "tv:926"
+              ]
+            }
+          },
+          {
+            "label": "Psychological horror",
+            "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=tv&nextpage=true&widget=true&with_id=true&include_adult=false&sort_by=popularity.desc&first_air_date.lte=t%2B0&vote_count.gte=10&with_keywords=295907&without_genres=16%2C35%2C10751%2C10762%2C10764%2C10767",
+            "enabled": true,
+            "discovery_order": {
+              "enabled": true,
+              "role": "theme",
+              "exclude_ids": [
+                "tv:126027",
+                "tv:14009",
+                "tv:15260",
+                "tv:17174",
+                "tv:2661",
+                "tv:605",
+                "tv:926"
+              ]
+            }
+          },
+          {
+            "label": "Horror anthologies",
+            "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=tv&nextpage=true&widget=true&with_id=true&include_adult=false&sort_by=popularity.desc&first_air_date.lte=t%2B0&vote_count.gte=10&with_keywords=250593&without_genres=16%2C10751%2C10762%2C10764%2C10767",
+            "enabled": true,
+            "discovery_order": {
+              "enabled": true,
+              "role": "theme",
+              "exclude_ids": [
+                "tv:126027",
+                "tv:14009",
+                "tv:15260",
+                "tv:17174",
+                "tv:2661",
+                "tv:605",
+                "tv:926"
+              ]
+            }
+          },
+          {
+            "label": "More to discover",
+            "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=tv&nextpage=true&widget=true&with_id=true&include_adult=false&sort_by=popularity.desc&first_air_date.lte=t-365&with_keywords=12339%7C1299%7C3133&without_genres=16%2C35%2C10751%2C10762%2C10764%2C10767&vote_average.gte=6.5&vote_count.gte=30&vote_count.lte=3000&with_separator=OR",
+            "enabled": true,
+            "discovery_order": {
+              "enabled": true,
+              "role": "more",
+              "max_votes": 3000,
+              "exclude_ids": [
+                "tv:126027",
+                "tv:14009",
+                "tv:15260",
+                "tv:17174",
+                "tv:2661",
+                "tv:605",
+                "tv:926"
+              ]
+            }
+          },
+          {
+            "label": "Classic series",
+            "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=tv&nextpage=true&widget=true&with_id=true&include_adult=false&with_keywords=295907%7C250593%7C12377%7C3358%7C161261&with_separator=OR&without_genres=16%2C10751%2C10762%2C10764%2C10767&sort_by=vote_average.desc&first_air_date.lte=1999-12-31&vote_count.gte=100",
+            "enabled": true,
+            "discovery_order": {
+              "enabled": true,
+              "role": "classic",
+              "exclude_ids": [
+                "tv:126027",
+                "tv:14009",
+                "tv:15260",
+                "tv:17174",
+                "tv:2661",
+                "tv:605",
+                "tv:926"
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "id": "bl-shows-mystery",
+        "label": "Mystery",
+        "section": "Shows",
+        "enabled": true,
+        "rows": [
+          {
+            "label": "New series",
+            "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=tv&nextpage=true&widget=true&with_id=true&include_adult=false&with_genres=9648&sort_by=popularity.desc&first_air_date.gte=t-730&first_air_date.lte=t%2B0",
+            "enabled": true,
+            "discovery_order": {
+              "enabled": true,
+              "role": "recent"
+            }
+          },
+          {
+            "label": "Whodunits & murder mysteries",
+            "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=tv&nextpage=true&widget=true&with_id=true&include_adult=false&sort_by=popularity.desc&first_air_date.lte=t%2B0&vote_count.gte=10&with_genres=9648&with_keywords=12570%7C207046&with_separator=OR",
+            "enabled": true,
+            "discovery_order": {
+              "enabled": true,
+              "role": "theme"
+            }
+          },
+          {
+            "label": "Missing persons",
+            "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=tv&nextpage=true&widget=true&with_id=true&sort_by=popularity.desc&include_adult=false&with_genres=9648&with_keywords=156091",
+            "enabled": true,
+            "discovery_order": {
+              "enabled": true,
+              "role": "theme"
+            }
+          },
+          {
+            "label": "Conspiracies & secrets",
+            "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=tv&nextpage=true&widget=true&with_id=true&sort_by=popularity.desc&include_adult=false&with_genres=9648&with_keywords=10410",
+            "enabled": true,
+            "discovery_order": {
+              "enabled": true,
+              "role": "theme"
+            }
+          },
+          {
+            "label": "Strange & unexplained",
+            "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=tv&nextpage=true&widget=true&with_id=true&include_adult=false&sort_by=popularity.desc&first_air_date.lte=t%2B0&vote_count.gte=10&with_genres=9648&with_keywords=6152&without_genres=35%2C10751",
+            "enabled": true,
+            "discovery_order": {
+              "enabled": true,
+              "role": "theme"
+            }
+          },
+          {
+            "label": "More to discover",
+            "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=tv&nextpage=true&widget=true&with_id=true&include_adult=false&with_genres=9648&sort_by=popularity.desc&first_air_date.lte=t-365&vote_average.gte=7&vote_count.gte=30&vote_count.lte=3000",
+            "enabled": true,
+            "discovery_order": {
+              "enabled": true,
+              "max_votes": 3000,
+              "role": "more"
+            }
+          },
+          {
+            "label": "Classic series",
+            "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=tv&nextpage=true&widget=true&with_id=true&include_adult=false&with_genres=9648&sort_by=vote_average.desc&first_air_date.lte=1999-12-31&vote_count.gte=100",
+            "enabled": true,
+            "discovery_order": {
+              "enabled": true,
+              "role": "classic"
+            }
+          }
+        ]
+      },
+      {
+        "id": "bl-shows-sci-fi-fantasy",
+        "label": "Sci-Fi & Fantasy",
+        "section": "Shows",
+        "enabled": true,
+        "rows": [
+          {
+            "label": "New series",
+            "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=tv&nextpage=true&widget=true&with_id=true&include_adult=false&with_genres=10765&sort_by=popularity.desc&first_air_date.gte=t-730&first_air_date.lte=t%2B0",
+            "enabled": true,
+            "discovery_order": {
+              "enabled": true,
+              "role": "recent"
+            }
+          },
+          {
+            "label": "Space adventures",
+            "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=tv&nextpage=true&widget=true&with_id=true&include_adult=false&sort_by=popularity.desc&first_air_date.lte=t%2B0&vote_count.gte=10&with_genres=10765&with_keywords=9882&without_keywords=9715",
+            "enabled": true,
+            "discovery_order": {
+              "enabled": true,
+              "role": "theme"
+            }
+          },
+          {
+            "label": "Magic & fantasy worlds",
+            "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=tv&nextpage=true&widget=true&with_id=true&include_adult=false&sort_by=popularity.desc&first_air_date.lte=t%2B0&vote_count.gte=10&with_genres=10765&with_keywords=2343%7C2035&with_separator=OR",
+            "enabled": true,
+            "discovery_order": {
+              "enabled": true,
+              "role": "theme"
+            }
+          },
+          {
+            "label": "Time travel",
+            "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=tv&nextpage=true&widget=true&with_id=true&sort_by=popularity.desc&include_adult=false&with_genres=10765&with_keywords=4379",
+            "enabled": true,
+            "discovery_order": {
+              "enabled": true,
+              "role": "theme"
+            }
+          },
+          {
+            "label": "Dystopian futures",
+            "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=tv&nextpage=true&widget=true&with_id=true&sort_by=popularity.desc&include_adult=false&with_genres=10765&with_keywords=4565",
+            "enabled": true,
+            "discovery_order": {
+              "enabled": true,
+              "role": "theme"
+            }
+          },
+          {
+            "label": "More to discover",
+            "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=tv&nextpage=true&widget=true&with_id=true&include_adult=false&sort_by=vote_count.desc&first_air_date.lte=t-365&with_genres=10765&vote_average.gte=7&vote_count.gte=100&vote_count.lte=2000",
+            "enabled": true,
+            "discovery_order": {
+              "enabled": true,
+              "max_votes": 2000,
+              "role": "more"
+            }
+          },
+          {
+            "label": "Classic series",
+            "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=tv&nextpage=true&widget=true&with_id=true&include_adult=false&with_genres=10765&sort_by=vote_average.desc&first_air_date.lte=1999-12-31&vote_count.gte=100",
+            "enabled": true,
+            "discovery_order": {
+              "enabled": true,
+              "role": "classic"
+            }
+          }
+        ]
+      },
+      {
+        "id": "bl-shows-animation",
+        "label": "Animation",
+        "section": "Shows",
+        "enabled": true,
+        "rows": [
+          {
+            "label": "New series",
+            "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=tv&nextpage=true&widget=true&with_id=true&include_adult=false&with_genres=16&sort_by=popularity.desc&first_air_date.gte=t-730&first_air_date.lte=t%2B0",
+            "enabled": true,
+            "discovery_order": {
+              "enabled": true,
+              "role": "recent"
+            }
+          },
+          {
+            "label": "Anime series",
+            "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=tv&nextpage=true&widget=true&with_id=true&sort_by=popularity.desc&include_adult=false&with_genres=16&with_keywords=210024",
+            "enabled": true,
+            "discovery_order": {
+              "enabled": true,
+              "role": "theme"
+            }
+          },
+          {
+            "label": "Animation for grown-ups",
+            "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=tv&nextpage=true&widget=true&with_id=true&sort_by=popularity.desc&include_adult=false&with_genres=16&with_keywords=161919",
+            "enabled": true,
+            "discovery_order": {
+              "enabled": true,
+              "role": "theme"
+            }
+          },
+          {
+            "label": "Kids & family animation",
+            "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=tv&nextpage=true&widget=true&with_id=true&sort_by=popularity.desc&include_adult=false&with_genres=16%2C10762",
+            "enabled": true,
+            "discovery_order": {
+              "enabled": true,
+              "role": "theme"
+            }
+          },
+          {
+            "label": "Animated adventures",
+            "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=tv&nextpage=true&widget=true&with_id=true&include_adult=false&sort_by=popularity.desc&first_air_date.lte=t%2B0&vote_count.gte=10&with_genres=16%2C10759&without_genres=10762",
+            "enabled": true,
+            "discovery_order": {
+              "enabled": true,
+              "role": "theme"
+            }
+          },
+          {
+            "label": "More to discover",
+            "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=tv&nextpage=true&widget=true&with_id=true&include_adult=false&with_genres=16&sort_by=popularity.desc&first_air_date.lte=t-365&vote_average.gte=7&vote_count.gte=30&vote_count.lte=3000",
+            "enabled": true,
+            "discovery_order": {
+              "enabled": true,
+              "max_votes": 3000,
+              "role": "more"
+            }
+          },
+          {
+            "label": "Classic series",
+            "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=tv&nextpage=true&widget=true&with_id=true&include_adult=false&with_genres=16&sort_by=vote_average.desc&first_air_date.lte=1999-12-31&vote_count.gte=100",
+            "enabled": true,
+            "discovery_order": {
+              "enabled": true,
+              "role": "classic"
+            }
+          }
+        ]
+      },
+      {
+        "id": "bl-shows-documentary",
+        "label": "Documentary",
+        "section": "Shows",
+        "enabled": true,
+        "rows": [
+          {
+            "label": "New documentary series",
+            "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=tv&nextpage=true&widget=true&with_id=true&include_adult=false&with_genres=99&sort_by=popularity.desc&first_air_date.gte=t-730&first_air_date.lte=t%2B0",
+            "enabled": true,
+            "discovery_order": {
+              "enabled": true,
+              "role": "recent"
+            }
+          },
+          {
+            "label": "True crime",
+            "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=tv&nextpage=true&widget=true&with_id=true&sort_by=popularity.desc&include_adult=false&with_genres=99&with_keywords=33722",
+            "enabled": true,
+            "discovery_order": {
+              "enabled": true,
+              "role": "theme"
+            }
+          },
+          {
+            "label": "Nature & the environment",
+            "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=tv&nextpage=true&widget=true&with_id=true&sort_by=popularity.desc&include_adult=false&with_genres=99&with_keywords=18330",
+            "enabled": true,
+            "discovery_order": {
+              "enabled": true,
+              "role": "theme"
+            }
+          },
+          {
+            "label": "History",
+            "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=tv&nextpage=true&widget=true&with_id=true&sort_by=popularity.desc&include_adult=false&with_genres=99&with_keywords=282633",
+            "enabled": true,
+            "discovery_order": {
+              "enabled": true,
+              "role": "theme"
+            }
+          },
+          {
+            "label": "Sports stories",
+            "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=tv&nextpage=true&widget=true&with_id=true&sort_by=popularity.desc&include_adult=false&with_genres=99&with_keywords=6075",
+            "enabled": true,
+            "discovery_order": {
+              "enabled": true,
+              "role": "theme"
+            }
+          },
+          {
+            "label": "Music & musicians",
+            "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=tv&nextpage=true&widget=true&with_id=true&sort_by=popularity.desc&include_adult=false&with_genres=99&with_keywords=246377",
+            "enabled": true,
+            "discovery_order": {
+              "enabled": true,
+              "role": "theme"
+            }
+          },
+          {
+            "label": "More to discover",
+            "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=tv&nextpage=true&widget=true&with_id=true&include_adult=false&with_genres=99&sort_by=popularity.desc&first_air_date.lte=t-365&vote_average.gte=7&vote_count.gte=30&vote_count.lte=3000",
+            "enabled": true,
+            "discovery_order": {
+              "enabled": true,
+              "max_votes": 3000,
+              "role": "more"
+            }
+          },
+          {
+            "label": "Landmark documentaries",
+            "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=tv&nextpage=true&widget=true&with_id=true&include_adult=false&with_genres=99&sort_by=vote_average.desc&first_air_date.lte=1999-12-31&vote_count.gte=100",
+            "enabled": true,
+            "discovery_order": {
+              "enabled": true,
+              "role": "classic"
+            }
+          }
+        ]
+      },
+      {
+        "id": "bl-shows-reality",
+        "label": "Reality",
+        "section": "Shows",
+        "enabled": true,
+        "rows": [
+          {
+            "label": "Recent reality series",
+            "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=tv&nextpage=true&widget=true&with_id=true&include_adult=false&with_genres=10764&sort_by=popularity.desc&first_air_date.gte=t-730&first_air_date.lte=t%2B0",
+            "enabled": true,
+            "discovery_order": {
+              "enabled": true,
+              "role": "recent"
+            }
+          },
+          {
+            "label": "Cooking & food",
+            "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=tv&nextpage=true&widget=true&with_id=true&sort_by=popularity.desc&include_adult=false&with_genres=10764&with_keywords=1918",
+            "enabled": true,
+            "discovery_order": {
+              "enabled": true,
+              "role": "theme"
+            }
+          },
+          {
+            "label": "Talent & competition",
+            "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=tv&nextpage=true&widget=true&with_id=true&sort_by=popularity.desc&include_adult=false&with_genres=10764&with_keywords=271",
+            "enabled": true,
+            "discovery_order": {
+              "enabled": true,
+              "role": "theme"
+            }
+          },
+          {
+            "label": "Homes & renovations",
+            "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=tv&nextpage=true&widget=true&with_id=true&sort_by=popularity.desc&include_adult=false&with_genres=10764&with_keywords=182804",
+            "enabled": true,
+            "discovery_order": {
+              "enabled": true,
+              "role": "theme"
+            }
+          },
+          {
+            "label": "Travel",
+            "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=tv&nextpage=true&widget=true&with_id=true&sort_by=popularity.desc&include_adult=false&with_genres=10764&with_keywords=9935",
+            "enabled": true,
+            "discovery_order": {
+              "enabled": true,
+              "role": "theme"
+            }
+          },
+          {
+            "label": "Dating & relationships",
+            "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=tv&nextpage=true&widget=true&with_id=true&sort_by=popularity.desc&include_adult=false&with_genres=10764&with_keywords=215119",
+            "enabled": true,
+            "discovery_order": {
+              "enabled": true,
+              "role": "theme"
+            }
+          },
+          {
+            "label": "More to discover",
+            "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=tv&nextpage=true&widget=true&with_id=true&include_adult=false&with_genres=10764&sort_by=popularity.desc&first_air_date.lte=t-365&vote_average.gte=7&vote_count.gte=30&vote_count.lte=3000",
+            "enabled": true,
+            "discovery_order": {
+              "enabled": true,
+              "max_votes": 3000,
+              "role": "more"
+            }
+          }
+        ]
+      },
+      {
+        "id": "bl-movies-international",
+        "label": "International",
+        "section": "Movies",
+        "enabled": true,
+        "rows": [
+          {
+            "label": "Recent international releases",
+            "path": "plugin://plugin.video.themoviedb.helper/?info=trakt_popular&tmdb_type=movie&nextpage=true&widget=true&countries=gb%2Ckr%2Cjp%2Cfr%2Ces%2Cde%2Cin%2Cse%2Cno%2Cdk%2Cfi%2Cis%2Cmx%2Cit%2Cbr%2Chk%2Ccn%2Ctw%2Cau%2Cca&years=2021-2026",
+            "enabled": true,
+            "discovery_order": {
+              "enabled": true
+            }
+          },
+          {
+            "label": "British",
+            "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=movie&nextpage=true&widget=true&with_id=true&sort_by=popularity.desc&include_adult=false&with_origin_country=GB",
+            "enabled": true,
+            "discovery_order": {
+              "enabled": true
+            }
+          },
+          {
+            "label": "Korean",
+            "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=movie&nextpage=true&widget=true&with_id=true&sort_by=popularity.desc&include_adult=false&with_origin_country=KR",
+            "enabled": true,
+            "discovery_order": {
+              "enabled": true
+            }
+          },
+          {
+            "label": "Japanese",
+            "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=movie&nextpage=true&widget=true&with_id=true&sort_by=popularity.desc&include_adult=false&with_origin_country=JP",
+            "enabled": true,
+            "discovery_order": {
+              "enabled": true
+            }
+          },
+          {
+            "label": "French",
+            "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=movie&nextpage=true&widget=true&with_id=true&sort_by=popularity.desc&include_adult=false&with_origin_country=FR",
+            "enabled": true,
+            "discovery_order": {
+              "enabled": true
+            }
+          },
+          {
+            "label": "From Spain",
+            "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=movie&nextpage=true&widget=true&with_id=true&sort_by=popularity.desc&include_adult=false&with_origin_country=ES",
+            "enabled": true,
+            "discovery_order": {
+              "enabled": true
+            }
+          },
+          {
+            "label": "German",
+            "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=movie&nextpage=true&widget=true&with_id=true&sort_by=popularity.desc&include_adult=false&with_origin_country=DE",
+            "enabled": true,
+            "discovery_order": {
+              "enabled": true
+            }
+          },
+          {
+            "label": "Indian",
+            "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=movie&nextpage=true&widget=true&with_id=true&sort_by=popularity.desc&include_adult=false&with_origin_country=IN",
+            "enabled": true,
+            "discovery_order": {
+              "enabled": true
+            }
+          },
+          {
+            "label": "Nordic",
+            "path": "plugin://plugin.video.themoviedb.helper/?info=trakt_popular&tmdb_type=movie&nextpage=true&widget=true&countries=dk%2Cno%2Cse%2Cfi%2Cis",
+            "enabled": true,
+            "discovery_order": {
+              "enabled": true
+            }
+          },
+          {
+            "label": "Latin American",
+            "path": "plugin://plugin.video.themoviedb.helper/?info=trakt_popular&tmdb_type=movie&nextpage=true&widget=true&countries=mx%2Cbr%2Car%2Ccl%2Cco%2Cpe%2Cuy",
+            "enabled": true,
+            "discovery_order": {
+              "enabled": true
+            }
+          },
+          {
+            "label": "World classics",
+            "path": "plugin://plugin.video.themoviedb.helper/?info=trakt_popular&tmdb_type=movie&nextpage=true&widget=true&countries=gb%2Ckr%2Cjp%2Cfr%2Ces%2Cde%2Cin%2Cse%2Cno%2Cdk%2Cfi%2Cis%2Cmx%2Cit%2Cbr%2Chk%2Ccn%2Ctw%2Cau%2Cca&years=1900-1999",
+            "enabled": true,
+            "discovery_order": {
+              "enabled": true
+            }
+          }
+        ]
+      },
+      {
+        "id": "bl-shows-international",
+        "label": "International",
+        "section": "Shows",
+        "enabled": true,
+        "rows": [
+          {
+            "label": "New international series",
+            "path": "plugin://plugin.video.themoviedb.helper/?info=trakt_popular&tmdb_type=tv&nextpage=true&widget=true&countries=gb%2Ckr%2Cjp%2Cfr%2Ces%2Cde%2Cin%2Cse%2Cno%2Cdk%2Cfi%2Cis%2Cmx%2Cit%2Cbr%2Chk%2Ccn%2Ctw%2Cau%2Cca&years=2021-2026",
+            "enabled": true,
+            "discovery_order": {
+              "enabled": true
+            }
+          },
+          {
+            "label": "British",
+            "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=tv&nextpage=true&widget=true&with_id=true&sort_by=popularity.desc&include_adult=false&with_origin_country=GB",
+            "enabled": true,
+            "discovery_order": {
+              "enabled": true
+            }
+          },
+          {
+            "label": "Korean",
+            "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=tv&nextpage=true&widget=true&with_id=true&sort_by=popularity.desc&include_adult=false&with_origin_country=KR",
+            "enabled": true,
+            "discovery_order": {
+              "enabled": true
+            }
+          },
+          {
+            "label": "Japanese",
+            "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=tv&nextpage=true&widget=true&with_id=true&sort_by=popularity.desc&include_adult=false&with_origin_country=JP",
+            "enabled": true,
+            "discovery_order": {
+              "enabled": true
+            }
+          },
+          {
+            "label": "French",
+            "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=tv&nextpage=true&widget=true&with_id=true&sort_by=popularity.desc&include_adult=false&with_origin_country=FR",
+            "enabled": true,
+            "discovery_order": {
+              "enabled": true
+            }
+          },
+          {
+            "label": "From Spain",
+            "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=tv&nextpage=true&widget=true&with_id=true&sort_by=popularity.desc&include_adult=false&with_origin_country=ES",
+            "enabled": true,
+            "discovery_order": {
+              "enabled": true
+            }
+          },
+          {
+            "label": "German",
+            "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=tv&nextpage=true&widget=true&with_id=true&sort_by=popularity.desc&include_adult=false&with_origin_country=DE",
+            "enabled": true,
+            "discovery_order": {
+              "enabled": true
+            }
+          },
+          {
+            "label": "Indian",
+            "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=tv&nextpage=true&widget=true&with_id=true&sort_by=popularity.desc&include_adult=false&with_origin_country=IN",
+            "enabled": true,
+            "discovery_order": {
+              "enabled": true
+            }
+          },
+          {
+            "label": "Nordic",
+            "path": "plugin://plugin.video.themoviedb.helper/?info=trakt_popular&tmdb_type=tv&nextpage=true&widget=true&countries=dk%2Cno%2Cse%2Cfi%2Cis",
+            "enabled": true,
+            "discovery_order": {
+              "enabled": true
+            }
+          },
+          {
+            "label": "Latin American",
+            "path": "plugin://plugin.video.themoviedb.helper/?info=trakt_popular&tmdb_type=tv&nextpage=true&widget=true&countries=mx%2Cbr%2Car%2Ccl%2Cco%2Cpe%2Cuy",
+            "enabled": true,
+            "discovery_order": {
+              "enabled": true
+            }
+          },
+          {
+            "label": "World classics",
+            "path": "plugin://plugin.video.themoviedb.helper/?info=trakt_popular&tmdb_type=tv&nextpage=true&widget=true&countries=gb%2Ckr%2Cjp%2Cfr%2Ces%2Cde%2Cin%2Cse%2Cno%2Cdk%2Cfi%2Cis%2Cmx%2Cit%2Cbr%2Chk%2Ccn%2Ctw%2Cau%2Cca&years=1900-1999",
+            "enabled": true,
+            "discovery_order": {
+              "enabled": true
+            }
+          }
+        ]
+      }
+    ],
+    "Categories": [
+      {
+        "label": "Top rated",
+        "path": "plugin://plugin.video.themoviedb.helper/?info=top_rated&tmdb_type=movie&nextpage=true&widget=true",
+        "section": "Movies",
+        "id": "8af7d252f2941013",
+        "enabled": true,
+        "rows": [
+          {
+            "label": "Recent standouts",
+            "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=movie&nextpage=true&widget=true&with_id=true&include_adult=false&sort_by=vote_average.desc&vote_count.gte=500&primary_release_date.lte=t%2B0&primary_release_date.gte=t-730",
+            "enabled": true,
+            "discovery_order": {
+              "enabled": true
+            }
+          },
+          {
+            "label": "Modern favourites",
+            "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=movie&nextpage=true&widget=true&with_id=true&include_adult=false&sort_by=vote_average.desc&vote_count.gte=500&primary_release_date.lte=t-731&primary_release_date.gte=2000-01-01",
+            "enabled": true,
+            "discovery_order": {
+              "enabled": true
+            }
+          },
+          {
+            "label": "Classic favourites",
+            "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=movie&nextpage=true&widget=true&with_id=true&include_adult=false&sort_by=vote_average.desc&vote_count.gte=500&primary_release_date.lte=1999-12-31",
+            "enabled": true,
+            "discovery_order": {
+              "enabled": true
+            }
+          }
+        ]
+      },
+      {
+        "label": "Top rated",
+        "path": "plugin://plugin.video.themoviedb.helper/?info=top_rated&tmdb_type=tv&nextpage=true&widget=true",
+        "section": "Shows",
+        "id": "b5b141525ce1d467",
+        "enabled": true,
+        "rows": [
+          {
+            "label": "Recent standouts",
+            "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=tv&nextpage=true&widget=true&with_id=true&include_adult=false&sort_by=vote_average.desc&vote_count.gte=100&first_air_date.lte=t%2B0&first_air_date.gte=t-730",
+            "enabled": true,
+            "discovery_order": {
+              "enabled": true
+            }
+          },
+          {
+            "label": "Modern favourites",
+            "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=tv&nextpage=true&widget=true&with_id=true&include_adult=false&sort_by=vote_average.desc&vote_count.gte=100&first_air_date.lte=t-731&first_air_date.gte=2000-01-01",
+            "enabled": true,
+            "discovery_order": {
+              "enabled": true
+            }
+          },
+          {
+            "label": "Classic favourites",
+            "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=tv&nextpage=true&widget=true&with_id=true&include_adult=false&sort_by=vote_average.desc&vote_count.gte=100&first_air_date.lte=1999-12-31",
+            "enabled": true,
+            "discovery_order": {
+              "enabled": true
+            }
+          }
+        ]
+      },
+      {
+        "id": "trakt-personal",
+        "label": "Trakt",
+        "section": "Both",
+        "enabled": false,
+        "rows": [
+          {
+            "label": "Continue watching \u2014 episodes",
+            "enabled": true,
+            "path": "plugin://plugin.video.themoviedb.helper/?info=trakt_ondeck&tmdb_type=tv&widget=true&nextpage=true"
+          },
+          {
+            "label": "Next episodes",
+            "enabled": true,
+            "path": "plugin://plugin.video.themoviedb.helper/?info=trakt_nextepisodes&tmdb_type=tv&widget=true&nextpage=true"
+          },
+          {
+            "label": "Continue watching \u2014 movies",
+            "enabled": true,
+            "path": "plugin://plugin.video.themoviedb.helper/?info=trakt_inprogress&tmdb_type=movie&widget=true&nextpage=true"
+          },
+          {
+            "label": "Watchlist \u2014 movies",
+            "enabled": true,
+            "path": "plugin://plugin.video.themoviedb.helper/?info=trakt_watchlist&tmdb_type=movie&widget=true&nextpage=true"
+          },
+          {
+            "label": "Watchlist \u2014 shows",
+            "enabled": true,
+            "path": "plugin://plugin.video.themoviedb.helper/?info=trakt_watchlist&tmdb_type=tv&widget=true&nextpage=true"
+          },
+          {
+            "label": "Recently watched \u2014 movies",
+            "enabled": true,
+            "path": "plugin://plugin.video.themoviedb.helper/?info=trakt_history&tmdb_type=movie&widget=true&nextpage=true"
+          },
+          {
+            "label": "Recently watched \u2014 shows",
+            "enabled": true,
+            "path": "plugin://plugin.video.themoviedb.helper/?info=trakt_history&tmdb_type=tv&widget=true&nextpage=true"
+          }
+        ]
+      },
+      {
+        "id": "bl-movies-standup",
+        "label": "Stand-up",
+        "section": "Movies",
+        "enabled": true,
+        "rows": [
+          {
+            "label": "Recent specials",
+            "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=movie&nextpage=true&widget=true&with_id=true&include_adult=false&with_keywords=9716&sort_by=popularity.desc&primary_release_date.gte=t-730&primary_release_date.lte=t%2B0",
+            "enabled": true,
+            "discovery_order": {
+              "enabled": true
+            }
+          },
+          {
+            "label": "2020s favourites",
+            "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=movie&nextpage=true&widget=true&with_id=true&include_adult=false&with_keywords=9716&sort_by=popularity.desc&primary_release_date.gte=2020-01-01&primary_release_date.lte=t-731",
+            "enabled": true,
+            "discovery_order": {
+              "enabled": true
+            }
+          },
+          {
+            "label": "Stand-up from the 2010s",
+            "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=movie&nextpage=true&widget=true&with_id=true&include_adult=false&with_keywords=9716&sort_by=popularity.desc&primary_release_date.gte=2010-01-01&primary_release_date.lte=2019-12-31",
+            "enabled": true,
+            "discovery_order": {
+              "enabled": true
+            }
+          },
+          {
+            "label": "Stand-up from the 2000s",
+            "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=movie&nextpage=true&widget=true&with_id=true&include_adult=false&with_keywords=9716&sort_by=popularity.desc&primary_release_date.gte=2000-01-01&primary_release_date.lte=2009-12-31",
+            "enabled": true,
+            "discovery_order": {
+              "enabled": true
+            }
+          },
+          {
+            "label": "Classic sets",
+            "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=movie&nextpage=true&widget=true&with_id=true&include_adult=false&with_keywords=9716&sort_by=popularity.desc&primary_release_date.lte=1999-12-31",
+            "enabled": true,
+            "discovery_order": {
+              "enabled": true
+            }
+          },
+          {
+            "label": "British stand-up",
+            "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=movie&nextpage=true&widget=true&with_id=true&include_adult=false&with_keywords=9716&sort_by=popularity.desc&with_origin_country=GB",
+            "enabled": true,
+            "discovery_order": {
+              "enabled": true
+            }
+          },
+          {
+            "label": "French-language stand-up",
+            "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=movie&nextpage=true&widget=true&with_id=true&include_adult=false&with_keywords=9716&sort_by=popularity.desc&with_original_language=fr",
+            "enabled": true,
+            "discovery_order": {
+              "enabled": true
+            }
+          }
+        ]
+      },
+      {
+        "id": "bl-shows-standup",
+        "label": "Stand-up",
+        "section": "Shows",
+        "enabled": true,
+        "rows": [
+          {
+            "label": "Recent stand-up series",
+            "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=tv&nextpage=true&widget=true&with_id=true&include_adult=false&with_keywords=9716&sort_by=popularity.desc&first_air_date.gte=t-730&first_air_date.lte=t%2B0&without_genres=18",
+            "enabled": true,
+            "discovery_order": {
+              "enabled": true,
+              "exclude_ids": [
+                "tv:32962",
+                "tv:4420",
+                "tv:47562",
+                "tv:61880",
+                "tv:66620"
+              ]
+            }
+          },
+          {
+            "label": "Live sets & showcases",
+            "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=tv&nextpage=true&widget=true&with_id=true&include_adult=false&with_keywords=9716&sort_by=popularity.desc&without_genres=18",
+            "enabled": true,
+            "discovery_order": {
+              "enabled": true,
+              "exclude_ids": [
+                "tv:32962",
+                "tv:4420",
+                "tv:47562",
+                "tv:61880",
+                "tv:66620"
+              ]
+            }
+          },
+          {
+            "label": "Competitions & roast battles",
+            "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=tv&nextpage=true&widget=true&with_id=true&include_adult=false&with_keywords=9716&sort_by=popularity.desc&with_genres=10764&without_genres=18",
+            "enabled": true,
+            "discovery_order": {
+              "enabled": true,
+              "exclude_ids": [
+                "tv:32962",
+                "tv:4420",
+                "tv:47562",
+                "tv:61880",
+                "tv:66620"
+              ]
+            }
+          },
+          {
+            "label": "Classic stand-up series",
+            "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=tv&nextpage=true&widget=true&with_id=true&include_adult=false&with_keywords=9716&sort_by=popularity.desc&first_air_date.lte=1999-12-31&without_genres=18",
+            "enabled": true,
+            "discovery_order": {
+              "enabled": true,
+              "exclude_ids": [
+                "tv:32962",
+                "tv:4420",
+                "tv:47562",
+                "tv:61880",
+                "tv:66620"
+              ]
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "recognized": {
+    "sections": {
+      "Movies": [
+        "496aa6078b7f462ca04528adedade396b29a09f0d7aa8f03b4c1ebd600e3d8f3",
+        "5b786d882f6f268396b85b7de75cdfd957e795c76af998d1690ae9d3518f2548"
+      ],
+      "Shows": [
+        "5c2d2625867c6684a1dcb7237aeb3add3f4c71cbcb91431330631bcabf7cf616",
+        "f2f42e6223043d2cd31ebbc355ffc5d7d7336f41ff2d6837f56d849ea8098e4d"
+      ]
+    },
+    "pages": {
+      "Genres:Movies:bl-movies-action": [
+        "2d8e96990564a238e0ecfef28eab76f0780a4676ef67f6f153f1acb0d7f2a1e5",
+        "59fd64475d54fd866878bfd81e9764e69266a20caf01aa19c6eeb80878eb1654"
+      ],
+      "Genres:Movies:bl-movies-adventure": [
+        "313a00cc9064164a91b9fd76207c8187672ca4d7deec39e8447934139ebf7bb8",
+        "96557c5421ab30dcf84a0081c418fcaadaab66f3fa4801e7d438cbc226a066f3"
+      ],
+      "Genres:Movies:bl-movies-comedy": [
+        "6c43aa58f71c85464b9ec808aba5d3dc2621313a32a52a6edaf5467682cde83a",
+        "e71c61f082c566372dad24ab08b5571c1d5cd5936c8221deb159894bc69d7117"
+      ],
+      "Genres:Movies:bl-movies-crime": [
+        "853d3a0078917218efa7f3cbaa24ed459385830f7a27d53a0dc95e4776d126ed",
+        "c15c6ede05cc58abb09de1753dce68bf83d1593763cff0312d9d40c4febd0f90"
+      ],
+      "Genres:Movies:bl-movies-drama": [
+        "aaf24188a9cc738cf2dccf1ea7e608bcdaf3db55380951e9ed4192b71ce0f441",
+        "d14da5918d5a0646c8c3c84279ba0a1364c384739596f6cbdae04d3bc5664b3b"
+      ],
+      "Genres:Movies:bl-movies-horror": [
+        "359bf144b8dfea2377fd8f0000053a947ef2bbca9e5741217e20f73cb1c7b60c",
+        "d29ea8f56622368a184751c6795fc7213507f7c5c6902f77527b5d3701377979"
+      ],
+      "Genres:Movies:bl-movies-thriller": [
+        "2ef2c30502c5aadfd12b559054650bf015f1fcf83e22ad9f0eded481e3ebb67f",
+        "42dcd7952265907d2dff6d02208fab9337eaa13803756deceee639e508bf58e1"
+      ],
+      "Genres:Movies:bl-movies-mystery": [
+        "4050d86bfea0fdea71fbf44904278246965092a12d29bc0890b474f27ba7a47b",
+        "f3318565d37b2fc3caf8a1b45c490d056128e17dfd05eb6df0fcc1302b0b36ae"
+      ],
+      "Genres:Movies:bl-movies-sci-fi": [
+        "e88663c7cc19be6f07bd5af88e75810d181cc233809f0615ebde67c161286524",
+        "f9a425c35051e8266ab6d4294807a9d6a0b51cef4f4214eec36cb4e79d7e5442"
+      ],
+      "Genres:Movies:bl-movies-fantasy": [
+        "d8e98ebe54f0da34465cc3e16aadd54de0a849897d6d2ad2aa5a8ef8db9cc671",
+        "f7fdc7631052dc4ae0473813b4fb6f1f55b9a3e0a20b2955fc6fdb2ce95ff9f2"
+      ],
+      "Genres:Movies:bl-movies-animation": [
+        "9d3e384d5400d832d73a2b3c1d3ea3036179c38911b4aa83ce49dcaa44a68187",
+        "c88f57e4fc554305742a66e9e7ac8398ad5eb8cb449b3d9f753dca7149965cef"
+      ],
+      "Genres:Movies:bl-movies-documentary": [
+        "0c013492eefc1aa6dd4f939f1a79e0ee3608f2aa52f9ab6c1e0bedc5d28150bb",
+        "81a98bf6bd9a6db9e9c39dea78cceb096d3d7206f5610fa8e562003e5170381f"
+      ],
+      "Genres:Movies:bl-movies-westerns": [
+        "2e0b4b6c0c4ac120861613371cf39532d70226bfa58a4d3c817bce543e03308a",
+        "ea04da213ebd1801bda0aa918d94f40cce7308592048e0cdb551d33360af2922"
+      ],
+      "Genres:Shows:bl-shows-action-adventure": [
+        "b66579f03391f3c3c1209bf7916815b86bdc9f75156d52c71fc8b11d84714c40",
+        "bb583a7ad4da3fb73bb45125d11d35e8ad4884a2297f477280aa82c54fb4d158"
+      ],
+      "Genres:Shows:bl-shows-comedy": [
+        "da94882c2905344e44649049db8f6a303e3b1bc3bcf91b02a3f8568a9ab9de5c",
+        "f85f14740ff93a32b34170c6b2c268facb36025bf782115dafff52739ab0c24f"
+      ],
+      "Genres:Shows:bl-shows-crime": [
+        "4ee7108bcd377159e1052e7e24b16de20557f2d21e63ea72f17b5468711811e7",
+        "639a11c32d5347fc4e9fbb74041cb4c08073f1bee6a49a1770f114c4406c4f01"
+      ],
+      "Genres:Shows:bl-shows-drama": [
+        "1293d2be19fb24effabe497c0d0af0e0b8d14b06339bd0012d2b74f058f7bae7",
+        "16aa3c7233abb57e42ac34d913f1df793dca31f1eae3164236346c8118576dc3"
+      ],
+      "Genres:Shows:bl-shows-horror": [
+        "63db2199c3265b5aeda61060280f38a4c5111dd2dd10ccf64e5eff49d71388ab",
+        "7738550420d224c183b49787627cf2e9dc79575a624648a313fbcfda1223a20e"
+      ],
+      "Genres:Shows:bl-shows-mystery": [
+        "28f4fd49ef144f0d1bc8f24928b3f55aabf77cc3d471e1c0e0d0add7bc1d4d5c",
+        "6ecb31392a95a447784d6bb7e2e495fb70fc044e1ee17bfeb6480731a70e3600"
+      ],
+      "Genres:Shows:bl-shows-sci-fi-fantasy": [
+        "6435a72ab2820265796553a974b5dac3a7d1a6e11ad11f298e907f441c38cc38",
+        "6b0a1a72b69d66eed8f0ed7d43d698f8510943f6d6d2c4d744a12e96df798243"
+      ],
+      "Genres:Shows:bl-shows-animation": [
+        "439aa5ddbafd00af0786f09244b12cda5b4f1f5cb346e38c4ae8ae7bd0aa7409",
+        "d600cacbd2c175a1c696ba92cb86d4df62922c3aab27522751754841a7c4da12"
+      ],
+      "Genres:Shows:bl-shows-documentary": [
+        "01049a0893e9344ddbac096b7e93e7409c4f2b3469d53c3d8779299f605540dc",
+        "1ad2383e0c9abc43f2d3d7268aa8a36e0b4399f39551276c3abbb29a19a57e56"
+      ],
+      "Genres:Shows:bl-shows-reality": [
+        "190a788618323e27f47872d39b798d1aece5bddd6b23dfbd876fc977166f228c",
+        "9890f64afe3ede909a0a33113b5f197594887ba53d7cd13148a138fade2ce631"
+      ],
+      "Genres:Movies:bl-movies-international": [
+        "d37b87c41179381c4b64972e72acb9380f3a3ed689eab09537f836e8c60f5b0b",
+        "d679f3d6943597a87fd15ea3a3de67c3595ccf0d114b9354f11dd1f0724e3f4e"
+      ],
+      "Genres:Shows:bl-shows-international": [
+        "98a51cba58eeb112a9333d8de7ba358824a00efa2fcc67bf4a9e243f2fc29133",
+        "e90b0026765bc93cd04166d203e3403a2d93f997fbb28057d9f791d054fdc787"
+      ],
+      "Categories:Movies:8af7d252f2941013": [
+        "4867428bc2117ff012662049b5ca5713f6678fe76c300a6949a7c7a99e88435c",
+        "7960a874559266a0a115d3bd8eb4409eb8e68b016146ba6be7e97e348cd813de"
+      ],
+      "Categories:Shows:b5b141525ce1d467": [
+        "7b34913f26e001c12fa7c3a175b8d7e78e4fed93fbcee8b3457daf207b014ccf",
+        "fc363b6963f22eabfc644347dda6e59b04a58db1a5345b2830cebfa54a0f7bbb"
+      ],
+      "Categories:Both:trakt-personal": [
+        "2d884b15ccabdbf6e0bb3fff3ede0091be00dd8ca57a1d1582fd6c64352073a5"
+      ],
+      "Categories:Movies:bl-movies-standup": [
+        "4e02ff1205221103bc0ced63a33d941b6038e48d87e1c1767e3f79817839f782",
+        "7ff68a53090c9cc00cc84948a16b6dacab6438818ef8fa2f31bc6454dc90203d"
+      ],
+      "Categories:Shows:bl-shows-standup": [
+        "55744bebb431d5ca1731ae28350c07342f5d00f63994d7cee07da0c789efcd0c",
+        "e467d210a3b387a027d922cb64dd5cc0d412e42e543a6b4d835dbc443e93cca1"
+      ]
+    }
+  }
+}

@@ -382,14 +382,18 @@ def verify_autoplay_acceptance(receipt, controller, umbrella):
  cleanup=receipt['test_cleanup'];assert cleanup.get('session_cleared') is True and cleanup.get('prepared_policy_cleared') is True and cleanup.get('queue_size')==0
  assert receipt.get('other_devices_accessed') is False, 'Deferred devices must remain untouched'
 
-def verify_youtube_end_acceptance(receipt, manifest):
+def verify_youtube_end_acceptance(receipt, manifest, historical=False):
  """Bind the new delta to actual Mac acceptance without inventing remote tests."""
  assert receipt.get('schema')==1 and receipt.get('feature')=='youtube-end-1' and receipt.get('passed') is True
  assert receipt.get('devices')==['mac'] and receipt.get('runtime')=='21.3','New native evidence is Mac only'
  assert receipt.get('tested_controller')=='0.1.84' and receipt.get('release_controller')==manifest.get('controller')=='0.1.85'
- xml=(ROOT/'controller-source/addon/addon.xml').read_bytes()
- files={p.relative_to(ROOT/'controller-source/addon').as_posix():hashlib.sha256(p.read_bytes()).hexdigest() for p in (ROOT/'controller-source/addon').rglob('*') if p.is_file() and '__pycache__' not in p.parts and p.suffix not in ('.pyc','.pyo')}
- assert files==manifest['files'],'Release controller differs from manifest'
+ if historical:
+  xml=(ROOT/'controller-source/historical-addon85.xml').read_bytes();files=dict(manifest['files'])
+  assert hashlib.sha256(xml).hexdigest()==files['addon.xml']
+ else:
+  xml=(ROOT/'controller-source/addon/addon.xml').read_bytes()
+  files={p.relative_to(ROOT/'controller-source/addon').as_posix():hashlib.sha256(p.read_bytes()).hexdigest() for p in (ROOT/'controller-source/addon').rglob('*') if p.is_file() and '__pycache__' not in p.parts and p.suffix not in ('.pyc','.pyo')}
+  assert files==manifest['files'],'Release controller differs from manifest'
  tested=dict(files);tested['addon.xml']=hashlib.sha256(xml.replace(b'version="0.1.85"',b'version="0.1.84"',1)).hexdigest()
  assert tested==receipt['files'],'Release source differs from native-tested candidate'
  assert receipt.get('skin_Home_sha256')==manifest['skin']['Home.xml']==hashlib.sha256((ROOT/'controller-source/skin-overrides/Home.xml').read_bytes()).hexdigest()
@@ -398,6 +402,23 @@ def verify_youtube_end_acceptance(receipt, manifest):
  delay=receipt.get('autoplay_delay_seconds');assert type(delay) in (int,float) and isfinite(delay) and 15<=delay<17
  assert receipt.get('account_request_recognized') is True and receipt.get('exact_youtube_com_ranking_claimed') is False
  preserved=receipt['preservation'];assert preserved.get('core_preferences')==280 and preserved.get('protected_files')==301 and preserved.get('healthy_history_databases')==4 and preserved.get('unrelated_history_preserved') is True
+
+def verify_discovery_acceptance(receipt,manifest):
+ assert receipt.get('schema')==1 and receipt.get('feature')=='discovery-first-page-1' and receipt.get('passed') is True
+ assert receipt.get('devices')==['mac'] and receipt.get('runtime')=='21.3' and receipt.get('other_devices_accessed') is False
+ assert receipt.get('release_controller')==manifest.get('controller')=='0.1.86'
+ root=ROOT/'controller-source/addon'
+ actual={p.relative_to(root).as_posix():hashlib.sha256(p.read_bytes()).hexdigest() for p in root.rglob('*') if p.is_file() and '__pycache__' not in p.parts and p.suffix not in ('.pyc','.pyo')}
+ assert actual==manifest['files']==receipt['files'],'Discovery release source differs from native-tested source'
+ previous=json.loads((ROOT/'controller-source/manifest85.json').read_text())
+ changed={n for n in set(previous['files'])|set(actual) if previous['files'].get(n)!=actual.get(n)}
+ assert changed=={'addon.xml','live_review.py','discovery_order.py'},'Unreviewed unrelated controller delta'
+ assert manifest['skin']==previous['skin'],'Unrelated skin change'
+ for field in ('next_back_stable_order','vertical_focus','watch_refresh_stable_order_focus','restored_provider_zero_vs_fresh_start','settings_authorizations_preserved'):
+  assert receipt['acceptance'].get(field) is True,'Missing Mac discovery acceptance: '+field
+ assert receipt.get('native_cases')==16
+ assert receipt.get('catalog_sha256')==hashlib.sha256((SOURCE/'resources/discovery-lineup.json').read_bytes()).hexdigest(),'Discovery recipe catalogue changed'
+ assert receipt['preservation']=={'protected_files':301,'core_preferences':280,'history_databases':4,'favorites_preserved':True,'unchanged_controller_files':315}
 
 def verify(folder):
  verify_release112_acceptance(json.loads((ROOT/'controller-source/usability-release112-verification.json').read_text()),json.loads((ROOT/'controller-source/manifest83.json').read_text()),require_v2=True)
@@ -418,36 +439,40 @@ def verify(folder):
   json.loads((ROOT/'compatibility/autoplay-size/natural-verification.json').read_text()),
   json.loads((ROOT/'controller-source/manifest84.json').read_text()),
   json.loads((SOURCE/'resources/managed-umbrella.json').read_text()))
- verify_youtube_end_acceptance(json.loads((ROOT/'controller-source/youtube-end-native-verification.json').read_text()),json.loads((ROOT/'controller-source/manifest85.json').read_text()))
+ verify_youtube_end_acceptance(json.loads((ROOT/'controller-source/youtube-end-native-verification.json').read_text()),json.loads((ROOT/'controller-source/manifest85.json').read_text()),historical=True)
+ verify_discovery_acceptance(json.loads((ROOT/"controller-source/discovery-native-verification.json").read_text()),json.loads((ROOT/"controller-source/manifest86.json").read_text()))
  spec=importlib.util.spec_from_file_location('managed',SOURCE/'resources/libs/managed_addons.py');m=importlib.util.module_from_spec(spec);spec.loader.exec_module(m)
- with zipfile.ZipFile(folder/'plugin.program.blacklanturninstaller-1.0.21.zip') as z:
+ with zipfile.ZipFile(folder/'plugin.program.blacklanturninstaller-1.0.22.zip') as z:
   assert z.testzip() is None
   installer={n:z.read(n) for n in z.namelist()}
   assert all(n.startswith('plugin.program.blacklanturninstaller/') for n in installer)
   expected_installer={'plugin.program.blacklanturninstaller/'+str(p.relative_to(SOURCE)):p.read_bytes() for p in SOURCE.rglob('*') if p.is_file() and '__pycache__' not in p.parts and not p.name.endswith(('.pyc','.DS_Store'))}
   assert installer==expected_installer,'Installer ZIP differs from reviewed source'
  for ed in ('General','Apple-TV-Mac'):
-  with zipfile.ZipFile(folder/f'BlackLanturn-{ed}-Kodi21-1.1.16.zip') as z:
+  with zipfile.ZipFile(folder/f'BlackLanturn-{ed}-Kodi21-1.1.17.zip') as z:
    assert z.testzip() is None;m.verify_archive(z,umbrella=True,network=True);verify_playback_defaults(z);verify_display_defaults(z)
    p=json.loads(z.read('userdata/blacklanturn-build.json'))
-   assert p['schema']==3 and p['preferences_policy']=='playback-trakt-youtube-umbrella-network-autoplay-1' and p['helper_patch']=='empty-cache-1' and p['installer_min_version']=='1.0.20'
-   assert p['build_version']=='1.1.16' and p['network_patch']=='request-reliability-privacy-1' and p['umbrella_version']=='6.7.92' and p['umbrella_patch']=='event-progress-3'
-   assert p['controller_version']=='0.1.85' and p['helper_search_patch']=='search-batch-1' and p['helper_playback_patch']=='sampled-progress-1'
+   assert p['schema']==3 and p['preferences_policy']=='playback-trakt-youtube-umbrella-network-autoplay-1' and p['helper_patch']=='empty-cache-1' and p['installer_min_version']=='1.0.22'
+   assert p['build_version']=='1.1.17' and p['network_patch']=='request-reliability-privacy-1' and p['umbrella_version']=='6.7.92' and p['umbrella_patch']=='event-progress-3'
+   assert p['controller_version']=='0.1.86' and p['helper_search_patch']=='search-batch-1' and p['helper_playback_patch']=='sampled-progress-1'
    gui={n.get('id'):n.text for n in ET.fromstring(z.read('userdata/guisettings.xml'))}
    assert {k:gui[k] for k in ('filecache.memorysize','filecache.readfactor','filecache.buffermode','filecache.chunksize')}=={'filecache.memorysize':'64','filecache.readfactor':'400','filecache.buffermode':'4','filecache.chunksize':'131072'}
    assert next(n.text for n in ET.fromstring(z.read('userdata/addon_data/plugin.video.themoviedb.helper/settings.xml')) if n.get('id')=='artwork_quality')=='1'
    assert p['autoplay_patch']=='same-show-source-1'
-   expected=json.loads((ROOT/'controller-source/manifest85.json').read_text())['files']
+   expected=json.loads((ROOT/'controller-source/manifest86.json').read_text())['files']
    actual={n[len('addons/script.blacklanturn.preview/'):]:hashlib.sha256(z.read(n)).hexdigest() for n in z.namelist() if n.startswith('addons/script.blacklanturn.preview/')}
    assert actual==expected
    skin=json.loads((ROOT/'controller-source/manifest85.json').read_text())['skin']
    assert hashlib.sha256(z.read('addons/skin.blacklanturn.preview/xml/Home.xml')).hexdigest()==skin['Home.xml']
    assert ET.fromstring(z.read('addons/skin.blacklanturn.preview/addon.xml')).get('version')==skin['version']
+   assert p['discovery_patch']=='discovery-first-page-1'
+   from resources.libs import discovery_defaults
+   discovery_defaults.verify_archive(z)
    assert p['youtube_end_patch']=='youtube-end-1' and p['skin_version']==skin['version']
    config=json.loads(z.read('userdata/addon_data/script.blacklanturn.preview/rows.json'))
    assert config.get('YouTubeEndSuggestions') is True and config.get('YouTubeEndAutoplay') is False
    for n,d in installer.items():assert z.read('addons/'+n)==d,'Installer mismatch'
    assert z.read('addons/plugin.program.blacklanturninstaller/resources/libs/managed_addons.py')==(SOURCE/'resources/libs/managed_addons.py').read_bytes()
- print('PASS: both packages, protected schema, exact installer, full managed Helper/Umbrella manifests historical progress evidence and historical natural Mac autoplay acceptance and exact-source Mac YouTube end-screen acceptance; Fire/Apple native feature testing pending')
+ print('PASS: both packages, protected schema, exact installer, full managed Helper/Umbrella manifests historical progress evidence and historical natural Mac autoplay acceptance and retained historical YouTube end-screen acceptance plus exact-source Mac first-page discovery acceptance; Fire/Apple discovery testing deferred')
 if __name__=='__main__':
  p=argparse.ArgumentParser();p.add_argument('artifacts',type=Path);verify(p.parse_args().artifacts)

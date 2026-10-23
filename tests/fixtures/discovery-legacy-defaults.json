@@ -1,0 +1,1757 @@
+{
+  "Movies": [
+    {
+      "label": "Trending movies",
+      "path": "plugin://plugin.video.themoviedb.helper/?info=trakt_trending&tmdb_type=movie&nextpage=true&widget=true",
+      "enabled": true
+    },
+    {
+      "label": "Recommended movies",
+      "path": "plugin://plugin.video.themoviedb.helper/?info=trakt_recommendations&tmdb_type=movie&nextpage=true&widget=true",
+      "enabled": true
+    },
+    {
+      "label": "New and popular",
+      "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=movie&nextpage=true&widget=true&with_id=true&sort_by=popularity.desc&include_adult=false&primary_release_date.gte=t-365&primary_release_date.lte=t%2B0",
+      "enabled": true
+    },
+    {
+      "label": "Most popular movies",
+      "path": "plugin://plugin.video.themoviedb.helper/?info=trakt_popular&tmdb_type=movie&nextpage=true&widget=true",
+      "enabled": true
+    },
+    {
+      "label": "Highly rated movies",
+      "path": "plugin://plugin.video.themoviedb.helper/?info=top_rated&tmdb_type=movie&nextpage=true&widget=true",
+      "enabled": true
+    },
+    {
+      "label": "Modern favourites",
+      "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=movie&nextpage=true&widget=true&with_id=true&sort_by=vote_average.desc&include_adult=false&primary_release_date.gte=2000-01-01&vote_count.gte=500",
+      "enabled": true
+    },
+    {
+      "label": "Classics",
+      "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=movie&nextpage=true&widget=true&with_id=true&sort_by=vote_average.desc&include_adult=false&primary_release_date.lte=1999-12-31&vote_count.gte=500",
+      "enabled": true
+    },
+    {
+      "label": "Hidden gems",
+      "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=movie&nextpage=true&widget=true&with_id=true&sort_by=popularity.desc&include_adult=false&vote_average.gte=7&vote_count.gte=100&vote_count.lte=1000",
+      "enabled": true
+    }
+  ],
+  "Shows": [
+    {
+      "label": "Trending shows",
+      "path": "plugin://plugin.video.themoviedb.helper/?info=trakt_trending&tmdb_type=tv&nextpage=true&widget=true",
+      "enabled": true
+    },
+    {
+      "label": "Recommended shows",
+      "path": "plugin://plugin.video.themoviedb.helper/?info=trakt_recommendations&tmdb_type=tv&nextpage=true&widget=true",
+      "enabled": true
+    },
+    {
+      "label": "New and popular",
+      "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=tv&nextpage=true&widget=true&with_id=true&sort_by=popularity.desc&include_adult=false&first_air_date.gte=t-365&first_air_date.lte=t%2B0",
+      "enabled": true
+    },
+    {
+      "label": "Most popular shows",
+      "path": "plugin://plugin.video.themoviedb.helper/?info=trakt_popular&tmdb_type=tv&nextpage=true&widget=true",
+      "enabled": true
+    },
+    {
+      "label": "Highly rated shows",
+      "path": "plugin://plugin.video.themoviedb.helper/?info=top_rated&tmdb_type=tv&nextpage=true&widget=true",
+      "enabled": true
+    },
+    {
+      "label": "Modern favourites",
+      "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=tv&nextpage=true&widget=true&with_id=true&sort_by=vote_average.desc&include_adult=false&first_air_date.gte=2000-01-01&vote_count.gte=500",
+      "enabled": true
+    },
+    {
+      "label": "Classics",
+      "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=tv&nextpage=true&widget=true&with_id=true&sort_by=vote_average.desc&include_adult=false&first_air_date.lte=1999-12-31&vote_count.gte=500",
+      "enabled": true
+    },
+    {
+      "label": "Hidden gems",
+      "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=tv&nextpage=true&widget=true&with_id=true&sort_by=popularity.desc&include_adult=false&vote_average.gte=7&vote_count.gte=100&vote_count.lte=1000",
+      "enabled": true
+    }
+  ],
+  "Genres": [
+    {
+      "id": "bl-movies-action",
+      "label": "Action",
+      "section": "Movies",
+      "enabled": true,
+      "rows": [
+        {
+          "label": "Trending \u00b7 Action",
+          "path": "plugin://plugin.video.themoviedb.helper/?info=trakt_trending&tmdb_type=movie&nextpage=true&widget=true&genres=action",
+          "enabled": true
+        },
+        {
+          "label": "Current picks \u00b7 Action",
+          "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=movie&nextpage=true&widget=true&with_id=true&sort_by=popularity.desc&include_adult=false&primary_release_date.gte=t-1825&primary_release_date.lte=t%2B0&with_genres=28",
+          "enabled": true
+        },
+        {
+          "label": "Martial arts",
+          "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=movie&nextpage=true&widget=true&with_id=true&sort_by=popularity.desc&include_adult=false&with_genres=28&with_keywords=779",
+          "enabled": true
+        },
+        {
+          "label": "Spy missions",
+          "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=movie&nextpage=true&widget=true&with_id=true&sort_by=popularity.desc&include_adult=false&with_genres=28&with_keywords=470",
+          "enabled": true
+        },
+        {
+          "label": "Superheroes",
+          "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=movie&nextpage=true&widget=true&with_id=true&sort_by=popularity.desc&include_adult=false&with_genres=28&with_keywords=9715",
+          "enabled": true
+        },
+        {
+          "label": "Car chases",
+          "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=movie&nextpage=true&widget=true&with_id=true&sort_by=popularity.desc&include_adult=false&with_genres=28&with_keywords=382327",
+          "enabled": true
+        },
+        {
+          "label": "Revenge action",
+          "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=movie&nextpage=true&widget=true&with_id=true&sort_by=popularity.desc&include_adult=false&with_genres=28&with_keywords=9748",
+          "enabled": true
+        },
+        {
+          "label": "Classics \u00b7 Action",
+          "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=movie&nextpage=true&widget=true&with_id=true&sort_by=vote_average.desc&include_adult=false&primary_release_date.lte=1999-12-31&vote_count.gte=100&with_genres=28",
+          "enabled": true
+        },
+        {
+          "label": "Hidden gems \u00b7 Action",
+          "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=movie&nextpage=true&widget=true&with_id=true&sort_by=popularity.desc&include_adult=false&vote_average.gte=7&vote_count.gte=100&vote_count.lte=3000&with_genres=28",
+          "enabled": true
+        },
+        {
+          "label": "Most popular \u00b7 Action",
+          "path": "plugin://plugin.video.themoviedb.helper/?info=trakt_popular&tmdb_type=movie&nextpage=true&widget=true&genres=action",
+          "enabled": true
+        }
+      ]
+    },
+    {
+      "id": "bl-movies-adventure",
+      "label": "Adventure",
+      "section": "Movies",
+      "enabled": true,
+      "rows": [
+        {
+          "label": "Trending \u00b7 Adventure",
+          "path": "plugin://plugin.video.themoviedb.helper/?info=trakt_trending&tmdb_type=movie&nextpage=true&widget=true&genres=adventure",
+          "enabled": true
+        },
+        {
+          "label": "Current picks \u00b7 Adventure",
+          "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=movie&nextpage=true&widget=true&with_id=true&sort_by=popularity.desc&include_adult=false&primary_release_date.gte=t-1825&primary_release_date.lte=t%2B0&with_genres=12",
+          "enabled": true
+        },
+        {
+          "label": "Jungle adventures",
+          "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=movie&nextpage=true&widget=true&with_id=true&sort_by=popularity.desc&include_adult=false&with_genres=12&with_keywords=10787",
+          "enabled": true
+        },
+        {
+          "label": "Survival adventures",
+          "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=movie&nextpage=true&widget=true&with_id=true&sort_by=popularity.desc&include_adult=false&with_genres=12&with_keywords=10349",
+          "enabled": true
+        },
+        {
+          "label": "Treasure hunts",
+          "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=movie&nextpage=true&widget=true&with_id=true&sort_by=popularity.desc&include_adult=false&with_genres=12&with_keywords=6956",
+          "enabled": true
+        },
+        {
+          "label": "Expeditions",
+          "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=movie&nextpage=true&widget=true&with_id=true&sort_by=popularity.desc&include_adult=false&with_genres=12&with_keywords=1963",
+          "enabled": true
+        },
+        {
+          "label": "Pirates",
+          "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=movie&nextpage=true&widget=true&with_id=true&sort_by=popularity.desc&include_adult=false&with_genres=12&with_keywords=12988",
+          "enabled": true
+        },
+        {
+          "label": "Classics \u00b7 Adventure",
+          "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=movie&nextpage=true&widget=true&with_id=true&sort_by=vote_average.desc&include_adult=false&primary_release_date.lte=1999-12-31&vote_count.gte=100&with_genres=12",
+          "enabled": true
+        },
+        {
+          "label": "Hidden gems \u00b7 Adventure",
+          "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=movie&nextpage=true&widget=true&with_id=true&sort_by=popularity.desc&include_adult=false&vote_average.gte=7&vote_count.gte=100&vote_count.lte=3000&with_genres=12",
+          "enabled": true
+        },
+        {
+          "label": "Most popular \u00b7 Adventure",
+          "path": "plugin://plugin.video.themoviedb.helper/?info=trakt_popular&tmdb_type=movie&nextpage=true&widget=true&genres=adventure",
+          "enabled": true
+        }
+      ]
+    },
+    {
+      "id": "bl-movies-comedy",
+      "label": "Comedy",
+      "section": "Movies",
+      "enabled": true,
+      "rows": [
+        {
+          "label": "Trending \u00b7 Comedy",
+          "path": "plugin://plugin.video.themoviedb.helper/?info=trakt_trending&tmdb_type=movie&nextpage=true&widget=true&genres=comedy",
+          "enabled": true
+        },
+        {
+          "label": "Current picks \u00b7 Comedy",
+          "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=movie&nextpage=true&widget=true&with_id=true&sort_by=popularity.desc&include_adult=false&primary_release_date.gte=t-1825&primary_release_date.lte=t%2B0&with_genres=35",
+          "enabled": true
+        },
+        {
+          "label": "Romantic comedy",
+          "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=movie&nextpage=true&widget=true&with_id=true&sort_by=popularity.desc&include_adult=false&with_genres=35%2C10749",
+          "enabled": true
+        },
+        {
+          "label": "Dark comedy",
+          "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=movie&nextpage=true&widget=true&with_id=true&sort_by=popularity.desc&include_adult=false&with_genres=35&with_keywords=10123",
+          "enabled": true
+        },
+        {
+          "label": "Stand-up specials",
+          "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=movie&nextpage=true&widget=true&with_id=true&sort_by=popularity.desc&include_adult=false&with_genres=35&with_keywords=9716",
+          "enabled": true
+        },
+        {
+          "label": "Buddy comedy",
+          "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=movie&nextpage=true&widget=true&with_id=true&sort_by=popularity.desc&include_adult=false&with_genres=35&with_keywords=167541",
+          "enabled": true
+        },
+        {
+          "label": "Satire",
+          "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=movie&nextpage=true&widget=true&with_id=true&sort_by=popularity.desc&include_adult=false&with_genres=35&with_keywords=8201",
+          "enabled": true
+        },
+        {
+          "label": "Classics \u00b7 Comedy",
+          "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=movie&nextpage=true&widget=true&with_id=true&sort_by=vote_average.desc&include_adult=false&primary_release_date.lte=1999-12-31&vote_count.gte=100&with_genres=35",
+          "enabled": true
+        },
+        {
+          "label": "Hidden gems \u00b7 Comedy",
+          "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=movie&nextpage=true&widget=true&with_id=true&sort_by=popularity.desc&include_adult=false&vote_average.gte=7&vote_count.gte=100&vote_count.lte=3000&with_genres=35",
+          "enabled": true
+        },
+        {
+          "label": "Most popular \u00b7 Comedy",
+          "path": "plugin://plugin.video.themoviedb.helper/?info=trakt_popular&tmdb_type=movie&nextpage=true&widget=true&genres=comedy",
+          "enabled": true
+        }
+      ]
+    },
+    {
+      "id": "bl-movies-crime",
+      "label": "Crime",
+      "section": "Movies",
+      "enabled": true,
+      "rows": [
+        {
+          "label": "Trending \u00b7 Crime",
+          "path": "plugin://plugin.video.themoviedb.helper/?info=trakt_trending&tmdb_type=movie&nextpage=true&widget=true&genres=crime",
+          "enabled": true
+        },
+        {
+          "label": "Current picks \u00b7 Crime",
+          "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=movie&nextpage=true&widget=true&with_id=true&sort_by=popularity.desc&include_adult=false&primary_release_date.gte=t-1825&primary_release_date.lte=t%2B0&with_genres=80",
+          "enabled": true
+        },
+        {
+          "label": "Heists",
+          "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=movie&nextpage=true&widget=true&with_id=true&sort_by=popularity.desc&include_adult=false&with_genres=80&with_keywords=10051",
+          "enabled": true
+        },
+        {
+          "label": "Gangsters",
+          "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=movie&nextpage=true&widget=true&with_id=true&sort_by=popularity.desc&include_adult=false&with_genres=80&with_keywords=3149",
+          "enabled": true
+        },
+        {
+          "label": "Detectives",
+          "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=movie&nextpage=true&widget=true&with_id=true&sort_by=popularity.desc&include_adult=false&with_genres=80&with_keywords=703",
+          "enabled": true
+        },
+        {
+          "label": "Organized crime",
+          "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=movie&nextpage=true&widget=true&with_id=true&sort_by=popularity.desc&include_adult=false&with_genres=80&with_keywords=10291",
+          "enabled": true
+        },
+        {
+          "label": "Serial killers",
+          "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=movie&nextpage=true&widget=true&with_id=true&sort_by=popularity.desc&include_adult=false&with_genres=80&with_keywords=10714",
+          "enabled": true
+        },
+        {
+          "label": "Classics \u00b7 Crime",
+          "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=movie&nextpage=true&widget=true&with_id=true&sort_by=vote_average.desc&include_adult=false&primary_release_date.lte=1999-12-31&vote_count.gte=100&with_genres=80",
+          "enabled": true
+        },
+        {
+          "label": "Hidden gems \u00b7 Crime",
+          "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=movie&nextpage=true&widget=true&with_id=true&sort_by=popularity.desc&include_adult=false&vote_average.gte=7&vote_count.gte=100&vote_count.lte=3000&with_genres=80",
+          "enabled": true
+        },
+        {
+          "label": "Most popular \u00b7 Crime",
+          "path": "plugin://plugin.video.themoviedb.helper/?info=trakt_popular&tmdb_type=movie&nextpage=true&widget=true&genres=crime",
+          "enabled": true
+        }
+      ]
+    },
+    {
+      "id": "bl-movies-drama",
+      "label": "Drama",
+      "section": "Movies",
+      "enabled": true,
+      "rows": [
+        {
+          "label": "Trending \u00b7 Drama",
+          "path": "plugin://plugin.video.themoviedb.helper/?info=trakt_trending&tmdb_type=movie&nextpage=true&widget=true&genres=drama",
+          "enabled": true
+        },
+        {
+          "label": "Current picks \u00b7 Drama",
+          "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=movie&nextpage=true&widget=true&with_id=true&sort_by=popularity.desc&include_adult=false&primary_release_date.gte=t-1825&primary_release_date.lte=t%2B0&with_genres=18",
+          "enabled": true
+        },
+        {
+          "label": "Historical drama",
+          "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=movie&nextpage=true&widget=true&with_id=true&sort_by=popularity.desc&include_adult=false&with_genres=18&with_keywords=192772",
+          "enabled": true
+        },
+        {
+          "label": "Courtroom drama",
+          "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=movie&nextpage=true&widget=true&with_id=true&sort_by=popularity.desc&include_adult=false&with_genres=18&with_keywords=33519",
+          "enabled": true
+        },
+        {
+          "label": "Biographical drama",
+          "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=movie&nextpage=true&widget=true&with_id=true&sort_by=popularity.desc&include_adult=false&with_genres=18&with_keywords=5565",
+          "enabled": true
+        },
+        {
+          "label": "Coming of age",
+          "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=movie&nextpage=true&widget=true&with_id=true&sort_by=popularity.desc&include_adult=false&with_genres=18&with_keywords=10683",
+          "enabled": true
+        },
+        {
+          "label": "Political drama",
+          "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=movie&nextpage=true&widget=true&with_id=true&sort_by=popularity.desc&include_adult=false&with_genres=18&with_keywords=298528",
+          "enabled": true
+        },
+        {
+          "label": "Classics \u00b7 Drama",
+          "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=movie&nextpage=true&widget=true&with_id=true&sort_by=vote_average.desc&include_adult=false&primary_release_date.lte=1999-12-31&vote_count.gte=100&with_genres=18",
+          "enabled": true
+        },
+        {
+          "label": "Hidden gems \u00b7 Drama",
+          "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=movie&nextpage=true&widget=true&with_id=true&sort_by=popularity.desc&include_adult=false&vote_average.gte=7&vote_count.gte=100&vote_count.lte=3000&with_genres=18",
+          "enabled": true
+        },
+        {
+          "label": "Most popular \u00b7 Drama",
+          "path": "plugin://plugin.video.themoviedb.helper/?info=trakt_popular&tmdb_type=movie&nextpage=true&widget=true&genres=drama",
+          "enabled": true
+        }
+      ]
+    },
+    {
+      "id": "bl-movies-horror",
+      "label": "Horror",
+      "section": "Movies",
+      "enabled": true,
+      "rows": [
+        {
+          "label": "Trending \u00b7 Horror",
+          "path": "plugin://plugin.video.themoviedb.helper/?info=trakt_trending&tmdb_type=movie&nextpage=true&widget=true&genres=horror",
+          "enabled": true
+        },
+        {
+          "label": "Current picks \u00b7 Horror",
+          "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=movie&nextpage=true&widget=true&with_id=true&sort_by=popularity.desc&include_adult=false&primary_release_date.gte=t-1825&primary_release_date.lte=t%2B0&with_genres=27",
+          "enabled": true
+        },
+        {
+          "label": "Slashers",
+          "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=movie&nextpage=true&widget=true&with_id=true&sort_by=popularity.desc&include_adult=false&with_genres=27&with_keywords=12339",
+          "enabled": true
+        },
+        {
+          "label": "Creature Features",
+          "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=movie&nextpage=true&widget=true&with_id=true&sort_by=popularity.desc&include_adult=false&with_genres=27&with_keywords=1299",
+          "enabled": true
+        },
+        {
+          "label": "Supernatural horror",
+          "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=movie&nextpage=true&widget=true&with_id=true&sort_by=popularity.desc&include_adult=false&with_genres=27&with_keywords=6152",
+          "enabled": true
+        },
+        {
+          "label": "Haunted houses",
+          "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=movie&nextpage=true&widget=true&with_id=true&sort_by=popularity.desc&include_adult=false&with_genres=27&with_keywords=3358",
+          "enabled": true
+        },
+        {
+          "label": "Zombies",
+          "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=movie&nextpage=true&widget=true&with_id=true&sort_by=popularity.desc&include_adult=false&with_genres=27&with_keywords=12377",
+          "enabled": true
+        },
+        {
+          "label": "Classics \u00b7 Horror",
+          "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=movie&nextpage=true&widget=true&with_id=true&sort_by=vote_average.desc&include_adult=false&primary_release_date.lte=1999-12-31&vote_count.gte=100&with_genres=27",
+          "enabled": true
+        },
+        {
+          "label": "Hidden gems \u00b7 Horror",
+          "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=movie&nextpage=true&widget=true&with_id=true&sort_by=popularity.desc&include_adult=false&vote_average.gte=7&vote_count.gte=100&vote_count.lte=3000&with_genres=27",
+          "enabled": true
+        },
+        {
+          "label": "Most popular \u00b7 Horror",
+          "path": "plugin://plugin.video.themoviedb.helper/?info=trakt_popular&tmdb_type=movie&nextpage=true&widget=true&genres=horror",
+          "enabled": true
+        }
+      ]
+    },
+    {
+      "id": "bl-movies-thriller",
+      "label": "Thriller",
+      "section": "Movies",
+      "enabled": true,
+      "rows": [
+        {
+          "label": "Trending \u00b7 Thriller",
+          "path": "plugin://plugin.video.themoviedb.helper/?info=trakt_trending&tmdb_type=movie&nextpage=true&widget=true&genres=thriller",
+          "enabled": true
+        },
+        {
+          "label": "Current picks \u00b7 Thriller",
+          "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=movie&nextpage=true&widget=true&with_id=true&sort_by=popularity.desc&include_adult=false&primary_release_date.gte=t-1825&primary_release_date.lte=t%2B0&with_genres=53",
+          "enabled": true
+        },
+        {
+          "label": "Psychological thrillers",
+          "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=movie&nextpage=true&widget=true&with_id=true&sort_by=popularity.desc&include_adult=false&with_genres=53&with_keywords=12565",
+          "enabled": true
+        },
+        {
+          "label": "Crime thrillers",
+          "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=movie&nextpage=true&widget=true&with_id=true&sort_by=popularity.desc&include_adult=false&with_genres=53%2C80",
+          "enabled": true
+        },
+        {
+          "label": "Survival thrillers",
+          "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=movie&nextpage=true&widget=true&with_id=true&sort_by=popularity.desc&include_adult=false&with_genres=53&with_keywords=10349",
+          "enabled": true
+        },
+        {
+          "label": "Conspiracy thrillers",
+          "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=movie&nextpage=true&widget=true&with_id=true&sort_by=popularity.desc&include_adult=false&with_genres=53&with_keywords=10410",
+          "enabled": true
+        },
+        {
+          "label": "Kidnapping thrillers",
+          "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=movie&nextpage=true&widget=true&with_id=true&sort_by=popularity.desc&include_adult=false&with_genres=53&with_keywords=1930",
+          "enabled": true
+        },
+        {
+          "label": "Classics \u00b7 Thriller",
+          "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=movie&nextpage=true&widget=true&with_id=true&sort_by=vote_average.desc&include_adult=false&primary_release_date.lte=1999-12-31&vote_count.gte=100&with_genres=53",
+          "enabled": true
+        },
+        {
+          "label": "Hidden gems \u00b7 Thriller",
+          "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=movie&nextpage=true&widget=true&with_id=true&sort_by=popularity.desc&include_adult=false&vote_average.gte=7&vote_count.gte=100&vote_count.lte=3000&with_genres=53",
+          "enabled": true
+        },
+        {
+          "label": "Most popular \u00b7 Thriller",
+          "path": "plugin://plugin.video.themoviedb.helper/?info=trakt_popular&tmdb_type=movie&nextpage=true&widget=true&genres=thriller",
+          "enabled": true
+        }
+      ]
+    },
+    {
+      "id": "bl-movies-mystery",
+      "label": "Mystery",
+      "section": "Movies",
+      "enabled": true,
+      "rows": [
+        {
+          "label": "Trending \u00b7 Mystery",
+          "path": "plugin://plugin.video.themoviedb.helper/?info=trakt_trending&tmdb_type=movie&nextpage=true&widget=true&genres=mystery",
+          "enabled": true
+        },
+        {
+          "label": "Current picks \u00b7 Mystery",
+          "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=movie&nextpage=true&widget=true&with_id=true&sort_by=popularity.desc&include_adult=false&primary_release_date.gte=t-1825&primary_release_date.lte=t%2B0&with_genres=9648",
+          "enabled": true
+        },
+        {
+          "label": "Murder mysteries",
+          "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=movie&nextpage=true&widget=true&with_id=true&sort_by=popularity.desc&include_adult=false&with_genres=9648&with_keywords=207046",
+          "enabled": true
+        },
+        {
+          "label": "Detective mysteries",
+          "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=movie&nextpage=true&widget=true&with_id=true&sort_by=popularity.desc&include_adult=false&with_genres=9648&with_keywords=703",
+          "enabled": true
+        },
+        {
+          "label": "Conspiracies",
+          "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=movie&nextpage=true&widget=true&with_id=true&sort_by=popularity.desc&include_adult=false&with_genres=9648&with_keywords=10410",
+          "enabled": true
+        },
+        {
+          "label": "Whodunits",
+          "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=movie&nextpage=true&widget=true&with_id=true&sort_by=popularity.desc&include_adult=false&with_genres=9648&with_keywords=12570",
+          "enabled": true
+        },
+        {
+          "label": "Missing persons",
+          "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=movie&nextpage=true&widget=true&with_id=true&sort_by=popularity.desc&include_adult=false&with_genres=9648&with_keywords=156091",
+          "enabled": true
+        },
+        {
+          "label": "Classics \u00b7 Mystery",
+          "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=movie&nextpage=true&widget=true&with_id=true&sort_by=vote_average.desc&include_adult=false&primary_release_date.lte=1999-12-31&vote_count.gte=100&with_genres=9648",
+          "enabled": true
+        },
+        {
+          "label": "Hidden gems \u00b7 Mystery",
+          "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=movie&nextpage=true&widget=true&with_id=true&sort_by=popularity.desc&include_adult=false&vote_average.gte=7&vote_count.gte=100&vote_count.lte=3000&with_genres=9648",
+          "enabled": true
+        },
+        {
+          "label": "Most popular \u00b7 Mystery",
+          "path": "plugin://plugin.video.themoviedb.helper/?info=trakt_popular&tmdb_type=movie&nextpage=true&widget=true&genres=mystery",
+          "enabled": true
+        }
+      ]
+    },
+    {
+      "id": "bl-movies-sci-fi",
+      "label": "Sci-Fi",
+      "section": "Movies",
+      "enabled": true,
+      "rows": [
+        {
+          "label": "Trending \u00b7 Sci-Fi",
+          "path": "plugin://plugin.video.themoviedb.helper/?info=trakt_trending&tmdb_type=movie&nextpage=true&widget=true&genres=science-fiction",
+          "enabled": true
+        },
+        {
+          "label": "Current picks \u00b7 Sci-Fi",
+          "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=movie&nextpage=true&widget=true&with_id=true&sort_by=popularity.desc&include_adult=false&primary_release_date.gte=t-1825&primary_release_date.lte=t%2B0&with_genres=878",
+          "enabled": true
+        },
+        {
+          "label": "Space travel",
+          "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=movie&nextpage=true&widget=true&with_id=true&sort_by=popularity.desc&include_adult=false&with_genres=878&with_keywords=3801",
+          "enabled": true
+        },
+        {
+          "label": "Alien encounters",
+          "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=movie&nextpage=true&widget=true&with_id=true&sort_by=popularity.desc&include_adult=false&with_genres=878&with_keywords=9951",
+          "enabled": true
+        },
+        {
+          "label": "Dystopian futures",
+          "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=movie&nextpage=true&widget=true&with_id=true&sort_by=popularity.desc&include_adult=false&with_genres=878&with_keywords=4565",
+          "enabled": true
+        },
+        {
+          "label": "Time travel",
+          "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=movie&nextpage=true&widget=true&with_id=true&sort_by=popularity.desc&include_adult=false&with_genres=878&with_keywords=4379",
+          "enabled": true
+        },
+        {
+          "label": "Artificial intelligence",
+          "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=movie&nextpage=true&widget=true&with_id=true&sort_by=popularity.desc&include_adult=false&with_genres=878&with_keywords=310",
+          "enabled": true
+        },
+        {
+          "label": "Classics \u00b7 Sci-Fi",
+          "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=movie&nextpage=true&widget=true&with_id=true&sort_by=vote_average.desc&include_adult=false&primary_release_date.lte=1999-12-31&vote_count.gte=100&with_genres=878",
+          "enabled": true
+        },
+        {
+          "label": "Hidden gems \u00b7 Sci-Fi",
+          "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=movie&nextpage=true&widget=true&with_id=true&sort_by=popularity.desc&include_adult=false&vote_average.gte=7&vote_count.gte=100&vote_count.lte=3000&with_genres=878",
+          "enabled": true
+        },
+        {
+          "label": "Most popular \u00b7 Sci-Fi",
+          "path": "plugin://plugin.video.themoviedb.helper/?info=trakt_popular&tmdb_type=movie&nextpage=true&widget=true&genres=science-fiction",
+          "enabled": true
+        }
+      ]
+    },
+    {
+      "id": "bl-movies-fantasy",
+      "label": "Fantasy",
+      "section": "Movies",
+      "enabled": true,
+      "rows": [
+        {
+          "label": "Trending \u00b7 Fantasy",
+          "path": "plugin://plugin.video.themoviedb.helper/?info=trakt_trending&tmdb_type=movie&nextpage=true&widget=true&genres=fantasy",
+          "enabled": true
+        },
+        {
+          "label": "Current picks \u00b7 Fantasy",
+          "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=movie&nextpage=true&widget=true&with_id=true&sort_by=popularity.desc&include_adult=false&primary_release_date.gte=t-1825&primary_release_date.lte=t%2B0&with_genres=14",
+          "enabled": true
+        },
+        {
+          "label": "Magic",
+          "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=movie&nextpage=true&widget=true&with_id=true&sort_by=popularity.desc&include_adult=false&with_genres=14&with_keywords=2343",
+          "enabled": true
+        },
+        {
+          "label": "Mythical worlds",
+          "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=movie&nextpage=true&widget=true&with_id=true&sort_by=popularity.desc&include_adult=false&with_genres=14&with_keywords=2035",
+          "enabled": true
+        },
+        {
+          "label": "Dark fantasy",
+          "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=movie&nextpage=true&widget=true&with_id=true&sort_by=popularity.desc&include_adult=false&with_genres=14&with_keywords=177895",
+          "enabled": true
+        },
+        {
+          "label": "Sword and sorcery",
+          "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=movie&nextpage=true&widget=true&with_id=true&sort_by=popularity.desc&include_adult=false&with_genres=14&with_keywords=234213",
+          "enabled": true
+        },
+        {
+          "label": "Fairy tales",
+          "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=movie&nextpage=true&widget=true&with_id=true&sort_by=popularity.desc&include_adult=false&with_genres=14&with_keywords=3205",
+          "enabled": true
+        },
+        {
+          "label": "Classics \u00b7 Fantasy",
+          "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=movie&nextpage=true&widget=true&with_id=true&sort_by=vote_average.desc&include_adult=false&primary_release_date.lte=1999-12-31&vote_count.gte=100&with_genres=14",
+          "enabled": true
+        },
+        {
+          "label": "Hidden gems \u00b7 Fantasy",
+          "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=movie&nextpage=true&widget=true&with_id=true&sort_by=popularity.desc&include_adult=false&vote_average.gte=7&vote_count.gte=100&vote_count.lte=3000&with_genres=14",
+          "enabled": true
+        },
+        {
+          "label": "Most popular \u00b7 Fantasy",
+          "path": "plugin://plugin.video.themoviedb.helper/?info=trakt_popular&tmdb_type=movie&nextpage=true&widget=true&genres=fantasy",
+          "enabled": true
+        }
+      ]
+    },
+    {
+      "id": "bl-movies-animation",
+      "label": "Animation",
+      "section": "Movies",
+      "enabled": true,
+      "rows": [
+        {
+          "label": "Trending \u00b7 Animation",
+          "path": "plugin://plugin.video.themoviedb.helper/?info=trakt_trending&tmdb_type=movie&nextpage=true&widget=true&genres=animation",
+          "enabled": true
+        },
+        {
+          "label": "Current picks \u00b7 Animation",
+          "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=movie&nextpage=true&widget=true&with_id=true&sort_by=popularity.desc&include_adult=false&primary_release_date.gte=t-1825&primary_release_date.lte=t%2B0&with_genres=16",
+          "enabled": true
+        },
+        {
+          "label": "Anime",
+          "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=movie&nextpage=true&widget=true&with_id=true&sort_by=popularity.desc&include_adult=false&with_genres=16&with_keywords=210024",
+          "enabled": true
+        },
+        {
+          "label": "Adult animation",
+          "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=movie&nextpage=true&widget=true&with_id=true&sort_by=popularity.desc&include_adult=false&with_genres=16&with_keywords=161919",
+          "enabled": true
+        },
+        {
+          "label": "Family animation",
+          "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=movie&nextpage=true&widget=true&with_id=true&sort_by=popularity.desc&include_adult=false&with_genres=16%2C10751",
+          "enabled": true
+        },
+        {
+          "label": "Stop motion",
+          "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=movie&nextpage=true&widget=true&with_id=true&sort_by=popularity.desc&include_adult=false&with_genres=16&with_keywords=10121",
+          "enabled": true
+        },
+        {
+          "label": "Animated adventures",
+          "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=movie&nextpage=true&widget=true&with_id=true&sort_by=popularity.desc&include_adult=false&with_genres=16%2C12",
+          "enabled": true
+        },
+        {
+          "label": "Classics \u00b7 Animation",
+          "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=movie&nextpage=true&widget=true&with_id=true&sort_by=vote_average.desc&include_adult=false&primary_release_date.lte=1999-12-31&vote_count.gte=100&with_genres=16",
+          "enabled": true
+        },
+        {
+          "label": "Hidden gems \u00b7 Animation",
+          "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=movie&nextpage=true&widget=true&with_id=true&sort_by=popularity.desc&include_adult=false&vote_average.gte=7&vote_count.gte=100&vote_count.lte=3000&with_genres=16",
+          "enabled": true
+        },
+        {
+          "label": "Most popular \u00b7 Animation",
+          "path": "plugin://plugin.video.themoviedb.helper/?info=trakt_popular&tmdb_type=movie&nextpage=true&widget=true&genres=animation",
+          "enabled": true
+        }
+      ]
+    },
+    {
+      "id": "bl-movies-documentary",
+      "label": "Documentary",
+      "section": "Movies",
+      "enabled": true,
+      "rows": [
+        {
+          "label": "Trending \u00b7 Documentary",
+          "path": "plugin://plugin.video.themoviedb.helper/?info=trakt_trending&tmdb_type=movie&nextpage=true&widget=true&genres=documentary",
+          "enabled": true
+        },
+        {
+          "label": "Current picks \u00b7 Documentary",
+          "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=movie&nextpage=true&widget=true&with_id=true&sort_by=popularity.desc&include_adult=false&primary_release_date.gte=t-1825&primary_release_date.lte=t%2B0&with_genres=99",
+          "enabled": true
+        },
+        {
+          "label": "True crime",
+          "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=movie&nextpage=true&widget=true&with_id=true&sort_by=popularity.desc&include_adult=false&with_genres=99&with_keywords=33722",
+          "enabled": true
+        },
+        {
+          "label": "Nature",
+          "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=movie&nextpage=true&widget=true&with_id=true&sort_by=popularity.desc&include_adult=false&with_genres=99&with_keywords=18330",
+          "enabled": true
+        },
+        {
+          "label": "History",
+          "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=movie&nextpage=true&widget=true&with_id=true&sort_by=popularity.desc&include_adult=false&with_genres=99&with_keywords=282633",
+          "enabled": true
+        },
+        {
+          "label": "Sports documentaries",
+          "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=movie&nextpage=true&widget=true&with_id=true&sort_by=popularity.desc&include_adult=false&with_genres=99&with_keywords=6075",
+          "enabled": true
+        },
+        {
+          "label": "Music documentaries",
+          "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=movie&nextpage=true&widget=true&with_id=true&sort_by=popularity.desc&include_adult=false&with_genres=99&with_keywords=246377",
+          "enabled": true
+        },
+        {
+          "label": "Classics \u00b7 Documentary",
+          "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=movie&nextpage=true&widget=true&with_id=true&sort_by=vote_average.desc&include_adult=false&primary_release_date.lte=1999-12-31&vote_count.gte=100&with_genres=99",
+          "enabled": true
+        },
+        {
+          "label": "Hidden gems \u00b7 Documentary",
+          "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=movie&nextpage=true&widget=true&with_id=true&sort_by=popularity.desc&include_adult=false&vote_average.gte=7&vote_count.gte=100&vote_count.lte=3000&with_genres=99",
+          "enabled": true
+        },
+        {
+          "label": "Most popular \u00b7 Documentary",
+          "path": "plugin://plugin.video.themoviedb.helper/?info=trakt_popular&tmdb_type=movie&nextpage=true&widget=true&genres=documentary",
+          "enabled": true
+        }
+      ]
+    },
+    {
+      "id": "bl-movies-westerns",
+      "label": "Westerns",
+      "section": "Movies",
+      "enabled": true,
+      "rows": [
+        {
+          "label": "Trending \u00b7 Westerns",
+          "path": "plugin://plugin.video.themoviedb.helper/?info=trakt_trending&tmdb_type=movie&nextpage=true&widget=true&genres=western",
+          "enabled": true
+        },
+        {
+          "label": "Current picks \u00b7 Westerns",
+          "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=movie&nextpage=true&widget=true&with_id=true&sort_by=popularity.desc&include_adult=false&primary_release_date.gte=t-1825&primary_release_date.lte=t%2B0&with_genres=37",
+          "enabled": true
+        },
+        {
+          "label": "Classic westerns",
+          "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=movie&nextpage=true&widget=true&with_id=true&sort_by=popularity.desc&include_adult=false&primary_release_date.lte=1989-12-31&with_genres=37",
+          "enabled": true
+        },
+        {
+          "label": "Modern westerns",
+          "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=movie&nextpage=true&widget=true&with_id=true&sort_by=popularity.desc&include_adult=false&primary_release_date.gte=1990-01-01&with_genres=37",
+          "enabled": true
+        },
+        {
+          "label": "Spaghetti westerns",
+          "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=movie&nextpage=true&widget=true&with_id=true&sort_by=popularity.desc&include_adult=false&with_genres=37&with_keywords=156212",
+          "enabled": true
+        },
+        {
+          "label": "Outlaws",
+          "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=movie&nextpage=true&widget=true&with_id=true&sort_by=popularity.desc&include_adult=false&with_genres=37&with_keywords=9503",
+          "enabled": true
+        },
+        {
+          "label": "Life on the frontier",
+          "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=movie&nextpage=true&widget=true&with_id=true&sort_by=popularity.desc&include_adult=false&with_genres=37&with_keywords=9454",
+          "enabled": true
+        },
+        {
+          "label": "Classics \u00b7 Westerns",
+          "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=movie&nextpage=true&widget=true&with_id=true&sort_by=vote_average.desc&include_adult=false&primary_release_date.lte=1999-12-31&vote_count.gte=100&with_genres=37",
+          "enabled": true
+        },
+        {
+          "label": "Hidden gems \u00b7 Westerns",
+          "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=movie&nextpage=true&widget=true&with_id=true&sort_by=popularity.desc&include_adult=false&vote_average.gte=7&vote_count.gte=100&vote_count.lte=3000&with_genres=37",
+          "enabled": true
+        },
+        {
+          "label": "Most popular \u00b7 Westerns",
+          "path": "plugin://plugin.video.themoviedb.helper/?info=trakt_popular&tmdb_type=movie&nextpage=true&widget=true&genres=western",
+          "enabled": true
+        }
+      ]
+    },
+    {
+      "id": "bl-shows-action-adventure",
+      "label": "Action & Adventure",
+      "section": "Shows",
+      "enabled": true,
+      "rows": [
+        {
+          "label": "Trending \u00b7 Action & Adventure",
+          "path": "plugin://plugin.video.themoviedb.helper/?info=trakt_trending&tmdb_type=tv&nextpage=true&widget=true&genres=action%2Cadventure",
+          "enabled": true
+        },
+        {
+          "label": "Current picks \u00b7 Action & Adventure",
+          "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=tv&nextpage=true&widget=true&with_id=true&sort_by=popularity.desc&include_adult=false&first_air_date.gte=t-1825&first_air_date.lte=t%2B0&with_genres=10759",
+          "enabled": true
+        },
+        {
+          "label": "Superheroes",
+          "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=tv&nextpage=true&widget=true&with_id=true&sort_by=popularity.desc&include_adult=false&with_genres=10759&with_keywords=9715",
+          "enabled": true
+        },
+        {
+          "label": "Spy series",
+          "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=tv&nextpage=true&widget=true&with_id=true&sort_by=popularity.desc&include_adult=false&with_genres=10759&with_keywords=470",
+          "enabled": true
+        },
+        {
+          "label": "Martial arts",
+          "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=tv&nextpage=true&widget=true&with_id=true&sort_by=popularity.desc&include_adult=false&with_genres=10759&with_keywords=779",
+          "enabled": true
+        },
+        {
+          "label": "Survival adventures",
+          "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=tv&nextpage=true&widget=true&with_id=true&sort_by=popularity.desc&include_adult=false&with_genres=10759&with_keywords=10349",
+          "enabled": true
+        },
+        {
+          "label": "Superpowers",
+          "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=tv&nextpage=true&widget=true&with_id=true&sort_by=popularity.desc&include_adult=false&with_genres=10759&with_keywords=33637",
+          "enabled": true
+        },
+        {
+          "label": "Classics \u00b7 Action & Adventure",
+          "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=tv&nextpage=true&widget=true&with_id=true&sort_by=vote_average.desc&include_adult=false&first_air_date.lte=1999-12-31&vote_count.gte=100&with_genres=10759",
+          "enabled": true
+        },
+        {
+          "label": "Hidden gems \u00b7 Action & Adventure",
+          "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=tv&nextpage=true&widget=true&with_id=true&sort_by=popularity.desc&include_adult=false&vote_average.gte=7&vote_count.gte=100&vote_count.lte=3000&with_genres=10759",
+          "enabled": true
+        },
+        {
+          "label": "Most popular \u00b7 Action & Adventure",
+          "path": "plugin://plugin.video.themoviedb.helper/?info=trakt_popular&tmdb_type=tv&nextpage=true&widget=true&genres=action%2Cadventure",
+          "enabled": true
+        }
+      ]
+    },
+    {
+      "id": "bl-shows-comedy",
+      "label": "Comedy",
+      "section": "Shows",
+      "enabled": true,
+      "rows": [
+        {
+          "label": "Trending \u00b7 Comedy",
+          "path": "plugin://plugin.video.themoviedb.helper/?info=trakt_trending&tmdb_type=tv&nextpage=true&widget=true&genres=comedy",
+          "enabled": true
+        },
+        {
+          "label": "Current picks \u00b7 Comedy",
+          "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=tv&nextpage=true&widget=true&with_id=true&sort_by=popularity.desc&include_adult=false&first_air_date.gte=t-1825&first_air_date.lte=t%2B0&with_genres=35",
+          "enabled": true
+        },
+        {
+          "label": "Sitcoms",
+          "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=tv&nextpage=true&widget=true&with_id=true&sort_by=popularity.desc&include_adult=false&with_genres=35&with_keywords=193171",
+          "enabled": true
+        },
+        {
+          "label": "Dark comedy",
+          "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=tv&nextpage=true&widget=true&with_id=true&sort_by=popularity.desc&include_adult=false&with_genres=35&with_keywords=10123",
+          "enabled": true
+        },
+        {
+          "label": "Stand-up series",
+          "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=tv&nextpage=true&widget=true&with_id=true&sort_by=popularity.desc&include_adult=false&with_genres=35&with_keywords=9716",
+          "enabled": true
+        },
+        {
+          "label": "Workplace comedy",
+          "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=tv&nextpage=true&widget=true&with_id=true&sort_by=popularity.desc&include_adult=false&with_genres=35&with_keywords=210605",
+          "enabled": true
+        },
+        {
+          "label": "Sketch comedy",
+          "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=tv&nextpage=true&widget=true&with_id=true&sort_by=popularity.desc&include_adult=false&with_genres=35&with_keywords=156203",
+          "enabled": true
+        },
+        {
+          "label": "Classics \u00b7 Comedy",
+          "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=tv&nextpage=true&widget=true&with_id=true&sort_by=vote_average.desc&include_adult=false&first_air_date.lte=1999-12-31&vote_count.gte=100&with_genres=35",
+          "enabled": true
+        },
+        {
+          "label": "Hidden gems \u00b7 Comedy",
+          "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=tv&nextpage=true&widget=true&with_id=true&sort_by=popularity.desc&include_adult=false&vote_average.gte=7&vote_count.gte=100&vote_count.lte=3000&with_genres=35",
+          "enabled": true
+        },
+        {
+          "label": "Most popular \u00b7 Comedy",
+          "path": "plugin://plugin.video.themoviedb.helper/?info=trakt_popular&tmdb_type=tv&nextpage=true&widget=true&genres=comedy",
+          "enabled": true
+        }
+      ]
+    },
+    {
+      "id": "bl-shows-crime",
+      "label": "Crime",
+      "section": "Shows",
+      "enabled": true,
+      "rows": [
+        {
+          "label": "Trending \u00b7 Crime",
+          "path": "plugin://plugin.video.themoviedb.helper/?info=trakt_trending&tmdb_type=tv&nextpage=true&widget=true&genres=crime",
+          "enabled": true
+        },
+        {
+          "label": "Current picks \u00b7 Crime",
+          "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=tv&nextpage=true&widget=true&with_id=true&sort_by=popularity.desc&include_adult=false&first_air_date.gte=t-1825&first_air_date.lte=t%2B0&with_genres=80",
+          "enabled": true
+        },
+        {
+          "label": "Police procedurals",
+          "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=tv&nextpage=true&widget=true&with_id=true&sort_by=popularity.desc&include_adult=false&with_genres=80&with_keywords=268067",
+          "enabled": true
+        },
+        {
+          "label": "Detectives",
+          "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=tv&nextpage=true&widget=true&with_id=true&sort_by=popularity.desc&include_adult=false&with_genres=80&with_keywords=703",
+          "enabled": true
+        },
+        {
+          "label": "True crime",
+          "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=tv&nextpage=true&widget=true&with_id=true&sort_by=popularity.desc&include_adult=false&with_genres=80&with_keywords=33722",
+          "enabled": true
+        },
+        {
+          "label": "Organized crime",
+          "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=tv&nextpage=true&widget=true&with_id=true&sort_by=popularity.desc&include_adult=false&with_genres=80&with_keywords=10291",
+          "enabled": true
+        },
+        {
+          "label": "Serial killers",
+          "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=tv&nextpage=true&widget=true&with_id=true&sort_by=popularity.desc&include_adult=false&with_genres=80&with_keywords=10714",
+          "enabled": true
+        },
+        {
+          "label": "Classics \u00b7 Crime",
+          "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=tv&nextpage=true&widget=true&with_id=true&sort_by=vote_average.desc&include_adult=false&first_air_date.lte=1999-12-31&vote_count.gte=100&with_genres=80",
+          "enabled": true
+        },
+        {
+          "label": "Hidden gems \u00b7 Crime",
+          "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=tv&nextpage=true&widget=true&with_id=true&sort_by=popularity.desc&include_adult=false&vote_average.gte=7&vote_count.gte=100&vote_count.lte=3000&with_genres=80",
+          "enabled": true
+        },
+        {
+          "label": "Most popular \u00b7 Crime",
+          "path": "plugin://plugin.video.themoviedb.helper/?info=trakt_popular&tmdb_type=tv&nextpage=true&widget=true&genres=crime",
+          "enabled": true
+        }
+      ]
+    },
+    {
+      "id": "bl-shows-drama",
+      "label": "Drama",
+      "section": "Shows",
+      "enabled": true,
+      "rows": [
+        {
+          "label": "Trending \u00b7 Drama",
+          "path": "plugin://plugin.video.themoviedb.helper/?info=trakt_trending&tmdb_type=tv&nextpage=true&widget=true&genres=drama",
+          "enabled": true
+        },
+        {
+          "label": "Current picks \u00b7 Drama",
+          "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=tv&nextpage=true&widget=true&with_id=true&sort_by=popularity.desc&include_adult=false&first_air_date.gte=t-1825&first_air_date.lte=t%2B0&with_genres=18",
+          "enabled": true
+        },
+        {
+          "label": "Family drama",
+          "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=tv&nextpage=true&widget=true&with_id=true&sort_by=popularity.desc&include_adult=false&with_genres=18&with_keywords=12279",
+          "enabled": true
+        },
+        {
+          "label": "Period drama",
+          "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=tv&nextpage=true&widget=true&with_id=true&sort_by=popularity.desc&include_adult=false&with_genres=18&with_keywords=15060",
+          "enabled": true
+        },
+        {
+          "label": "Medical drama",
+          "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=tv&nextpage=true&widget=true&with_id=true&sort_by=popularity.desc&include_adult=false&with_genres=18&with_keywords=208788",
+          "enabled": true
+        },
+        {
+          "label": "Political drama",
+          "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=tv&nextpage=true&widget=true&with_id=true&sort_by=popularity.desc&include_adult=false&with_genres=18&with_keywords=298528",
+          "enabled": true
+        },
+        {
+          "label": "Coming of age",
+          "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=tv&nextpage=true&widget=true&with_id=true&sort_by=popularity.desc&include_adult=false&with_genres=18&with_keywords=10683",
+          "enabled": true
+        },
+        {
+          "label": "Classics \u00b7 Drama",
+          "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=tv&nextpage=true&widget=true&with_id=true&sort_by=vote_average.desc&include_adult=false&first_air_date.lte=1999-12-31&vote_count.gte=100&with_genres=18",
+          "enabled": true
+        },
+        {
+          "label": "Hidden gems \u00b7 Drama",
+          "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=tv&nextpage=true&widget=true&with_id=true&sort_by=popularity.desc&include_adult=false&vote_average.gte=7&vote_count.gte=100&vote_count.lte=3000&with_genres=18",
+          "enabled": true
+        },
+        {
+          "label": "Most popular \u00b7 Drama",
+          "path": "plugin://plugin.video.themoviedb.helper/?info=trakt_popular&tmdb_type=tv&nextpage=true&widget=true&genres=drama",
+          "enabled": true
+        }
+      ]
+    },
+    {
+      "id": "bl-shows-horror",
+      "label": "Horror",
+      "section": "Shows",
+      "enabled": true,
+      "rows": [
+        {
+          "label": "Trending \u00b7 Horror",
+          "path": "plugin://plugin.video.themoviedb.helper/?info=trakt_trending&tmdb_type=tv&nextpage=true&widget=true&genres=horror",
+          "enabled": true
+        },
+        {
+          "label": "Current picks \u00b7 Horror",
+          "path": "plugin://plugin.video.themoviedb.helper/?info=trakt_popular&tmdb_type=tv&nextpage=true&widget=true&genres=horror&years=2021-2026",
+          "enabled": true
+        },
+        {
+          "label": "Supernatural series",
+          "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=tv&nextpage=true&widget=true&with_id=true&sort_by=popularity.desc&include_adult=false&with_keywords=6152",
+          "enabled": true
+        },
+        {
+          "label": "Zombies",
+          "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=tv&nextpage=true&widget=true&with_id=true&sort_by=popularity.desc&include_adult=false&with_keywords=12377",
+          "enabled": true
+        },
+        {
+          "label": "Vampires",
+          "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=tv&nextpage=true&widget=true&with_id=true&sort_by=popularity.desc&include_adult=false&with_keywords=3133",
+          "enabled": true
+        },
+        {
+          "label": "Haunted houses",
+          "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=tv&nextpage=true&widget=true&with_id=true&sort_by=popularity.desc&include_adult=false&with_keywords=3358",
+          "enabled": true
+        },
+        {
+          "label": "Psychological horror",
+          "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=tv&nextpage=true&widget=true&with_id=true&sort_by=popularity.desc&include_adult=false&with_keywords=295907",
+          "enabled": true
+        },
+        {
+          "label": "Classics \u00b7 Horror",
+          "path": "plugin://plugin.video.themoviedb.helper/?info=trakt_popular&tmdb_type=tv&nextpage=true&widget=true&genres=horror&years=1900-1999",
+          "enabled": true
+        },
+        {
+          "label": "Hidden gems \u00b7 Horror",
+          "path": "plugin://plugin.video.themoviedb.helper/?info=trakt_popular&tmdb_type=tv&nextpage=true&widget=true&genres=horror&ratings=70-100&votes=100-3000",
+          "enabled": true
+        },
+        {
+          "label": "Most popular \u00b7 Horror",
+          "path": "plugin://plugin.video.themoviedb.helper/?info=trakt_popular&tmdb_type=tv&nextpage=true&widget=true&genres=horror",
+          "enabled": true
+        }
+      ]
+    },
+    {
+      "id": "bl-shows-mystery",
+      "label": "Mystery",
+      "section": "Shows",
+      "enabled": true,
+      "rows": [
+        {
+          "label": "Trending \u00b7 Mystery",
+          "path": "plugin://plugin.video.themoviedb.helper/?info=trakt_trending&tmdb_type=tv&nextpage=true&widget=true&genres=mystery",
+          "enabled": true
+        },
+        {
+          "label": "Current picks \u00b7 Mystery",
+          "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=tv&nextpage=true&widget=true&with_id=true&sort_by=popularity.desc&include_adult=false&first_air_date.gte=t-1825&first_air_date.lte=t%2B0&with_genres=9648",
+          "enabled": true
+        },
+        {
+          "label": "Murder mysteries",
+          "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=tv&nextpage=true&widget=true&with_id=true&sort_by=popularity.desc&include_adult=false&with_genres=9648&with_keywords=207046",
+          "enabled": true
+        },
+        {
+          "label": "Detective series",
+          "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=tv&nextpage=true&widget=true&with_id=true&sort_by=popularity.desc&include_adult=false&with_genres=9648&with_keywords=703",
+          "enabled": true
+        },
+        {
+          "label": "Conspiracies",
+          "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=tv&nextpage=true&widget=true&with_id=true&sort_by=popularity.desc&include_adult=false&with_genres=9648&with_keywords=10410",
+          "enabled": true
+        },
+        {
+          "label": "Whodunits",
+          "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=tv&nextpage=true&widget=true&with_id=true&sort_by=popularity.desc&include_adult=false&with_genres=9648&with_keywords=12570",
+          "enabled": true
+        },
+        {
+          "label": "Missing persons",
+          "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=tv&nextpage=true&widget=true&with_id=true&sort_by=popularity.desc&include_adult=false&with_genres=9648&with_keywords=156091",
+          "enabled": true
+        },
+        {
+          "label": "Classics \u00b7 Mystery",
+          "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=tv&nextpage=true&widget=true&with_id=true&sort_by=vote_average.desc&include_adult=false&first_air_date.lte=1999-12-31&vote_count.gte=100&with_genres=9648",
+          "enabled": true
+        },
+        {
+          "label": "Hidden gems \u00b7 Mystery",
+          "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=tv&nextpage=true&widget=true&with_id=true&sort_by=popularity.desc&include_adult=false&vote_average.gte=7&vote_count.gte=100&vote_count.lte=3000&with_genres=9648",
+          "enabled": true
+        },
+        {
+          "label": "Most popular \u00b7 Mystery",
+          "path": "plugin://plugin.video.themoviedb.helper/?info=trakt_popular&tmdb_type=tv&nextpage=true&widget=true&genres=mystery",
+          "enabled": true
+        }
+      ]
+    },
+    {
+      "id": "bl-shows-sci-fi-fantasy",
+      "label": "Sci-Fi & Fantasy",
+      "section": "Shows",
+      "enabled": true,
+      "rows": [
+        {
+          "label": "Trending \u00b7 Sci-Fi & Fantasy",
+          "path": "plugin://plugin.video.themoviedb.helper/?info=trakt_trending&tmdb_type=tv&nextpage=true&widget=true&genres=science-fiction%2Cfantasy",
+          "enabled": true
+        },
+        {
+          "label": "Current picks \u00b7 Sci-Fi & Fantasy",
+          "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=tv&nextpage=true&widget=true&with_id=true&sort_by=popularity.desc&include_adult=false&first_air_date.gte=t-1825&first_air_date.lte=t%2B0&with_genres=10765",
+          "enabled": true
+        },
+        {
+          "label": "Space series",
+          "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=tv&nextpage=true&widget=true&with_id=true&sort_by=popularity.desc&include_adult=false&with_genres=10765&with_keywords=9882",
+          "enabled": true
+        },
+        {
+          "label": "Magic and fantasy",
+          "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=tv&nextpage=true&widget=true&with_id=true&sort_by=popularity.desc&include_adult=false&with_genres=10765&with_keywords=2343",
+          "enabled": true
+        },
+        {
+          "label": "Superheroes",
+          "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=tv&nextpage=true&widget=true&with_id=true&sort_by=popularity.desc&include_adult=false&with_genres=10765&with_keywords=9715",
+          "enabled": true
+        },
+        {
+          "label": "Time travel",
+          "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=tv&nextpage=true&widget=true&with_id=true&sort_by=popularity.desc&include_adult=false&with_genres=10765&with_keywords=4379",
+          "enabled": true
+        },
+        {
+          "label": "Dystopian worlds",
+          "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=tv&nextpage=true&widget=true&with_id=true&sort_by=popularity.desc&include_adult=false&with_genres=10765&with_keywords=4565",
+          "enabled": true
+        },
+        {
+          "label": "Classics \u00b7 Sci-Fi & Fantasy",
+          "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=tv&nextpage=true&widget=true&with_id=true&sort_by=vote_average.desc&include_adult=false&first_air_date.lte=1999-12-31&vote_count.gte=100&with_genres=10765",
+          "enabled": true
+        },
+        {
+          "label": "Hidden gems \u00b7 Sci-Fi & Fantasy",
+          "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=tv&nextpage=true&widget=true&with_id=true&sort_by=popularity.desc&include_adult=false&vote_average.gte=7&vote_count.gte=100&vote_count.lte=3000&with_genres=10765",
+          "enabled": true
+        },
+        {
+          "label": "Most popular \u00b7 Sci-Fi & Fantasy",
+          "path": "plugin://plugin.video.themoviedb.helper/?info=trakt_popular&tmdb_type=tv&nextpage=true&widget=true&genres=science-fiction%2Cfantasy",
+          "enabled": true
+        }
+      ]
+    },
+    {
+      "id": "bl-shows-animation",
+      "label": "Animation",
+      "section": "Shows",
+      "enabled": true,
+      "rows": [
+        {
+          "label": "Trending \u00b7 Animation",
+          "path": "plugin://plugin.video.themoviedb.helper/?info=trakt_trending&tmdb_type=tv&nextpage=true&widget=true&genres=animation",
+          "enabled": true
+        },
+        {
+          "label": "Current picks \u00b7 Animation",
+          "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=tv&nextpage=true&widget=true&with_id=true&sort_by=popularity.desc&include_adult=false&first_air_date.gte=t-1825&first_air_date.lte=t%2B0&with_genres=16",
+          "enabled": true
+        },
+        {
+          "label": "Anime",
+          "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=tv&nextpage=true&widget=true&with_id=true&sort_by=popularity.desc&include_adult=false&with_genres=16&with_keywords=210024",
+          "enabled": true
+        },
+        {
+          "label": "Adult animation",
+          "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=tv&nextpage=true&widget=true&with_id=true&sort_by=popularity.desc&include_adult=false&with_genres=16&with_keywords=161919",
+          "enabled": true
+        },
+        {
+          "label": "Animated comedy",
+          "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=tv&nextpage=true&widget=true&with_id=true&sort_by=popularity.desc&include_adult=false&with_genres=16%2C35",
+          "enabled": true
+        },
+        {
+          "label": "Kids animation",
+          "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=tv&nextpage=true&widget=true&with_id=true&sort_by=popularity.desc&include_adult=false&with_genres=16%2C10762",
+          "enabled": true
+        },
+        {
+          "label": "Animated science fiction",
+          "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=tv&nextpage=true&widget=true&with_id=true&sort_by=popularity.desc&include_adult=false&with_genres=16%2C10765",
+          "enabled": true
+        },
+        {
+          "label": "Classics \u00b7 Animation",
+          "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=tv&nextpage=true&widget=true&with_id=true&sort_by=vote_average.desc&include_adult=false&first_air_date.lte=1999-12-31&vote_count.gte=100&with_genres=16",
+          "enabled": true
+        },
+        {
+          "label": "Hidden gems \u00b7 Animation",
+          "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=tv&nextpage=true&widget=true&with_id=true&sort_by=popularity.desc&include_adult=false&vote_average.gte=7&vote_count.gte=100&vote_count.lte=3000&with_genres=16",
+          "enabled": true
+        },
+        {
+          "label": "Most popular \u00b7 Animation",
+          "path": "plugin://plugin.video.themoviedb.helper/?info=trakt_popular&tmdb_type=tv&nextpage=true&widget=true&genres=animation",
+          "enabled": true
+        }
+      ]
+    },
+    {
+      "id": "bl-shows-documentary",
+      "label": "Documentary",
+      "section": "Shows",
+      "enabled": true,
+      "rows": [
+        {
+          "label": "Trending \u00b7 Documentary",
+          "path": "plugin://plugin.video.themoviedb.helper/?info=trakt_trending&tmdb_type=tv&nextpage=true&widget=true&genres=documentary",
+          "enabled": true
+        },
+        {
+          "label": "Current picks \u00b7 Documentary",
+          "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=tv&nextpage=true&widget=true&with_id=true&sort_by=popularity.desc&include_adult=false&first_air_date.gte=t-1825&first_air_date.lte=t%2B0&with_genres=99",
+          "enabled": true
+        },
+        {
+          "label": "True crime",
+          "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=tv&nextpage=true&widget=true&with_id=true&sort_by=popularity.desc&include_adult=false&with_genres=99&with_keywords=33722",
+          "enabled": true
+        },
+        {
+          "label": "Nature",
+          "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=tv&nextpage=true&widget=true&with_id=true&sort_by=popularity.desc&include_adult=false&with_genres=99&with_keywords=18330",
+          "enabled": true
+        },
+        {
+          "label": "History",
+          "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=tv&nextpage=true&widget=true&with_id=true&sort_by=popularity.desc&include_adult=false&with_genres=99&with_keywords=282633",
+          "enabled": true
+        },
+        {
+          "label": "Sports documentaries",
+          "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=tv&nextpage=true&widget=true&with_id=true&sort_by=popularity.desc&include_adult=false&with_genres=99&with_keywords=6075",
+          "enabled": true
+        },
+        {
+          "label": "Music documentaries",
+          "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=tv&nextpage=true&widget=true&with_id=true&sort_by=popularity.desc&include_adult=false&with_genres=99&with_keywords=246377",
+          "enabled": true
+        },
+        {
+          "label": "Classics \u00b7 Documentary",
+          "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=tv&nextpage=true&widget=true&with_id=true&sort_by=vote_average.desc&include_adult=false&first_air_date.lte=1999-12-31&vote_count.gte=100&with_genres=99",
+          "enabled": true
+        },
+        {
+          "label": "Hidden gems \u00b7 Documentary",
+          "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=tv&nextpage=true&widget=true&with_id=true&sort_by=popularity.desc&include_adult=false&vote_average.gte=7&vote_count.gte=100&vote_count.lte=3000&with_genres=99",
+          "enabled": true
+        },
+        {
+          "label": "Most popular \u00b7 Documentary",
+          "path": "plugin://plugin.video.themoviedb.helper/?info=trakt_popular&tmdb_type=tv&nextpage=true&widget=true&genres=documentary",
+          "enabled": true
+        }
+      ]
+    },
+    {
+      "id": "bl-shows-reality",
+      "label": "Reality",
+      "section": "Shows",
+      "enabled": true,
+      "rows": [
+        {
+          "label": "Trending \u00b7 Reality",
+          "path": "plugin://plugin.video.themoviedb.helper/?info=trakt_trending&tmdb_type=tv&nextpage=true&widget=true&genres=reality",
+          "enabled": true
+        },
+        {
+          "label": "Current picks \u00b7 Reality",
+          "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=tv&nextpage=true&widget=true&with_id=true&sort_by=popularity.desc&include_adult=false&first_air_date.gte=t-1825&first_air_date.lte=t%2B0&with_genres=10764",
+          "enabled": true
+        },
+        {
+          "label": "Cooking shows",
+          "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=tv&nextpage=true&widget=true&with_id=true&sort_by=popularity.desc&include_adult=false&with_genres=10764&with_keywords=1918",
+          "enabled": true
+        },
+        {
+          "label": "Competitions",
+          "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=tv&nextpage=true&widget=true&with_id=true&sort_by=popularity.desc&include_adult=false&with_genres=10764&with_keywords=271",
+          "enabled": true
+        },
+        {
+          "label": "Home renovation",
+          "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=tv&nextpage=true&widget=true&with_id=true&sort_by=popularity.desc&include_adult=false&with_genres=10764&with_keywords=182804",
+          "enabled": true
+        },
+        {
+          "label": "Travel shows",
+          "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=tv&nextpage=true&widget=true&with_id=true&sort_by=popularity.desc&include_adult=false&with_genres=10764&with_keywords=9935",
+          "enabled": true
+        },
+        {
+          "label": "Dating shows",
+          "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=tv&nextpage=true&widget=true&with_id=true&sort_by=popularity.desc&include_adult=false&with_genres=10764&with_keywords=215119",
+          "enabled": true
+        },
+        {
+          "label": "Classics \u00b7 Reality",
+          "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=tv&nextpage=true&widget=true&with_id=true&sort_by=vote_average.desc&include_adult=false&first_air_date.lte=1999-12-31&vote_count.gte=100&with_genres=10764",
+          "enabled": true
+        },
+        {
+          "label": "Hidden gems \u00b7 Reality",
+          "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=tv&nextpage=true&widget=true&with_id=true&sort_by=popularity.desc&include_adult=false&vote_average.gte=7&vote_count.gte=100&vote_count.lte=3000&with_genres=10764",
+          "enabled": true
+        },
+        {
+          "label": "Most popular \u00b7 Reality",
+          "path": "plugin://plugin.video.themoviedb.helper/?info=trakt_popular&tmdb_type=tv&nextpage=true&widget=true&genres=reality",
+          "enabled": true
+        }
+      ]
+    },
+    {
+      "id": "bl-movies-international",
+      "label": "International",
+      "section": "Movies",
+      "enabled": true,
+      "rows": [
+        {
+          "label": "Trending international",
+          "path": "plugin://plugin.video.themoviedb.helper/?info=trakt_trending&tmdb_type=movie&nextpage=true&widget=true&countries=gb%2Ckr%2Cjp%2Cfr%2Ces%2Cde%2Cin%2Cse%2Cno%2Cdk%2Cfi%2Cis%2Cmx%2Cit%2Cbr%2Chk%2Ccn%2Ctw%2Cau%2Cca",
+          "enabled": true
+        },
+        {
+          "label": "Current international picks",
+          "path": "plugin://plugin.video.themoviedb.helper/?info=trakt_popular&tmdb_type=movie&nextpage=true&widget=true&countries=gb%2Ckr%2Cjp%2Cfr%2Ces%2Cde%2Cin%2Cse%2Cno%2Cdk%2Cfi%2Cis%2Cmx%2Cit%2Cbr%2Chk%2Ccn%2Ctw%2Cau%2Cca&years=2021-2026",
+          "enabled": true
+        },
+        {
+          "label": "British picks",
+          "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=movie&nextpage=true&widget=true&with_id=true&sort_by=popularity.desc&include_adult=false&with_origin_country=GB",
+          "enabled": true
+        },
+        {
+          "label": "Korean picks",
+          "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=movie&nextpage=true&widget=true&with_id=true&sort_by=popularity.desc&include_adult=false&with_origin_country=KR",
+          "enabled": true
+        },
+        {
+          "label": "Japanese picks",
+          "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=movie&nextpage=true&widget=true&with_id=true&sort_by=popularity.desc&include_adult=false&with_origin_country=JP",
+          "enabled": true
+        },
+        {
+          "label": "French picks",
+          "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=movie&nextpage=true&widget=true&with_id=true&sort_by=popularity.desc&include_adult=false&with_origin_country=FR",
+          "enabled": true
+        },
+        {
+          "label": "Spanish picks",
+          "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=movie&nextpage=true&widget=true&with_id=true&sort_by=popularity.desc&include_adult=false&with_origin_country=ES",
+          "enabled": true
+        },
+        {
+          "label": "German picks",
+          "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=movie&nextpage=true&widget=true&with_id=true&sort_by=popularity.desc&include_adult=false&with_origin_country=DE",
+          "enabled": true
+        },
+        {
+          "label": "Indian picks",
+          "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=movie&nextpage=true&widget=true&with_id=true&sort_by=popularity.desc&include_adult=false&with_origin_country=IN",
+          "enabled": true
+        },
+        {
+          "label": "Nordic picks",
+          "path": "plugin://plugin.video.themoviedb.helper/?info=trakt_popular&tmdb_type=movie&nextpage=true&widget=true&countries=dk%2Cno%2Cse%2Cfi%2Cis",
+          "enabled": true
+        },
+        {
+          "label": "International classics",
+          "path": "plugin://plugin.video.themoviedb.helper/?info=trakt_popular&tmdb_type=movie&nextpage=true&widget=true&countries=gb%2Ckr%2Cjp%2Cfr%2Ces%2Cde%2Cin%2Cse%2Cno%2Cdk%2Cfi%2Cis%2Cmx%2Cit%2Cbr%2Chk%2Ccn%2Ctw%2Cau%2Cca&years=1900-1999",
+          "enabled": true
+        },
+        {
+          "label": "International hidden gems",
+          "path": "plugin://plugin.video.themoviedb.helper/?info=trakt_popular&tmdb_type=movie&nextpage=true&widget=true&countries=gb%2Ckr%2Cjp%2Cfr%2Ces%2Cde%2Cin%2Cse%2Cno%2Cdk%2Cfi%2Cis%2Cmx%2Cit%2Cbr%2Chk%2Ccn%2Ctw%2Cau%2Cca&ratings=70-100&votes=100-3000",
+          "enabled": true
+        },
+        {
+          "label": "Most popular international",
+          "path": "plugin://plugin.video.themoviedb.helper/?info=trakt_popular&tmdb_type=movie&nextpage=true&widget=true&countries=gb%2Ckr%2Cjp%2Cfr%2Ces%2Cde%2Cin%2Cse%2Cno%2Cdk%2Cfi%2Cis%2Cmx%2Cit%2Cbr%2Chk%2Ccn%2Ctw%2Cau%2Cca",
+          "enabled": true
+        }
+      ]
+    },
+    {
+      "id": "bl-shows-international",
+      "label": "International",
+      "section": "Shows",
+      "enabled": true,
+      "rows": [
+        {
+          "label": "Trending international",
+          "path": "plugin://plugin.video.themoviedb.helper/?info=trakt_trending&tmdb_type=tv&nextpage=true&widget=true&countries=gb%2Ckr%2Cjp%2Cfr%2Ces%2Cde%2Cin%2Cse%2Cno%2Cdk%2Cfi%2Cis%2Cmx%2Cit%2Cbr%2Chk%2Ccn%2Ctw%2Cau%2Cca",
+          "enabled": true
+        },
+        {
+          "label": "Current international picks",
+          "path": "plugin://plugin.video.themoviedb.helper/?info=trakt_popular&tmdb_type=tv&nextpage=true&widget=true&countries=gb%2Ckr%2Cjp%2Cfr%2Ces%2Cde%2Cin%2Cse%2Cno%2Cdk%2Cfi%2Cis%2Cmx%2Cit%2Cbr%2Chk%2Ccn%2Ctw%2Cau%2Cca&years=2021-2026",
+          "enabled": true
+        },
+        {
+          "label": "British picks",
+          "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=tv&nextpage=true&widget=true&with_id=true&sort_by=popularity.desc&include_adult=false&with_origin_country=GB",
+          "enabled": true
+        },
+        {
+          "label": "Korean picks",
+          "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=tv&nextpage=true&widget=true&with_id=true&sort_by=popularity.desc&include_adult=false&with_origin_country=KR",
+          "enabled": true
+        },
+        {
+          "label": "Japanese picks",
+          "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=tv&nextpage=true&widget=true&with_id=true&sort_by=popularity.desc&include_adult=false&with_origin_country=JP",
+          "enabled": true
+        },
+        {
+          "label": "French picks",
+          "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=tv&nextpage=true&widget=true&with_id=true&sort_by=popularity.desc&include_adult=false&with_origin_country=FR",
+          "enabled": true
+        },
+        {
+          "label": "Spanish picks",
+          "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=tv&nextpage=true&widget=true&with_id=true&sort_by=popularity.desc&include_adult=false&with_origin_country=ES",
+          "enabled": true
+        },
+        {
+          "label": "German picks",
+          "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=tv&nextpage=true&widget=true&with_id=true&sort_by=popularity.desc&include_adult=false&with_origin_country=DE",
+          "enabled": true
+        },
+        {
+          "label": "Indian picks",
+          "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=tv&nextpage=true&widget=true&with_id=true&sort_by=popularity.desc&include_adult=false&with_origin_country=IN",
+          "enabled": true
+        },
+        {
+          "label": "Nordic picks",
+          "path": "plugin://plugin.video.themoviedb.helper/?info=trakt_popular&tmdb_type=tv&nextpage=true&widget=true&countries=dk%2Cno%2Cse%2Cfi%2Cis",
+          "enabled": true
+        },
+        {
+          "label": "International classics",
+          "path": "plugin://plugin.video.themoviedb.helper/?info=trakt_popular&tmdb_type=tv&nextpage=true&widget=true&countries=gb%2Ckr%2Cjp%2Cfr%2Ces%2Cde%2Cin%2Cse%2Cno%2Cdk%2Cfi%2Cis%2Cmx%2Cit%2Cbr%2Chk%2Ccn%2Ctw%2Cau%2Cca&years=1900-1999",
+          "enabled": true
+        },
+        {
+          "label": "International hidden gems",
+          "path": "plugin://plugin.video.themoviedb.helper/?info=trakt_popular&tmdb_type=tv&nextpage=true&widget=true&countries=gb%2Ckr%2Cjp%2Cfr%2Ces%2Cde%2Cin%2Cse%2Cno%2Cdk%2Cfi%2Cis%2Cmx%2Cit%2Cbr%2Chk%2Ccn%2Ctw%2Cau%2Cca&ratings=70-100&votes=100-3000",
+          "enabled": true
+        },
+        {
+          "label": "Most popular international",
+          "path": "plugin://plugin.video.themoviedb.helper/?info=trakt_popular&tmdb_type=tv&nextpage=true&widget=true&countries=gb%2Ckr%2Cjp%2Cfr%2Ces%2Cde%2Cin%2Cse%2Cno%2Cdk%2Cfi%2Cis%2Cmx%2Cit%2Cbr%2Chk%2Ccn%2Ctw%2Cau%2Cca",
+          "enabled": true
+        }
+      ]
+    }
+  ],
+  "Categories": [
+    {
+      "label": "Top rated",
+      "path": "plugin://plugin.video.themoviedb.helper/?info=top_rated&tmdb_type=movie&nextpage=true&widget=true",
+      "section": "Movies",
+      "id": "8af7d252f2941013",
+      "enabled": true,
+      "rows": [
+        {
+          "label": "Top rated",
+          "path": "plugin://plugin.video.themoviedb.helper/?info=top_rated&tmdb_type=movie&nextpage=true&widget=true",
+          "enabled": true
+        },
+        {
+          "label": "Highly rated movies",
+          "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=movie&nextpage=true&widget=true&sort_by=popularity.desc&vote_average.gte=7&vote_count.gte=200",
+          "enabled": true
+        },
+        {
+          "label": "Recent favorites",
+          "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=movie&nextpage=true&widget=true&sort_by=popularity.desc&vote_average.gte=7&vote_count.gte=200&primary_release_date.gte=2023-01-01",
+          "enabled": true
+        },
+        {
+          "label": "Classic favorites",
+          "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=movie&nextpage=true&widget=true&sort_by=popularity.desc&vote_average.gte=7&vote_count.gte=200&primary_release_date.lte=2000-12-31",
+          "enabled": true
+        }
+      ]
+    },
+    {
+      "label": "Top rated",
+      "path": "plugin://plugin.video.themoviedb.helper/?info=top_rated&tmdb_type=tv&nextpage=true&widget=true",
+      "section": "Shows",
+      "id": "b5b141525ce1d467",
+      "enabled": true,
+      "rows": [
+        {
+          "label": "Top rated",
+          "path": "plugin://plugin.video.themoviedb.helper/?info=top_rated&tmdb_type=tv&nextpage=true&widget=true",
+          "enabled": true
+        },
+        {
+          "label": "Highly rated series",
+          "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=tv&nextpage=true&widget=true&sort_by=popularity.desc&vote_average.gte=7&vote_count.gte=200",
+          "enabled": true
+        }
+      ]
+    },
+    {
+      "id": "trakt-personal",
+      "label": "Trakt",
+      "section": "Both",
+      "enabled": false,
+      "rows": [
+        {
+          "label": "Continue watching \u2014 episodes",
+          "enabled": true,
+          "path": "plugin://plugin.video.themoviedb.helper/?info=trakt_ondeck&tmdb_type=tv&widget=true&nextpage=true"
+        },
+        {
+          "label": "Next episodes",
+          "enabled": true,
+          "path": "plugin://plugin.video.themoviedb.helper/?info=trakt_nextepisodes&tmdb_type=tv&widget=true&nextpage=true"
+        },
+        {
+          "label": "Continue watching \u2014 movies",
+          "enabled": true,
+          "path": "plugin://plugin.video.themoviedb.helper/?info=trakt_inprogress&tmdb_type=movie&widget=true&nextpage=true"
+        },
+        {
+          "label": "Watchlist \u2014 movies",
+          "enabled": true,
+          "path": "plugin://plugin.video.themoviedb.helper/?info=trakt_watchlist&tmdb_type=movie&widget=true&nextpage=true"
+        },
+        {
+          "label": "Watchlist \u2014 shows",
+          "enabled": true,
+          "path": "plugin://plugin.video.themoviedb.helper/?info=trakt_watchlist&tmdb_type=tv&widget=true&nextpage=true"
+        },
+        {
+          "label": "Recently watched \u2014 movies",
+          "enabled": true,
+          "path": "plugin://plugin.video.themoviedb.helper/?info=trakt_history&tmdb_type=movie&widget=true&nextpage=true"
+        },
+        {
+          "label": "Recently watched \u2014 shows",
+          "enabled": true,
+          "path": "plugin://plugin.video.themoviedb.helper/?info=trakt_history&tmdb_type=tv&widget=true&nextpage=true"
+        }
+      ]
+    },
+    {
+      "id": "bl-movies-standup",
+      "label": "Stand-up",
+      "section": "Movies",
+      "enabled": true,
+      "rows": [
+        {
+          "label": "Most popular stand-up",
+          "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=movie&nextpage=true&widget=true&with_keywords=9716&with_id=true&include_adult=false&sort_by=popularity.desc",
+          "enabled": true
+        },
+        {
+          "label": "Recent stand-up",
+          "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=movie&nextpage=true&widget=true&with_keywords=9716&with_id=true&include_adult=false&sort_by=primary_release_date.desc&primary_release_date.lte=t%2B0&primary_release_date.gte=t-1825",
+          "enabled": true
+        },
+        {
+          "label": "Stand-up from the 2010s",
+          "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=movie&nextpage=true&widget=true&with_keywords=9716&with_id=true&include_adult=false&sort_by=popularity.desc&primary_release_date.gte=2010-01-01&primary_release_date.lte=2019-12-31",
+          "enabled": true
+        },
+        {
+          "label": "Classic stand-up",
+          "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=movie&nextpage=true&widget=true&with_keywords=9716&with_id=true&include_adult=false&sort_by=popularity.desc&primary_release_date.lte=2009-12-31",
+          "enabled": true
+        },
+        {
+          "label": "British stand-up",
+          "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=movie&nextpage=true&widget=true&with_keywords=9716&with_id=true&include_adult=false&sort_by=popularity.desc&with_origin_country=GB",
+          "enabled": true
+        },
+        {
+          "label": "American stand-up",
+          "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=movie&nextpage=true&widget=true&with_keywords=9716&with_id=true&include_adult=false&sort_by=popularity.desc&with_origin_country=US",
+          "enabled": true
+        },
+        {
+          "label": "French-language stand-up",
+          "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=movie&nextpage=true&widget=true&with_keywords=9716&with_id=true&include_adult=false&sort_by=popularity.desc&with_original_language=fr",
+          "enabled": true
+        },
+        {
+          "label": "Highly rated stand-up",
+          "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=movie&nextpage=true&widget=true&with_keywords=9716&with_id=true&include_adult=false&sort_by=vote_average.desc&vote_count.gte=25",
+          "enabled": true
+        }
+      ]
+    },
+    {
+      "id": "bl-shows-standup",
+      "label": "Stand-up",
+      "section": "Shows",
+      "enabled": true,
+      "rows": [
+        {
+          "label": "Most popular stand-up",
+          "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=tv&nextpage=true&widget=true&with_keywords=9716&with_id=true&include_adult=false&sort_by=popularity.desc",
+          "enabled": true
+        },
+        {
+          "label": "Recent stand-up",
+          "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=tv&nextpage=true&widget=true&with_keywords=9716&with_id=true&include_adult=false&sort_by=first_air_date.desc&first_air_date.lte=t%2B0&first_air_date.gte=t-1825",
+          "enabled": true
+        },
+        {
+          "label": "Stand-up from the 2010s",
+          "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=tv&nextpage=true&widget=true&with_keywords=9716&with_id=true&include_adult=false&sort_by=popularity.desc&first_air_date.gte=2010-01-01&first_air_date.lte=2019-12-31",
+          "enabled": true
+        },
+        {
+          "label": "Classic stand-up",
+          "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=tv&nextpage=true&widget=true&with_keywords=9716&with_id=true&include_adult=false&sort_by=popularity.desc&first_air_date.lte=2009-12-31",
+          "enabled": true
+        },
+        {
+          "label": "British stand-up",
+          "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=tv&nextpage=true&widget=true&with_keywords=9716&with_id=true&include_adult=false&sort_by=popularity.desc&with_origin_country=GB",
+          "enabled": true
+        },
+        {
+          "label": "American stand-up",
+          "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=tv&nextpage=true&widget=true&with_keywords=9716&with_id=true&include_adult=false&sort_by=popularity.desc&with_origin_country=US",
+          "enabled": true
+        },
+        {
+          "label": "French-language stand-up",
+          "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=tv&nextpage=true&widget=true&with_keywords=9716&with_id=true&include_adult=false&sort_by=popularity.desc&with_original_language=fr",
+          "enabled": true
+        },
+        {
+          "label": "Highly rated stand-up",
+          "path": "plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=tv&nextpage=true&widget=true&with_keywords=9716&with_id=true&include_adult=false&sort_by=vote_average.desc&vote_count.gte=25",
+          "enabled": true
+        }
+      ]
+    }
+  ]
+}

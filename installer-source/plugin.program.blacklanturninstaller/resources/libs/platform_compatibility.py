@@ -77,6 +77,10 @@ def prepare(path, kodi, home=None):
                                    'playback-trakt-youtube-umbrella-1':'1.0.18',
                                    'playback-trakt-youtube-umbrella-network-1':'1.0.19',
                                    'playback-trakt-youtube-umbrella-network-autoplay-1':'1.0.20'}.get(preference_policy)
+                        discovery_patch=policy.get('discovery_patch')
+                        if discovery_patch is not None:
+                            if discovery_patch!='discovery-first-page-1' or preference_policy!='playback-trakt-youtube-umbrella-network-autoplay-1':raise CompatibilityError('Update BlackLanturn Installer before installing this build.')
+                            minimum='1.0.22'
                         if minimum is None or policy.get('installer_min_version') != minimum:
                             raise CompatibilityError('Update BlackLanturn Installer before installing this build.')
                         managed_network = preference_policy in ('playback-trakt-youtube-umbrella-network-1', 'playback-trakt-youtube-umbrella-network-autoplay-1')
@@ -101,6 +105,10 @@ def prepare(path, kodi, home=None):
                     if policy['schema'] == 3:
                         try:
                             build_preferences.verify_archive(archive, policy=preference_policy)
+                            if policy.get('discovery_patch'):
+                                from resources.libs import discovery_defaults
+                                try:discovery_defaults.verify_archive(archive)
+                                except (KeyError,ValueError,TypeError) as exc:raise CompatibilityError('Build discovery defaults are invalid. Your current build has been kept.') from exc
                         except build_preferences.PreferenceError as exc:
                             raise CompatibilityError(str(exc)) from exc
                 for name in names:

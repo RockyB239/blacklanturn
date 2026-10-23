@@ -8,6 +8,7 @@ import copy,json,math
 from pathlib import Path
 import xml.etree.ElementTree as E
 from resources.libs import settings_store as store
+from resources.libs.discovery_defaults import upgrade as discovery_upgrade
 DEFAULTS=json.loads((Path(__file__).parents[1]/'playback-defaults.json').read_text(encoding='utf-8'))
 YOUTUBE='addon_data/plugin.video.youtube/settings.xml'
 YOUTUBE_CHOICES={'kodion.video.quality','kodion.video.quality.ask','kodion.subtitle.languages.num','kodion.subtitle.download','kodion.audio_only',
@@ -135,7 +136,14 @@ def restore(home,accounts,addon_ids):
     if node is None:node=E.SubElement(root,'setting',id=key)
     node.attrib.pop('default',None);node.attrib.pop('value',None);node.text=value
    prepared.append((name,E.tostring(root,encoding='utf-8',xml_declaration=True)))
-  if snapshot.get('controller') is not None:prepared.append((CONTROLLER_CONFIG,snapshot['controller'].encode('utf-8')))
+  if snapshot.get('controller') is not None:
+   raw=snapshot['controller'];marker_raw=_read(home,'blacklanturn-build.json')
+   if marker_raw is not None:
+    if len(marker_raw)>32768:raise ValueError('Invalid build policy')
+    marker=json.loads(marker_raw)
+    if not isinstance(marker,dict):raise ValueError('Invalid build policy')
+    if marker.get('discovery_patch')=='discovery-first-page-1':raw=discovery_upgrade(raw)
+   prepared.append((CONTROLLER_CONFIG,raw.encode('utf-8')))
   for name,raw in prepared:_write(home,name,raw)
  except (OSError,ValueError,TypeError,E.ParseError) as exc:raise PreferenceError('Playback preference restoration needs attention. Keep the pending backup and reinstall.') from exc
 
