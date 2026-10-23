@@ -1174,6 +1174,11 @@ class LiveReview(YouTubeBrowser,xbmcgui.WindowXML):
         event('browse_restored',section=self.section,page=self.active_page,mode=self.mode,offset=self.row_offset,positions=state['positions'])
     def refresh_watch_status(self,sync=False,browse_state=None):
         if self.actions_open:return
+        if self.section=='YouTube':
+            # Queued feed metadata predates this watch update. Retire it
+            # permanently, including after watch_refresh_generation is cleared.
+            self.youtube_content_revision=object();self.youtube_job=None;self.youtube_update=None;self.youtube_refreshing=False
+            self.setProperty('youtubeRefreshLabel','Refresh recommendations')
         self.invalidate_row_results()
         self.generation+=1
         self.row_window_busy=False

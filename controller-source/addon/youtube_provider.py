@@ -3,7 +3,7 @@
 This is its regular YouTube video Home for TV clients, not YouTube TV and not
 YouTube.com's browser feed. Browser Home requires separate cookie authentication.
 """
-import sys,threading,atexit,time
+import sys,threading,atexit,time,copy
 from contextlib import contextmanager
 from types import SimpleNamespace
 from pathlib import Path
@@ -101,11 +101,12 @@ def _content_refresh(runtime,refresh):
             if previous is missing:params.pop('refresh',None)
             else:params['refresh']=previous
 
-def load_home_rows(current=lambda:True,refresh=False):
+def load_home_rows(current=lambda:True,refresh=False,resolved_items=()):
     if not current():return []
     with _session(current) as runtime:
         context,provider=runtime.context,runtime.provider;client=provider.get_client(context)
-        with _content_refresh(runtime,refresh):return _load_home(runtime,client,current)
+        with _content_refresh(runtime,refresh):
+            return _load_home(runtime,client,current,**({'resolved_items':resolved_items} if resolved_items else {}))
 
 def _resolve_entries(runtime,entries,current):
     unique={x['id']:x for x in entries if x.get('kind')=='youtube#video'}
@@ -185,7 +186,7 @@ def load_related_page(cursor,current=lambda:True):
         else:more=None
         return files,more
 
-def _load_home(runtime,client,current):
+def _load_home(runtime,client,current,resolved_items=()):
     # Main recommendations/subscriptions resolve independently. Broader interest
     # groups use this bounded background request and never gate those rows.
     raw=client.get_browse_items(browse_id='FEwhat_to_watch',client='tv',do_auth=True,json_path=None)
@@ -204,7 +205,8 @@ def _load_home(runtime,client,current):
     unique={x['id']:x for shelf in shelves for x in shelf['items'] if x.get('kind')=='youtube#video'}
     if not shelves:return []
     # The native converter's page size must not truncate the later shelves.
-    items=[];entries=list(unique.items())
+    items=[copy.deepcopy(x) for x in resolved_items if video_id(x) in unique]
+    reused={video_id(x) for x in items};entries=[(key,value) for key,value in unique.items() if key not in reused]
     for start in range(0,len(entries),40):
         if not current():return []
         items.extend(_resolve(runtime,dict(entries[start:start+40]),current))

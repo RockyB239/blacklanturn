@@ -4,6 +4,7 @@ Workers only stage data. The browser monitor publishes one coherent update,
 restores native selection, and skips preview observation during that rebind.
 """
 import copy,threading,time
+from queue import Queue,Empty
 from collections import Counter
 from pathlib import Path
 from urllib.parse import urlsplit,urlunsplit,parse_qsl,urlencode
@@ -140,37 +141,85 @@ class YouTubeRows:
                 if self.youtube_job is job and not getattr(self,'youtube_update',None):self.youtube_job=None
         threading.Thread(target=work,name='BlackLanturnYouTubeRow',daemon=True).start()
 
+    def _apply_youtube_refresh_row(self,row):
+        path=row['path'];index=next((i for i,d in enumerate(self.page_definitions) if d.get('path')==path),None)
+        if index is None:return
+        fresh=copy.deepcopy(row)
+        if index==0:fresh['local_items']=recommendation_order(fresh['local_items']);fresh['_youtube_ordered']=True
+        previous=self.page_definitions[index];prior_page=self.youtube_pages.pop(path,None);cached=self.row_cache.pop(index,None)
+        self.page_definitions[index]=fresh
+        for n,visible in enumerate(self.paths):
+            if visible!=path:continue
+            files=self.rows[n];control=self.getControl(900+n);position=control.getSelectedPosition()
+            anchor=files[position].get('file') if 0<=position<len(files) else None
+            selected=next((i for i,x in enumerate(fresh['local_items']) if x.get('file')==anchor),min(position,max(0,len(fresh['local_items'])-1)))
+            focus=self.getFocusId()
+            tokens=getattr(self,'path_tokens',None)
+            if tokens is not None:tokens[n]=tokens.get(n,0)+1
+            try:self.apply_row(n,fresh['local_items'],fresh['label'],selected,update_selected=focus==900+n)
+            except RuntimeError:
+                self.page_definitions[index]=previous
+                if prior_page is not None:self.youtube_pages[path]=prior_page
+                else:self.youtube_pages.pop(path,None)
+                if cached is not None:self.row_cache[index]=cached
+                self.rows[n]=files
+                try:self.apply_row(n,files,previous['label'],position,update_selected=False)
+                except RuntimeError:pass
+                raise
+            finally:
+                try:
+                    if self.alive and focus==900+n and _focus_id()==0:self.setFocusId(focus)
+                except RuntimeError:pass # A closed window cannot receive focus repair.
+        self.focus_key=None
+
+    def _apply_youtube_refresh_shelves(self,shelves,identity):
+        # Keep the active category pair intact. The new catalog is available
+        # below it; the next Home entry gets the fresh catalog without pins.
+        pinned=[]
+        for path in self.paths:
+            found=next((d for i,d in enumerate(self.page_definitions) if i>=2 and d.get('path')==path),None)
+            if found is not None:pinned.append(found)
+        paths={d.get('path') for d in pinned}
+        self.page_definitions=self.page_definitions[:2]+pinned+[copy.deepcopy(d) for d in shelves[1:] if d.get('path') not in paths]
+        if self.row_offset>=2:self.row_offset=2
+        self.row_cache={}
+        self.youtube_pages={path:page for path,page in self.youtube_pages.items() if path in self.paths or path in {d['path'] for d in self.page_definitions[:2]}}
+        self.youtube_home_cache={'identity':identity,'time':time.monotonic(),'rows':copy.deepcopy(shelves)}
+        self.youtube_refresh_navigation()
+
     def refresh_youtube_recommendations(self):
         if not self.youtube_home_visible() or getattr(self,'youtube_refreshing',False):return
         self.stop_preview();self.youtube_home_request=object();self.youtube_home_pending=False
         revision=object();self.youtube_content_revision=revision
-        self.youtube_update=None;job=object();self.youtube_job=job;self.youtube_refreshing=True
-        generation=self.generation;lifetime=self.window_lifetime;identity=self.youtube_connection.identity
-        account_current=self.youtube_request_guard()
-        home_paths={d.get('path') for d in self.page_definitions}
+        job=object();self.youtube_job=job;self.youtube_refreshing=True
+        lifetime=self.window_lifetime;identity=self.youtube_connection.identity;account_current=self.youtube_request_guard()
+        watch_revision=getattr(self,'watch_refresh_generation',None)
+        home_paths={d.get('path') for d in self.page_definitions};updates=Queue(maxsize=4)
         def current():
             return (account_current() and self.window_lifetime is lifetime and self.section=='YouTube'
                     and self.youtube_tab=='home' and self.mode=='home' and not self.discovery_stack and self.youtube_content_revision is revision
-                    and all(not path or path in home_paths for path in self.paths)
-                    and self.youtube_job is job)
+                    and all(not path or path in home_paths for path in self.paths) and self.youtube_job is job
+                    and getattr(self,'watch_refresh_generation',None)==watch_revision)
+        self.youtube_update={'kind':'refresh_stream','current':current,'job':job,'queue':updates}
         self.setProperty('youtubeRefreshLabel','Refreshing…');self.setProperty('notice','Requesting fresh YouTube recommendations…')
+        def publish(kind,**data):
+            if current():updates.put_nowait(dict(data,kind=kind))
         def work():
             try:
-                rows=tab_rows('home')
-                for row in rows:
+                resolved=[]
+                for row in tab_rows('home'):
                     if not current():return
                     raw=_fetch_feed(_fresh_path(row['path']))
                     row['local_items'],row['youtube_cursor']=split_page(raw,row['path'])
-                if not rows[0]['local_items']:raise RuntimeError('Recommendations unavailable')
-                shelves=load_home_rows(current,refresh=True) if current() else []
+                    if not row['local_items']:
+                        if row['path']==tab_rows('home')[0]['path']:raise RuntimeError('YouTube recommendations unavailable')
+                        continue # An empty subscriptions feed must not block Home topics.
+                    resolved.extend(row['local_items']);publish('refresh_row',row=row)
+                shelves=load_home_rows(current,refresh=True,resolved_items=resolved) if current() else []
                 if not shelves:raise RuntimeError('Personalized Home unavailable')
-                if current():self.youtube_update={'kind':'refresh','current':current,'job':job,'rows':rows+copy.deepcopy(shelves[1:]),'shelves':shelves,'identity':identity}
-            except Exception:
-                if current():self.youtube_update={'kind':'refresh_error','current':current,'job':job}
-            finally:
-                if self.youtube_job is job and not getattr(self,'youtube_update',None):
-                    self.youtube_job=None;self.youtube_refreshing=False
-                    if self.window_lifetime is lifetime:self.setProperty('youtubeRefreshLabel','Refresh recommendations')
+                publish('refresh_shelves',shelves=shelves,identity=identity)
+                publish('refresh_done')
+            except Exception:publish('refresh_error')
         threading.Thread(target=work,name='BlackLanturnYouTubeRefresh',daemon=True).start()
 
     def apply_youtube_updates(self):
@@ -182,7 +231,26 @@ class YouTubeRows:
                 self.youtube_update=None
                 if getattr(self,'youtube_job',None) is update['job']:self.youtube_job=None;self.youtube_refreshing=False
                 return False
-            kind=update['kind'];self.youtube_update=None
+            kind=update['kind']
+            if kind=='refresh_stream':
+                try:message=update['queue'].get_nowait()
+                except Empty:return False
+                terminal=message['kind'] in ('refresh_done','refresh_error')
+                try:
+                    if message['kind']=='refresh_row':
+                        self._apply_youtube_refresh_row(message['row'])
+                        self.setProperty('notice',message['row']['label']+' refreshed · Updating remaining YouTube rows…')
+                    elif message['kind']=='refresh_shelves':self._apply_youtube_refresh_shelves(message['shelves'],message['identity'])
+                    elif message['kind']=='refresh_done':self.setProperty('notice','YouTube recommendations refreshed')
+                    else:self.setProperty('notice','Some YouTube rows could not refresh. Available rows remain; try Refresh again.')
+                except RuntimeError:
+                    terminal=True;self.setProperty('notice','Could not display refreshed YouTube rows. Available rows remain; try Refresh again.')
+                finally:
+                    if terminal and self.youtube_job is update['job']:
+                        self.youtube_update=None;self.youtube_job=None;self.youtube_refreshing=False
+                        self.setProperty('youtubeRefreshLabel','Refresh recommendations')
+                return True
+            self.youtube_update=None
             try:
                 if kind.startswith('refresh'):
                     self.youtube_refreshing=False;self.setProperty('youtubeRefreshLabel','Refresh recommendations')

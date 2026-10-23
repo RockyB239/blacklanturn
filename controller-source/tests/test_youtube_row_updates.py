@@ -83,7 +83,7 @@ class RowUpdates(unittest.TestCase):
  def test_only_one_request_runs_and_no_background_request_runs_during_playback(self):
   w=self.window();self.ready(w);w.player.isPlaying=lambda:True;w.request_youtube_more(0);self.assertEqual(self.jobs,[])
   w.player.isPlaying=lambda:False;w.request_youtube_more(0);w.request_youtube_more(0);self.assertEqual(len(self.jobs),1)
- def test_refresh_keeps_live_rows_until_all_fresh_rows_are_ready_and_commits_once(self):
+ def test_refresh_worker_stages_rows_without_touching_native_controls(self):
   w=self.window();self.ready(w);before=copy.deepcopy(w.rows);config=copy.deepcopy(w.config)
   fresh=[{'label':'Provider recommendations','local_items':[video(3)]},{'label':'New personalized interest','local_items':[video(4)],'youtube_cursor':{'continuation':'new-token'}}]
   feed_calls=[]
@@ -92,13 +92,14 @@ class RowUpdates(unittest.TestCase):
    w.refresh_youtube_recommendations();self.assertEqual(w.rows,before);self.jobs.pop()()
   self.assertEqual(self.applied,[]);self.assertTrue(all('refresh=1' in p for p in feed_calls));self.assertEqual(len(feed_calls),2)
   self.assertTrue(w.apply_youtube_updates());self.assertEqual(len(self.applied),1)
-  self.assertEqual([x['label'] for x in self.applied[0]],['Recommended for you','Subscriptions','New personalized interest'])
-  self.assertEqual(w.config,config);self.assertEqual(w.youtube_pages,{})
+  while w.apply_youtube_updates():pass
+  self.assertEqual([x['label'] for x in w.page_definitions],['Recommended for you','Subscriptions','New personalized interest'])
+  self.assertEqual(w.config,config);self.assertFalse(w.youtube_refreshing)
  def test_refresh_failure_or_retirement_keeps_current_rows_and_cursors(self):
   for failed in [True,False]:
    with self.subTest(failed=failed):
     w=self.window();self.ready(w);before=copy.deepcopy(w.rows);pages=copy.deepcopy(w.youtube_pages)
-    with patch.object(mod,'_fetch_feed',return_value=[video(3)]),patch.object(mod,'load_home_rows',side_effect=RuntimeError('offline') if failed else None,return_value=[{'label':'Fresh'}]):
+    with patch.object(mod,'_fetch_feed',side_effect=RuntimeError('offline') if failed else None,return_value=[video(3)]),patch.object(mod,'load_home_rows',return_value=[{'label':'Fresh'}]):
      w.refresh_youtube_recommendations();self.jobs.pop()()
     if not failed:w.youtube_connection.identity='account-b'
     w.apply_youtube_updates();self.assertEqual(w.rows,before);self.assertEqual(w.youtube_pages,pages);self.assertEqual(self.applied,[])
@@ -106,7 +107,9 @@ class RowUpdates(unittest.TestCase):
   w=self.window();self.ready(w)
   with patch.object(mod,'_fetch_feed',return_value=[video(3)]),patch.object(mod,'load_home_rows',return_value=[{'label':'Recommendations'},{'label':'New topic'}]):
    w.refresh_youtube_recommendations();w.generation+=1;self.jobs.pop()()
-  self.assertTrue(w.apply_youtube_updates());self.assertEqual(self.applied[0][-1]['label'],'New topic')
+  self.assertTrue(w.apply_youtube_updates())
+  while w.apply_youtube_updates():pass
+  self.assertEqual(w.page_definitions[-1]['label'],'New topic')
  def test_playlist_continuation_preserves_identity_with_inserted_previous_card(self):
   from browse_controls import page_cards,page_card
   from live_core import PageHistory
