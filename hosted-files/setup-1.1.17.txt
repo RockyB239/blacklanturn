@@ -1,0 +1,13 @@
+BlackLanturn 1.1.17 — Kodi 21.3 Omega
+
+Editions: General (Fire TV / Android) and Apple TV & Mac. Controller 0.1.86; skin 0.1.39; Installer 1.0.22; Repository 1.0.6.
+
+Update BlackLanturn Installer to 1.0.22 through the BlackLanturn Repository, then restart Kodi before installing Build 1.1.17. Older installers refuse this build before cleanup.
+
+To retain settings and accounts, use Standard update. In Save Data, keep Trakt, debrid and login accounts enabled, plus the desired sources, GUI settings, profiles, favorites, playercorefactory and advancedsettings options. Review the final confirmation: it must say Mode: Standard and show the desired account/file switches ON. Account-only reset deliberately resets preferences and is not the preservation update mode.
+
+The installer upgrades recognized default discovery rows to the new first-page lineup. Customized row groups, saved items, unknown preferences and other controller preferences stay retained. Extra uniqueness requests have been removed; ordinary paging remains available. Rolling dates keep recent rows fresh. Existing playback, Trakt, automatic YouTube quality, source-selection behavior and platform-specific workarounds remain included.
+
+Stop playback before updating. Wait for download, verification, extraction and restoration to finish, then follow the restart prompt. Reopen Kodi, confirm Build 1.1.17, and verify accounts and playback choices. A preflight failure should retain the current setup; keep pending recovery data and report the exact message instead of choosing a reset.
+
+The new discovery behavior passed native Mac checks. Fire Stick and Apple TV installation/testing is deferred until the user is home. Publication does not install anything on a device. Prior release assets remain available for recovery using the same preservation choices.
