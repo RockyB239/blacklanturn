@@ -948,7 +948,10 @@ class LiveReview(YouTubeBrowser,xbmcgui.WindowXML):
     def apply_row(self,n,files,label,position=0,update_selected=True,display_position=False,ranked_start=False):
         with self.preview_dispatch_lock:
             original=files[position] if 0<=position<len(files) else None
-            if getattr(self,'section','')=='YouTube' and hasattr(self,'prepare_youtube_row'):files=self.prepare_youtube_row(n,files)
+            if getattr(self,'section','')=='YouTube' and hasattr(self,'prepare_youtube_row'):
+                fresh=hasattr(self,'fresh_recommendation_row') and self.fresh_recommendation_row(n)
+                files=self.prepare_youtube_row(n,files)
+                if fresh and position==0 and not display_position:original=None
             metadata=getattr(self,'anime_metadata',None)
             if metadata and should_exclude_anime(self,self.paths[n]):files=metadata.without_anime(files)
             if hasattr(self,"prepare_discovery_order"):

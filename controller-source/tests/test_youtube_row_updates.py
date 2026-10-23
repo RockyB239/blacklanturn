@@ -230,7 +230,7 @@ class RowUpdates(unittest.TestCase):
   page=w.youtube_pages[w.paths[0]]
   self.assertEqual(page['cursor'],cursor);self.assertEqual(page['items'],before)
   self.assertEqual(w.rows[0][:-1],before);self.assertEqual(w.rows[0][-1]['label'],'Retry')
-  self.assertNotIn('youtube_cursor',w.page_definitions[0]);self.assertIsNone(w.youtube_job)
+  self.assertEqual(w.page_definitions[0]['youtube_cursor'],cursor);self.assertIsNone(w.youtube_job)
   with patch.object(mod,'_fetch_feed',return_value=[video(3)]):w.request_youtube_more(0,explicit=True);self.jobs.pop()()
   w.apply_youtube_updates();self.assertEqual(w.rows[0],before+[video(3)])
 

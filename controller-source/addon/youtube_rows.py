@@ -7,7 +7,7 @@ import copy,threading,time
 from collections import Counter
 from pathlib import Path
 from urllib.parse import urlsplit,urlunsplit,parse_qsl,urlencode
-from youtube_core import video_id,tab_rows
+from youtube_core import video_id,tab_rows,recommendation_order
 from youtube_home import split_page,merge_page
 from youtube_provider import load_home_rows,load_shelf_page,load_related_page
 
@@ -37,6 +37,15 @@ def _fresh_path(path):
     return urlunsplit(route._replace(query=urlencode(params)))
 
 class YouTubeRows:
+    def fresh_recommendation_row(self,n):
+        if getattr(self,'section','')!='YouTube':return False
+        path=self.paths[n]
+        definition=next((d for d in self.page_definitions if d.get('path')==path),{})
+        page=getattr(self,'youtube_pages',{}).get(path)
+        return (path.startswith('plugin://plugin.video.youtube/')
+                and urlsplit(path).path.rstrip('/')=='/special/recommendations'
+                and not (page or {}).get('items') and not definition.get('_youtube_ordered'))
+
     def youtube_home_visible(self):
         paths={d.get('path') for d in getattr(self,'page_definitions',[])}
         return (getattr(self,'section','')=='YouTube' and self.mode=='home' and getattr(self,'youtube_tab','')=='home'
@@ -60,6 +69,13 @@ class YouTubeRows:
             return copy.deepcopy(page['items'])+([_more_card(page.get('error'))] if page['cursor'] else [])
         items,cursor=split_page(files,path)
         if 'youtube_cursor' in definition:cursor=copy.deepcopy(definition['youtube_cursor'])
+        if items and YouTubeRows.fresh_recommendation_row(self,n):
+            items=recommendation_order(items)
+            # Retain the first display order with the existing bounded row
+            # definition, including after the eight-page window evicts it.
+            definition['_youtube_ordered']=True
+            definition['local_items']=copy.deepcopy(items)
+            definition['youtube_cursor']=copy.deepcopy(cursor)
         # Existing provider/saved cards are stable. Diversity is applied only
         # to incoming continuation batches, never again at a finite end/return.
         page={'items':items,'cursor':cursor,'seen':[],'error':False}

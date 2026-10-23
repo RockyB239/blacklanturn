@@ -1,0 +1,11 @@
+{
+  "status": "Mac-only tested candidate; unpublished",
+  "native_addon": "plugin.video.youtube",
+  "native_version": "7.4.4a",
+  "native_path": "resources/lib/youtube_plugin/kodion/sql_store/function_cache.py",
+  "upstream_sha256": "ed3a13323d20c3c8fae40051c0572ecf5158b9dc59ae565615456f4ae0a784f4",
+  "candidate_sha256": "7418d1ba8afa569d0b0f3ccef78748c75c6b6560e8d096b6bf6c1e83efa830cb",
+  "controller_base": "0.1.86",
+  "build_base": "1.1.17",
+  "installer_base": "1.0.22"
+}

@@ -74,6 +74,21 @@ def caption(item):
     except (ValueError,TypeError,OverflowError):pass
     return ' · '.join(parts)
 
+def recommendation_order(items):
+    """Prefer unfinished videos using existing local history; retain all choices.
+
+    Keep directory positions and provider order within each bucket. Reuse the
+    original item objects so artwork, resume and exact playback URLs survive.
+    """
+    fresh=[];completed=[]
+    for item in items:
+        if not video_id(item):continue
+        try:watched=float(item.get('playcount') or 0)>0
+        except (TypeError,ValueError,OverflowError):watched=False
+        (completed if watched else fresh).append(item)
+    videos=iter(fresh+completed)
+    return [next(videos) if video_id(item) else item for item in items]
+
 def automatic_preview(config,section,movie_mode):
     return bool(config.get('YouTubePreviews',True)) if section=='YouTube' else movie_mode=='auto'
 
