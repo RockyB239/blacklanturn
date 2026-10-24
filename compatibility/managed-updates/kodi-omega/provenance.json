@@ -1,0 +1,10 @@
+{
+  "AddonVersion.cpp": {
+    "url": "https://raw.githubusercontent.com/xbmc/xbmc/Omega/xbmc/addons/AddonVersion.cpp",
+    "sha256": "4ffef76297df93e4f7b4e6e6b7dc64e22a62aa122af1fc868904530db66cd91b"
+  },
+  "AddonVersion.h": {
+    "url": "https://raw.githubusercontent.com/xbmc/xbmc/Omega/xbmc/addons/AddonVersion.h",
+    "sha256": "4d7759c79baed1089953ac53efc8003fd61eddc4d87e0063ebc553d35ab46054"
+  }
+}

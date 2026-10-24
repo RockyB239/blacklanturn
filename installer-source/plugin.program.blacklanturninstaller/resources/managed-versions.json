@@ -1,0 +1,55 @@
+{
+  "schema": 1,
+  "policy": "kodi-version-epoch-1",
+  "installer_min_version": "1.0.25",
+  "addons": {
+    "plugin.video.themoviedb.helper": [
+      {
+        "upstream_version": "6.17.9",
+        "managed_version": "1:6.17.9+blacklanturn.1",
+        "upstream_sha256": "1e66bfeab08c6bc4b6f9a422202cf6e0588d7ab46caa7f1d7449b83a87342ac6",
+        "managed_sha256": "b274e2bb19214bbaa6f461fd237fb35f35d496042aa48012159567bdbb7af4b2"
+      }
+    ],
+    "plugin.video.umbrella": [
+      {
+        "upstream_version": "6.7.92",
+        "managed_version": "1:6.7.92+blacklanturn.1",
+        "upstream_sha256": "29f0d70e7ee0555c374ce76592c6108b71613867f15b1d44365508fce3c96b3e",
+        "managed_sha256": "9251deb93dcf377a021ba1238548e06bc625c11580cd5ea5259a7a96f823c3a4"
+      }
+    ],
+    "script.module.jurialmunkey": [
+      {
+        "upstream_version": "0.2.35",
+        "managed_version": "1:0.2.35+blacklanturn.1",
+        "upstream_sha256": "f355a2810c2022d1992e2ba52299092774b62c9ace40e7508d989e083e466175",
+        "managed_sha256": "66ebeedf21ab01e36ba32059e647edb3f40a6bcd0db3ba01a5b46deb44241f05"
+      }
+    ],
+    "plugin.video.youtube": [
+      {
+        "upstream_version": "7.4.4",
+        "managed_version": "1:7.4.4+blacklanturn.1",
+        "upstream_sha256": "e75de5d79110bf773591eb73be702529d3d64d3c6c693b539862c8d14eee4887",
+        "managed_sha256": "df94e8c06b90c8131635c4a98a57f91d9ed9162b639061a824405254c96f1551"
+      },
+      {
+        "upstream_version": "7.4.4a",
+        "managed_version": "1:7.4.4a+blacklanturn.1",
+        "upstream_sha256": "73c675e03caa62402c092fb8c6895cee87dac7f84854eef3d7cce5eb9badadf2",
+        "managed_sha256": "5559026f3981c03003c4f4bb21b8b72dadc57765a98821a619c836ab827a598f"
+      }
+    ]
+  },
+  "source_adapters": {
+    "plugin.video.umbrella/resources/lib/modules/control.py": {
+      "upstream_sha256": "3b742abd6915ddd9f6b66bebf29b6aceecd0b78e68e43e273b8937a76cb07dcd",
+      "managed_sha256": "b580a0a0a2edd8e88bab6a82f5f7d1cd32f7afe124e8ab5cd230ba99c5b00ca6"
+    },
+    "plugin.video.umbrella/resources/lib/database/cache.py": {
+      "upstream_sha256": "59b49b4238cda135a3381f9e1c996f031fc4659ab071e263bfc90af915f07c44",
+      "managed_sha256": "fdf624f0fec89756f1b4a437eebac0a8386c45bf01af746d599206e8bd6f6385"
+    }
+  }
+}

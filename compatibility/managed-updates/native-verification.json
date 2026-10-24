@@ -1,0 +1,97 @@
+{
+  "schema": 1,
+  "checked_at": "2026-10-24T03:47:10.507291+00:00",
+  "public_release_changed": false,
+  "candidate": "Build1.1.20 / Installer1.0.25",
+  "artifacts": {
+    "BlackLanturn-General-Kodi21-1.1.20.zip": "6cb8dc3dc61e396535d1d12a6c6380237e479a8d939abe57f2c9f41ac29a372f",
+    "BlackLanturn-Apple-TV-Mac-Kodi21-1.1.20.zip": "b3ce8db36f57b744a8db1ad2028080ec8bbc570e70417a31d7ab831f532e3089",
+    "plugin.program.blacklanturninstaller-1.0.25.zip": "bca39d7ca6f6649549db866d7159bf15f9a945b1822da1ae054c6fedcfe30142"
+  },
+  "native_bulk": {
+    "scope": "Native Kodi21.3 disposable profile; synthetic loopback repository. Normal GUI Available updates / Install all updates. Final adapter source included.",
+    "changed_managed_trees": [],
+    "installed": {
+      "plugin.program.blacklanturn.updatecontrol": {
+        "version": "2.0.0",
+        "enabled": true
+      },
+      "plugin.video.themoviedb.helper": {
+        "version": "1:6.17.9+blacklanturn.1",
+        "enabled": true
+      },
+      "plugin.video.umbrella": {
+        "version": "1:6.7.92+blacklanturn.1",
+        "enabled": true
+      },
+      "plugin.video.youtube": {
+        "version": "1:7.4.4a+blacklanturn.1",
+        "enabled": true
+      },
+      "script.module.jurialmunkey": {
+        "version": "1:0.2.35+blacklanturn.1",
+        "enabled": true
+      }
+    },
+    "passed": true
+  },
+  "native_install": {
+    "passed": true,
+    "personal_profile_accessed": false,
+    "scope": "native Mac Kodi API / production install core; transport and Wizard UI tested separately",
+    "cases": [
+      {
+        "mode": "clean",
+        "passed": true,
+        "source_files_exact": 3833,
+        "native_registry_preserved": true,
+        "synthetic_history_choice_preserved": true
+      },
+      {
+        "mode": "standard",
+        "passed": true,
+        "source_files_exact": 3833,
+        "native_registry_preserved": true,
+        "synthetic_history_choice_preserved": true
+      }
+    ]
+  },
+  "automated_installer_tests": 632,
+  "source_session_contracts": {
+    "before_failed": 12,
+    "after_passed": 12,
+    "scope": "Read-only copied installed module; no fresh natural season-transition claim"
+  },
+  "mac_native_ui": {
+    "ordinary_staged_addon_zip_install": true,
+    "source_exact": true,
+    "saved_settings_and_refresh_grants_preserved": true,
+    "home_art_and_four_ratings": true,
+    "signed_in_youtube_rows": true,
+    "normal_youtube_resume_auto_1080p": true,
+    "back_returns_to_title_and_progress": true,
+    "build_receipt": "1.1.19",
+    "installer": "1.0.25"
+  },
+  "apple": {
+    "addon_files_recovered_exact": 3831,
+    "native_xml_preserved": 9,
+    "healthy_databases": 26,
+    "watched_cache_rows_preserved": 106,
+    "bookmark_cache_rows_preserved": 18,
+    "ordinary_addon_updates_performed": false,
+    "visible_ui_acceptance": "pending: DeviceHub AVC stream RTCP timeout",
+    "incident": "CoreDevice remove-existing-content affected app data beyond named destination; recovered existing app from verified fresh backup; no app reinstall or profile changes"
+  },
+  "firestick_touched": false,
+  "limits": [
+    "Synthetic local repository used for deterministic bulk-update positive control; actual configured repositories refreshed separately on Mac.",
+    "Native clean/Standard validation exercises production installer core in disposable Kodi; no new public catalog transport acceptance.",
+    "Explicit user downgrade/replacement through Versions remains possible.",
+    "Umbrella upstream-version informational notification remains; managed upgrades are delivered through reviewed BlackLanturn builds."
+  ],
+  "known97_preflight": {
+    "actual_preupdate_source_accepted": true,
+    "scope": "Read-only exact code-only copy of the ordinary updated Mac snapshot"
+  }
+}

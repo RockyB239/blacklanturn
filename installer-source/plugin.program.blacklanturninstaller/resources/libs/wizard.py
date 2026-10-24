@@ -167,7 +167,7 @@ class Wizard:
                         for dependency in db.depends_list(addon):
                             kept.add(dependency)
                             kept.update(db.depends_list(dependency))
-                    managed_addons.verify_kept(CONFIG.HOME, kept, network=protected_network, youtube=protected_youtube)
+                    managed_addons.verify_kept(CONFIG.HOME, kept, network=protected_network, youtube=protected_youtube, metadata_protected=bool((prepared.get('policy') or {}).get('managed_update_policy')))
                 except (managed_addons.ProtectionError, OSError, ValueError, TypeError, IndexError) as exc:
                     self.dialogProgress.close()
                     self.dialog.ok(CONFIG.ADDONTITLE, str(exc))

@@ -12,7 +12,7 @@ class RepairedRelease(unittest.TestCase):
   self.assertEqual(manifest['files'],{str(p.relative_to(addon)):hashlib.sha256(p.read_bytes()).hexdigest() for p in addon.rglob('*') if p.is_file() and '__pycache__' not in p.parts and p.suffix not in ('.pyc','.pyo')})
  def test_managed_provider_and_installer_require_repaired_payload(self):
   source=ROOT/'installer-source/plugin.program.blacklanturninstaller'
-  self.assertEqual(ET.parse(source/'addon.xml').getroot().get('version'),'1.0.24')
+  self.assertEqual(ET.parse(source/'addon.xml').getroot().get('version'),'1.0.25')
   manifest=json.loads((source/'resources/managed-helper.json').read_text())
   self.assertEqual(manifest['search_patch'],'search-batch-1')
   path='resources/tmdbhelper/lib/items/directories/tmdb/lists_search.py'

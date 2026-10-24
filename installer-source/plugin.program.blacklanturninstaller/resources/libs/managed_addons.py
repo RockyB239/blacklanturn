@@ -15,6 +15,15 @@ import xml.etree.ElementTree as E
 _path_spec = importlib.util.spec_from_file_location('_blacklanturn_archive_paths', Path(__file__).with_name('archive_paths.py'))
 _archive_paths = importlib.util.module_from_spec(_path_spec)
 _path_spec.loader.exec_module(_archive_paths)
+_version_spec = importlib.util.spec_from_file_location('_blacklanturn_managed_versions', Path(__file__).with_name('managed_versions.py'))
+_versions = importlib.util.module_from_spec(_version_spec)
+_version_spec.loader.exec_module(_versions)
+
+def _digest(addon, name, raw):
+    if name == 'addon.xml':
+        raw = _versions.normalize_metadata(addon, raw)
+    return _versions.source_digest(addon, name, raw)
+
 
 HELPER = 'plugin.video.themoviedb.helper'
 PREFIX = 'addons/' + HELPER + '/'
@@ -35,28 +44,32 @@ def verify_archive(archive, umbrella=False, network=False, youtube=False):
         _archive_paths.validate(archive)
     except _archive_paths.PathError as exc:
         raise ProtectionError(str(exc)) from exc
+    try:
+        _versions.verify_archive_adapters(archive)
+    except (OSError, ValueError) as exc:
+        raise ProtectionError(str(exc)) from exc
     expected = json.loads((Path(__file__).parents[1] / 'managed-helper.json').read_text())['files']
-    actual = {n[len(PREFIX):]: hashlib.sha256(archive.read(n)).hexdigest()
+    actual = {n[len(PREFIX):]: _digest(HELPER, n[len(PREFIX):], archive.read(n))
               for n in archive.namelist() if n.startswith(PREFIX) and not n.endswith('/')}
     if actual != expected:
         raise ProtectionError('The Helper package has not passed BlackLanturn compatibility checks. Update BlackLanturn Installer and retry. Your current build has been kept.')
     if umbrella:
         prefix = 'addons/' + UMBRELLA + '/'
         expected = _umbrella_manifest()['files']
-        actual = {n[len(prefix):]: hashlib.sha256(archive.read(n)).hexdigest()
+        actual = {n[len(prefix):]: _digest(UMBRELLA, n[len(prefix):], archive.read(n))
                   for n in archive.namelist() if n.startswith(prefix) and not n.endswith('/')}
         if actual != expected:
             raise ProtectionError('The Umbrella package has not passed BlackLanturn compatibility checks. Update BlackLanturn Installer and retry. Your current build has been kept.')
     if network:
         prefix = 'addons/' + NETWORK + '/'
         expected = json.loads((Path(__file__).parents[1] / 'managed-network.json').read_text())['files']
-        actual = {n[len(prefix):]: hashlib.sha256(archive.read(n)).hexdigest()
+        actual = {n[len(prefix):]: _digest(NETWORK, n[len(prefix):], archive.read(n))
                   for n in archive.namelist() if n.startswith(prefix) and not n.endswith('/')}
         if actual != expected:
             raise ProtectionError('The shared network package has not passed BlackLanturn compatibility checks. Update BlackLanturn Installer and retry. Your current build has been kept.')
     if youtube:
         prefix = 'addons/' + YOUTUBE + '/'
-        actual = {n[len(prefix):]: hashlib.sha256(archive.read(n)).hexdigest()
+        actual = {n[len(prefix):]: _digest(YOUTUBE, n[len(prefix):], archive.read(n))
                   for n in archive.namelist() if n.startswith(prefix) and not n.endswith('/')}
         if not any(actual == variant['files'] for variant in _youtube_manifest()['variants'].values()):
             raise ProtectionError('The YouTube package has not passed BlackLanturn compatibility checks. Update BlackLanturn Installer and retry. Your current build has been kept.')
@@ -65,6 +78,10 @@ def verify_archive(archive, umbrella=False, network=False, youtube=False):
 def _source_files(addon, message):
     if addon.is_symlink() or addon.parent.is_symlink() or not addon.is_dir():
         raise ProtectionError(message)
+    try:
+        _versions.verify_installed_adapters(addon)
+    except (OSError, ValueError) as exc:
+        raise ProtectionError(message) from exc
     actual = {}
     total = entries = 0
     for path in addon.rglob('*'):
@@ -79,7 +96,7 @@ def _source_files(addon, message):
         total += path.stat().st_size
         if len(actual) >= 4096 or total > 32 * 1024 * 1024:
             raise ProtectionError(message)
-        actual[relative.as_posix()] = hashlib.sha256(path.read_bytes()).hexdigest()
+        actual[relative.as_posix()] = _digest(addon.name, relative.as_posix(), path.read_bytes())
     return actual
 
 def verify_installed(home, network=False, youtube=False):
@@ -98,7 +115,7 @@ def verify_installed(home, network=False, youtube=False):
     message = 'Installed Umbrella has unreviewed source or version. Your current build has been kept; update compatibility support before installing.'
     try:
         actual = _source_files(addon, message)
-        version = E.fromstring((addon / 'addon.xml').read_bytes()).get('version')
+        version = _versions.upstream_version(UMBRELLA, (addon / 'addon.xml').read_bytes())
         manifest = _umbrella_manifest()
         expected = (manifest['files'] if version == manifest['version']
                     else manifest.get('legacy_files', {}).get(version))
@@ -148,7 +165,7 @@ def _verify_installed_network(home):
     except (OSError, ValueError, KeyError) as exc:
         raise ProtectionError(message) from exc
 
-def verify_kept(home, addon_ids, network=False, youtube=False):
+def verify_kept(home, addon_ids, network=False, youtube=False, metadata_protected=False):
     """Whitelist may retain managed source only when it already matches target."""
     managed = [(HELPER, 'TMDb Helper', 'managed-helper.json'),
                (UMBRELLA, 'Umbrella', 'managed-umbrella.json')]
@@ -164,6 +181,10 @@ def verify_kept(home, addon_ids, network=False, youtube=False):
                    "Selected accounts and supported playback preferences can still be preserved. Your current build has been kept.")
         try:
             manifest = json.loads((Path(__file__).parents[1] / filename).read_text())
+            if metadata_protected:
+                raw = (Path(home) / 'addons' / addon / 'addon.xml').read_bytes()
+                if _versions.normalize_metadata(addon, raw) == raw:
+                    raise ProtectionError(message)
             candidates = ([v['files'] for v in manifest['variants'].values()] if addon == YOUTUBE else [manifest['files']])
             if _source_files(Path(home) / 'addons' / addon, message) not in candidates:
                 raise ProtectionError(message)

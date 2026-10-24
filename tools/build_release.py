@@ -1,4 +1,4 @@
-"""Reproducible 1.1.19 candidate from verified clean baselines, never live profiles."""
+"""Reproducible 1.1.20 candidate from verified clean baselines, never live profiles."""
 import argparse,ast,hashlib,importlib.util,json,re,sys,xml.etree.ElementTree as ET,zipfile
 from pathlib import Path
 ROOT=Path(__file__).resolve().parents[1]
@@ -27,6 +27,14 @@ def apply_youtube_refresh(data):
  if sha(data[target])!=manifest['upstream_sha256'] or sha(candidate)!=manifest['candidate_sha256']:
   raise ValueError('Unknown YouTube context source; compatibility review is required')
  data[target]=candidate
+
+def apply_managed_versions(data):
+ spec=importlib.util.spec_from_file_location('build_managed_versions',SOURCE/'resources/libs/managed_versions.py');m=importlib.util.module_from_spec(spec);spec.loader.exec_module(m)
+ staged=dict(data)
+ candidates={key:(ROOT/'compatibility/managed-updates/umbrella/candidate'/key.split('/',1)[1]).read_bytes() for key in m.policy()['source_adapters']}
+ m.apply_source_adapters(staged,candidates)
+ m.apply_metadata(staged)
+ data.update(staged)
 
 def zipwrite(path,data):
  with zipfile.ZipFile(path,'w',zipfile.ZIP_DEFLATED,compresslevel=6) as z:
@@ -86,8 +94,8 @@ def apply_umbrella(data):
 def build(baselines,output):
  output.mkdir(parents=True,exist_ok=True)
  installer={str(p.relative_to(SOURCE)):p.read_bytes() for p in SOURCE.rglob('*') if p.is_file() and '__pycache__' not in p.parts and not p.name.endswith(('.pyc','.DS_Store'))}
- assert ET.fromstring(installer['addon.xml']).get('version')=='1.0.24'
- installer_zip=output/'plugin.program.blacklanturninstaller-1.0.24.zip'
+ assert ET.fromstring(installer['addon.xml']).get('version')=='1.0.25'
+ installer_zip=output/'plugin.program.blacklanturninstaller-1.0.25.zip'
  zipwrite(installer_zip,{'plugin.program.blacklanturninstaller/'+n:raw for n,raw in installer.items()})
  spec=importlib.util.spec_from_file_location('managed',SOURCE/'resources/libs/managed_addons.py');managed=importlib.util.module_from_spec(spec);spec.loader.exec_module(managed)
  for edition,expected in BASE_HASHES.items():
@@ -134,12 +142,14 @@ def build(baselines,output):
   apply_settings(yp,{'kodion.mpd.stream.select':'1','kodion.video.stream.select':'1','kodion.history.remote':'true','kodion.history.local':'true'})
   defaults=json.loads((SOURCE/'resources/playback-defaults.json').read_text(encoding='utf-8'))
   for name,fields in defaults.items():apply_settings('userdata/'+name,fields)
-  marker=json.loads(data['userdata/blacklanturn-build.json']);marker.update(schema=3,youtube_refresh_patch='youtube-freshness-2',preferences_policy='playback-trakt-youtube-umbrella-network-autoplay-1',autoplay_patch='same-show-source-1',build_version='1.1.19',network_patch='request-reliability-privacy-1',helper_patch='empty-cache-1',installer_min_version='1.0.24',discovery_patch='discovery-first-page-1',controller_version='0.1.87',youtube_end_patch='youtube-end-1',skin_version='0.1.39',helper_search_patch='search-batch-1',helper_playback_patch='sampled-progress-1',umbrella_version='6.7.92',umbrella_patch='event-progress-3')
+  marker=json.loads(data['userdata/blacklanturn-build.json']);marker.update(schema=3,youtube_refresh_patch='youtube-freshness-2',preferences_policy='playback-trakt-youtube-umbrella-network-autoplay-1',autoplay_patch='same-show-source-1',build_version='1.1.20',managed_update_policy='kodi-version-epoch-1',network_patch='request-reliability-privacy-1',helper_patch='empty-cache-1',installer_min_version='1.0.25',discovery_patch='discovery-first-page-1',controller_version='0.1.87',youtube_end_patch='youtube-end-1',skin_version='0.1.39',helper_search_patch='search-batch-1',helper_playback_patch='sampled-progress-1',umbrella_version='6.7.92',umbrella_patch='event-progress-3')
   data['userdata/blacklanturn-build.json']=json.dumps(marker,indent=2).encode()
   data['userdata/BlackLanturn-README.txt']=(before['userdata/BlackLanturn-README.txt'].decode()+'\nRelease 1.1.16: YouTube end-screen suggestions use signed-in Watch Next with related-video fallback. Autoplay defaults off; optional countdown is 15 seconds, navigation cancels, first Back hides suggestions and second Back returns to the original row. Suggestions can be disabled. Controller 0.1.85 and skin 0.1.39 package the Mac-tested behavior in both editions. New native acceptance is Mac only; Fire Stick testing follows publication at the user request. Installer 1.0.21 preserves existing Standard-update account/settings behavior.\n'+'\nRelease 1.1.15: Flat title Options, retained-row retries and clear local My Stuff wording. Manually chosen episode sources carry their service and size ceiling through the same show, including later seasons; normal autoplay keeps its configured ranking. The source choice is temporary, can be reset from Options and clears at Stop. Queued playback retains its prepared source and tracked progress across native callback handoffs. Controller 0.1.84 and Installer 1.0.20 protect exact reviewed source. New playback was naturally tested on Mac only; Fire/Apple TV device updates and native acceptance are deferred. Standard updates retain supported playback preferences and selected accounts.\n'+'\nRelease 1.1.14: Both editions share request-reliability-privacy-1: server Retry-After cooldown (minimum 60 seconds) and status/hostname-only HTTP error logging. Installer 1.0.19 validates and protects the complete shared dependency using the existing managed-addon update policy. Platform-specific YouTube source, processing limits and playback/default settings are unchanged.\n'+'\n\nRelease 1.1.13: Umbrella 6.7.92 includes event-progress-3 with current-item metadata duration fallback, absolute seek capture and guarded exact-zero resume clearing. Installer 1.0.18 verifies the complete managed Umbrella tree and protects its normal update path before cleanup. Controller 0.1.83 uses YouTube-specific Details and consistent independent preview navigation. Both clean editions default to four ratings with TMDb hidden; ratings remain configurable. The preserved install flow makes Standard versus Account-only reset explicit, repairs preservation controls and hides unconfigured destinations. Standard updates retain selected playback choices and authorizations; account-only reset deliberately uses build defaults and selected accounts. Managed Helper 6.17.9 includes sampled-progress-1 alongside empty-cache-1 and search-batch-1. Position sampling uses the existing playback service only, with no added browsing network requests or background thread. Existing adaptive YouTube recommendations, artwork, watch status, 45-second inline previews, automatic fullscreen quality, language/forced subtitle defaults and device-specific playback compatibility remain retained. Native release acceptance is recorded separately; this package description is not proof.\n').encode()
   data['userdata/BlackLanturn-README.txt']+=b'\nRelease 1.1.17: First-page discovery uses improved category recipes and local ordering without extra duplicate-refill requests. Valid overlap remains available. Installer 1.0.22 upgrades recognized default lists while retaining customized lists, all other controller preferences and selected accounts. Controller 0.1.87; skin 0.1.39 unchanged. Native discovery acceptance is Mac only; other device updates are deferred.\n'
   data['userdata/BlackLanturn-README.txt']+=b'\nRelease 1.1.18: YouTube cache reads retain fetched age; normal full-video history is enabled on clean installs while previews remain excluded. Fresh recommendations place completed videos after unfinished choices. The existing refresh worker publishes primary rows early, then categories, retaining focus and prior results on late errors. Controller 0.1.87 and Installer 1.0.23 protect exact platform-specific YouTube code. Standard preserves saved history privacy choices, playback preferences and selected accounts. Native feature acceptance is Mac only at packaging time.\n'
   allowed={n for n in set(before)|set(data) if n.startswith((prefix,cp,'addons/plugin.video.umbrella/'))}|{'addons/skin.blacklanturn.preview/xml/Home.xml','addons/skin.blacklanturn.preview/addon.xml','addons/plugin.video.youtube/resources/lib/youtube_plugin/kodion/sql_store/function_cache.py','addons/plugin.video.youtube/resources/lib/youtube_plugin/kodion/context/xbmc/xbmc_context.py','userdata/blacklanturn-build.json','userdata/BlackLanturn-README.txt','userdata/guisettings.xml','userdata/addon_data/script.blacklanturn.preview/rows.json',hp,up,yp,target,'addons/script.module.jurialmunkey/resources/modules/jurialmunkey/reqapi.py'}|{'addons/plugin.video.themoviedb.helper/resources/tmdbhelper/lib/monitor/'+n for n in ('player.py','scrobbler.py','service.py')}
+  apply_managed_versions(data)
+  allowed.update('addons/'+aid+'/addon.xml' for aid in ('plugin.video.themoviedb.helper','plugin.video.umbrella','script.module.jurialmunkey','plugin.video.youtube'))
   changed={n for n in set(before)|set(data) if before.get(n)!=data.get(n)};assert changed<=allowed
   for n,raw in data.items():
    assert n.startswith(('addons/','userdata/')) and '..' not in n.split('/')
@@ -156,10 +166,11 @@ def build(baselines,output):
     if dep.get('optional')=='true':continue
     assert dep.get('addon') in addons or dep.get('addon') in system,(aid,dep.get('addon'))
   data['userdata/BlackLanturn-README.txt']+=b'\nRelease 1.1.19: YouTube handles missing Kodi plugin-folder values safely, preventing subscription requests from failing when no plugin folder is active. The exact context guard joins the protected cache patch. Installer 1.0.24 is required. Controller 0.1.87, skin 0.1.39, saved playback choices and selected accounts are retained.\n'
-  out=output/f'BlackLanturn-{edition}-Kodi21-1.1.19.zip';zipwrite(out,data)
+  data['userdata/BlackLanturn-README.txt']+=b'\nRelease 1.1.20: Reviewed managed-addon versions survive ordinary Kodi bulk updates. Installer 1.0.25 validates exact metadata and Umbrella internal-version compatibility before cleanup. Existing playback, source-selection, platform workarounds and selected account choices are retained. Explicit manual downgrades remain outside this protection.\n'
+  out=output/f'BlackLanturn-{edition}-Kodi21-1.1.20.zip';zipwrite(out,data)
   with zipfile.ZipFile(out) as z:managed.verify_archive(z, umbrella=True, network=True, youtube=True)
   files={n:sha(d) for n,d in sorted(data.items())}
-  report={'file':out.name,'sha256':sha(out.read_bytes()),'bytes':out.stat().st_size,'files':len(data),'changed_paths':sorted(changed),'helper':'6.17.9 + empty-cache-1 + search-batch-1 + sampled-progress-1','installer':'1.0.24','umbrella':'6.7.92 + event-progress-3','schema':3,'settings_and_rows':'clean 1.1.2 plus exact playback-provider, automatic YouTube quality, watch-indicator, 64MB/4x buffer and High artwork defaults','native_binaries':0}
+  report={'file':out.name,'sha256':sha(out.read_bytes()),'bytes':out.stat().st_size,'files':len(data),'changed_paths':sorted(changed),'helper':'6.17.9 + empty-cache-1 + search-batch-1 + sampled-progress-1','installer':'1.0.25','umbrella':'6.7.92 + event-progress-3','schema':3,'settings_and_rows':'clean 1.1.2 plus exact playback-provider, automatic YouTube quality, watch-indicator, 64MB/4x buffer and High artwork defaults','native_binaries':0}
   (output/(edition+'-package.json')).write_text(json.dumps(report,indent=2));(output/(edition+'-manifest.json')).write_text(json.dumps(files,indent=2));print(json.dumps(report),flush=True)
 if __name__=='__main__':
  p=argparse.ArgumentParser();p.add_argument('--baselines',type=Path,required=True);p.add_argument('--output',type=Path,required=True);a=p.parse_args();build(a.baselines,a.output)
