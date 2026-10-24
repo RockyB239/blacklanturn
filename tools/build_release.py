@@ -36,6 +36,20 @@ def apply_managed_versions(data):
  m.apply_metadata(staged)
  data.update(staged)
 
+def apply_preview_check(data):
+ """Keep the General-only read-only checker compatible with reviewed metadata."""
+ root=ROOT/'compatibility/managed-updates/previewcheck'
+ receipt=json.loads((root/'provenance.json').read_text())
+ prefix='addons/service.blacklanturn.previewcheck/'
+ present={name[len(prefix):]:sha(raw) for name,raw in data.items() if name.startswith(prefix)}
+ if not present:return  # The Apple edition does not ship this Fire TV check.
+ if present not in (receipt['upstream_files'],receipt['candidate_files']):
+  raise ValueError('Unknown General preview checker; compatibility review is required')
+ candidates={p.name:p.read_bytes() for p in (root/'candidate').iterdir() if p.is_file()}
+ if {n:sha(raw) for n,raw in candidates.items()}!=receipt['candidate_files']:
+  raise ValueError('Reviewed General preview checker changed')
+ data.update({prefix+n:raw for n,raw in candidates.items()})
+
 def zipwrite(path,data):
  with zipfile.ZipFile(path,'w',zipfile.ZIP_DEFLATED,compresslevel=6) as z:
   for name,raw in sorted(data.items()):
@@ -149,6 +163,8 @@ def build(baselines,output):
   data['userdata/BlackLanturn-README.txt']+=b'\nRelease 1.1.18: YouTube cache reads retain fetched age; normal full-video history is enabled on clean installs while previews remain excluded. Fresh recommendations place completed videos after unfinished choices. The existing refresh worker publishes primary rows early, then categories, retaining focus and prior results on late errors. Controller 0.1.87 and Installer 1.0.23 protect exact platform-specific YouTube code. Standard preserves saved history privacy choices, playback preferences and selected accounts. Native feature acceptance is Mac only at packaging time.\n'
   allowed={n for n in set(before)|set(data) if n.startswith((prefix,cp,'addons/plugin.video.umbrella/'))}|{'addons/skin.blacklanturn.preview/xml/Home.xml','addons/skin.blacklanturn.preview/addon.xml','addons/plugin.video.youtube/resources/lib/youtube_plugin/kodion/sql_store/function_cache.py','addons/plugin.video.youtube/resources/lib/youtube_plugin/kodion/context/xbmc/xbmc_context.py','userdata/blacklanturn-build.json','userdata/BlackLanturn-README.txt','userdata/guisettings.xml','userdata/addon_data/script.blacklanturn.preview/rows.json',hp,up,yp,target,'addons/script.module.jurialmunkey/resources/modules/jurialmunkey/reqapi.py'}|{'addons/plugin.video.themoviedb.helper/resources/tmdbhelper/lib/monitor/'+n for n in ('player.py','scrobbler.py','service.py')}
   apply_managed_versions(data)
+  apply_preview_check(data)
+  allowed.update(n for n in data if n.startswith('addons/service.blacklanturn.previewcheck/'))
   allowed.update('addons/'+aid+'/addon.xml' for aid in ('plugin.video.themoviedb.helper','plugin.video.umbrella','script.module.jurialmunkey','plugin.video.youtube'))
   changed={n for n in set(before)|set(data) if before.get(n)!=data.get(n)};assert changed<=allowed
   for n,raw in data.items():

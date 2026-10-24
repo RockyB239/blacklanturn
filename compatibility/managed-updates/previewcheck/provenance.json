@@ -1,0 +1,20 @@
+{
+  "addon": "service.blacklanturn.previewcheck",
+  "upstream_files": {
+    "README.txt": "bb25e91530fb43fb54d555973b317ec458ea0035478ef2a58692b8832adf326f",
+    "addon.xml": "7a002f1b7bdff29954c9cbb711d969b6d55528458cbd43c3f9f9dc977897b7ef",
+    "check.py": "96e73dc3ec22868ed08a2dc98a20b515180a861e8b1ea960b3893ffe958ee06a",
+    "default.py": "1650948c02532e9335ae5e2835d9da9d5a76767c74008da40f4a821d57becc56",
+    "runtime.py": "22ff0178c57608d97810545d2f5989b56979dcb9f8e8d4824912dccbe6d61d41",
+    "service.py": "4a08dff9e10eeef83b23ccdf5f65908208d561688d5e098c1c4252c051373c10"
+  },
+  "tested_client_sha256": "cec04fc03b713ba5d0f25dee3b060fec8e0448b2a54696965bd1bcfd09213d38",
+  "candidate_files": {
+    "README.txt": "bb25e91530fb43fb54d555973b317ec458ea0035478ef2a58692b8832adf326f",
+    "addon.xml": "d094a27502dd1d0d5228cdc55d3ae32033771004231256ea6fe1f5b10ab77121",
+    "check.py": "081a88d7744782a33c9b087c2d696e86bf108c2ef3c4911e648c8118af38b7bf",
+    "default.py": "1650948c02532e9335ae5e2835d9da9d5a76767c74008da40f4a821d57becc56",
+    "runtime.py": "eb5bfca3df93839289201ad48a51179fd5b3e5e4f0297c0ec6172c858aa465ba",
+    "service.py": "4a08dff9e10eeef83b23ccdf5f65908208d561688d5e098c1c4252c051373c10"
+  }
+}
