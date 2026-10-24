@@ -36,6 +36,8 @@ class Kodi:
         if method == 'Settings.GetSettingValue':
             assert p['setting']=='addons.updatemode', 'Wrong Kodi repository policy setting'
             return json.dumps({'jsonrpc':'2.0','id':1,'result':{'value':self.repo_mode}})
+        if method == 'Addons.GetAddons':
+            return json.dumps({'jsonrpc':'2.0','id':req.get('id',1),'result':{'addons':[],'limits':{'start':0,'end':0,'total':0}}})
         raise AssertionError(method)
     def executebuiltin(self, command, wait=False):
         self.commands.append(command)

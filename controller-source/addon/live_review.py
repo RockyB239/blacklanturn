@@ -5,6 +5,7 @@ from pathlib import Path
 from urllib.parse import urlencode,urlsplit,parse_qs
 import xbmc,xbmcgui,xbmcvfs,xbmcaddon
 import autoplay_session
+from update_notes_ui import HomeUpdates
 from live_runtime import read_controller_config
 from live_core import directory_items,rating_line,PageHistory,valid_source,person_identity,mdblist_line,rating_badges,select_rating_badges,update_rating_sources,preview_candidates,PreviewAttempts,watch_state,clear_stale_preview,episode_identity,show_identity,title_details_params,merge_title_details,episode_heading,is_browse_folder
 from probe_core import HoverScroll
@@ -201,6 +202,7 @@ class LiveReview(YouTubeBrowser,xbmcgui.WindowXML):
         threading.Thread(target=lambda:self.start(lifetime),name='BlackLanturnLiveSetup',daemon=True).start()
         threading.Thread(target=lambda:self.monitor(lifetime),name='BlackLanturnLiveFocus',daemon=True).start()
         if resume and resume.get('origin')!='sidebar':threading.Thread(target=lambda:self.resume_settings(lifetime),name='BlackLanturnSettingsReturn',daemon=True).start()
+        self.home_updates=HomeUpdates(self,rpc)
         event('live_opened')
     def initialize_startup_focus(self):
         # Only a new browsing session starts neutral. Settings and playback
@@ -1798,6 +1800,9 @@ class LiveReview(YouTubeBrowser,xbmcgui.WindowXML):
             if self.section!='YouTube':self.setProperty('previewMode',self.preview_mode)
             self.config['PreviewMode']=self.preview_mode;self.save();self.row_navigation()
         elif action=='integration_status':self.integration_status()
+        elif action=='update_notes':
+            from update_notes_ui import show_notes
+            show_notes()
         elif action=='help':
             xbmcgui.Dialog().textviewer('BlackLanturn · Help',(ROOT/'HELP.txt').read_text(encoding='utf-8'))
         elif action=='clear_search':
@@ -1841,6 +1846,7 @@ class LiveReview(YouTubeBrowser,xbmcgui.WindowXML):
                         self.setProperty('captionFitStep',fit)
                         event('caption_fit',width=width,height=height,step=fit)
                     caption_checked=time.monotonic()
+                if getattr(self,'home_updates',None):self.home_updates.tick()
                 focus=self.getFocusId();key=(focus,self.getControl(focus).getSelectedPosition()) if focus in (900,901,3100) else (focus,0)
                 if not current():return
                 if getattr(self,'startup_idle',False) and focus!=5:

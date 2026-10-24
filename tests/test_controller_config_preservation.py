@@ -211,7 +211,8 @@ class ControllerConfigInstallFlow(unittest.TestCase):
                 backup = home / 'userdata/addon_data/plugin.program.blacklanturninstaller/authorizations.json'
                 snapshot = json.loads(backup.read_text())['build_preferences']
                 self.assertEqual(snapshot['controller'].encode('utf-8'), ORIGINAL)
-                self.assertEqual(snapshot['schema'], 2)
+                self.assertEqual(snapshot['schema'], 3)
+                self.assertIn('update_notes', snapshot)
                 self.assertFalse(backup.with_name('authorizations.pending.json').exists())
                 helper = home / 'userdata/addon_data/plugin.video.themoviedb.helper/settings.xml'
                 self.assertEqual({node.get('id'): node.text for node in fixtures.E.parse(helper).getroot()}['trakt_token'], 'private-token')

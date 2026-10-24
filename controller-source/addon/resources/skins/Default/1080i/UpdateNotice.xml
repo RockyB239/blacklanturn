@@ -1,0 +1,74 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<window>
+  <defaultcontrol>101</defaultcontrol>
+  <zorder>20</zorder>
+  <controls>
+    <control type="image">
+      <left>1110</left>
+      <top>280</top>
+      <width>720</width>
+      <height>290</height>
+      <texture>update-notice-panel.png</texture>
+    </control>
+    <control type="image">
+      <left>1140</left>
+      <top>305</top>
+      <width>64</width>
+      <height>64</height>
+      <texture>blacklanturn-lantern.png</texture>
+      <aspectratio>keep</aspectratio>
+    </control>
+    <control type="label">
+      <left>1220</left>
+      <top>305</top>
+      <width>580</width>
+      <height>50</height>
+      <font>font30</font>
+      <label>BlackLanturn updated</label>
+      <textcolor>FFF4F6F8</textcolor>
+    </control>
+    <control type="textbox">
+      <left>1140</left>
+      <top>370</top>
+      <width>650</width>
+      <height>90</height>
+      <font>font13</font>
+      <label>$INFO[Window.Property(summary)]</label>
+      <textcolor>FFBCC7CE</textcolor>
+    </control>
+    <control type="button" id="101">
+      <left>1140</left>
+      <top>480</top>
+      <width>350</width>
+      <height>60</height>
+      <font>font13</font>
+      <label>View changes</label>
+      <textcolor>FFF5F5F5</textcolor>
+      <focusedcolor>FF00DBE9</focusedcolor>
+      <texturefocus>focus-teal.png</texturefocus>
+      <texturenofocus>button-dark.png</texturenofocus>
+      <textoffsetx>20</textoffsetx>
+      <onleft>102</onleft>
+      <onright>102</onright>
+      <onup>101</onup>
+      <ondown>101</ondown>
+    </control>
+    <control type="button" id="102">
+      <left>1510</left>
+      <top>480</top>
+      <width>290</width>
+      <height>60</height>
+      <font>font13</font>
+      <label>Dismiss</label>
+      <textcolor>FFF5F5F5</textcolor>
+      <focusedcolor>FF00DBE9</focusedcolor>
+      <texturefocus>focus-teal.png</texturefocus>
+      <texturenofocus>button-dark.png</texturenofocus>
+      <textoffsetx>20</textoffsetx>
+      <onleft>101</onleft>
+      <onright>101</onright>
+      <onup>102</onup>
+      <ondown>102</ondown>
+    </control>
+  </controls>
+</window>

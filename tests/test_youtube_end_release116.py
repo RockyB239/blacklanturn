@@ -9,7 +9,7 @@ class YouTubeEndRelease(unittest.TestCase):
   return json.loads((ROOT/'controller-source/youtube-end-native-verification.json').read_text()),json.loads((ROOT/'controller-source/manifest85.json').read_text())
  def test_current_receipt_matches_exact_release_source(self):
   receipt,manifest=self.inputs();V.verify_youtube_end_acceptance(receipt,manifest,historical=True)
-  self.assertEqual(E.parse(ROOT/'controller-source/addon/addon.xml').getroot().get('version'),'0.1.87')
+  self.assertEqual(E.parse(ROOT/'controller-source/addon/addon.xml').getroot().get('version'),'0.1.88')
  def test_missing_native_behaviors_and_changed_source_fail(self):
   receipt,manifest=self.inputs()
   for key in ('natural_end','autoplay_started','back_hides_and_cancels','second_back_restores_row','disabled_skips_request','pointer_cancels','details_save_channel','settings_authorizations_preserved'):

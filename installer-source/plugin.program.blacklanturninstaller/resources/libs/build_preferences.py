@@ -8,6 +8,7 @@ import copy,json,math
 from pathlib import Path
 import xml.etree.ElementTree as E
 from resources.libs import settings_store as store
+from resources.libs import update_notes_state as update_notes
 from resources.libs.discovery_defaults import upgrade as discovery_upgrade
 DEFAULTS=json.loads((Path(__file__).parents[1]/'playback-defaults.json').read_text(encoding='utf-8'))
 YOUTUBE='addon_data/plugin.video.youtube/settings.xml'
@@ -78,8 +79,8 @@ def _controller_text(raw):
   raise PreferenceError('Controller settings are invalid. Your current build has been kept.') from exc
 
 def _validate(snapshot,addon_ids,auth_only=None):
- if not isinstance(snapshot,dict) or type(snapshot.get('schema')) is not int or snapshot.get('schema') not in (1,2) or type(snapshot.get('auth_only')) is not bool or not isinstance(snapshot.get('values'),dict):raise PreferenceError('Invalid preference recovery. Installation stopped.')
- expected={'schema','auth_only','values'}|({'controller'} if snapshot['schema']==2 else set())
+ if not isinstance(snapshot,dict) or type(snapshot.get('schema')) is not int or snapshot.get('schema') not in (1,2,3) or type(snapshot.get('auth_only')) is not bool or not isinstance(snapshot.get('values'),dict):raise PreferenceError('Invalid preference recovery. Installation stopped.')
+ expected={'schema','auth_only','values'}|({'controller'} if snapshot['schema']>=2 else set())|({'update_notes'} if snapshot['schema']==3 else set())
  if set(snapshot)!=expected:raise PreferenceError('Invalid preference recovery. Installation stopped.')
  if auth_only is not None and snapshot['auth_only']!=auth_only:raise PreferenceError('Finish the pending installation using its original clean/update mode.')
  if snapshot['schema']==1 and not snapshot['auth_only'] and CONTROLLER in addon_ids:
@@ -93,6 +94,10 @@ def _validate(snapshot,addon_ids,auth_only=None):
  if controller is not None:
   if snapshot['auth_only'] or CONTROLLER not in addon_ids:raise PreferenceError('Unexpected controller preference recovery. Installation stopped.')
   _controller_text(controller)
+ notes=snapshot.get('update_notes')
+ if notes is not None:
+  if snapshot['auth_only'] or CONTROLLER not in addon_ids:raise PreferenceError('Unexpected update history recovery. Installation stopped.')
+  update_notes.validate(notes)
  return snapshot
 
 def prepare(home,accounts,addon_ids,auth_only=False):
@@ -114,7 +119,13 @@ def prepare(home,accounts,addon_ids,auth_only=False):
   if not auth_only and CONTROLLER in addon_ids:
    raw=_read(home,CONTROLLER_CONFIG)
    if raw is not None:controller=_controller_text(raw.decode('utf-8'))
-  result['build_preferences']={'schema':2,'auth_only':auth_only,'values':values,'controller':controller}
+  notes=None
+  if not auth_only and CONTROLLER in addon_ids:
+   raw=_read(home,'addon_data/script.blacklanturn.preview/update-notes.json')
+   if raw is not None:
+    if len(raw)>1024*1024:raise ValueError('Oversized update history')
+    notes=update_notes.validate(json.loads(raw))
+  result['build_preferences']={'schema':3,'auth_only':auth_only,'values':values,'controller':controller,'update_notes':notes}
   return result
  except (OSError,ValueError,TypeError,E.ParseError) as exc:raise PreferenceError('Playback preferences could not be saved. Your current build has been kept.') from exc
 
@@ -144,6 +155,8 @@ def restore(home,accounts,addon_ids):
     if not isinstance(marker,dict):raise ValueError('Invalid build policy')
     if marker.get('discovery_patch')=='discovery-first-page-1':raw=discovery_upgrade(raw)
    prepared.append((CONTROLLER_CONFIG,raw.encode('utf-8')))
+  if snapshot.get('update_notes') is not None:
+   prepared.append(('addon_data/script.blacklanturn.preview/update-notes.json',json.dumps(snapshot['update_notes'],ensure_ascii=False).encode('utf-8')))
   for name,raw in prepared:_write(home,name,raw)
  except (OSError,ValueError,TypeError,E.ParseError) as exc:raise PreferenceError('Playback preference restoration needs attention. Keep the pending backup and reinstall.') from exc
 

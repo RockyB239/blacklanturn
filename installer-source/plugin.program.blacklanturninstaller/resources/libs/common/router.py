@@ -50,6 +50,13 @@ class Router:
             MainMenu().get_listing()
             self._finish(handle)
 
+        elif mode == 'updatenotes':
+            if xbmc.getCondVisibility('System.HasAddon(script.blacklanturn.preview)'):
+                xbmc.executebuiltin('RunScript(script.blacklanturn.preview,updates)')
+            else:
+                import xbmcgui
+                xbmcgui.Dialog().ok('BlackLanturn', 'Update notes are available after installing a BlackLanturn build.')
+
         # SETTINGS
         elif mode == 'settings':  # OpenWizard settings
             CONFIG.open_settings(name)

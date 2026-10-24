@@ -1,0 +1,16 @@
+{
+  "script.blacklanturn.preview": {
+    "0.1.88": {
+      "summary": [
+        "Grouped update notices appear when browsing is idle, after installed versions change.",
+        "Saved change history and a Show update notices switch are available from Help and the Installer.",
+        "No additional web requests are made for update notices."
+      ]
+    }
+  },
+  "plugin.program.blacklanturninstaller": {
+    "1.0.26": {
+      "summary": ["Adds an entry to saved BlackLanturn update notes."]
+    }
+  }
+}

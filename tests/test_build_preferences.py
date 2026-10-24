@@ -113,3 +113,14 @@ class BuildPreferences(unittest.TestCase):
   a=self.m.prepare(self.home,self.accounts(),IDS,False)
   with self.assertRaises(self.m.PreferenceError):self.m.restore(self.home,a,IDS)
   self.assertEqual(store[key],original)
+
+ def test_update_note_preferences_survive_standard_cleanup(self):
+  from resources.libs.update_notes_state import empty_state
+  ids=IDS+['script.blacklanturn.preview'];state=empty_state();state['enabled']=False
+  p=self.home/'userdata/addon_data/script.blacklanturn.preview/update-notes.json';p.parent.mkdir(parents=True,exist_ok=True);p.write_text(json.dumps(state))
+  a=self.m.prepare(self.home,self.accounts(),ids,False);p.unlink();self.m.restore(self.home,a,ids)
+  self.assertEqual(json.loads(p.read_text()),state)
+ def test_account_only_clean_does_not_restore_update_history(self):
+  from resources.libs.update_notes_state import empty_state
+  ids=IDS+['script.blacklanturn.preview'];p=self.home/'userdata/addon_data/script.blacklanturn.preview/update-notes.json';p.parent.mkdir(parents=True,exist_ok=True);p.write_text(json.dumps(empty_state()))
+  a=self.m.prepare(self.home,self.accounts(),ids,True);p.unlink();self.m.restore(self.home,a,ids);self.assertFalse(p.exists())

@@ -30,6 +30,8 @@ class MainMenu:
         from resources.libs.common import logging
         from resources.libs.common import tools
 
+        directory.add_file('What’s new & update notices', {'mode': 'updatenotes'}, themeit=CONFIG.THEME2)
+
         errors = int(logging.error_checking(count=True))
         errorsfound = str(errors) + ' Error(s) Found' if errors > 0 else 'None Found'
 

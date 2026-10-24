@@ -55,7 +55,10 @@ def run_live_review():
 home=xbmcgui.Window(10000)
 owns_session=False
 try:
-    if 'recover' in sys.argv:
+    if 'updates' in sys.argv:
+        from update_notes_ui import show_notes
+        show_notes()
+    elif 'recover' in sys.argv:
         from live_recovery import return_to_previous_skin
         return_to_previous_skin()
     elif xbmc.getSkinDir()!='skin.blacklanturn.preview':

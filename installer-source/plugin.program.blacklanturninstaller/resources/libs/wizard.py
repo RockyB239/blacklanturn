@@ -20,6 +20,7 @@
 import xbmc
 import xbmcgui
 
+import time
 import os
 
 from resources.libs import check
@@ -204,6 +205,17 @@ class Wizard:
                     pending_accounts = os.path.join(CONFIG.PLUGIN_DATA, 'authorizations.pending.json')
                     accounts = authorizations.prepare(CONFIG.HOME, prepared['addon_ids'], categories, pending_accounts)
                     if protected_preferences:
+                        if not auth_only:
+                            from resources.libs import update_notes_state
+                            import json as update_json
+                            from pathlib import Path as UpdatePath
+                            update_path=UpdatePath(CONFIG.HOME)/'userdata/addon_data/script.blacklanturn.preview/update-notes.json'
+                            try:
+                                update_reply=update_json.loads(xbmc.executeJSONRPC(update_json.dumps({'jsonrpc':'2.0','id':1,'method':'Addons.GetAddons','params':{'installed':True,'properties':['name','version','enabled']}})))
+                                update_items=update_notes_state.complete_inventory(update_reply)
+                                update_notes_state.transact(update_path,lambda old:update_notes_state.observe(old,update_items,time.time(),complete=True))
+                            except (OSError,ValueError):
+                                logging.log('BlackLanturn update inventory unavailable; no success notice recorded.')
                         from resources.libs import build_preferences
                         try:
                             accounts = build_preferences.prepare(CONFIG.HOME, accounts, prepared['addon_ids'], auth_only=auth_only)

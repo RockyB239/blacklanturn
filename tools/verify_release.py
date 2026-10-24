@@ -422,13 +422,18 @@ def verify_discovery_acceptance(receipt,manifest,historical=False):
  assert receipt.get('catalog_sha256')==hashlib.sha256((SOURCE/'resources/discovery-lineup.json').read_bytes()).hexdigest(),'Discovery recipe catalogue changed'
  assert receipt['preservation']=={'protected_files':301,'core_preferences':280,'history_databases':4,'favorites_preserved':True,'unchanged_controller_files':315}
 
-def verify_youtube_refresh_acceptance(receipt, manifest):
+def verify_youtube_refresh_acceptance(receipt, manifest, historical=False):
  assert receipt.get('schema')==1 and receipt.get('feature')=='youtube-freshness-1' and receipt.get('passed') is True
  assert receipt.get('runtime')=='21.3' and receipt.get('native_devices')==['mac'], 'Do not expand historical Mac proof to untested devices'
  assert receipt.get('controller')==manifest.get('controller')=='0.1.87'
  root=ROOT/'controller-source/addon'
  actual={p.relative_to(root).as_posix():hashlib.sha256(p.read_bytes()).hexdigest() for p in root.rglob('*') if p.is_file() and '__pycache__' not in p.parts and p.suffix not in ('.pyc','.pyo')}
- assert actual==manifest['files']==receipt['files'], 'Freshness proof differs from current packaged source'
+ if historical:
+  # Retained v87 acceptance; v88's notice-only delta has a separate native gate.
+  for name in ('live_runtime.py','youtube_rows.py','youtube_provider.py','youtube_core.py','youtube_home.py','youtube_end.py','playback_runtime.py','autoplay_session.py'):
+   assert actual[name]==manifest['files'][name], 'Previously accepted playback/YouTube source changed: '+name
+  actual=manifest['files']
+ assert actual==manifest['files']==receipt['files'], 'Freshness proof differs from accepted source'
  previous=json.loads((ROOT/'controller-source/manifest86.json').read_text())
  changed={n for n in set(previous['files'])|set(actual) if previous['files'].get(n)!=actual.get(n)}
  assert changed=={'addon.xml','live_review.py','live_runtime.py','youtube_core.py','youtube_rows.py','youtube_provider.py'}, 'Unreviewed controller delta'
@@ -466,6 +471,7 @@ def verify_youtube_context_acceptance(receipt):
   assert check['continuation']['after']>check['continuation']['before']>=50 and check['continuation']['anchor_and_metadata_preserved'] is True
 
 def verify(folder):
+
  verify_release112_acceptance(json.loads((ROOT/'controller-source/usability-release112-verification.json').read_text()),json.loads((ROOT/'controller-source/manifest83.json').read_text()),require_v2=True)
  verify_release111_acceptance(json.loads((ROOT/'controller-source/youtube-release111-verification.json').read_text()),json.loads((ROOT/'controller-source/manifest82.json').read_text()))
  verify_release110_acceptance(json.loads((ROOT/'controller-source/youtube-release110-verification.json').read_text()),json.loads((ROOT/'controller-source/manifest81.json').read_text()))
@@ -486,10 +492,13 @@ def verify(folder):
   json.loads((SOURCE/'resources/managed-umbrella.json').read_text()))
  verify_youtube_end_acceptance(json.loads((ROOT/'controller-source/youtube-end-native-verification.json').read_text()),json.loads((ROOT/'controller-source/manifest85.json').read_text()),historical=True)
  verify_discovery_acceptance(json.loads((ROOT/"controller-source/discovery-native-verification.json").read_text()),json.loads((ROOT/"controller-source/manifest86.json").read_text()),historical=True)
- verify_youtube_refresh_acceptance(json.loads((ROOT/"controller-source/youtube-refresh-native-verification.json").read_text()),json.loads((ROOT/"controller-source/manifest87.json").read_text()))
+ verify_youtube_refresh_acceptance(json.loads((ROOT/"controller-source/youtube-refresh-native-verification.json").read_text()),json.loads((ROOT/"controller-source/manifest87.json").read_text()),historical=True)
  verify_youtube_context_acceptance(json.loads((ROOT/'compatibility/youtube-context/native-verification.json').read_text()))
  spec=importlib.util.spec_from_file_location('managed',SOURCE/'resources/libs/managed_addons.py');m=importlib.util.module_from_spec(spec);spec.loader.exec_module(m)
- with zipfile.ZipFile(folder/'plugin.program.blacklanturninstaller-1.0.25.zip') as z:
+ import importlib.util as update_import
+ update_spec=update_import.spec_from_file_location('update_notes_gate',ROOT/'tools/verify_update_notes.py');update_gate=update_import.module_from_spec(update_spec);update_spec.loader.exec_module(update_gate)
+ update_gate.verify(json.loads((ROOT/'controller-source/update-notes-native-verification.json').read_text()),json.loads((ROOT/'controller-source/manifest88.json').read_text()))
+ with zipfile.ZipFile(folder/'plugin.program.blacklanturninstaller-1.0.26.zip') as z:
   assert z.testzip() is None
   installer={n:z.read(n) for n in z.namelist()}
   assert all(n.startswith('plugin.program.blacklanturninstaller/') for n in installer)
@@ -505,9 +514,9 @@ def verify(folder):
    assert raw_tree==reviewed_tree['files'],'Managed-version Umbrella source differs from reviewed complete tree'
    assert hashlib.sha256(json.dumps(raw_tree,sort_keys=True,separators=(',',':')).encode()).hexdigest()==reviewed_tree['tree_sha256']
    p=json.loads(z.read('userdata/blacklanturn-build.json'))
-   assert p['schema']==3 and p['preferences_policy']=='playback-trakt-youtube-umbrella-network-autoplay-1' and p['helper_patch']=='empty-cache-1' and p['installer_min_version']=='1.0.25'
+   assert p['schema']==3 and p['preferences_policy']=='playback-trakt-youtube-umbrella-network-autoplay-1' and p['helper_patch']=='empty-cache-1' and p['installer_min_version']=='1.0.26'
    assert p['build_version']=='1.1.20' and p['network_patch']=='request-reliability-privacy-1' and p['umbrella_version']=='6.7.92' and p['umbrella_patch']=='event-progress-3'
-   assert p['controller_version']=='0.1.87' and p['helper_search_patch']=='search-batch-1' and p['helper_playback_patch']=='sampled-progress-1'
+   assert p['controller_version']=='0.1.88' and p['helper_search_patch']=='search-batch-1' and p['helper_playback_patch']=='sampled-progress-1'
    gui={n.get('id'):n.text for n in ET.fromstring(z.read('userdata/guisettings.xml'))}
    assert {k:gui[k] for k in ('filecache.memorysize','filecache.readfactor','filecache.buffermode','filecache.chunksize')}=={'filecache.memorysize':'64','filecache.readfactor':'400','filecache.buffermode':'4','filecache.chunksize':'131072'}
    assert next(n.text for n in ET.fromstring(z.read('userdata/addon_data/plugin.video.themoviedb.helper/settings.xml')) if n.get('id')=='artwork_quality')=='1'
@@ -515,7 +524,7 @@ def verify(folder):
    assert p['managed_update_policy']=='kodi-version-epoch-1'
    assert hashlib.sha256(z.read('addons/plugin.video.youtube/resources/lib/youtube_plugin/kodion/context/xbmc/xbmc_context.py')).hexdigest()==json.loads((ROOT/'compatibility/youtube-context/manifest.json').read_text())['candidate_sha256']
    assert p['autoplay_patch']=='same-show-source-1'
-   expected=json.loads((ROOT/'controller-source/manifest87.json').read_text())['files']
+   expected=json.loads((ROOT/'controller-source/manifest88.json').read_text())['files']
    actual={n[len('addons/script.blacklanturn.preview/'):]:hashlib.sha256(z.read(n)).hexdigest() for n in z.namelist() if n.startswith('addons/script.blacklanturn.preview/')}
    assert actual==expected
    skin=json.loads((ROOT/'controller-source/manifest85.json').read_text())['skin']

@@ -36,6 +36,7 @@ SETTINGS_GROUPS=[
   ('kodi:systeminfo','System information','Kodi version, hardware and network information.'),
   ('kodi:eventlog','Event log','Kodi notices and errors.')]),
  ('Help','Guidance for using BlackLanturn.',[
+  ('update_notes','What’s new & update notices','View installed changes and choose whether to show update notices.'),
   ('startup_preview','Preview loading screen','Review the BlackLanturn startup design.'),
   ('help','Using BlackLanturn','Browsing, search, accounts, previews and recovery.'),
   ('clear_search','Clear saved search','Remove the last search term saved on this device.'),

@@ -60,6 +60,7 @@ class ExperimentLifecycle(unittest.TestCase):
             'migrate_pages': lambda config: config,
             'initialize_addons': initialize or (lambda: effects.append('initialize')),
             'BackendSettings': dialog_factory,
+            'HomeUpdates':lambda *a:SimpleNamespace(tick=lambda:None),
             'ROOT': Path(folder),
             'parse_qs': parse_qs, 'urlsplit': urlsplit,
             'valid_source': valid_source, 'provider_page_label': provider_page_label,

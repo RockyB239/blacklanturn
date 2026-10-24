@@ -47,7 +47,8 @@ def producer(route):
     return None
 
 def tools_menu():
-    specs=[('Installer settings',{'mode':'settings','name':CONFIG.ADDON_ID}),
+    specs=[('What’s new & update notices',{'mode':'updatenotes'}),
+           ('Installer settings',{'mode':'settings','name':CONFIG.ADDON_ID}),
            ('View Kodi log',{'mode':'viewlog'}),('View installer log',{'mode':'viewwizlog'}),
            ('View errors in log',{'mode':'viewerrorlog'}),('View latest error',{'mode':'viewerrorlast'}),
            ('Upload log file',{'mode':'uploadlog'})]

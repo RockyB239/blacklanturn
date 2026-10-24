@@ -1,0 +1,104 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<window>
+  <defaultcontrol>102</defaultcontrol>
+  <zorder>20</zorder>
+  <controls>
+    <control type="image">
+      <left>50</left>
+      <top>50</top>
+      <width>1820</width>
+      <height>980</height>
+      <texture>white.png</texture>
+      <colordiffuse>B3000000</colordiffuse>
+    </control>
+    <control type="image">
+      <left>360</left>
+      <top>140</top>
+      <width>1200</width>
+      <height>800</height>
+      <texture>update-notes-panel.png</texture>
+    </control>
+    <control type="image">
+      <left>400</left>
+      <top>175</top>
+      <width>80</width>
+      <height>80</height>
+      <texture>blacklanturn-lantern.png</texture>
+      <aspectratio>keep</aspectratio>
+    </control>
+    <control type="label">
+      <left>500</left>
+      <top>180</top>
+      <width>980</width>
+      <height>50</height>
+      <font>font30</font>
+      <label>BlackLanturn · What’s new</label>
+      <textcolor>FFF4F6F8</textcolor>
+    </control>
+    <control type="label">
+      <left>410</left>
+      <top>260</top>
+      <width>1100</width>
+      <height>45</height>
+      <font>font13</font>
+      <label>Installed add-on changes on this device</label>
+      <textcolor>FF00DBE9</textcolor>
+    </control>
+    <control type="textbox" id="100">
+      <left>410</left>
+      <top>325</top>
+      <width>1100</width>
+      <height>420</height>
+      <font>font13</font>
+      <label>$INFO[Window.Property(notes)]</label>
+      <textcolor>FFDAE1E5</textcolor>
+      <onup>102</onup>
+      <ondown>101</ondown>
+      <onleft>101</onleft>
+      <onright>102</onright>
+    </control>
+    <control type="label">
+      <left>410</left>
+      <top>765</top>
+      <width>1100</width>
+      <height>45</height>
+      <font>font13</font>
+      <label>Your playback settings and authorizations stay saved.</label>
+      <textcolor>FFBCC7CE</textcolor>
+    </control>
+    <control type="radiobutton" id="101">
+      <left>410</left>
+      <top>835</top>
+      <width>720</width>
+      <height>60</height>
+      <font>font13</font>
+      <label>Show update notices</label>
+      <textcolor>FFF4F6F8</textcolor>
+      <focusedcolor>FF00DBE9</focusedcolor>
+      <texturefocus>focus-teal.png</texturefocus>
+      <texturenofocus>button-dark.png</texturenofocus>
+      <selected>String.IsEqual(Window.Property(noticesEnabled),true)</selected>
+      <onleft>102</onleft>
+      <onright>102</onright>
+      <onup>100</onup>
+      <ondown>102</ondown>
+    </control>
+    <control type="button" id="102">
+      <left>1220</left>
+      <top>835</top>
+      <width>290</width>
+      <height>60</height>
+      <font>font13</font>
+      <label>Done</label>
+      <textcolor>FFF5F5F5</textcolor>
+      <focusedcolor>FF00DBE9</focusedcolor>
+      <texturefocus>focus-teal.png</texturefocus>
+      <texturenofocus>button-dark.png</texturenofocus>
+      <textoffsetx>20</textoffsetx>
+      <onleft>101</onleft>
+      <onright>101</onright>
+      <onup>100</onup>
+      <ondown>101</ondown>
+    </control>
+  </controls>
+</window>
