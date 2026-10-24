@@ -1,0 +1,59 @@
+{
+  "schema": 1,
+  "feature": "youtube-context-1",
+  "passed": true,
+  "runtime": "21.3",
+  "controller": "0.1.87",
+  "candidate_sha256": "6eb2526020c082553ba9ec688db1b00a2ca2a497ae97ab0734752b3d896d0c75",
+  "upstream_sha256": "323f8d58dccc6379efa7c5a5303914e9f7210c9a14f39545007651daf80f38d6",
+  "devices": {
+    "mac": {
+      "passed": true,
+      "context_sha256": "6eb2526020c082553ba9ec688db1b00a2ca2a497ae97ab0734752b3d896d0c75",
+      "complete_refresh": true,
+      "attempts": 1,
+      "main_and_subscriptions_visible": true,
+      "continuation": {
+        "before": 50,
+        "after": 100,
+        "anchor_and_metadata_preserved": true,
+        "next_cursor_before": true
+      },
+      "refresh_seconds": 12.043,
+      "new_recommendation_ids": 15,
+      "rows_focus_artwork_progress_preserved": true
+    },
+    "fire": {
+      "passed": true,
+      "context_sha256": "6eb2526020c082553ba9ec688db1b00a2ca2a497ae97ab0734752b3d896d0c75",
+      "complete_refresh": true,
+      "attempts": 1,
+      "main_and_subscriptions_visible": true,
+      "continuation": {
+        "before": 50,
+        "after": 100,
+        "anchor_and_metadata_preserved": true,
+        "next_cursor_before": true
+      },
+      "refresh_seconds": 16.9,
+      "new_recommendation_ids": 15,
+      "rows_focus_artwork_progress_preserved": true
+    },
+    "apple": {
+      "passed": true,
+      "context_sha256": "6eb2526020c082553ba9ec688db1b00a2ca2a497ae97ab0734752b3d896d0c75",
+      "complete_refresh": true,
+      "attempts": 1,
+      "main_and_subscriptions_visible": true,
+      "continuation": {
+        "before": 50,
+        "after": 100,
+        "anchor_and_metadata_preserved": true,
+        "next_cursor_before": true
+      },
+      "refresh_seconds": 11.536,
+      "new_recommendation_ids": 17,
+      "rows_focus_artwork_progress_preserved": true
+    }
+  }
+}

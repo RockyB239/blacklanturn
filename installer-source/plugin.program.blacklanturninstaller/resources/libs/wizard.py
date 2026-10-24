@@ -155,7 +155,7 @@ class Wizard:
 
             protected_helper = (prepared.get('policy') or {}).get('schema') in (2, 3)
             protected_preferences = (prepared.get('policy') or {}).get('schema') == 3
-            protected_youtube = (prepared.get('policy') or {}).get('youtube_refresh_patch') == 'youtube-freshness-1'
+            protected_youtube = (prepared.get('policy') or {}).get('youtube_refresh_patch') == 'youtube-freshness-2'
             protected_network = (prepared.get('policy') or {}).get('preferences_policy') in ('playback-trakt-youtube-umbrella-network-1', 'playback-trakt-youtube-umbrella-network-autoplay-1')
             protected_umbrella = (prepared.get('policy') or {}).get('preferences_policy') in ('playback-trakt-youtube-umbrella-1', 'playback-trakt-youtube-umbrella-network-1', 'playback-trakt-youtube-umbrella-network-autoplay-1')
             if protected_umbrella and not reviewed_auth_only and CONFIG.KEEPWHITELIST == 'true':

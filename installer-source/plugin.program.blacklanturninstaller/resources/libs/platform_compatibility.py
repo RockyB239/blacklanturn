@@ -84,9 +84,9 @@ def prepare(path, kodi, home=None):
                         youtube_patch = policy.get('youtube_refresh_patch')
                         managed_youtube = youtube_patch is not None
                         if managed_youtube:
-                            if youtube_patch != 'youtube-freshness-1' or discovery_patch != 'discovery-first-page-1':
+                            if youtube_patch != 'youtube-freshness-2' or discovery_patch != 'discovery-first-page-1':
                                 raise CompatibilityError('Update BlackLanturn Installer before installing this build.')
-                            minimum = '1.0.23'
+                            minimum = '1.0.24'
                         if minimum is None or policy.get('installer_min_version') != minimum:
                             raise CompatibilityError('Update BlackLanturn Installer before installing this build.')
                         managed_network = preference_policy in ('playback-trakt-youtube-umbrella-network-1', 'playback-trakt-youtube-umbrella-network-autoplay-1')

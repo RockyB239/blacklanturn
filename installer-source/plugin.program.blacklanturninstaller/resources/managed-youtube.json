@@ -1,7 +1,7 @@
 {
   "addon_id": "plugin.video.youtube",
   "version": "7.4.4a",
-  "patch": "youtube-freshness-1",
+  "patch": "youtube-freshness-2",
   "variants": {
     "general": {
       "files": {
@@ -103,7 +103,7 @@
         "resources/lib/youtube_plugin/kodion/context/__init__.py": "587983be6fe2855fd5b1945366da96886667201532eba07bbd8722dc2a023157",
         "resources/lib/youtube_plugin/kodion/context/abstract_context.py": "18446765c47b8927c420f7a471d64e489755d98976a480779b4e5c7b8a448f7c",
         "resources/lib/youtube_plugin/kodion/context/xbmc/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-        "resources/lib/youtube_plugin/kodion/context/xbmc/xbmc_context.py": "323f8d58dccc6379efa7c5a5303914e9f7210c9a14f39545007651daf80f38d6",
+        "resources/lib/youtube_plugin/kodion/context/xbmc/xbmc_context.py": "6eb2526020c082553ba9ec688db1b00a2ca2a497ae97ab0734752b3d896d0c75",
         "resources/lib/youtube_plugin/kodion/debug.py": "27dae631ea3ca4dfbac8b5702787c322cb335961a7c687eeb3722822943b1a2c",
         "resources/lib/youtube_plugin/kodion/exceptions.py": "124c5c59c505708f6bc3fc3aa4f51b78391365353e2ab0fee823344c0ed45b22",
         "resources/lib/youtube_plugin/kodion/items/__init__.py": "4dc21c7bf94dd8322a0d7fa93ac4d32045fab4464aa481720b4e9241ce2f8c58",
@@ -332,7 +332,7 @@
         "resources/lib/youtube_plugin/kodion/context/__init__.py": "587983be6fe2855fd5b1945366da96886667201532eba07bbd8722dc2a023157",
         "resources/lib/youtube_plugin/kodion/context/abstract_context.py": "18446765c47b8927c420f7a471d64e489755d98976a480779b4e5c7b8a448f7c",
         "resources/lib/youtube_plugin/kodion/context/xbmc/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-        "resources/lib/youtube_plugin/kodion/context/xbmc/xbmc_context.py": "323f8d58dccc6379efa7c5a5303914e9f7210c9a14f39545007651daf80f38d6",
+        "resources/lib/youtube_plugin/kodion/context/xbmc/xbmc_context.py": "6eb2526020c082553ba9ec688db1b00a2ca2a497ae97ab0734752b3d896d0c75",
         "resources/lib/youtube_plugin/kodion/debug.py": "27dae631ea3ca4dfbac8b5702787c322cb335961a7c687eeb3722822943b1a2c",
         "resources/lib/youtube_plugin/kodion/exceptions.py": "124c5c59c505708f6bc3fc3aa4f51b78391365353e2ab0fee823344c0ed45b22",
         "resources/lib/youtube_plugin/kodion/items/__init__.py": "4dc21c7bf94dd8322a0d7fa93ac4d32045fab4464aa481720b4e9241ce2f8c58",
@@ -464,6 +464,8 @@
     "9b7c26d4c9c5cc8349cc3549d5f7dae056e09fe4ca736c6f400da2ce095ab56c",
     "80775f77e140348fe37b572da526f8863f6c5648b96dcee4f3e9ba8c1097839e",
     "6df84b64316a227b1c463e0520f738ac91004a386f4916190a41b2195ae347e7",
-    "3b4dccc70a0ea55d5834af4e784e38c65903ca742e376972a00885ffc9345b24"
+    "3b4dccc70a0ea55d5834af4e784e38c65903ca742e376972a00885ffc9345b24",
+    "80908b6097bd1da39c1bd592c2c3bcd9d613ee6a9c6e9bdb6c901e3be5ee98c0",
+    "5919ba92a2f0b1300be2f1aca314fd614c06d312e2fcaf0a502862b2713af7aa"
   ]
 }

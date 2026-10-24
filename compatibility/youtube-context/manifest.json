@@ -1,0 +1,12 @@
+{
+  "schema": 1,
+  "feature": "youtube-context-1",
+  "path": "resources/lib/youtube_plugin/kodion/context/xbmc/xbmc_context.py",
+  "upstream_sha256": "323f8d58dccc6379efa7c5a5303914e9f7210c9a14f39545007651daf80f38d6",
+  "candidate_sha256": "6eb2526020c082553ba9ec688db1b00a2ca2a497ae97ab0734752b3d896d0c75",
+  "versions": [
+    "7.4.4",
+    "7.4.4a"
+  ],
+  "reason": "Kodi can return False for a missing active plugin container; non-text paths are not plugin paths."
+}

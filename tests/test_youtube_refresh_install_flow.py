@@ -4,7 +4,7 @@ from pathlib import Path
 from unittest.mock import patch
 import test_network_install_flow as fixture
 ROOT=Path(__file__).resolve().parents[1];LIB=ROOT/'installer-source/plugin.program.blacklanturninstaller/resources/libs'
-POLICY=dict(fixture.POLICY,preferences_policy='playback-trakt-youtube-umbrella-network-autoplay-1',autoplay_patch='same-show-source-1',discovery_patch='discovery-first-page-1',youtube_refresh_patch='youtube-freshness-1',installer_min_version='1.0.23')
+POLICY=dict(fixture.POLICY,preferences_policy='playback-trakt-youtube-umbrella-network-autoplay-1',autoplay_patch='same-show-source-1',discovery_patch='discovery-first-page-1',youtube_refresh_patch='youtube-freshness-2',installer_min_version='1.0.24')
 class RefreshInstallFlow(unittest.TestCase):
  def setUp(self):
   self.f=fixture.NetworkInstallFlow();self.f.setUp();self.addCleanup(self.f.doCleanups);self.addCleanup(self.f.f.tearDown)
@@ -16,6 +16,7 @@ class RefreshInstallFlow(unittest.TestCase):
    data={n:z.read(n) for n in z.namelist() if n.startswith('addons/plugin.video.youtube/')}
   key='addons/plugin.video.youtube/resources/lib/youtube_plugin/kodion/sql_store/function_cache.py'
   data[key]=(ROOT/'compatibility/youtube-refresh/candidate/function_cache.py').read_bytes()
+  data['addons/plugin.video.youtube/resources/lib/youtube_plugin/kodion/context/xbmc/xbmc_context.py']=(ROOT/'compatibility/youtube-context/candidate/xbmc_context.py').read_bytes()
   data['userdata/addon_data/plugin.video.youtube/settings.xml']=b'<settings><setting id="kodion.history.remote">true</setting><setting id="kodion.history.local">true</setting></settings>'
   defaults=json.loads((LIB.parent/'playback-defaults.json').read_text())['addon_data/plugin.video.youtube/settings.xml']
   import xml.etree.ElementTree as E
@@ -48,6 +49,10 @@ class RefreshInstallFlow(unittest.TestCase):
   self.assertTrue((h/'userdata/addon_data/plugin.video.youtube/access_manager.json').is_file())
  def test_installer22_rejects_new_payload_before_setup(self):
   k,cfg,mods=self.f.f.environment();path=self.packaged();m=types.ModuleType('old22');m.__file__=str(LIB/'platform_compatibility.py');exec(compile((ROOT/'tests/fixtures/platform_compatibility_1_0_22.py').read_text(),m.__file__,'exec'),m.__dict__)
+  with patch.dict('sys.modules',mods),self.assertRaises(m.CompatibilityError):m.prepare(path,k,home=cfg.HOME)
+  self.assertEqual(k.requests,[])
+ def test_installer23_rejects_context_guard_payload_before_setup(self):
+  k,cfg,mods=self.f.f.environment();path=self.packaged();m=types.ModuleType('old23');m.__file__=str(LIB/'platform_compatibility.py');exec(compile((ROOT/'tests/fixtures/platform_compatibility_1_0_23.py').read_text(),m.__file__,'exec'),m.__dict__)
   with patch.dict('sys.modules',mods),self.assertRaises(m.CompatibilityError):m.prepare(path,k,home=cfg.HOME)
   self.assertEqual(k.requests,[])
  def test_missing_or_unknown_history_patch_fails_without_cleanup(self):

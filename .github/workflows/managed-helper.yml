@@ -29,6 +29,8 @@ jobs:
         run: python -m unittest discover -s compatibility/autoplay-size/tests -v
       - name: Native probe regression checks
         run: python -m unittest discover -s tools/device_validation -p 'test_*.py'
+      - name: YouTube context regression checks
+        run: python -m unittest discover -s compatibility/youtube-context/tests -v
       - name: Rebuild and verify protected editions
         run: |
           python tools/build_release.py --baselines baselines --output artifacts
