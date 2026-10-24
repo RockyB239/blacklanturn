@@ -10,7 +10,7 @@ from episode_ui import episode_item
 from youtube_core import resume_allowed,automatic_preview
 from row_feedback import trim_row_cache,row_message
 from search_ui import discovery_result,best_matches,clear_search_selection,entity_kind
-from filtered_pages import provider_path,upstream_path,needs_fill
+from filtered_pages import provider_path,upstream_path,needs_fill,first_page_minimum,first_page_keep
 SOURCE=Path(os.environ.get('BL_CONTROLLER_SOURCE',str(Path(__file__).parents[1]/'addon/live_review.py')))
 class Control:
  def __init__(self):self.items=[];self.pos=0
@@ -29,7 +29,7 @@ class SyncThread:
 def methods(names,namespace):
  from browse_controls import page_cards,should_exclude_anime
  namespace.update(automatic_preview=automatic_preview,youtube_resume_allowed=resume_allowed,page_cards=page_cards,should_exclude_anime=should_exclude_anime,best_matches=best_matches,clear_search_selection=clear_search_selection,entity_kind=entity_kind,show_identity=show_identity,parse_qs=parse_qs,urlsplit=urlsplit)
- namespace.update(row_items=row_items,provider_path=provider_path,upstream_path=upstream_path,needs_fill=needs_fill)
+ namespace.update(row_items=row_items,provider_path=provider_path,upstream_path=upstream_path,needs_fill=needs_fill,first_page_minimum=first_page_minimum,first_page_keep=first_page_keep)
  cls=next(n for n in ast.parse(SOURCE.read_text()).body if isinstance(n,ast.ClassDef) and n.name=='LiveReview')
  nodes=[next((n for n in cls.body if isinstance(n,ast.FunctionDef) and n.name==name),None) for name in names]
  if None in nodes:raise AssertionError('Required discovery controller method is absent')

@@ -20,6 +20,15 @@ def votes(item):
         return v if math.isfinite(v) and v>=0 else None
     except (ValueError,TypeError):return None
 
+def hard_eligible(item,policy):
+    """Pure eligibility shared by page readiness and final row ordering."""
+    ident=identity(item)
+    if not ident:return True
+    if ident in (policy.get('exclude_ids') or []):return False
+    ceiling=policy.get('max_votes')
+    number=votes(item) if ceiling is not None else None
+    return ceiling is None or (number is not None and number<=ceiling)
+
 def franchise(item):
     value=item.get('set')
     if value:return str(value).casefold()
@@ -43,14 +52,11 @@ class Selector:
         if not policy.get('enabled'):return list(files)
         key=(namespace,row,page)
         with self.lock:
-            controls=[];titles=[];excluded=set(policy.get('exclude_ids') or []);max_votes=policy.get('max_votes')
+            controls=[];titles=[]
             for item in files:
                 ident=identity(item)
                 if not ident:controls.append(item);continue
-                if ident in excluded:continue
-                if max_votes is not None:
-                    number=votes(item)
-                    if number is None or number>max_votes:continue
+                if not hard_eligible(item,policy):continue
                 titles.append(item)
             byid={identity(x):x for x in titles}
             seen=set().union(*(v for k,v in self.exposed.items() if k[0]==namespace and k!=key)) if self.exposed else set()

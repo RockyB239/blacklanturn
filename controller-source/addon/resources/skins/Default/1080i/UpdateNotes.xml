@@ -1,101 +1,200 @@
-<?xml version='1.0' encoding='UTF-8'?>
+<?xml version='1.0' encoding='utf-8'?>
 <window>
   <defaultcontrol>102</defaultcontrol>
   <zorder>20</zorder>
   <controls>
     <control type="image">
-      <left>50</left>
-      <top>50</top>
-      <width>1820</width>
-      <height>980</height>
+      <left>0</left>
+      <top>0</top>
+      <width>1920</width>
+      <height>1080</height>
       <texture>white.png</texture>
-      <colordiffuse>B3000000</colordiffuse>
+      <colordiffuse>99000000</colordiffuse>
     </control>
     <control type="image">
-      <left>360</left>
-      <top>140</top>
-      <width>1200</width>
-      <height>800</height>
+      <left>480</left>
+      <top>100</top>
+      <width>960</width>
+      <height>900</height>
       <texture>update-notes-panel.png</texture>
     </control>
     <control type="image">
-      <left>400</left>
-      <top>175</top>
-      <width>80</width>
-      <height>80</height>
+      <left>525</left>
+      <top>132</top>
+      <width>65</width>
+      <height>65</height>
       <texture>blacklanturn-lantern.png</texture>
       <aspectratio>keep</aspectratio>
     </control>
     <control type="label">
-      <left>500</left>
-      <top>180</top>
-      <width>980</width>
-      <height>50</height>
-      <font>font30</font>
-      <label>BlackLanturn · What’s new</label>
-      <textcolor>FFF4F6F8</textcolor>
+      <left>600</left>
+      <top>140</top>
+      <width>680</width>
+      <height>45</height>
+      <font>font25_title</font>
+      <label>BlackLanturn</label>
+      <textcolor>FF00D9E7</textcolor>
+      <aligny>center</aligny>
     </control>
     <control type="label">
-      <left>410</left>
-      <top>260</top>
-      <width>1100</width>
-      <height>45</height>
-      <font>font13</font>
-      <label>Installed add-on changes on this device</label>
-      <textcolor>FF00DBE9</textcolor>
+      <left>530</left>
+      <top>215</top>
+      <width>850</width>
+      <height>70</height>
+      <font>font52_title</font>
+      <label>What’s new</label>
+      <textcolor>FFF2F5F7</textcolor>
+      <aligny>center</aligny>
     </control>
-    <control type="textbox" id="100">
-      <left>410</left>
-      <top>325</top>
-      <width>1100</width>
+    <control type="label">
+      <left>530</left>
+      <top>290</top>
+      <width>850</width>
+      <height>45</height>
+      <font>font27</font>
+      <label>$INFO[Window.Property(subtitle)]</label>
+      <textcolor>FFBAC7CD</textcolor>
+      <aligny>center</aligny>
+    </control>
+    <control type="list" id="100">
+      <left>530</left>
+      <top>365</top>
+      <width>860</width>
       <height>420</height>
-      <font>font13</font>
-      <label>$INFO[Window.Property(notes)]</label>
-      <textcolor>FFDAE1E5</textcolor>
       <onup>102</onup>
       <ondown>101</ondown>
       <onleft>101</onleft>
       <onright>102</onright>
+      <scrolltime>180</scrolltime>
+      <itemlayout width="860" height="190">
+        <control type="image">
+          <left>0</left>
+          <top>0</top>
+          <width>860</width>
+          <height>2</height>
+          <texture>white.png</texture>
+          <colordiffuse>FF33434C</colordiffuse>
+        </control>
+        <control type="label">
+          <left>0</left>
+          <top>18</top>
+          <width>850</width>
+          <height>48</height>
+          <font>font32_title</font>
+          <label>$INFO[ListItem.Label]</label>
+          <textcolor>FFF2F5F7</textcolor>
+          <aligny>center</aligny>
+        </control>
+        <control type="textbox">
+          <left>0</left>
+          <top>78</top>
+          <width>850</width>
+          <height>108</height>
+          <font>font27</font>
+          <label>$INFO[ListItem.Property(bullets)]</label>
+          <textcolor>FFE0E7EB</textcolor>
+          <autoscroll delay="3000" time="2000" repeat="4000">Control.HasFocus(100)</autoscroll>
+        </control>
+      </itemlayout>
+      <focusedlayout width="860" height="190">
+        <control type="image">
+          <left>0</left>
+          <top>0</top>
+          <width>860</width>
+          <height>2</height>
+          <texture>white.png</texture>
+          <colordiffuse>FF33434C</colordiffuse>
+        </control>
+        <control type="label">
+          <left>0</left>
+          <top>18</top>
+          <width>850</width>
+          <height>48</height>
+          <font>font32_title</font>
+          <label>$INFO[ListItem.Label]</label>
+          <textcolor>FFF2F5F7</textcolor>
+          <aligny>center</aligny>
+        </control>
+        <control type="textbox">
+          <left>0</left>
+          <top>78</top>
+          <width>850</width>
+          <height>108</height>
+          <font>font27</font>
+          <label>$INFO[ListItem.Property(bullets)]</label>
+          <textcolor>FFE0E7EB</textcolor>
+          <autoscroll delay="3000" time="2000" repeat="4000">Control.HasFocus(100)</autoscroll>
+        </control>
+      </focusedlayout>
+    </control>
+    <control type="image">
+      <left>530</left>
+      <top>808</top>
+      <width>45</width>
+      <height>45</height>
+      <texture>watched-mark.png</texture>
+      <aspectratio>keep</aspectratio>
     </control>
     <control type="label">
-      <left>410</left>
-      <top>765</top>
-      <width>1100</width>
+      <left>585</left>
+      <top>808</top>
+      <width>800</width>
       <height>45</height>
-      <font>font13</font>
+      <font>font27</font>
       <label>Your playback settings and authorizations stay saved.</label>
-      <textcolor>FFBCC7CE</textcolor>
+      <textcolor>FFD6E0E5</textcolor>
+      <aligny>center</aligny>
     </control>
     <control type="radiobutton" id="101">
-      <left>410</left>
-      <top>835</top>
-      <width>720</width>
+      <left>530</left>
+      <top>890</top>
+      <width>485</width>
       <height>60</height>
-      <font>font13</font>
+      <font>font25_title</font>
       <label>Show update notices</label>
       <textcolor>FFF4F6F8</textcolor>
-      <focusedcolor>FF00DBE9</focusedcolor>
+      <focusedcolor>FF00D9E7</focusedcolor>
       <texturefocus>focus-teal.png</texturefocus>
-      <texturenofocus>button-dark.png</texturenofocus>
+      <texturenofocus>nav-clear.png</texturenofocus>
       <selected>String.IsEqual(Window.Property(noticesEnabled),true)</selected>
       <onleft>102</onleft>
-      <onright>102</onright>
+      <onright>103</onright>
       <onup>100</onup>
       <ondown>102</ondown>
     </control>
-    <control type="button" id="102">
-      <left>1220</left>
-      <top>835</top>
-      <width>290</width>
-      <height>60</height>
-      <font>font13</font>
-      <label>Done</label>
-      <textcolor>FFF5F5F5</textcolor>
-      <focusedcolor>FF00DBE9</focusedcolor>
+    <control type="button" id="103">
+      <left>1040</left>
+      <top>888</top>
+      <width>150</width>
+      <height>64</height>
+      <font>font25_title</font>
+      <label>Update</label>
+      <textcolor>FFF2F5F7</textcolor>
+      <focusedcolor>FFFFFFFF</focusedcolor>
       <texturefocus>focus-teal.png</texturefocus>
       <texturenofocus>button-dark.png</texturenofocus>
-      <textoffsetx>20</textoffsetx>
+      <align>center</align>
+      <aligny>center</aligny>
       <onleft>101</onleft>
+      <onright>102</onright>
+      <onup>100</onup>
+      <ondown>101</ondown>
+      <visible>String.IsEqual(Window.Property(updateAvailable),true)</visible>
+    </control>
+    <control type="button" id="102">
+      <left>1210</left>
+      <top>888</top>
+      <width>180</width>
+      <height>64</height>
+      <font>font25_title</font>
+      <label>Done</label>
+      <textcolor>FFF2F5F7</textcolor>
+      <focusedcolor>FFFFFFFF</focusedcolor>
+      <texturefocus>focus-teal.png</texturefocus>
+      <texturenofocus>button-dark.png</texturenofocus>
+      <align>center</align>
+      <aligny>center</aligny>
+      <onleft>103</onleft>
       <onright>101</onright>
       <onup>100</onup>
       <ondown>101</ondown>

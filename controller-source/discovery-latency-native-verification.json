@@ -1,0 +1,242 @@
+{
+  "schema": 1,
+  "feature": "discovery-first-page-readiness-1",
+  "passed": true,
+  "controller": "0.1.90",
+  "runtime": "21.3",
+  "device": "Fire Stick",
+  "source_hashes": {
+    "live_review.py": "2ff25ebde8caaa69d2b7059766ba4023faf3a3c97ebe7427e279d8e3f8673c72",
+    "filtered_pages.py": "72c4cc2dedcb9640f4cc8fcd6043fd8dbee1a8cf7370c3b424f7b659e501ab57"
+  },
+  "before_source_hashes": {
+    "live_review.py": "ae01a3eb8b124f0809dde8e946eb71e824e641d5d672e66838ddff1d793a2a81",
+    "filtered_pages.py": "5b99ac212227003121f572fd1764e2b81af4571b5d7306783fec1d2ef9c057a2"
+  },
+  "measurement": {
+    "scope": "Warm provider caches; two-row Comedy/Crime view; five-view trial. Home variation is not attributed to repair.",
+    "before_seconds": 3.238,
+    "after_seconds": 2.383,
+    "improvement_percent": 26.4,
+    "before_pages": [
+      {
+        "section": "Home",
+        "offset": 0,
+        "seconds": 4.721,
+        "counts": [
+          20,
+          20
+        ],
+        "states": {
+          "0": "ready",
+          "1": "ready"
+        },
+        "headings": [
+          "Recommended shows",
+          "Recommended movies"
+        ]
+      },
+      {
+        "section": "Home",
+        "offset": 2,
+        "seconds": 3.533,
+        "counts": [
+          21,
+          21
+        ],
+        "states": {
+          "0": "ready",
+          "1": "ready"
+        },
+        "headings": [
+          "Trending shows",
+          "Trending movies"
+        ]
+      },
+      {
+        "section": "Movies",
+        "offset": 0,
+        "seconds": 1.458,
+        "counts": [
+          20,
+          21
+        ],
+        "states": {
+          "0": "ready",
+          "1": "ready"
+        },
+        "headings": [
+          "Recommended for you",
+          "Trending this week"
+        ]
+      },
+      {
+        "section": "Movies",
+        "offset": 2,
+        "seconds": 2.344,
+        "counts": [
+          21,
+          21
+        ],
+        "states": {
+          "0": "ready",
+          "1": "ready"
+        },
+        "headings": [
+          "Recently released",
+          "Action"
+        ]
+      },
+      {
+        "section": "Movies",
+        "offset": 4,
+        "seconds": 3.238,
+        "counts": [
+          21,
+          21
+        ],
+        "states": {
+          "0": "ready",
+          "1": "ready"
+        },
+        "headings": [
+          "Comedy",
+          "Crime"
+        ]
+      }
+    ],
+    "after_pages": [
+      {
+        "section": "Home",
+        "offset": 0,
+        "seconds": 2.821,
+        "counts": [
+          20,
+          20
+        ],
+        "states": {
+          "0": "ready",
+          "1": "ready"
+        },
+        "headings": [
+          "Recommended shows",
+          "Recommended movies"
+        ]
+      },
+      {
+        "section": "Home",
+        "offset": 2,
+        "seconds": 3.593,
+        "counts": [
+          21,
+          21
+        ],
+        "states": {
+          "0": "ready",
+          "1": "ready"
+        },
+        "headings": [
+          "Trending shows",
+          "Trending movies"
+        ]
+      },
+      {
+        "section": "Movies",
+        "offset": 0,
+        "seconds": 1.328,
+        "counts": [
+          20,
+          21
+        ],
+        "states": {
+          "0": "ready",
+          "1": "ready"
+        },
+        "headings": [
+          "Recommended for you",
+          "Trending this week"
+        ]
+      },
+      {
+        "section": "Movies",
+        "offset": 2,
+        "seconds": 2.297,
+        "counts": [
+          21,
+          21
+        ],
+        "states": {
+          "0": "ready",
+          "1": "ready"
+        },
+        "headings": [
+          "Recently released",
+          "Action"
+        ]
+      },
+      {
+        "section": "Movies",
+        "offset": 4,
+        "seconds": 2.383,
+        "counts": [
+          20,
+          21
+        ],
+        "states": {
+          "0": "ready",
+          "1": "ready"
+        },
+        "headings": [
+          "Comedy",
+          "Crime"
+        ]
+      }
+    ]
+  },
+  "metadata": [
+    {
+      "checked": 40,
+      "differences": []
+    },
+    {
+      "checked": 40,
+      "differences": []
+    },
+    {
+      "checked": 40,
+      "differences": []
+    },
+    {
+      "checked": 40,
+      "differences": []
+    },
+    {
+      "checked": 39,
+      "differences": []
+    }
+  ],
+  "continuation": {
+    "next_available": true,
+    "selected_before_next": 19,
+    "loaded": true,
+    "expected_position": 19,
+    "actual_position": 19,
+    "before_count": 20,
+    "after_back_count": 20,
+    "returned": true,
+    "focus_retained": true
+  },
+  "dns": [
+    {
+      "host": "api.trakt.tv",
+      "seconds": 0.024,
+      "result": "ok"
+    },
+    {
+      "host": "api.themoviedb.org",
+      "seconds": 0.047,
+      "result": "ok"
+    }
+  ],
+  "limitations": "One physical Fire Stick, no physical clean wipe or Apple TV acceptance. Initial immediate GUI focus read was premature; final measurement waits up to2s for native queued selection; product code does not wait. Duplicate changed staging ZIP failed extraction; unique frozen ZIP installed normally."
+}

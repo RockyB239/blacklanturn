@@ -1,7 +1,7 @@
 {
   "schema": 1,
   "policy": "kodi-version-epoch-1",
-  "installer_min_version": "1.0.25",
+  "installer_min_version": "1.0.27",
   "addons": {
     "plugin.video.themoviedb.helper": [
       {

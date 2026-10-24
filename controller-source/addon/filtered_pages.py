@@ -49,7 +49,34 @@ def needs_fill(path,files,keep,size=20,positioned=False):
     titles=[x for x in files if not is_next_page(x,path) and not x.get('_page_control')]
     return len(keep(titles))<size and any(is_next_page(x,path) for x in files)
 
-def fill_page(path,files,fetch,keep,current=lambda:True,size=20,max_pages=40):
+def first_page_minimum(definition):
+    path=definition.get('path','');u=urlsplit(path);q=parse_qs(u.query)
+    quick=(definition.get('discovery_order') or {}).get('enabled') is True
+    public=q.get('info',[''])[0] in ('discover','trending_day','trending_week','popular','top_rated','trakt_popular','trakt_trending','now_playing','upcoming','airing_today','on_the_air')
+    first=q.get('page',['1'])==['1'] and q.get('bl_start',['0'])==['0']
+    return 1 if quick and public and first and (u.scheme,u.netloc,u.path)==('plugin','plugin.video.themoviedb.helper','/') else 20
+
+def path_minimum(window,path):
+    for definition in getattr(window,'page_definitions',[]):
+        if provider_path(definition.get('path',''))==provider_path(path):
+            return first_page_minimum(dict(definition,path=path))
+    return 20
+
+def first_page_keep(window,path,keep,definition=None):
+    """Count titles that survive both metadata and hard row eligibility.
+
+    This does not rank titles or record selector exposure. Partial first pages
+    may publish early only when at least one title can actually be displayed.
+    """
+    if definition is None:
+        definition=next((d for d in getattr(window,'page_definitions',[]) if provider_path(d.get('path',''))==provider_path(path)),{})
+    definition=dict(definition,path=path)
+    if first_page_minimum(definition)!=1:return keep
+    from discovery_order import hard_eligible
+    policy=definition.get('discovery_order') or {}
+    return lambda files:[item for item in keep(files) if hard_eligible(item,policy)]
+
+def fill_page(path,files,fetch,keep,current=lambda:True,size=20,max_pages=40,minimum=20):
     raw_path=provider_path(path);start=_start(path);seen=set();result=[];identities=set()
     for _ in range(max_pages):
         if not current():raise PageCancelled('Page navigation changed')
@@ -73,6 +100,8 @@ def fill_page(path,files,fetch,keep,current=lambda:True,size=20,max_pages=40):
             if not current():raise PageCancelled('Page navigation changed')
             return result
         if not current():raise PageCancelled('Page navigation changed')
+        if result and len(result)>=minimum:
+            return result+[{'file':next_item['file'],'filetype':'directory','label':'Next'}]
         if len(seen)>=max_pages:raise RuntimeError('Provider page limit reached; retry the row')
         raw_path=provider_path(next_item['file']);start=0;files=fetch(raw_path)
     raise RuntimeError('Provider page limit reached; retry the row')

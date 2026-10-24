@@ -17,7 +17,9 @@ class NoticeGateTests(unittest.TestCase):
    for node in tree.findall('.//control'):
     values=[node.findtext(k) for k in ('left','top','width','height')]
     if all(v is not None and v.isdigit() for v in values):
-     x,y,w,h=map(int,values);self.assertLessEqual(x+w,1870,name);self.assertLessEqual(y+h,1030,name)
+     x,y,w,h=map(int,values)
+     if node.findtext('colordiffuse')=='99000000' and (x,y,w,h)==(0,0,1920,1080):continue # full-screen dimming behind notes only
+     self.assertLessEqual(x+w,1870,name);self.assertLessEqual(y+h,1030,name)
 
 class HomeUpdatesRuntimeTests(unittest.TestCase):
  def setUp(self):
@@ -36,18 +38,21 @@ class HomeUpdatesRuntimeTests(unittest.TestCase):
   with patch.dict(sys.modules,modules):
    spec=importlib.util.spec_from_file_location('update_ui_test',Path(__file__).resolve().parents[1]/'addon/update_notes_ui.py');self.ui=importlib.util.module_from_spec(spec);spec.loader.exec_module(self.ui)
   self.path=Path(self.temp.name)/'state.json';self.ui.state_path=lambda:self.path
-  from update_notes import observe,write_state
-  old=[{'addonid':'plugin.video.example','name':'Example','version':'1'}];new=[dict(old[0],version='2')]
-  self.state=observe(observe({},old,1),new,2);write_state(self.path,self.state)
+  from release_updates import refresh,write_state
+  import hashlib
+  f=Path(self.temp.name)/'addons/example/main.py';f.parent.mkdir(parents=True);f.write_text('release')
+  release={'id':'release2','edition':'apple','version':'1.1.20','revision':0,'title':'BlackLanturn 1.1.20','summary':'Our tested changes.','sections':[{'heading':'Playback','bullets':['Our playback changes.']}],'files':{'addons/example/main.py':hashlib.sha256(b'release').hexdigest()}}
+  self.state=refresh({}, {'edition':'apple','build_version':'1.1.19'}, {'schema':1,'releases':[release]},1,Path(self.temp.name));write_state(self.path,self.state)
+  self.ui.legacy_path=lambda:Path(self.temp.name)/'old.json'
   self.owner=types.SimpleNamespace(alive=True,window_lifetime=object(),mode='home',nav=False,settings_open=False,actions_open=False,getProperty=lambda k:'false')
   self.runtime=self.ui.HomeUpdates(self.owner,lambda *a:{})
   self.runtime.state=self.state;self.runtime.due=float('inf')
   calls=self.calls
   class Notice(Window):
-   def doModal(self):calls.append('notice');self.view=False
+   def doModal(self):calls.append('notice');self.view=False;self.update=False
   self.ui.UpdateNotice=Notice
  def test_real_ack_path_persists_and_does_not_redisplay(self):
-  from update_notes import pending,read_state
+  from release_updates import pending,read_state
   self.runtime.tick();self.assertEqual(self.calls,['notice']);self.assertFalse(pending(read_state(self.path)))
   self.runtime.tick();self.assertEqual(self.calls,['notice']);self.assertFalse(self.owner.actions_open)
  def test_corrupt_read_cannot_kill_home_monitor(self):
@@ -61,8 +66,8 @@ class HomeUpdatesRuntimeTests(unittest.TestCase):
   self.playing=True;self.runtime.tick();self.assertEqual(self.calls,[])
   self.playing=False;self.owner.window_lifetime=object();self.runtime.tick();self.assertEqual(self.calls,[])
  def test_manual_toggle_uses_durable_store_and_history_stays(self):
-  from update_notes import pending,read_state
-  self.ui.save_preference(False);state=read_state(self.path);self.assertFalse(pending(state));self.assertEqual(len(state['history']),1)
+  from release_updates import pending,read_state
+  self.ui.save_preference(False);state=read_state(self.path);self.assertFalse(pending(state));self.assertEqual(state['available']['id'],'release2')
   self.ui.save_preference(True);self.assertTrue(pending(read_state(self.path)))
  def test_timeout_closes_before_any_new_playback_is_interrupted(self):
   import time
@@ -74,3 +79,42 @@ class HomeUpdatesRuntimeTests(unittest.TestCase):
   ns={'xbmc':self.ui.xbmc,'time':time};exec(compile(ast.Module(body=[method],type_ignores=[]),str(source),'exec'),ns)
   obj=types.SimpleNamespace(finished=False,opened=time.monotonic()-20,close=lambda:self.calls.append('closed'))
   ns['timeout'](obj);self.assertTrue(obj.finished);self.assertEqual(self.calls,['closed'])
+ def test_update_uses_only_fixed_installer_catalog_and_not_during_playback(self):
+  self.ui.xbmc.executebuiltin=lambda cmd:self.calls.append(cmd)
+  self.assertTrue(self.ui.request_update());self.assertEqual(self.calls,['RunPlugin(plugin://plugin.program.blacklanturninstaller/?mode=builds)'])
+  self.playing=True;self.assertFalse(self.ui.request_update());self.assertEqual(len(self.calls),1)
+ def test_catalog_is_cached_and_no_inventory_rpc_is_used(self):
+  from unittest.mock import patch
+  import json
+  root=Path(self.temp.name);home=root/'home';(home/'userdata').mkdir(parents=True)
+  (home/'userdata/blacklanturn-build.json').write_text(json.dumps({'edition':'apple','build_version':'1.1.19'}))
+  self.ui.profile_path=lambda:root;self.ui.home_path=lambda:home
+  catalog={'schema':1,'releases':[self.state['available']]}
+  with patch.object(self.ui.releases,'fetch_catalog',return_value=catalog) as fetch:
+   self.ui.sample(lambda *a:self.fail('No add-on inventory RPC allowed'));self.ui.sample()
+   self.assertEqual(fetch.call_count,1)
+ def test_offline_catalog_backs_off_and_retains_cached_release(self):
+  from unittest.mock import patch
+  import json
+  root=Path(self.temp.name);home=root/'home';(home/'userdata').mkdir(parents=True)
+  (home/'userdata/blacklanturn-build.json').write_text(json.dumps({'edition':'apple','build_version':'1.1.19'}))
+  self.ui.profile_path=lambda:root;self.ui.home_path=lambda:home
+  catalog={'schema':1,'releases':[self.state['available']]}
+  (root/'release-catalog-cache.json').write_text(json.dumps({'source':self.ui.catalog_source(),'fetched':0,'catalog':catalog}))
+  with patch.object(self.ui.releases,'fetch_catalog',side_effect=OSError('offline')) as fetch:
+   state=self.ui.sample();self.ui.sample();self.assertEqual(fetch.call_count,1)
+  self.assertEqual(state['available']['id'],'release2')
+
+ def test_new_bundled_release_completes_with_recent_empty_network_cache(self):
+  import json,time,copy
+  from unittest.mock import patch
+  root=Path(self.temp.name);home=root/'testhome';profile=root/'profile';(home/'userdata').mkdir(parents=True);profile.mkdir()
+  entry=copy.deepcopy(self.state['available']);file=home/'addons/example/main.py';file.parent.mkdir(parents=True);file.write_text('release')
+  (home/'userdata/blacklanturn-build.json').write_text(json.dumps({'edition':'apple','build_version':'1.1.20'}))
+  (home/'userdata/blacklanturn-releases.json').write_text(json.dumps({'schema':1,'releases':[entry]}))
+  (home/'userdata/blacklanturn-install-complete.json').write_text(json.dumps(dict(schema=1,id='release2',edition='apple',version='1.1.20',revision=0,complete=True)))
+  self.ui.home_path=lambda:home;self.ui.profile_path=lambda:profile;source=self.ui.catalog_source()
+  (profile/'release-catalog-cache.json').write_text(json.dumps({'source':source,'fetched':time.time(),'catalog':{'schema':1,'releases':[]}}))
+  with patch.object(self.ui.releases,'fetch_catalog',side_effect=AssertionError('Recent cache must not fetch')):
+   state=self.ui.sample()
+  self.assertIsNotNone(state['completed'],'Old cache hid the newly installed bundled release');self.assertEqual(state['completed']['id'],'release2')

@@ -496,9 +496,9 @@ def verify(folder):
  verify_youtube_context_acceptance(json.loads((ROOT/'compatibility/youtube-context/native-verification.json').read_text()))
  spec=importlib.util.spec_from_file_location('managed',SOURCE/'resources/libs/managed_addons.py');m=importlib.util.module_from_spec(spec);spec.loader.exec_module(m)
  import importlib.util as update_import
- update_spec=update_import.spec_from_file_location('update_notes_gate',ROOT/'tools/verify_update_notes.py');update_gate=update_import.module_from_spec(update_spec);update_spec.loader.exec_module(update_gate)
- update_gate.verify(json.loads((ROOT/'controller-source/update-notes-native-verification.json').read_text()),json.loads((ROOT/'controller-source/manifest88.json').read_text()))
- with zipfile.ZipFile(folder/'plugin.program.blacklanturninstaller-1.0.26.zip') as z:
+ update_spec=update_import.spec_from_file_location('update_notes_gate',ROOT/'tools/verify_release_notices.py');update_gate=update_import.module_from_spec(update_spec);update_spec.loader.exec_module(update_gate)
+ update_gate.verify(json.loads((ROOT/'controller-source/release-notices-native-verification.json').read_text()),json.loads((ROOT/'controller-source/manifest90.json').read_text()))
+ with zipfile.ZipFile(folder/'plugin.program.blacklanturninstaller-1.0.27.zip') as z:
   assert z.testzip() is None
   installer={n:z.read(n) for n in z.namelist()}
   assert all(n.startswith('plugin.program.blacklanturninstaller/') for n in installer)
@@ -514,17 +514,29 @@ def verify(folder):
    assert raw_tree==reviewed_tree['files'],'Managed-version Umbrella source differs from reviewed complete tree'
    assert hashlib.sha256(json.dumps(raw_tree,sort_keys=True,separators=(',',':')).encode()).hexdigest()==reviewed_tree['tree_sha256']
    p=json.loads(z.read('userdata/blacklanturn-build.json'))
-   assert p['schema']==3 and p['preferences_policy']=='playback-trakt-youtube-umbrella-network-autoplay-1' and p['helper_patch']=='empty-cache-1' and p['installer_min_version']=='1.0.26'
+   assert p['schema']==3 and p['preferences_policy']=='playback-trakt-youtube-umbrella-network-autoplay-1' and p['helper_patch']=='empty-cache-1' and p['installer_min_version']=='1.0.27'
    assert p['build_version']=='1.1.20' and p['network_patch']=='request-reliability-privacy-1' and p['umbrella_version']=='6.7.92' and p['umbrella_patch']=='event-progress-3'
-   assert p['controller_version']=='0.1.88' and p['helper_search_patch']=='search-batch-1' and p['helper_playback_patch']=='sampled-progress-1'
+   assert p['controller_version']=='0.1.90' and p['helper_search_patch']=='search-batch-1' and p['helper_playback_patch']=='sampled-progress-1'
    gui={n.get('id'):n.text for n in ET.fromstring(z.read('userdata/guisettings.xml'))}
    assert {k:gui[k] for k in ('filecache.memorysize','filecache.readfactor','filecache.buffermode','filecache.chunksize')}=={'filecache.memorysize':'64','filecache.readfactor':'400','filecache.buffermode':'4','filecache.chunksize':'131072'}
    assert next(n.text for n in ET.fromstring(z.read('userdata/addon_data/plugin.video.themoviedb.helper/settings.xml')) if n.get('id')=='artwork_quality')=='1'
    assert p['youtube_refresh_patch']=='youtube-freshness-2'
    assert p['managed_update_policy']=='kodi-version-epoch-1'
+   assert p['release_notices']=='curated-releases-1' and p['release_revision']==0
+   import sys as release_sys
+   release_sys.path.insert(0,str(ROOT/'controller-source/addon'))
+   import release_updates
+   catalog=release_updates.validate_catalog(json.loads(z.read('userdata/blacklanturn-releases.json')))
+   assert len(catalog['releases'])==1
+   entry=catalog['releases'][0]
+   assert entry['id']==p['release_id'] and entry['edition']==p['edition'] and entry['version']==p['build_version'] and entry['revision']==p['release_revision']
+   assert '1.1.20' in entry['title'] and 'Important' in entry['summary']
+   assert all(hashlib.sha256(z.read(n)).hexdigest()==h for n,h in entry['files'].items()),'Bundled release proof differs'
+   assert 'userdata/blacklanturn-install-complete.json' not in z.namelist(),'A clean package must not predeclare installation success'
+   assert 'userdata/addon_data/script.blacklanturn.preview/release-notices.json' not in z.namelist(),'A clean package must not copy notice history'
    assert hashlib.sha256(z.read('addons/plugin.video.youtube/resources/lib/youtube_plugin/kodion/context/xbmc/xbmc_context.py')).hexdigest()==json.loads((ROOT/'compatibility/youtube-context/manifest.json').read_text())['candidate_sha256']
    assert p['autoplay_patch']=='same-show-source-1'
-   expected=json.loads((ROOT/'controller-source/manifest88.json').read_text())['files']
+   expected=json.loads((ROOT/'controller-source/manifest90.json').read_text())['files']
    actual={n[len('addons/script.blacklanturn.preview/'):]:hashlib.sha256(z.read(n)).hexdigest() for n in z.namelist() if n.startswith('addons/script.blacklanturn.preview/')}
    assert actual==expected
    skin=json.loads((ROOT/'controller-source/manifest85.json').read_text())['skin']

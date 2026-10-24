@@ -122,7 +122,7 @@ def notice_allowed(home,loading,playing,dialog,settings,idle):
     return bool(home and not (loading or playing or dialog or settings) and idle>=8)
 
 
-def transact(path,transform):
+def transact(path,transform,reader=None,writer=None):
     """Serialize separate Kodi script interpreters; atomically replace JSON."""
     path=Path(path);path.parent.mkdir(parents=True,exist_ok=True)
     lock=path.with_suffix('.lock');token=uuid.uuid4().hex;deadline=time.monotonic()+2
@@ -138,8 +138,8 @@ def transact(path,transform):
             if time.monotonic()>=deadline:raise OSError('Update history busy')
             time.sleep(.02)
     try:
-        old=read_state(path);new=transform(copy.deepcopy(old))
-        if new!=old:write_state(path,new)
+        old=(reader or read_state)(path);new=transform(copy.deepcopy(old))
+        if new!=old:(writer or write_state)(path,new)
         return new
     finally:
         try:

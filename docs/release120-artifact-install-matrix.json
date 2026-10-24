@@ -1,0 +1,57 @@
+{
+  "passed": true,
+  "cases": [
+    {
+      "release_preference_verified": true,
+      "completion_receipt_verified": true,
+      "edition": "General",
+      "mode": "clean",
+      "passed": true,
+      "source_files_exact": 3849,
+      "complete_payload_sha256": "617dd8a549119978050aad7a8062a1a4fc4ba135d7540bbb43bc60ca3c1e7173",
+      "real_wizard_preflight_cleanup_extract": true,
+      "native_api": "simulated",
+      "synthetic_accounts_preserved": false,
+      "no_personal_profile_access": true
+    },
+    {
+      "release_preference_verified": true,
+      "completion_receipt_verified": true,
+      "edition": "General",
+      "mode": "standard",
+      "passed": true,
+      "source_files_exact": 3849,
+      "complete_payload_sha256": "617dd8a549119978050aad7a8062a1a4fc4ba135d7540bbb43bc60ca3c1e7173",
+      "real_wizard_preflight_cleanup_extract": true,
+      "native_api": "simulated",
+      "synthetic_accounts_preserved": true,
+      "no_personal_profile_access": true
+    },
+    {
+      "release_preference_verified": true,
+      "completion_receipt_verified": true,
+      "edition": "Apple-TV-Mac",
+      "mode": "clean",
+      "passed": true,
+      "source_files_exact": 3845,
+      "complete_payload_sha256": "8e05d8d05354b2a2d39b78b0e7300e80d6adecf0bc515295f18c9c96b8eb0341",
+      "real_wizard_preflight_cleanup_extract": true,
+      "native_api": "simulated",
+      "synthetic_accounts_preserved": false,
+      "no_personal_profile_access": true
+    },
+    {
+      "release_preference_verified": true,
+      "completion_receipt_verified": true,
+      "edition": "Apple-TV-Mac",
+      "mode": "standard",
+      "passed": true,
+      "source_files_exact": 3845,
+      "complete_payload_sha256": "8e05d8d05354b2a2d39b78b0e7300e80d6adecf0bc515295f18c9c96b8eb0341",
+      "real_wizard_preflight_cleanup_extract": true,
+      "native_api": "simulated",
+      "synthetic_accounts_preserved": true,
+      "no_personal_profile_access": true
+    }
+  ]
+}

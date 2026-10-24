@@ -1,0 +1,16 @@
+"""Current curated release acceptance; historical inventory notices are not a gate."""
+import hashlib,json
+from pathlib import Path
+ROOT=Path(__file__).resolve().parents[1]
+CASES=('available_notice','view_changes','later_button','update_opens_installer','completed_notice','dismiss_button','persistent_no_repeat','preference_persists','settings_preserved','authorizations_preserved')
+def inventory(root):return {p.relative_to(root).as_posix():hashlib.sha256(p.read_bytes()).hexdigest() for p in root.rglob('*') if p.is_file() and '__pycache__' not in p.parts and p.suffix not in ('.pyc','.pyo')}
+def verify(receipt,manifest):
+ assert receipt.get('schema')==1 and receipt.get('feature')=='curated-release-notices-1' and receipt.get('passed') is True
+ assert receipt.get('controller')==manifest.get('controller')=='0.1.90' and receipt.get('installer')=='1.0.27'
+ assert receipt.get('runtime')=='21.3' and receipt.get('native_devices') in (['mac'],['mac','fire'])
+ assert receipt.get('files')==manifest['files']==inventory(ROOT/'controller-source/addon'),'Current release source differs from native acceptance'
+ assert receipt.get('installer_files')==inventory(ROOT/'installer-source/plugin.program.blacklanturninstaller'),'Installer differs from accepted install-core tests'
+ for device in receipt['native_devices']:
+  assert all(receipt.get('native',{}).get(device,{}).get(case) is True for case in CASES),'Incomplete native release-notice acceptance: '+device
+ assert all(receipt.get('automated',{}).get(case) is True for case in ('playback_deferral','monitor_error_isolation','no_inventory','failed_install_no_success'))
+ return True

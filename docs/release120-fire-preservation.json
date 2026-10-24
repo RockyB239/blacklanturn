@@ -1,0 +1,25 @@
+{
+  "xml_values_equal": 1350,
+  "xml_structures_equal": 5,
+  "json_equal": 10,
+  "differences": [],
+  "code_differences": [],
+  "database_integrity": {
+    "MyVideos131.db": "ok",
+    "Addons33.db": "ok",
+    "Textures13.db": "ok"
+  },
+  "build_marker_unchanged": true,
+  "personal_build": "1.1.19",
+  "watched": {
+    "unchanged": true,
+    "before_rows": 15,
+    "after_rows": 15
+  },
+  "resume": {
+    "unchanged": true,
+    "before_rows": 0,
+    "after_rows": 0
+  },
+  "passed": true
+}

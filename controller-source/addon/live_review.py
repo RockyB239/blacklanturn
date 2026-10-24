@@ -27,7 +27,7 @@ from backend_ui import BackendSettings,LoadingPreview
 from icon_picker import choose_icon
 from genre_picker import choose_genre
 from browse_controls import AnimeMetadata,can_choose_genre,should_exclude_anime,page_cards
-from filtered_pages import provider_path,upstream_path,logical_files,needs_fill,fill_page,PageCancelled
+from filtered_pages import first_page_keep,first_page_minimum, provider_path,upstream_path,logical_files,needs_fill,fill_page,PageCancelled
 from preview_language import cached_video_metadata,cached_title_aliases
 from preview_identity import TitleVerifier
 from preview_geometry import preview_fill_viewmode,preview_display_aspect,PreviewRendererGuard
@@ -551,20 +551,22 @@ class LiveReview(YouTubeBrowser,xbmcgui.WindowXML):
         filtered=metadata is not None and should_exclude_anime(self,path)
         if filtered:
             files=self.result_cache.get('filtered-v1:'+path)
-            if files is not None and not needs_fill(path,files,metadata.without_anime,positioned=True):return files,False
+            if files is not None and not needs_fill(path,files,first_page_keep(self,path,metadata.without_anime),positioned=True,size=first_page_minimum(definition)):return files,False
         files=self.result_cache.get(path)
         if files is not None:
-            return (None,False) if filtered and needs_fill(path,files,metadata.without_anime) else (files,False)
+            return (None,False) if filtered and needs_fill(path,files,first_page_keep(self,path,metadata.without_anime),size=first_page_minimum(definition)) else (files,False)
         snapshots=getattr(self,'snapshot_cache',None)
         files=snapshots.get(path) if snapshots is not None else None
-        if files is not None and filtered and needs_fill(path,files,metadata.without_anime):return None,False
+        if files is not None and filtered and needs_fill(path,files,first_page_keep(self,path,metadata.without_anime),size=first_page_minimum(definition)):return None,False
         return files,files is not None
-    def fill_discovery_page(self,path,files,current,refresh=False,publish=True):
+    def fill_discovery_page(self,path,files,current,refresh=False,publish=True,minimum=None):
+        from filtered_pages import path_minimum
+        if minimum is None:minimum=path_minimum(self,path)
         metadata=getattr(self,'anime_metadata',None)
         if metadata is None or not path.startswith(TMDB) or not should_exclude_anime(self,path):return files
         cache=self.result_cache;revision=cache.revision;key='filtered-v1:'+path
         cached=None if refresh else cache.get(key)
-        if cached is not None and not needs_fill(path,cached,metadata.without_anime,positioned=True):return cached
+        if cached is not None and not needs_fill(path,cached,first_page_keep(self,path,metadata.without_anime),positioned=True,size=minimum):return cached
         if not current():raise PageCancelled('Page navigation changed')
         def fetch(raw_path):
             if not current():raise PageCancelled('Page navigation changed')
@@ -574,7 +576,7 @@ class LiveReview(YouTubeBrowser,xbmcgui.WindowXML):
                 if current():cache.put(actual,raw,revision=revision)
             return logical_files(raw,actual,raw_path)
         if upstream_path(provider_path(path))!=provider_path(path):files=fetch(provider_path(path))
-        filled=fill_page(path,files,fetch,metadata.without_anime,current=current)
+        filled=fill_page(path,files,fetch,first_page_keep(self,path,metadata.without_anime),current=current,minimum=minimum)
         if current():cache.put(key,filled,revision=revision)
         if publish:self.publish_cache_stats()
         return filled
@@ -596,9 +598,9 @@ class LiveReview(YouTubeBrowser,xbmcgui.WindowXML):
         def current():return self.alive and self.generation==generation and cache.revision==revision and owner_current()
         if not definition.get('_snapshot_refresh') and getattr(self,'anime_metadata',None) is not None and should_exclude_anime(self,path):
             filled=cache.get('filtered-v1:'+path)
-            if filled is not None and not needs_fill(path,filled,self.anime_metadata.without_anime,positioned=True):self.publish_cache_stats();return filled
+            if filled is not None and not needs_fill(path,filled,first_page_keep(self,path,self.anime_metadata.without_anime),positioned=True,size=first_page_minimum(definition)):self.publish_cache_stats();return filled
         if getattr(self,'anime_metadata',None) is not None and should_exclude_anime(self,path) and upstream_path(provider_path(path))!=provider_path(path):
-            return self.fill_discovery_page(path,[],current,refresh=definition.get('_snapshot_refresh',False))
+            return self.fill_discovery_page(path,[],current,refresh=definition.get('_snapshot_refresh',False),minimum=first_page_minimum(definition))
         snapshots=getattr(self,'snapshot_cache',None);snapshot_revision=snapshots.revision if snapshots is not None else None
         files=None if definition.get('_snapshot_refresh') else cache.get(path)
         if files is None:
@@ -615,7 +617,7 @@ class LiveReview(YouTubeBrowser,xbmcgui.WindowXML):
                 cache.put(path,files,revision=revision,ttl=30 if info.startswith('trakt') else 120)
                 if revision==cache.revision and snapshots is not None and snapshots is getattr(self,'snapshot_cache',None):snapshots.put(path,files,revision=snapshot_revision)
         self.publish_cache_stats()
-        return self.fill_discovery_page(path,files,current,refresh=definition.get('_snapshot_refresh',False))
+        return self.fill_discovery_page(path,files,current,refresh=definition.get('_snapshot_refresh',False),minimum=first_page_minimum(definition))
     def apply_refreshed_row(self,n,files,label):
         # ControlList reset/add/select enqueue separate native GUI messages. A
         # background result must never replace that vector while input uses it.
@@ -661,6 +663,7 @@ class LiveReview(YouTubeBrowser,xbmcgui.WindowXML):
         if target is not None and item_key(target) in fresh and current():
             self.update(target);self.focus_key=None
     def show_row_window(self,offset,focus_slot=None):
+        from filtered_pages import path_minimum
         scope_changed=self.configure_row_snapshots()
         revision=self.result_cache.revision
         if offset!=self.row_offset and not scope_changed:
@@ -690,7 +693,7 @@ class LiveReview(YouTubeBrowser,xbmcgui.WindowXML):
             if cached and cached.get('deferred') and cached.get('revision')!=revision:
                 cached=dict(cached,files=None,deferred=False);self.row_cache[index]=cached
             metadata=getattr(self,'anime_metadata',None)
-            if cached and cached.get('files') is not None and metadata is not None and should_exclude_anime(self,cached['path']) and needs_fill(cached['path'],cached['files'],metadata.without_anime,positioned=True):
+            if cached and cached.get('files') is not None and metadata is not None and should_exclude_anime(self,cached['path']) and needs_fill(cached['path'],cached['files'],first_page_keep(self,cached['path'],metadata.without_anime),positioned=True,size=path_minimum(self,cached['path'])):
                 cached=dict(cached,files=None,deferred=False);self.row_cache[index]=cached
             if n>=len(definitions):
                 self.paths[n]='';self.histories[n]=PageHistory();self.apply_row(n,[],'');continue
@@ -822,12 +825,13 @@ class LiveReview(YouTubeBrowser,xbmcgui.WindowXML):
                 self.prefetch_busy=False
         threading.Thread(target=work,name='BlackLanturnPublicRowTrial',daemon=True).start()
     def page_files(self,path,current,revision):
+        from filtered_pages import path_minimum
         """Shared foreground/lookahead path, including logical filtered pages."""
         if not current():raise PageCancelled('Page navigation changed')
         cache=self.result_cache;metadata=getattr(self,'anime_metadata',None)
         filtered=metadata is not None and path.startswith(TMDB) and should_exclude_anime(self,path)
         files=cache.get(('filtered-v1:' if filtered else '')+path)
-        if files is not None and filtered and needs_fill(path,files,metadata.without_anime,positioned=True):files=None
+        if files is not None and filtered and needs_fill(path,files,first_page_keep(self,path,metadata.without_anime),positioned=True,size=path_minimum(self,path)):files=None
         if files is None:
             if filtered and upstream_path(provider_path(path))!=provider_path(path):files=[]
             else:files=self.cached_provider_list(provider_path(path),revision,current)
@@ -1072,6 +1076,7 @@ class LiveReview(YouTubeBrowser,xbmcgui.WindowXML):
             finally:self.rating_busy=False
         threading.Thread(target=work,name='BlackLanturnSelectedRatings',daemon=True).start()
     def load_path(self,n,path,label=None,back=False,position=0,preserve_focus=False):
+        from filtered_pages import path_minimum
         if not valid_source(path):return
         if getattr(self,'section','')=='YouTube':
             self.youtube_content_revision=object();self.youtube_job=None;self.youtube_update=None;self.youtube_refreshing=False
@@ -1100,7 +1105,7 @@ class LiveReview(YouTubeBrowser,xbmcgui.WindowXML):
                     metadata=getattr(self,'anime_metadata',None)
                     filtered=metadata is not None and path.startswith(TMDB) and should_exclude_anime(self,path)
                     files=self.result_cache.get('filtered-v1:'+path) if filtered else None
-                    if files is not None and needs_fill(path,files,metadata.without_anime,positioned=True):files=None
+                    if files is not None and needs_fill(path,files,first_page_keep(self,path,metadata.without_anime),positioned=True,size=path_minimum(self,path)):files=None
                     if files is None:
                         files=[] if filtered and upstream_path(provider_path(path))!=provider_path(path) else load_best_matches(params.get('query',[''])[0],lambda part:self.cached_provider_list(part,revision,current),current,workers=2,batch_provider=get_list if getattr(self,'batch_search_enabled',False) else None,cache=cache,revision=revision) if params.get('info')==['blacklanturn_search_matches'] else get_list(provider_path(path))
                         if filtered:files=self.fill_discovery_page(path,files,current)

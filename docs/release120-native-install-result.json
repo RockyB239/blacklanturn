@@ -1,0 +1,49 @@
+{
+  "passed": true,
+  "personal_profile_accessed": false,
+  "scope": "native Mac Kodi API / production install core; transport and Wizard UI tested separately",
+  "cases": [
+    {
+      "edition": "General",
+      "platform_identity": "simulated Android only; all installer file/registry APIs native macOS",
+      "release_state_verified": true,
+      "mode": "clean",
+      "passed": true,
+      "source_files_exact": 3849,
+      "native_registry_preserved": true,
+      "synthetic_history_choice_preserved": true
+    },
+    {
+      "edition": "General",
+      "platform_identity": "simulated Android only; all installer file/registry APIs native macOS",
+      "release_state_verified": true,
+      "mode": "standard",
+      "passed": true,
+      "source_files_exact": 3849,
+      "native_registry_preserved": true,
+      "synthetic_history_choice_preserved": true
+    },
+    {
+      "edition": "Apple-TV-Mac",
+      "platform_identity": "native macOS",
+      "release_state_verified": true,
+      "mode": "clean",
+      "passed": true,
+      "source_files_exact": 3845,
+      "native_registry_preserved": true,
+      "synthetic_history_choice_preserved": true
+    },
+    {
+      "edition": "Apple-TV-Mac",
+      "platform_identity": "native macOS",
+      "release_state_verified": true,
+      "mode": "standard",
+      "passed": true,
+      "source_files_exact": 3845,
+      "native_registry_preserved": true,
+      "synthetic_history_choice_preserved": true
+    }
+  ],
+  "network_blocked": true,
+  "personal_profile_denied": true
+}

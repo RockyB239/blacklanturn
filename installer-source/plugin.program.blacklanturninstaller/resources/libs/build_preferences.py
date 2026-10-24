@@ -9,6 +9,7 @@ from pathlib import Path
 import xml.etree.ElementTree as E
 from resources.libs import settings_store as store
 from resources.libs import update_notes_state as update_notes
+from resources.libs import release_notice_state as releases
 from resources.libs.discovery_defaults import upgrade as discovery_upgrade
 DEFAULTS=json.loads((Path(__file__).parents[1]/'playback-defaults.json').read_text(encoding='utf-8'))
 YOUTUBE='addon_data/plugin.video.youtube/settings.xml'
@@ -79,8 +80,8 @@ def _controller_text(raw):
   raise PreferenceError('Controller settings are invalid. Your current build has been kept.') from exc
 
 def _validate(snapshot,addon_ids,auth_only=None):
- if not isinstance(snapshot,dict) or type(snapshot.get('schema')) is not int or snapshot.get('schema') not in (1,2,3) or type(snapshot.get('auth_only')) is not bool or not isinstance(snapshot.get('values'),dict):raise PreferenceError('Invalid preference recovery. Installation stopped.')
- expected={'schema','auth_only','values'}|({'controller'} if snapshot['schema']>=2 else set())|({'update_notes'} if snapshot['schema']==3 else set())
+ if not isinstance(snapshot,dict) or type(snapshot.get('schema')) is not int or snapshot.get('schema') not in (1,2,3,4) or type(snapshot.get('auth_only')) is not bool or not isinstance(snapshot.get('values'),dict):raise PreferenceError('Invalid preference recovery. Installation stopped.')
+ expected={'schema','auth_only','values'}|({'controller'} if snapshot['schema']>=2 else set())|({'update_notes'} if snapshot['schema']>=3 else set())|({'release_notices'} if snapshot['schema']>=4 else set())
  if set(snapshot)!=expected:raise PreferenceError('Invalid preference recovery. Installation stopped.')
  if auth_only is not None and snapshot['auth_only']!=auth_only:raise PreferenceError('Finish the pending installation using its original clean/update mode.')
  if snapshot['schema']==1 and not snapshot['auth_only'] and CONTROLLER in addon_ids:
@@ -98,6 +99,10 @@ def _validate(snapshot,addon_ids,auth_only=None):
  if notes is not None:
   if snapshot['auth_only'] or CONTROLLER not in addon_ids:raise PreferenceError('Unexpected update history recovery. Installation stopped.')
   update_notes.validate(notes)
+ release_state=snapshot.get('release_notices')
+ if release_state is not None:
+  if snapshot['auth_only'] or CONTROLLER not in addon_ids:raise PreferenceError('Unexpected release notice recovery. Installation stopped.')
+  releases.validate_state(release_state)
  return snapshot
 
 def prepare(home,accounts,addon_ids,auth_only=False):
@@ -125,7 +130,19 @@ def prepare(home,accounts,addon_ids,auth_only=False):
    if raw is not None:
     if len(raw)>1024*1024:raise ValueError('Oversized update history')
     notes=update_notes.validate(json.loads(raw))
-  result['build_preferences']={'schema':3,'auth_only':auth_only,'values':values,'controller':controller,'update_notes':notes}
+  release_state=None
+  if not auth_only and CONTROLLER in addon_ids:
+   raw=_read(home,'addon_data/script.blacklanturn.preview/release-notices.json')
+   if raw is not None:
+    if len(raw)>releases.MAX_BYTES:raise ValueError('Oversized release notices')
+    release_state=releases.validate_state(json.loads(raw))
+   else:
+    release_state=releases.empty_state(notes['enabled'] if notes is not None else True)
+    marker=_read(home,'blacklanturn-build.json')
+    if marker is not None:
+     previous=json.loads(marker)
+     if isinstance(previous,dict) and {'edition','build_version'}<=set(previous):release_state['installed']=releases.identity(previous)
+  result['build_preferences']={'schema':4,'auth_only':auth_only,'values':values,'controller':controller,'update_notes':notes,'release_notices':release_state}
   return result
  except (OSError,ValueError,TypeError,E.ParseError) as exc:raise PreferenceError('Playback preferences could not be saved. Your current build has been kept.') from exc
 
@@ -157,8 +174,24 @@ def restore(home,accounts,addon_ids):
    prepared.append((CONTROLLER_CONFIG,raw.encode('utf-8')))
   if snapshot.get('update_notes') is not None:
    prepared.append(('addon_data/script.blacklanturn.preview/update-notes.json',json.dumps(snapshot['update_notes'],ensure_ascii=False).encode('utf-8')))
+  if snapshot.get('release_notices') is not None:
+   prepared.append(('addon_data/script.blacklanturn.preview/release-notices.json',json.dumps(snapshot['release_notices'],ensure_ascii=False).encode('utf-8')))
   for name,raw in prepared:_write(home,name,raw)
  except (OSError,ValueError,TypeError,E.ParseError) as exc:raise PreferenceError('Playback preference restoration needs attention. Keep the pending backup and reinstall.') from exc
+
+def complete_install(home):
+ """Write success only after extraction and account/preference restoration."""
+ try:
+  raw=_read(home,'blacklanturn-build.json')
+  if raw is None:return
+  marker=json.loads(raw)
+  if marker.get('release_notices')!='curated-releases-1':return
+  ident=releases.identity(marker);key=marker.get('release_id')
+  import re
+  if not isinstance(key,str) or not re.fullmatch(r'[a-zA-Z0-9._-]{1,100}',key):raise ValueError('Invalid release identity')
+  receipt=dict(schema=1,id=key,**ident,complete=True)
+  _write(home,'blacklanturn-install-complete.json',json.dumps(receipt,sort_keys=True).encode('utf-8'))
+ except (OSError,ValueError,TypeError) as exc:raise PreferenceError('Installation completion could not be saved. Keep recovery data and retry.') from exc
 
 def verify_archive(archive,policy='playback-trakt-youtube-1'):
  """Reject missing/implicit defaults before any profile cleanup."""

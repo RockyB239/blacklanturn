@@ -1,0 +1,27 @@
+{
+  "title": "BlackLanturn Build 1.1.20",
+  "summary": "Important: protects playback patches and loads discovery rows sooner.",
+  "sections": [
+    {
+      "heading": "Important compatibility protection",
+      "bullets": [
+        "Reviewed BlackLanturn patches stay protected during ordinary add-on updates.",
+        "Our release notices explain BlackLanturn changes and important compatibility fixes."
+      ]
+    },
+    {
+      "heading": "Faster discovery rows",
+      "bullets": [
+        "Matching first-page titles appear without waiting to refill every filtered shelf to 20 cards.",
+        "Continue along the row to reach further titles. Artwork and watched/progress details remain attached to their original titles."
+      ]
+    },
+    {
+      "heading": "Your settings and accounts",
+      "bullets": [
+        "Standard update preserves playback choices, selected accounts and the update-notice preference.",
+        "Clean installs start with build defaults and a quiet notification baseline."
+      ]
+    }
+  ]
+}
