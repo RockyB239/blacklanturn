@@ -1,0 +1,17 @@
+BlackLanturn 1.1.18 - Kodi 21.3 Omega
+
+Editions: General (Fire TV / Android) and Apple TV & Mac. Controller 0.1.87; skin 0.1.39; Installer 1.0.23; Repository 1.0.6.
+
+Update BlackLanturn Installer to 1.0.23 through the BlackLanturn Repository, then restart Kodi before installing Build 1.1.18. Older installers refuse this protected build before cleanup.
+
+To preserve preferences and accounts, choose Standard update. In Save Data, retain Trakt, debrid and login accounts plus desired sources, GUI settings, profiles, favorites, playercorefactory and advancedsettings. Review the final confirmation for Mode: Standard and desired switches ON. Account-only reset deliberately resets preferences; Fresh install is for a clean profile.
+
+YouTube cache hits no longer extend recommendation freshness indefinitely. New recommendations prioritize unfinished videos and publish in stages, so the main row becomes usable before later shelves finish. Existing rows, focus, artwork and watch/progress metadata stay available during slow refreshes. Exact managed-source protection retains this repair through ordinary YouTube updates. No extra polling loop or parallel refresh worker was added.
+
+Clean installs enable full-video local and remote YouTube history. Standard update retains saved history/privacy choices. The addon's settings let you change these choices. Previews continue to exclude history reporting. Existing devices with remote history disabled retain that choice unless you enable it.
+
+Failed controller-layout reads now use a read-only fallback instead of saving over the original file. Concurrent saves use separate temporary files and an atomic replacement. The transient read-failure trigger was not isolated; the destructive fallback behavior and protection were reproduced and tested.
+
+Both packages retain the prior playback, Trakt, artwork, discovery, automatic YouTube quality and platform-specific compatibility changes. Standard installation, preferences, authorizations, actual refresh, continuation and focus/metadata preservation were checked on Mac, Fire Stick and Apple TV. Clean/Standard artifact tests cover both editions; a separate disposable Kodi test used no personal data and blocked network/personal-profile access. Remote watch-history reports and preview exclusion have native Mac evidence; they were not replayed with full videos on every platform in this release.
+
+Stop playback before updating. Wait for verification, extraction and restoration to finish, then follow the restart prompt. Confirm Build 1.1.18, accounts and playback choices afterward. Keep recovery data if preflight refuses an unrecognized source. Prior published releases remain available.
