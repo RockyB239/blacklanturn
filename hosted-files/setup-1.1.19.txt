@@ -1,0 +1,17 @@
+BlackLanturn 1.1.19 - Kodi 21.3 Omega
+
+General (Fire TV / Android) and Apple TV & Mac. Installer 1.0.24; Controller 0.1.87; skin 0.1.39; Repository 1.0.6.
+
+Update BlackLanturn Installer to 1.0.24 through the BlackLanturn Repository, then restart Kodi before installing Build 1.1.19. Older installers refuse this protected build before cleanup.
+
+To preserve accounts and preferences, choose Standard update. In Save Data, retain Trakt, debrid and login accounts, plus desired sources, GUI settings, profiles, favorites, playercorefactory and advancedsettings. Review the final confirmation for Mode: Standard and desired switches ON. Account-only reset and Fresh install intentionally reset preferences; they are not the preservation update mode.
+
+This release fixes YouTube subscription requests failing when Kodi has no active plugin folder. The add-on now handles that absent value safely. The guard adds no requests or workers. Both platform editions retain their specific workarounds.
+
+Build 1.1.18's features remain included: cache hits no longer extend recommendation age indefinitely; unfinished videos rank ahead of completed ones; refresh publishes recommendations before later shelves finish and preserves existing rows/focus after late errors. Failed layout reads cannot overwrite original settings with fallback defaults; concurrent saves use separate atomic files.
+
+Clean installs enable full-video local and remote YouTube history. Standard update preserves saved history/privacy choices. Change these in the YouTube add-on settings if desired. Previews remain excluded from watch reporting. Existing playback, source-selection, Trakt, artwork, discovery and automatic YouTube quality settings remain included.
+
+The complete refresh, subscriptions, category publication and pagination were tested natively on Mac, Fire Stick and Apple TV, retaining artwork/watch/progress metadata and focus. Both editions passed clean and Standard artifact tests, plus separate isolated native Kodi install-core checks with no personal data and network/personal-profile access denied. Native full-video remote reporting and preview exclusion retain Mac acceptance; full videos were not replayed on all platforms for this release. Other device models and sustained 4K playback remain outside the new acceptance.
+
+Stop playback before updating. Wait for download verification, extraction and restoration to finish, then follow the restart prompt. Confirm Build 1.1.19, accounts and playback choices afterward. Keep recovery data if preflight refuses unrecognized source. Prior published releases remain available.
