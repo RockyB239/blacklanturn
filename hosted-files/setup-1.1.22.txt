@@ -1,0 +1,13 @@
+Both editions now bundle the exact current BlackLanturn Repository 1.0.6 and its branded icon, preventing Standard updates from restoring the older baseline repository. This follow-up retains the already tested saved YouTube rows fix.
+
+YouTube opens faster by reusing saved rows while refreshing recommendations in the background. Watched and resume status are read from the current provider before cards are displayed. Explicit refresh and continued row navigation remain available.
+
+Includes both General (Fire TV / Android) and Apple TV & Mac editions with Installer 1.0.28 and Controller 0.1.91. Existing playback, Trakt, artwork, four-rating defaults, automatic YouTube quality, managed add-on protections and platform-specific workarounds are retained.
+
+Use Standard update and review Save Data choices to preserve accounts and settings. Stop playback and update Installer before applying the build. A first load without saved rows still depends on the network.
+
+Both editions passed exact-artifact clean and Standard workflow tests and isolated native macOS Kodi installation-core tests with personal profile/network access denied. Android platform identity is simulated only in that isolated core test. Saved-row browsing, watched metadata and continuation were tested separately on the physical Fire Stick and Mac. Apple TV was intentionally not contacted for this release. Native physical-device Standard update results are recorded separately after installation.
+
+Build 1.1.22 / Installer 1.0.28 / Controller 0.1.91 / Repository 1.0.6. Minimum compatible Installer 1.0.27.
+
+In Save Data, retain Trakt, debrid and addon login accounts plus desired sources, GUI settings, profiles, favorites, playercorefactory and advancedsettings. Confirm Standard mode before installing. Wait for extraction and restoration to finish; follow the restart prompt. Fresh and account-only reset deliberately use build defaults. Retain recovery copies if preflight refuses unfamiliar source.
