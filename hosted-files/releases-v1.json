@@ -1,0 +1,115 @@
+{
+  "schema": 1,
+  "releases": [
+    {
+      "id": "blacklanturn-general-1.1.20-r0",
+      "edition": "general",
+      "version": "1.1.20",
+      "revision": 0,
+      "title": "BlackLanturn Build 1.1.20",
+      "summary": "Important: protects playback patches and loads discovery rows sooner.",
+      "sections": [
+        {
+          "heading": "Important compatibility protection",
+          "bullets": [
+            "Reviewed BlackLanturn patches stay protected during ordinary add-on updates.",
+            "Our release notices explain BlackLanturn changes and important compatibility fixes."
+          ]
+        },
+        {
+          "heading": "Faster discovery rows",
+          "bullets": [
+            "Matching first-page titles appear without waiting to refill every filtered shelf to 20 cards.",
+            "Continue along the row to reach further titles. Artwork and watched/progress details remain attached to their original titles."
+          ]
+        },
+        {
+          "heading": "Your settings and accounts",
+          "bullets": [
+            "Standard update preserves playback choices, selected accounts and the update-notice preference.",
+            "Clean installs start with build defaults and a quiet notification baseline."
+          ]
+        }
+      ],
+      "files": {
+        "addons/script.blacklanturn.preview/addon.xml": "4b58e4bd7e034c7921d89bb70152e0ef2b4aaee31728ca3feadc649cf62665e6",
+        "addons/script.blacklanturn.preview/default.py": "243202c135f5bd624f67864baf85dc65ae5714f189a5bd0a959a4df12e3f5868",
+        "addons/script.blacklanturn.preview/live_review.py": "2ff25ebde8caaa69d2b7059766ba4023faf3a3c97ebe7427e279d8e3f8673c72",
+        "addons/script.blacklanturn.preview/filtered_pages.py": "72c4cc2dedcb9640f4cc8fcd6043fd8dbee1a8cf7370c3b424f7b659e501ab57",
+        "addons/script.blacklanturn.preview/release_updates.py": "093fb139a2e38eea24ba4a5a68d3d42c014afe2238f09780ee23e63a56539669",
+        "addons/script.blacklanturn.preview/update_notes_ui.py": "12aeb20480cd8262b9c31e39ea996d8cfe14753fdfe511b5e2fc90c782613fcf",
+        "addons/script.blacklanturn.preview/resources/skins/Default/1080i/UpdateNotice.xml": "76f785217cf72b885d0b289ba9c077195eca4050e1430cdbc9434cf04d4cd527",
+        "addons/script.blacklanturn.preview/resources/skins/Default/1080i/UpdateNotes.xml": "388f7431108a25ec785ad5b57ed05d074dc217601c4227bd6acdb3f8861b538c",
+        "addons/plugin.program.blacklanturninstaller/addon.xml": "0ff687752e0848e7879dd36ee73db75c05ef23613d32c6222f8379d65297a7fe",
+        "addons/plugin.program.blacklanturninstaller/resources/libs/wizard.py": "095ed528df397548da3ef87fea4bbe76b06fdfb045eee62ecc1a6d08533cdf6b",
+        "addons/plugin.program.blacklanturninstaller/resources/libs/build_preferences.py": "327168dbf3d68286d650a11e3532419f742225c9fa84399bd4bbbd6ad46bb3dc",
+        "addons/plugin.program.blacklanturninstaller/resources/libs/release_notice_state.py": "093fb139a2e38eea24ba4a5a68d3d42c014afe2238f09780ee23e63a56539669",
+        "addons/plugin.program.blacklanturninstaller/resources/libs/managed_addons.py": "bb962b44f55fe17008e3484bb4572597973bba94b02799535c1e9aee4368717e",
+        "addons/plugin.program.blacklanturninstaller/resources/libs/managed_versions.py": "093677950842e7ee264b60ad5558c8e91a4471705f4f76859de6b375a15dca7b",
+        "addons/plugin.video.themoviedb.helper/resources/tmdbhelper/lib/items/directories/tmdb/lists_search.py": "3cc1c1165fd57b233b868fb35e4ceca1cf2449a85a44fb5b9f04cde4b6ae2862",
+        "addons/plugin.video.themoviedb.helper/resources/tmdbhelper/lib/monitor/player.py": "cc8c8f4e6f499f54bfab551a8a23687d9979a43a1562fc0fc6f066a09f9112ec",
+        "addons/plugin.video.umbrella/resources/lib/modules/player.py": "5766e60fe02858d5cd5b4d38c03cf8f8f3de9d5e8dbb1b3d85a468f922f2be0b",
+        "addons/plugin.video.umbrella/resources/lib/modules/control.py": "b580a0a0a2edd8e88bab6a82f5f7d1cd32f7afe124e8ab5cd230ba99c5b00ca6",
+        "addons/plugin.video.youtube/resources/lib/youtube_plugin/kodion/context/xbmc/xbmc_context.py": "6eb2526020c082553ba9ec688db1b00a2ca2a497ae97ab0734752b3d896d0c75",
+        "addons/plugin.video.youtube/resources/lib/youtube_plugin/kodion/sql_store/function_cache.py": "7418d1ba8afa569d0b0f3ccef78748c75c6b6560e8d096b6bf6c1e83efa830cb",
+        "addons/script.module.jurialmunkey/resources/modules/jurialmunkey/reqapi.py": "9d232490dba165c07fd6ceab42c512ebe90997a794b610fbca14c64429668d59",
+        "addons/skin.blacklanturn.preview/xml/Home.xml": "7495994a5f5a1f0a71ad9e7e71d5dd43387433c822fabf179cac20050227586a"
+      }
+    },
+    {
+      "id": "blacklanturn-apple-1.1.20-r0",
+      "edition": "apple",
+      "version": "1.1.20",
+      "revision": 0,
+      "title": "BlackLanturn Build 1.1.20",
+      "summary": "Important: protects playback patches and loads discovery rows sooner.",
+      "sections": [
+        {
+          "heading": "Important compatibility protection",
+          "bullets": [
+            "Reviewed BlackLanturn patches stay protected during ordinary add-on updates.",
+            "Our release notices explain BlackLanturn changes and important compatibility fixes."
+          ]
+        },
+        {
+          "heading": "Faster discovery rows",
+          "bullets": [
+            "Matching first-page titles appear without waiting to refill every filtered shelf to 20 cards.",
+            "Continue along the row to reach further titles. Artwork and watched/progress details remain attached to their original titles."
+          ]
+        },
+        {
+          "heading": "Your settings and accounts",
+          "bullets": [
+            "Standard update preserves playback choices, selected accounts and the update-notice preference.",
+            "Clean installs start with build defaults and a quiet notification baseline."
+          ]
+        }
+      ],
+      "files": {
+        "addons/script.blacklanturn.preview/addon.xml": "4b58e4bd7e034c7921d89bb70152e0ef2b4aaee31728ca3feadc649cf62665e6",
+        "addons/script.blacklanturn.preview/default.py": "243202c135f5bd624f67864baf85dc65ae5714f189a5bd0a959a4df12e3f5868",
+        "addons/script.blacklanturn.preview/live_review.py": "2ff25ebde8caaa69d2b7059766ba4023faf3a3c97ebe7427e279d8e3f8673c72",
+        "addons/script.blacklanturn.preview/filtered_pages.py": "72c4cc2dedcb9640f4cc8fcd6043fd8dbee1a8cf7370c3b424f7b659e501ab57",
+        "addons/script.blacklanturn.preview/release_updates.py": "093fb139a2e38eea24ba4a5a68d3d42c014afe2238f09780ee23e63a56539669",
+        "addons/script.blacklanturn.preview/update_notes_ui.py": "12aeb20480cd8262b9c31e39ea996d8cfe14753fdfe511b5e2fc90c782613fcf",
+        "addons/script.blacklanturn.preview/resources/skins/Default/1080i/UpdateNotice.xml": "76f785217cf72b885d0b289ba9c077195eca4050e1430cdbc9434cf04d4cd527",
+        "addons/script.blacklanturn.preview/resources/skins/Default/1080i/UpdateNotes.xml": "388f7431108a25ec785ad5b57ed05d074dc217601c4227bd6acdb3f8861b538c",
+        "addons/plugin.program.blacklanturninstaller/addon.xml": "0ff687752e0848e7879dd36ee73db75c05ef23613d32c6222f8379d65297a7fe",
+        "addons/plugin.program.blacklanturninstaller/resources/libs/wizard.py": "095ed528df397548da3ef87fea4bbe76b06fdfb045eee62ecc1a6d08533cdf6b",
+        "addons/plugin.program.blacklanturninstaller/resources/libs/build_preferences.py": "327168dbf3d68286d650a11e3532419f742225c9fa84399bd4bbbd6ad46bb3dc",
+        "addons/plugin.program.blacklanturninstaller/resources/libs/release_notice_state.py": "093fb139a2e38eea24ba4a5a68d3d42c014afe2238f09780ee23e63a56539669",
+        "addons/plugin.program.blacklanturninstaller/resources/libs/managed_addons.py": "bb962b44f55fe17008e3484bb4572597973bba94b02799535c1e9aee4368717e",
+        "addons/plugin.program.blacklanturninstaller/resources/libs/managed_versions.py": "093677950842e7ee264b60ad5558c8e91a4471705f4f76859de6b375a15dca7b",
+        "addons/plugin.video.themoviedb.helper/resources/tmdbhelper/lib/items/directories/tmdb/lists_search.py": "3cc1c1165fd57b233b868fb35e4ceca1cf2449a85a44fb5b9f04cde4b6ae2862",
+        "addons/plugin.video.themoviedb.helper/resources/tmdbhelper/lib/monitor/player.py": "cc8c8f4e6f499f54bfab551a8a23687d9979a43a1562fc0fc6f066a09f9112ec",
+        "addons/plugin.video.umbrella/resources/lib/modules/player.py": "5766e60fe02858d5cd5b4d38c03cf8f8f3de9d5e8dbb1b3d85a468f922f2be0b",
+        "addons/plugin.video.umbrella/resources/lib/modules/control.py": "b580a0a0a2edd8e88bab6a82f5f7d1cd32f7afe124e8ab5cd230ba99c5b00ca6",
+        "addons/plugin.video.youtube/resources/lib/youtube_plugin/kodion/context/xbmc/xbmc_context.py": "6eb2526020c082553ba9ec688db1b00a2ca2a497ae97ab0734752b3d896d0c75",
+        "addons/plugin.video.youtube/resources/lib/youtube_plugin/kodion/sql_store/function_cache.py": "7418d1ba8afa569d0b0f3ccef78748c75c6b6560e8d096b6bf6c1e83efa830cb",
+        "addons/script.module.jurialmunkey/resources/modules/jurialmunkey/reqapi.py": "9d232490dba165c07fd6ceab42c512ebe90997a794b610fbca14c64429668d59",
+        "addons/skin.blacklanturn.preview/xml/Home.xml": "7495994a5f5a1f0a71ad9e7e71d5dd43387433c822fabf179cac20050227586a"
+      }
+    }
+  ]
+}

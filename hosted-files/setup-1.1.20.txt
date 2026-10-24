@@ -1,0 +1,17 @@
+BlackLanturn Build 1.1.20 - Kodi 21.3 Omega
+
+General (Fire TV / Android) and Apple TV & Mac. Installer 1.0.27; Controller 0.1.90; skin 0.1.39; Repository 1.0.6.
+
+Update BlackLanturn Installer to 1.0.27 through the BlackLanturn Repository, then restart Kodi before applying Build 1.1.20. Older installers refuse this protected build before cleanup.
+
+To retain your accounts and preferences, choose Standard update. In Save Data, retain Trakt, debrid and login accounts, plus desired sources, GUI settings, profiles, favorites, playercorefactory and advancedsettings. Review the final confirmation for Mode: Standard and desired switches ON. Account-only reset and Fresh install intentionally reset preferences.
+
+Important compatibility protection: reviewed BlackLanturn patches remain protected through ordinary add-on updates. Notices show releases published by BlackLanturn, with the build version and our release notes. Important fixes are identified in the authored release summary. They do not announce ordinary third-party add-on updates or infer patch needs on your device. The existing background monitor checks at most hourly and defers notices while you watch. View changes opens our branded notes; Update opens the BlackLanturn Installer. Notifications can be disabled. Standard update retains the preference/history; clean installs start quietly. Completion requires final installed-file and restoration proof, so an incomplete update cannot report success.
+
+Filtered discovery rows now display eligible first-page results without waiting to fill every shelf to 20 cards. Both anime and hard row exclusions must leave a real title before early publication. Continue along a row for more titles. The final warm Fire Stick Comedy/Crime view measured 3.238 to 2.383 seconds (26.4 percent faster); Home timing variation is not attributed to this repair. Artwork, watched/progress metadata and Next/Previous focus were checked on the physical Fire Stick.
+
+Both editions passed clean and Standard artifact tests, plus isolated actual Kodi installation-core tests with network/personal profile access denied. General Android identity is simulated in the native Mac core test; physical Fire Stick browsing was tested separately. Available/completed notices, preference persistence and Installer handoff passed natively on Mac. 805 controller, 652 Installer/package, 36 playback/lifecycle, 16 probe and 7 YouTube-context checks passed. Apple TV was intentionally untouched; prior platform-specific playback and YouTube acceptance remain separately dated. This is not new certification for every hardware model or sustained 4K playback.
+
+Existing playback language/forced subtitles, Trakt, source selection, artwork, four-rating default, automatic YouTube quality and platform workarounds remain retained. Standard update preserves saved privacy/history choices. Full-video history and preview exclusion retain their existing behavior.
+
+Stop playback before updating. Wait for verification, extraction and restoration to finish, then follow the restart prompt. Confirm Build 1.1.20, accounts and playback choices afterward. Keep recovery data if preflight refuses unfamiliar source. Prior published releases remain available.
