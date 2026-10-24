@@ -31,3 +31,23 @@ def check_dependencies(rpc,wait_for_abort=None,timeout=0,clock=None):
   remaining=deadline-clock()
   if not unavailable or wait_for_abort is None or remaining<=0:return unavailable
   if wait_for_abort(min(.25,remaining)):return unavailable
+
+
+def read_controller_config(path):
+ """Read once; a missing/unreadable layout must never become writable defaults."""
+ import json
+ value=json.loads(Path(path).read_text(encoding='utf-8'))
+ if not isinstance(value,dict):raise ValueError('Controller preferences must be an object')
+ return value
+
+def write_controller_config(path,value):
+ """Close a unique owned temp before replacement, including overlapping callers."""
+ import json,os,tempfile
+ path=Path(path);raw=json.dumps(value,indent=2)
+ fd,name=tempfile.mkstemp(prefix=path.name+'.',suffix='.pending',dir=str(path.parent))
+ temp=Path(name)
+ try:
+  with os.fdopen(fd,'w',encoding='utf-8') as stream:stream.write(raw)
+  os.replace(temp,path)
+ finally:
+  if temp.exists():temp.unlink()

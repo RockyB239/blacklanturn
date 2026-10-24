@@ -7,7 +7,7 @@ spec=importlib.util.spec_from_file_location('umbrella_build',ROOT/'tools/build_r
 P='addons/plugin.video.umbrella/';PROGRESS=ROOT/'compatibility/umbrella-progress'
 class UmbrellaBuildContract(unittest.TestCase):
  def test_installer18_source_metadata_is_local_only(self):
-  self.assertEqual(E.parse(SOURCE/'addon.xml').getroot().get('version'),'1.0.22')
+  self.assertEqual(E.parse(SOURCE/'addon.xml').getroot().get('version'),'1.0.23')
  def test_official_full_tree_overlay_preserves_nonprovider_data(self):
   apply=getattr(BUILD,'apply_umbrella',None);self.assertTrue(callable(apply),'Missing pinned official92 overlay')
   data={P+'obsolete.py':b'obsolete90','userdata/addon_data/plugin.video.umbrella/settings.xml':b'private preferences','addons/other/code.py':b'untouched'}
@@ -36,8 +36,8 @@ class UmbrellaBuildContract(unittest.TestCase):
   self.assertTrue(baselines.is_dir(),'Pinned clean build baselines unavailable')
   with tempfile.TemporaryDirectory()as folder:
    BUILD.build(baselines,Path(folder))
-   self.assertTrue((Path(folder)/'plugin.program.blacklanturninstaller-1.0.22.zip').is_file())
-   with zipfile.ZipFile(Path(folder)/'plugin.program.blacklanturninstaller-1.0.22.zip') as installer:self.assertEqual(installer.read('plugin.program.blacklanturninstaller/resources/libs/discovery_defaults.py'),(SOURCE/'resources/libs/discovery_defaults.py').read_bytes())
+   self.assertTrue((Path(folder)/'plugin.program.blacklanturninstaller-1.0.23.zip').is_file())
+   with zipfile.ZipFile(Path(folder)/'plugin.program.blacklanturninstaller-1.0.23.zip') as installer:self.assertEqual(installer.read('plugin.program.blacklanturninstaller/resources/libs/discovery_defaults.py'),(SOURCE/'resources/libs/discovery_defaults.py').read_bytes())
    replay=Path(folder)/'replay'
    result=subprocess.run([sys.executable,'-I','-B',str(ROOT/'tools/build_release.py'),'--baselines',str(baselines),'--output',str(replay)],capture_output=True,text=True)
    self.assertEqual(result.returncode,0,result.stderr)
@@ -46,15 +46,15 @@ class UmbrellaBuildContract(unittest.TestCase):
    self.assertEqual(first,second,'Build outputs are not reproducible')
    with zipfile.ZipFile(PROGRESS/'upstream-6.7.92.zip')as z:upstream={n.split('/',1)[1]:z.read(n)for n in z.namelist()if not n.endswith('/')}
    for edition in ('Apple-TV-Mac','General'):
-    with self.subTest(edition=edition),zipfile.ZipFile(Path(folder)/('BlackLanturn-'+edition+'-Kodi21-1.1.17.zip'))as z:
+    with self.subTest(edition=edition),zipfile.ZipFile(Path(folder)/('BlackLanturn-'+edition+'-Kodi21-1.1.18.zip'))as z:
      target={n[len(P):]:z.read(n)for n in z.namelist()if n.startswith(P)}
      self.assertEqual(set(target),set(upstream))
      self.assertEqual({n for n in upstream if target[n]!=upstream[n]}, {'resources/lib/modules/'+n for n in ('player.py','sources.py','source_preferences.py')})
      self.assertEqual(hashlib.sha256(target['resources/lib/modules/player.py']).hexdigest(),'5766e60fe02858d5cd5b4d38c03cf8f8f3de9d5e8dbb1b3d85a468f922f2be0b')
      marker=json.loads(z.read('userdata/blacklanturn-build.json'))
-     self.assertEqual(marker['preferences_policy'],'playback-trakt-youtube-umbrella-network-autoplay-1');self.assertEqual(marker['installer_min_version'],'1.0.22')
-     self.assertEqual(marker['build_version'],'1.1.17');self.assertEqual(marker['umbrella_patch'],'event-progress-3');self.assertEqual(marker['controller_version'],'0.1.86')
-     controller=json.loads((ROOT/'controller-source/manifest86.json').read_text())['files']
+     self.assertEqual(marker['preferences_policy'],'playback-trakt-youtube-umbrella-network-autoplay-1');self.assertEqual(marker['installer_min_version'],'1.0.23')
+     self.assertEqual(marker['build_version'],'1.1.18');self.assertEqual(marker['umbrella_patch'],'event-progress-3');self.assertEqual(marker['controller_version'],'0.1.87')
+     controller=json.loads((ROOT/'controller-source/manifest87.json').read_text())['files']
      actual={n[len('addons/script.blacklanturn.preview/'):]:hashlib.sha256(z.read(n)).hexdigest()for n in z.namelist()if n.startswith('addons/script.blacklanturn.preview/')}
      self.assertEqual(actual,controller)
      defaults=json.loads((SOURCE/'resources/playback-defaults.json').read_text())

@@ -81,6 +81,12 @@ def prepare(path, kodi, home=None):
                         if discovery_patch is not None:
                             if discovery_patch!='discovery-first-page-1' or preference_policy!='playback-trakt-youtube-umbrella-network-autoplay-1':raise CompatibilityError('Update BlackLanturn Installer before installing this build.')
                             minimum='1.0.22'
+                        youtube_patch = policy.get('youtube_refresh_patch')
+                        managed_youtube = youtube_patch is not None
+                        if managed_youtube:
+                            if youtube_patch != 'youtube-freshness-1' or discovery_patch != 'discovery-first-page-1':
+                                raise CompatibilityError('Update BlackLanturn Installer before installing this build.')
+                            minimum = '1.0.23'
                         if minimum is None or policy.get('installer_min_version') != minimum:
                             raise CompatibilityError('Update BlackLanturn Installer before installing this build.')
                         managed_network = preference_policy in ('playback-trakt-youtube-umbrella-network-1', 'playback-trakt-youtube-umbrella-network-autoplay-1')
@@ -94,10 +100,10 @@ def prepare(path, kodi, home=None):
                             raise CompatibilityError('Update BlackLanturn Installer before installing this build.')
                     try:
                         if managed_umbrella:
-                            managed_addons.verify_archive(archive, umbrella=True, network=managed_network)
+                            managed_addons.verify_archive(archive, umbrella=True, network=managed_network, youtube=managed_youtube)
                             if home is None:
                                 raise CompatibilityError('Umbrella source verification needs the current profile. Your current build has been kept.')
-                            managed_addons.verify_installed(home, network=managed_network)
+                            managed_addons.verify_installed(home, network=managed_network, youtube=managed_youtube)
                         else:
                             managed_addons.verify_archive(archive)
                     except managed_addons.ProtectionError as exc:
@@ -105,6 +111,13 @@ def prepare(path, kodi, home=None):
                     if policy['schema'] == 3:
                         try:
                             build_preferences.verify_archive(archive, policy=preference_policy)
+                            if managed_youtube:
+                                settings = E.fromstring(archive.read('userdata/addon_data/plugin.video.youtube/settings.xml'))
+                                values = {n.get('id'): n for n in settings}
+                                for field in ('kodion.history.remote', 'kodion.history.local'):
+                                    node = values.get(field)
+                                    if node is None or node.text != 'true' or node.get('default') == 'true':
+                                        raise CompatibilityError('YouTube full-video history defaults are incomplete. Your current build has been kept.')
                             if policy.get('discovery_patch'):
                                 from resources.libs import discovery_defaults
                                 try:discovery_defaults.verify_archive(archive)

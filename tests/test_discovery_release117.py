@@ -13,17 +13,17 @@ class DiscoveryRelease(unittest.TestCase):
   self.assertEqual(cfg['PreviewMode'],'manual');self.assertEqual(cfg['custom'],42);self.assertEqual(data['userdata/keep'],b'keep')
  def inputs(self):return json.loads((ROOT/'controller-source/discovery-native-verification.json').read_text()),json.loads((ROOT/'controller-source/manifest86.json').read_text())
  def test_release_receipt_binds_exact_source_and_mac_only_native_checks(self):
-  fn=getattr(V,'verify_discovery_acceptance',None);self.assertTrue(callable(fn),'Missing discovery release gate');fn(*self.inputs())
+  fn=getattr(V,'verify_discovery_acceptance',None);self.assertTrue(callable(fn),'Missing discovery release gate');fn(*self.inputs(),historical=True)
  def test_changed_component_or_missing_acceptance_cannot_pass(self):
   fn=getattr(V,'verify_discovery_acceptance',None);self.assertTrue(callable(fn),'Missing discovery release gate');receipt,manifest=self.inputs()
   for field in ('next_back_stable_order','vertical_focus','watch_refresh_stable_order_focus','restored_provider_zero_vs_fresh_start','settings_authorizations_preserved'):
    bad=copy.deepcopy(receipt);bad['acceptance'][field]=False
-   with self.assertRaises(AssertionError):fn(bad,manifest)
+   with self.assertRaises(AssertionError):fn(bad,manifest,historical=True)
   bad=copy.deepcopy(manifest);bad['files']['discovery_order.py']='0'*64
-  with self.assertRaises(AssertionError):fn(receipt,bad)
+  with self.assertRaises(AssertionError):fn(receipt,bad,historical=True)
  def test_remote_platform_claims_are_rejected(self):
   fn=getattr(V,'verify_discovery_acceptance',None);self.assertTrue(callable(fn),'Missing discovery release gate');r,m=self.inputs();r['devices']=['mac','fire']
-  with self.assertRaises(AssertionError):fn(r,m)
+  with self.assertRaises(AssertionError):fn(r,m,historical=True)
 if __name__=='__main__':unittest.main()
 
 class RollingDiscoveryWindows(unittest.TestCase):

@@ -19,6 +19,7 @@ from urllib.parse import parse_qs, urlsplit
 SOURCE = Path(__file__).parents[1] / 'addon' / 'live_review.py'
 sys.path.insert(0, str(SOURCE.parent))
 from live_core import PageHistory, valid_source, PreviewAttempts, title_details_params, merge_title_details, person_identity, show_identity
+from live_runtime import read_controller_config
 from row_feedback import RowResultCache, provider_page_label, row_message
 from filtered_pages import provider_path
 from preview_identity import TitleVerifier
@@ -46,6 +47,7 @@ class ExperimentLifecycle(unittest.TestCase):
         namespace = {
             'threading': SimpleNamespace(Thread=QueuedThread, RLock=threading.RLock,
                                          Lock=threading.Lock),
+            'read_controller_config': read_controller_config,
             'time': time, 'copy': copy,'youtube_preview_path':preview_path,'youtube_video_id':video_id,'automatic_preview':automatic_preview,'is_youtube':is_youtube,'youtube_resume_allowed':resume_allowed,
             'json': __import__('json'),
             'xbmc': SimpleNamespace(getSkinDir=lambda: 'skin.blacklanturn.preview',

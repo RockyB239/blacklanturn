@@ -11,7 +11,7 @@ from resources.libs import settings_store as store
 from resources.libs.discovery_defaults import upgrade as discovery_upgrade
 DEFAULTS=json.loads((Path(__file__).parents[1]/'playback-defaults.json').read_text(encoding='utf-8'))
 YOUTUBE='addon_data/plugin.video.youtube/settings.xml'
-YOUTUBE_CHOICES={'kodion.video.quality','kodion.video.quality.ask','kodion.subtitle.languages.num','kodion.subtitle.download','kodion.audio_only',
+YOUTUBE_CHOICES={'kodion.history.remote','kodion.history.local','kodion.video.quality','kodion.video.quality.ask','kodion.subtitle.languages.num','kodion.subtitle.download','kodion.audio_only',
  'kodion.live_stream.selection.1','kodion.live_stream.selection.2','kodion.support.alternative_player',
  'kodion.alternative_player.web_urls','kodion.alternative_player.mpd','kodion.default_player.web_urls','kodion.default_player.fallback_video'}
 CAPTURE_CHOICES={YOUTUBE:YOUTUBE_CHOICES,

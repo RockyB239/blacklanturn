@@ -38,10 +38,10 @@ class YouTubePreferences(unittest.TestCase):
   self.put(YT,{'kodion.mpd.stream.features':''});ids=IDS+['plugin.video.youtube']
   a=self.m.prepare(self.home,self.accounts(),ids,False);self.put(YT,CLEAN);self.m.restore(self.home,a,ids)
   self.assertEqual(self.get(YT)['kodion.mpd.stream.features'],'')
- def test_playback_capture_does_not_include_actions_privacy_maintenance_or_server_settings(self):
+ def test_capture_retains_history_privacy_but_excludes_actions_maintenance_servers(self):
   excluded={'kodion.video.quality.isa.configure':'RunScript','kodion.history.remote':'true','kodion.maintain.clear.playback_history':'true','kodion.http.listen':'0.0.0.0','youtube.api.key':'private-key'}
   self.put(YT,dict(excluded,**{'kodion.live_stream.selection.1':'3'}),default=True);ids=IDS+['plugin.video.youtube'];a=self.m.prepare(self.home,self.accounts(),ids,False)
-  self.assertEqual(a['build_preferences']['values'].get(YT),{'kodion.live_stream.selection.1':'3'})
+  self.assertEqual(a['build_preferences']['values'].get(YT),{'kodion.history.remote':'true','kodion.live_stream.selection.1':'3'})
 
 class YouTubePolicy(unittest.TestCase):
  setUp=flow.PreferenceInstallFlow.setUp

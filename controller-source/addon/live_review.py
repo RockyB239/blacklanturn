@@ -5,6 +5,7 @@ from pathlib import Path
 from urllib.parse import urlencode,urlsplit,parse_qs
 import xbmc,xbmcgui,xbmcvfs,xbmcaddon
 import autoplay_session
+from live_runtime import read_controller_config
 from live_core import directory_items,rating_line,PageHistory,valid_source,person_identity,mdblist_line,rating_badges,select_rating_badges,update_rating_sources,preview_candidates,PreviewAttempts,watch_state,clear_stale_preview,episode_identity,show_identity,title_details_params,merge_title_details,episode_heading,is_browse_folder
 from probe_core import HoverScroll
 from live_core import card_artwork,title_presentation
@@ -176,15 +177,20 @@ class LiveReview(YouTubeBrowser,xbmcgui.WindowXML):
         self.setProperty('loading','true');self.setProperty('loadingStatus','Starting BlackLanturn…')
         self.setProperty('input','remote');self.setProperty('previewMode','manual');self.setProperty('genreLabel','Genres: All');self.setProperty('page','home');self.setProperty('notice','Loading live add-on lists…')
         STORE.mkdir(parents=True,exist_ok=True)
-        try:self.config=json.loads((STORE/'rows.json').read_text())
-        except (FileNotFoundError,ValueError):
+        self.config_loaded=True
+        try:self.config=read_controller_config(STORE/'rows.json')
+        except (OSError,ValueError) as exc:
+            self.config_loaded=False
+            event('config_load_failed',error_type=type(exc).__name__)
             self.config={'Home':[{'label':'Movies this week','path':tmdb('trending_week')},{'label':'Shows this week','path':tmdb('trending_week','tv')}],
                          'Movies':[{'label':'Trending movies','path':tmdb('trending_week')},{'label':'Popular movies','path':tmdb('popular')}],
                          'Shows':[{'label':'Trending shows','path':tmdb('trending_week','tv')},{'label':'Popular shows','path':tmdb('popular','tv')}],
                          'Categories':[],'Saved':[]}
         self.config.setdefault('Genres',[])
         migrated=migrate_navigation(migrate_pages(self.config))
-        if migrated!=self.config:self.config=migrated;self.save()
+        if migrated!=self.config:
+            self.config=migrated
+            if self.config_loaded:self.save()
         self.snapshot_cache=None;self.configure_row_snapshots()
         # Explicit private A/B trial only; serialized provider calls are not cancellable.
         self.prefetch_trial=False;self.prefetch_attempted=set();self.prefetch_busy=False
@@ -209,7 +215,12 @@ class LiveReview(YouTubeBrowser,xbmcgui.WindowXML):
         self.settings(lifetime)
         if current():self.set_nav(False,pending_focus=True);self.setFocusId(900 if self.rows[0] else 101)
     def save(self,invalidate=True):
-        temp=STORE/'rows.tmp';temp.write_text(json.dumps(self.config,indent=2));temp.replace(STORE/'rows.json')
+        if not getattr(self,'config_loaded',True):
+            self.setProperty('notice','Saved layout unavailable. Restart Kodi before making changes.')
+            event('config_save_blocked',reason='load_failed')
+            return False
+        from live_runtime import write_controller_config
+        write_controller_config(STORE/'rows.json',self.config)
         if invalidate:
             self.invalidate_row_results()
             if getattr(self,'alive',False):self.restart_pending_rows()

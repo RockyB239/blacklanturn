@@ -20,6 +20,7 @@ HELPER = 'plugin.video.themoviedb.helper'
 PREFIX = 'addons/' + HELPER + '/'
 UMBRELLA = 'plugin.video.umbrella'
 NETWORK = 'script.module.jurialmunkey'
+YOUTUBE = 'plugin.video.youtube'
 USER_DISABLED_AUTO_UPDATE = 1  # Kodi 21 AddonInfo.h AddonUpdateRule
 
 class ProtectionError(Exception):
@@ -28,7 +29,7 @@ class ProtectionError(Exception):
 def _umbrella_manifest():
     return json.loads((Path(__file__).parents[1] / 'managed-umbrella.json').read_text())
 
-def verify_archive(archive, umbrella=False, network=False):
+def verify_archive(archive, umbrella=False, network=False, youtube=False):
     """Verify Helper and selected managed dependencies against reviewed manifests."""
     try:
         _archive_paths.validate(archive)
@@ -53,6 +54,12 @@ def verify_archive(archive, umbrella=False, network=False):
                   for n in archive.namelist() if n.startswith(prefix) and not n.endswith('/')}
         if actual != expected:
             raise ProtectionError('The shared network package has not passed BlackLanturn compatibility checks. Update BlackLanturn Installer and retry. Your current build has been kept.')
+    if youtube:
+        prefix = 'addons/' + YOUTUBE + '/'
+        actual = {n[len(prefix):]: hashlib.sha256(archive.read(n)).hexdigest()
+                  for n in archive.namelist() if n.startswith(prefix) and not n.endswith('/')}
+        if not any(actual == variant['files'] for variant in _youtube_manifest()['variants'].values()):
+            raise ProtectionError('The YouTube package has not passed BlackLanturn compatibility checks. Update BlackLanturn Installer and retry. Your current build has been kept.')
     return HELPER
 
 def _source_files(addon, message):
@@ -75,12 +82,14 @@ def _source_files(addon, message):
         actual[relative.as_posix()] = hashlib.sha256(path.read_bytes()).hexdigest()
     return actual
 
-def verify_installed(home, network=False):
+def verify_installed(home, network=False, youtube=False):
     """Reject unknown installed Umbrella/shared code before cleanup or native setup.
 
     Only reviewed complete trees and explicit player variants are accepted.
     Runtime bytecode is excluded; foreign files, links and oversized trees fail.
     """
+    if youtube:
+        _verify_installed_youtube(home)
     if network:
         _verify_installed_network(home)
     addon = Path(home) / 'addons' / UMBRELLA
@@ -106,6 +115,23 @@ def verify_installed(home, network=False):
         raise ProtectionError(message) from exc
     return UMBRELLA
 
+def _youtube_manifest():
+    return json.loads((Path(__file__).parents[1] / 'managed-youtube.json').read_text())
+
+def _tree_digest(files):
+    return hashlib.sha256(json.dumps(files, sort_keys=True, separators=(',', ':')).encode()).hexdigest()
+
+def _verify_installed_youtube(home):
+    addon = Path(home) / 'addons' / YOUTUBE
+    if not addon.exists() and not addon.is_symlink():
+        return
+    message = 'Installed YouTube has unreviewed source or version. Your current build has been kept; update compatibility support before installing.'
+    try:
+        if _tree_digest(_source_files(addon, message)) not in _youtube_manifest()['installed_tree_sha256']:
+            raise ProtectionError(message)
+    except (OSError, ValueError, KeyError) as exc:
+        raise ProtectionError(message) from exc
+
 def _verify_installed_network(home):
     addon = Path(home) / 'addons' / NETWORK
     if not addon.exists() and not addon.is_symlink():
@@ -122,12 +148,14 @@ def _verify_installed_network(home):
     except (OSError, ValueError, KeyError) as exc:
         raise ProtectionError(message) from exc
 
-def verify_kept(home, addon_ids, network=False):
+def verify_kept(home, addon_ids, network=False, youtube=False):
     """Whitelist may retain managed source only when it already matches target."""
     managed = [(HELPER, 'TMDb Helper', 'managed-helper.json'),
                (UMBRELLA, 'Umbrella', 'managed-umbrella.json')]
     if network:
         managed.append((NETWORK, 'Shared network dependency', 'managed-network.json'))
+    if youtube:
+        managed.append((YOUTUBE, 'YouTube', 'managed-youtube.json'))
     for addon, label, filename in managed:
         if addon not in addon_ids:
             continue
@@ -135,13 +163,14 @@ def verify_kept(home, addon_ids, network=False):
                    "In Save Data, open Edit My Whitelist and remove it, or turn off Keep My 'WhiteList', then retry. "
                    "Selected accounts and supported playback preferences can still be preserved. Your current build has been kept.")
         try:
-            expected = json.loads((Path(__file__).parents[1] / filename).read_text())['files']
-            if _source_files(Path(home) / 'addons' / addon, message) != expected:
+            manifest = json.loads((Path(__file__).parents[1] / filename).read_text())
+            candidates = ([v['files'] for v in manifest['variants'].values()] if addon == YOUTUBE else [manifest['files']])
+            if _source_files(Path(home) / 'addons' / addon, message) not in candidates:
                 raise ProtectionError(message)
         except (OSError, ValueError, KeyError) as exc:
             raise ProtectionError(message) from exc
 
-def protect(db_path, umbrella=False, network=False):
+def protect(db_path, umbrella=False, network=False, youtube=False):
     """Use the existing registry, retaining all unrelated and existing rules.
 
 Caller refreshes Kodi's in-memory rules with UpdateLocalAddons before cleanup
@@ -163,6 +192,8 @@ and again after extraction. Never create a replacement addon registry.
                 managed.append(UMBRELLA)
             if network:
                 managed.append(NETWORK)
+            if youtube:
+                managed.append(YOUTUBE)
             for addon in managed:
                 connection.execute('INSERT INTO update_rules (addonID,updateRule) SELECT ?,? WHERE NOT EXISTS (SELECT 1 FROM update_rules WHERE addonID=? AND updateRule=?)',
                                    (addon, USER_DISABLED_AUTO_UPDATE, addon, USER_DISABLED_AUTO_UPDATE))
