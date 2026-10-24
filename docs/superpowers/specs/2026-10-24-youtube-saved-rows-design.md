@@ -1,0 +1,13 @@
+# YouTube saved rows
+
+User approved investigating YouTube delay and implementing account-specific saved-row reuse on Mac and Fire Stick, with before/after tests, current recommendations/watch state and preserved accounts/settings. Apple TV and public builds are out of scope. Existing linked worktree is clean at e7bc414.
+
+Approaches: aggressive preloading increases competing work and was rejected in discussion; extending provider lifetimes risks stale recommendations; selected approach retains bounded display rows locally and refreshes them using the existing guarded progressive refresh. This records the user's approved approach; no repeat approval is required.
+
+Native baseline on October24: first/repeated Fire first-usable YouTube 3.924/2.917/4.948 seconds; main directory fetch2.607–4.244s and account runtime creation2.289s. Mac first/repeated .655/.276/.299s. Full traces are private under work/youtube-saved-rows-2026-10-24.
+
+Builder choices: one private atomic JSON snapshot, at most2MiB/18rows/60items per row. Identity includes selected account refresh-grant digest plus add-on version and display/history preferences; no credentials in payload. Five-minute freshness, at most24-hour stale display during background refresh; no timestamp renewal on reuse. Unreadable/different account or incompatible settings fails closed. Store display metadata and continuation context only; no watched/resume values. Read current local YouTube history in a bounded read-only transaction before displaying a reused row. Unknown history schema/settings causes normal provider fallback, never stale watch-state display.
+
+Reuse primary feeds and actual category shelves. Preserve native focus/artwork/continuations. Existing progressive refresh updates rows without resetting focus; only stale saved content triggers automatic refresh, explicit Refresh remains immediate. Fresh provider output replaces snapshots; empty failures do not overwrite last good rows. Read/save failures are nonfatal. Account/config change retires late work. No playback/network/VPN/account changes, no eager preload and no added workers outside YouTube.
+
+Test missing/corrupt/expired/oversize JSON, account switch, cache age, auth exclusion, local watched/resume edits/deletions, stale-worker retirement, refresh and continuation/focus. Test natural process reopen on both devices, paired timing, exact-source packaging and private preserved-state comparison. Native tests must not write real watch history or fake a completed video. Automatic history behavior is tested with isolated fixtures; actual device history remains unchanged.

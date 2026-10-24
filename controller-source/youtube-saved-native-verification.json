@@ -1,0 +1,43 @@
+{
+  "date": "2026-10-24",
+  "candidate_controller": "0.1.91",
+  "public_release": false,
+  "apple_tv_accessed": false,
+  "complete_controller_tests_passed": 832,
+  "new_regression_tests": 27,
+  "mac": {
+    "first_row_after_restart_before_seconds": 0.6551582909887657,
+    "first_row_after_restart_saved_seconds": 0.11948074994143099,
+    "repeated_before_median_seconds": 0.2875223960727453,
+    "repeated_saved_median_seconds": 0.105505708954297,
+    "fresh_feed_calls_three_visits": 0,
+    "saved_rows": 16,
+    "native_watch_cards_compared": 50,
+    "native_watch_matches": true,
+    "refresh_focus_retained": true,
+    "continuation_50_to_100": true,
+    "navigation_after_continuation": true,
+    "protected_state_preserved": true
+  },
+  "fire": {
+    "first_row_after_restart_before_seconds": 3.9236482310079737,
+    "first_row_after_restart_saved_seconds": 0.4943529999873135,
+    "repeated_before_median_seconds": 3.9324274999962654,
+    "repeated_saved_median_seconds": 0.5054072309940238,
+    "fresh_feed_calls_three_visits": 0,
+    "saved_rows": 16,
+    "native_watch_cards_compared": 50,
+    "native_watch_matches": true,
+    "refresh_focus_retained": true,
+    "continuation_50_to_100": true,
+    "navigation_after_continuation": true,
+    "protected_state_preserved": true
+  },
+  "limits": [
+    "Small native timing samples; actual GUI dispatch gaps retained in private raw evidence",
+    "Missing or expired snapshots still require the native remote provider and may take several seconds",
+    "No real personal playback/history mutation used for tests; positive history transitions tested with isolated fixtures",
+    "Full build receipts remain1.1.19, Installer1.0.27; no full Standard update or public publication in this task"
+  ],
+  "evidence_directory": "work/youtube-saved-rows-2026-10-24"
+}

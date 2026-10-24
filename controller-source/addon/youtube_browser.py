@@ -4,6 +4,7 @@ from contextlib import nullcontext
 from youtube_core import ConnectionState,TABS,tab_rows,account_options,connected_account
 from youtube_provider import load_home_rows
 from youtube_rows import YouTubeRows
+from youtube_saved_runtime import SavedYouTube
 
 def read_account_store():
     import xbmcvfs
@@ -17,7 +18,7 @@ def read_account_store():
     if not raw:raise ValueError('YouTube account store temporarily unreadable')
     return json.loads(raw.decode('utf-8'))
 
-class YouTubeBrowser(YouTubeRows):
+class YouTubeBrowser(YouTubeRows,SavedYouTube):
     def refresh_youtube_connection(self,force=False):
         import xbmc
         lifetime=getattr(self,'window_lifetime',None)
@@ -35,6 +36,9 @@ class YouTubeBrowser(YouTubeRows):
         self.youtube_connection=candidate
         self.setProperty('youtubeConnected','true' if candidate.connected else 'false')
         if not current() or not changed:return
+        saved=getattr(self,'youtube_saved_store',None)
+        if saved is not None and previous and previous.connected:saved.clear()
+        self.youtube_saved_store=None;self.youtube_saved_active=False;self.youtube_saved_due=float('inf')
         self.youtube_home_cache=None;self.youtube_home_request=object()
         self.youtube_pages={};self.youtube_content_revision=object();self.youtube_job=None;self.youtube_update=None;self.youtube_refreshing=False
         self.invalidate_row_results()
@@ -61,7 +65,7 @@ class YouTubeBrowser(YouTubeRows):
         if tab=='library':
             try:options=account_options(read_account_store())
             except (OSError,ValueError,TypeError):pass
-        self.set_rows(tab_rows(tab,self.youtube_query,account=options))
+        self.set_rows(self.saved_youtube_home() if tab=='home' and hasattr(self,'saved_youtube_home') else tab_rows(tab,self.youtube_query,account=options))
         if tab=='home':self.start_youtube_home()
 
     def apply_youtube_home_rows(self):
@@ -89,6 +93,7 @@ class YouTubeBrowser(YouTubeRows):
 
     def start_youtube_home(self):
         self.youtube_home_pending=False
+        if getattr(self,'youtube_saved_active',False):return
         self.apply_youtube_home_rows()
         cache=getattr(self,'youtube_home_cache',None);identity=self.youtube_connection.identity
         if cache and cache['identity']==identity and time.monotonic()-cache['time']<300:return
@@ -103,10 +108,12 @@ class YouTubeBrowser(YouTubeRows):
             try:identity_now=connected_account(read_account_store())[1]
             except (OSError,ValueError,TypeError):return False
             return owns() and identity_now==identity
+        if hasattr(self,'youtube_saved_guard'):current=self.youtube_saved_guard(current)
         def work():
             try:
                 rows=load_home_rows(current) if current() else []
                 if rows and current():
+                    if hasattr(self,'remember_youtube_shelves'):self.remember_youtube_shelves(rows,current)
                     self.youtube_home_cache={'identity':identity,'time':time.monotonic(),'rows':rows}
                     self.apply_youtube_home_rows()
             except Exception as exc:

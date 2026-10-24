@@ -591,6 +591,16 @@ class LiveReview(YouTubeBrowser,xbmcgui.WindowXML):
         return files
     def cached_row_items(self,definition,expected_revision=None,owner_current=lambda:True):
         path=definition.get('path','')
+        if path.startswith('plugin://plugin.video.youtube/') and getattr(self,'section','')=='YouTube':
+            owner_current=self.youtube_saved_guard(owner_current)
+            if definition.get('_youtube_saved'):
+                files=self.resolve_saved_youtube_row(definition,owner_current)
+                if files is not None:return files
+                raise PageCancelled('YouTube saved row account is unavailable or changed')
+            files=row_items(definition,get_list)
+            if not owner_current():raise PageCancelled('YouTube row account or settings changed')
+            if 'local_items' not in definition and hasattr(self,'remember_fetched_youtube_row'):self.remember_fetched_youtube_row(definition,files,owner_current)
+            return files
         if 'local_items' in definition or not path.startswith(TMDB):return row_items(definition,get_list)
         cache=self.result_cache;revision=cache.revision if expected_revision is None else expected_revision
         if revision!=cache.revision:return []

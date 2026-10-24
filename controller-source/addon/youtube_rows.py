@@ -200,6 +200,7 @@ class YouTubeRows:
                     and self.youtube_tab=='home' and self.mode=='home' and not self.discovery_stack and self.youtube_content_revision is revision
                     and all(not path or path in home_paths for path in self.paths) and self.youtube_job is job
                     and getattr(self,'watch_refresh_generation',None)==watch_revision)
+        if hasattr(self,'youtube_saved_guard'):current=self.youtube_saved_guard(current)
         self.youtube_update={'kind':'refresh_stream','current':current,'job':job,'queue':updates}
         self.setProperty('youtubeRefreshLabel','Refreshing…');self.setProperty('notice','Requesting fresh YouTube recommendations…')
         def publish(kind,**data):
@@ -214,15 +215,18 @@ class YouTubeRows:
                     if not row['local_items']:
                         if row['path']==tab_rows('home')[0]['path']:raise RuntimeError('YouTube recommendations unavailable')
                         continue # An empty subscriptions feed must not block Home topics.
+                    if hasattr(self,'remember_fetched_youtube_row'):self.remember_fetched_youtube_row(row,raw,current)
                     resolved.extend(row['local_items']);publish('refresh_row',row=row)
                 shelves=load_home_rows(current,refresh=True,resolved_items=resolved) if current() else []
                 if not shelves:raise RuntimeError('Personalized Home unavailable')
+                if current() and hasattr(self,'remember_youtube_shelves'):self.remember_youtube_shelves(shelves,current)
                 publish('refresh_shelves',shelves=shelves,identity=identity)
                 publish('refresh_done')
             except Exception:publish('refresh_error')
         threading.Thread(target=work,name='BlackLanturnYouTubeRefresh',daemon=True).start()
 
     def apply_youtube_updates(self):
+        if hasattr(self,'maybe_refresh_saved_youtube'):self.maybe_refresh_saved_youtube()
         update=getattr(self,'youtube_update',None)
         if not update:return False
         with self.preview_dispatch_lock:
