@@ -6,7 +6,8 @@
   "installer": "1.0.26",
   "runtime": "21.3",
   "native_devices": [
-    "mac"
+    "mac",
+    "apple"
   ],
   "files": {
     "NOTICES.txt": "f4bd742eeae81e3bec29bbe351189ec0110e9fd9c77ca38d4e6cdada176b87fe",
@@ -518,6 +519,18 @@
       "no_repeated_notice": true,
       "settings_preserved": true,
       "authorizations_preserved": true
+    },
+    "apple": {
+      "quiet_first_run": true,
+      "actual_install_notice": true,
+      "view_changes": true,
+      "back_dismiss": true,
+      "dismiss_persists": true,
+      "preference_persists": true,
+      "manual_installer_route": true,
+      "no_repeated_notice": true,
+      "settings_preserved": true,
+      "authorizations_preserved": true
     }
   },
   "automated": {
@@ -534,13 +547,26 @@
       "preference": "Native switch Off persisted through close/reopen and the branded Installer route, then restored On.",
       "manual_installer_route": "Installer1.0.26 More tools entry selected in native UI opened saved notes with the real version transition.",
       "preservation": "3432 prior XML values and120 JSON files matched the private pre-change backup; three history/add-on/image databases passed read-only quick_check. Refresh grant identity retained; short-lived YouTube access token expiry excluded only from token-rotation comparison. Watched file records145 and resume bookmarks4 also matched the pre-change database."
+    },
+    "apple": {
+      "install": "Normal Kodi Install from ZIP using a temporary two-package LAN source. Exact 324 controller and170 Installer source files matched; no live source-tree replacement.",
+      "quiet_first_run": "Complete161-entry inventory established with sequence0 and empty history before Installer update.",
+      "actual_install_notice": "Real Installer1.0.24 to1.0.26 recorded once. Native Home View changes control observed; timeout acknowledged sequence1 durably.",
+      "interactions": "Native Kodi controls exercised View changes, Back and Dismiss with an owned component replay of the recorded real update. Replay did not alter inventory/history; all3 cases returned expected results.",
+      "preference": "Show update notices Off persisted across close/reopen via actual Installer More tools entry. Restored On before final restart.",
+      "manual_installer_route": "Installer More tools > What\u2019s new & update notices opened real installed-version notes in native dialog.",
+      "preservation": "1388 saved plist settings matched the personal pre-update baseline; no structural differences. All9 prior JSON files retained, no differences, YouTube authorization file byte-identical. Audio default and forced-only subtitles retained. Remote control and Unknown sources saved On at user request and survived normal restart. Three databases passed quick_check; prior watched/resume tables were empty and remained empty.",
+      "restart": "Acknowledged history remained seen1/sequence1 with1 batch and noticesOn. Native Home observed25seconds after restart with no repeated notice; both installed versions enabled and both personal controlsOn.",
+      "cleanup": "Temporary network source removed through native File manager, original source list retained, server stopped, Kodi-home staging/tests removed. Two owned ZIP staging files remain in tvOS Documents because the app sandbox denies access there; no broader container deletion attempted."
     }
   },
   "limits": [
     "Fire Stick excluded at user request.",
-    "Apple TV is not yet updated or accepted: the existing Kodi crashed in CScreenShot::TakeScreenshot during a read-only probe and the native viewer is unavailable. The normal ZIP install is paused at Kodi Unknown sources OFF, pending explicit temporary-enable permission.",
+    "Apple TV native functional controls and exact installed files verified. Pixel-level Apple TV visual acceptance remains unavailable because its existing screen viewer fails; Mac rendering was verified.",
+    "Existing Apple Kodi crashed reading an HTTP ZIP when the temporary source lacked byte-range support. Server range handling was corrected and both native ZIP installations then succeeded. Earlier screenshot crash and local folder browsing failure are separate existing Kodi limitations.",
     "Playback/lifetime deferral and error isolation covered by automated runtime tests, not claimed as new full-video native testing.",
-    "Public Build1.1.19 remains unchanged; this is an unpublished candidate.",
-    "Managed version protection retains reviewed old upstream code; newer upstream rebasing/delivery remains separate work."
+    "Public Build1.1.19 remains unchanged; both Build1.1.20 packages are unpublished candidates. Mac and Apple TV received controller/Installer feature updates, not a full build reinstall.",
+    "Managed version protection retains reviewed old upstream code; newer upstream rebasing/delivery remains separate work.",
+    "Two non-secret owned ZIPs (about12MB) remain in the exact Documents/BlackLanturn-Update-Notes-20261024 folder; tvOS blocks app access and safe CoreDevice file deletion is unavailable."
   ]
 }
