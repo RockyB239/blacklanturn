@@ -1,0 +1,25 @@
+{
+  "xml_equal": 3432,
+  "xml_structure_equal": 11,
+  "xml_structure_differences": [],
+  "json_equal": 121,
+  "xml_differences": {},
+  "json_differences": [],
+  "code_differences": [],
+  "database_integrity": {
+    "MyVideos131.db": "ok",
+    "Addons33.db": "ok",
+    "Textures13.db": "ok"
+  },
+  "equivalent_upstream_default": "screensaver.mode serialized as empty; both nodes explicitly retain default=true",
+  "watched": {
+    "unchanged": true,
+    "before_rows": 145,
+    "after_rows": 145
+  },
+  "resume": {
+    "unchanged": true,
+    "before_rows": 4,
+    "after_rows": 4
+  }
+}

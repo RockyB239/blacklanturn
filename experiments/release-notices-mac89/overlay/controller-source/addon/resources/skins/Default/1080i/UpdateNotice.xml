@@ -1,0 +1,94 @@
+<?xml version='1.0' encoding='utf-8'?>
+<window>
+  <defaultcontrol>101</defaultcontrol>
+  <zorder>20</zorder>
+  <controls>
+    <control type="image">
+      <left>1190</left>
+      <top>230</top>
+      <width>650</width>
+      <height>300</height>
+      <texture>update-notice-panel.png</texture>
+    </control>
+    <control type="image">
+      <left>1220</left>
+      <top>254</top>
+      <width>52</width>
+      <height>54</height>
+      <texture>watched-mark.png</texture><aspectratio>keep</aspectratio></control>
+    <control type="label">
+      <left>1290</left>
+      <top>254</top>
+      <width>520</width>
+      <height>54</height>
+      <font>font30_title</font>
+      <label>$INFO[Window.Property(heading)]</label>
+      <textcolor>FFF2F5F7</textcolor>
+      <aligny>center</aligny>
+    </control>
+    <control type="textbox">
+      <left>1290</left>
+      <top>320</top>
+      <width>510</width>
+      <height>105</height>
+      <font>font27</font>
+      <label>$INFO[Window.Property(summary)]</label>
+      <textcolor>FFE0E7EB</textcolor>
+    </control>
+    <control type="button" id="101">
+      <left>1220</left>
+      <top>444</top>
+      <width>240</width>
+      <height>64</height>
+      <font>font25_title</font>
+      <label>View changes</label>
+      <textcolor>FFF2F5F7</textcolor>
+      <focusedcolor>FFFFFFFF</focusedcolor>
+      <texturefocus>focus-teal.png</texturefocus>
+      <texturenofocus>button-dark.png</texturenofocus>
+      <align>center</align>
+      <aligny>center</aligny>
+      <onleft>102</onleft>
+      <onright>103</onright>
+      <onup>101</onup>
+      <ondown>101</ondown>
+    </control>
+    <control type="button" id="103">
+      <left>1475</left>
+      <top>444</top>
+      <width>145</width>
+      <height>64</height>
+      <font>font25_title</font>
+      <label>Update</label>
+      <textcolor>FFF2F5F7</textcolor>
+      <focusedcolor>FFFFFFFF</focusedcolor>
+      <texturefocus>focus-teal.png</texturefocus>
+      <texturenofocus>button-dark.png</texturenofocus>
+      <align>center</align>
+      <aligny>center</aligny>
+      <onleft>101</onleft>
+      <onright>102</onright>
+      <onup>103</onup>
+      <ondown>101</ondown>
+      <visible>String.IsEqual(Window.Property(available),true)</visible>
+    </control>
+    <control type="button" id="102">
+      <left>1635</left>
+      <top>444</top>
+      <width>175</width>
+      <height>64</height>
+      <font>font25_title</font>
+      <label>$INFO[Window.Property(dismissLabel)]</label>
+      <textcolor>FFF2F5F7</textcolor>
+      <focusedcolor>FFFFFFFF</focusedcolor>
+      <texturefocus>focus-teal.png</texturefocus>
+      <texturenofocus>button-dark.png</texturenofocus>
+      <align>center</align>
+      <aligny>center</aligny>
+      <onleft>103</onleft>
+      <onright>101</onright>
+      <onup>102</onup>
+      <ondown>101</ondown>
+    </control>
+  </controls>
+</window>

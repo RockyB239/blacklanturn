@@ -1,0 +1,86 @@
+{
+  "schema": 1,
+  "status": "tested Mac-only unpublished candidate",
+  "controller": "0.1.89",
+  "real_build_marker": "1.1.19",
+  "installer": "1.0.26",
+  "base_commit": "6d24b6f9fe166151c7e5ffb9ec42e557f5e5e121",
+  "controller_tests": {
+    "passed": 798,
+    "seconds": 26.423
+  },
+  "canonical_package_regressions": {
+    "passed": 645,
+    "seconds": 123.836,
+    "canonical_controller_source": "0.1.88 unchanged"
+  },
+  "native_mac": {
+    "available_notice": true,
+    "view_changes": true,
+    "later_button": true,
+    "update_opens_existing_installer_catalog": true,
+    "no_build_download_or_install": true,
+    "partial_install_no_completion": true,
+    "matching_isolated_payload_completed": true,
+    "completed_notice": true,
+    "dismiss_button": true,
+    "persistent_no_repeat": true,
+    "preference_persists_and_restored": true,
+    "long_notes_scroll": true
+  },
+  "test_release": {
+    "id": "mac-local-notices-test-1",
+    "version": "1.1.20",
+    "revision": 1,
+    "isolated": true,
+    "published": false,
+    "real_build_marker_modified": false
+  },
+  "performance": {
+    "cached_sample_median_ms": 0.3690834855660796,
+    "cached_sample_max_ms": 1.961250090971589,
+    "samples": 40,
+    "measurement": "Kodi Python runtime cached background sample; not a full Home load benchmark"
+  },
+  "preservation": {
+    "xml_equal": 3432,
+    "xml_structure_equal": 11,
+    "xml_structure_differences": [],
+    "json_equal": 121,
+    "xml_differences": {},
+    "json_differences": [],
+    "code_differences": [],
+    "database_integrity": {
+      "MyVideos131.db": "ok",
+      "Addons33.db": "ok",
+      "Textures13.db": "ok"
+    },
+    "equivalent_upstream_default": "screensaver.mode serialized as empty; both nodes explicitly retain default=true",
+    "watched": {
+      "unchanged": true,
+      "before_rows": 145,
+      "after_rows": 145
+    },
+    "resume": {
+      "unchanged": true,
+      "before_rows": 4,
+      "after_rows": 4
+    }
+  },
+  "cleanup": {
+    "owned_favourites_removed": true,
+    "duplicate_download_zip_removed": true,
+    "single_test_youtube_manifest_counter_restored": true,
+    "private_backups_retained": true
+  },
+  "public_builds_changed": false,
+  "other_devices_accessed": false,
+  "third_party_upgrades_performed": false,
+  "review": {
+    "findings_fixed": [
+      "Slow-drip response could exceed bounded read deadline; read1/deadline test now passes.",
+      "Valid long section could clip; focused autoscroll test and native capture now pass."
+    ]
+  },
+  "artifact_sha256": "61ff56ab3630d8a7e21a8f312cd38505cf93548c59245de914e652822ddaaa00"
+}
