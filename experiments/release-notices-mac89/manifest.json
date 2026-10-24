@@ -10,7 +10,7 @@
     "controller-source/addon/update_notes.py": "154acecd67bf4e9822ac51aeb94ce1acfc84db2294eb2cb8def9783e99a1b43e",
     "controller-source/addon/resources/skins/Default/1080i/UpdateNotes.xml": "388f7431108a25ec785ad5b57ed05d074dc217601c4227bd6acdb3f8861b538c",
     "controller-source/addon/resources/skins/Default/1080i/UpdateNotice.xml": "76f785217cf72b885d0b289ba9c077195eca4050e1430cdbc9434cf04d4cd527",
-    "controller-source/tests/test_update_notes_runtime.py": "60ad6ea593434c5dde9a601daf907c02fb5fa5129c4c6f6015bd9fb91804a733",
+    "controller-source/tests/test_update_notes_runtime.py": "733ee720741d664635b8e77215f34dfcbcb045e83ef1bfa7085c5f85355fd701",
     "controller-source/tests/test_release_updates.py": "991f2a4590b87f52d6c4d81de99449081043b0c43c28337375b6a88ce5370d10",
     "controller-source/tests/test_release_layout.py": "2f78f8c2bbad7af6555023b5f8d6f9e17c77a1c6fe253952ec1958c267e6c1b8"
   },

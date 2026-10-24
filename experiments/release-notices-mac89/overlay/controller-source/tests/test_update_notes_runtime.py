@@ -43,7 +43,7 @@ class HomeUpdatesRuntimeTests(unittest.TestCase):
   f=Path(self.temp.name)/'addons/example/main.py';f.parent.mkdir(parents=True);f.write_text('release')
   release={'id':'release2','edition':'apple','version':'1.1.20','revision':0,'title':'BlackLanturn 1.1.20','summary':'Our tested changes.','sections':[{'heading':'Playback','bullets':['Our playback changes.']}],'files':{'addons/example/main.py':hashlib.sha256(b'release').hexdigest()}}
   self.state=refresh({}, {'edition':'apple','build_version':'1.1.19'}, {'schema':1,'releases':[release]},1,Path(self.temp.name));write_state(self.path,self.state)
-  self.ui.legacy_path=lambda:Path(self.temp.name)/'old.json' 
+  self.ui.legacy_path=lambda:Path(self.temp.name)/'old.json'
   self.owner=types.SimpleNamespace(alive=True,window_lifetime=object(),mode='home',nav=False,settings_open=False,actions_open=False,getProperty=lambda k:'false')
   self.runtime=self.ui.HomeUpdates(self.owner,lambda *a:{})
   self.runtime.state=self.state;self.runtime.due=float('inf')
