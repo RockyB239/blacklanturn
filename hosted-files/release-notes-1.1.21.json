@@ -1,0 +1,27 @@
+{
+  "title": "BlackLanturn Build 1.1.21",
+  "summary": "YouTube opens faster with saved rows, current watched status and background refresh.",
+  "sections": [
+    {
+      "heading": "Faster YouTube browsing",
+      "bullets": [
+        "Previously loaded recommendations, subscriptions and categories can appear immediately after reopening Kodi.",
+        "Overdue recommendations refresh in the background. Explicit Refresh remains available."
+      ]
+    },
+    {
+      "heading": "Current watched status and account privacy",
+      "bullets": [
+        "Reused rows read current watched and resume information instead of freezing old progress in the saved display.",
+        "Saved rows belong to the selected account and content preferences. Account or filter changes retire outdated work."
+      ]
+    },
+    {
+      "heading": "Your settings and playback",
+      "bullets": [
+        "Standard update retains selected settings, playback choices and authorizations. Platform-specific compatibility fixes remain included.",
+        "A first load without valid saved rows still needs YouTube and can take several seconds."
+      ]
+    }
+  ]
+}
