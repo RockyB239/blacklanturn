@@ -46,7 +46,7 @@ class UmbrellaBuildContract(unittest.TestCase):
    self.assertEqual(first,second,'Build outputs are not reproducible')
    with zipfile.ZipFile(PROGRESS/'upstream-6.7.92.zip')as z:upstream={n.split('/',1)[1]:z.read(n)for n in z.namelist()if not n.endswith('/')}
    for edition in ('Apple-TV-Mac','General'):
-    with self.subTest(edition=edition),zipfile.ZipFile(Path(folder)/('BlackLanturn-'+edition+'-Kodi21-1.1.21.zip'))as z:
+    with self.subTest(edition=edition),zipfile.ZipFile(Path(folder)/('BlackLanturn-'+edition+'-Kodi21-1.1.22.zip'))as z:
      target={n[len(P):]:z.read(n)for n in z.namelist()if n.startswith(P)}
      self.assertEqual(set(target),set(upstream))
      self.assertEqual(E.fromstring(target['addon.xml']).get('version'),'1:6.7.92+blacklanturn.1')
@@ -54,10 +54,11 @@ class UmbrellaBuildContract(unittest.TestCase):
      self.assertEqual(hashlib.sha256(target['resources/lib/modules/player.py']).hexdigest(),'5766e60fe02858d5cd5b4d38c03cf8f8f3de9d5e8dbb1b3d85a468f922f2be0b')
      marker=json.loads(z.read('userdata/blacklanturn-build.json'))
      self.assertEqual(marker['preferences_policy'],'playback-trakt-youtube-umbrella-network-autoplay-1');self.assertEqual(marker['installer_min_version'],'1.0.27')
-     self.assertEqual(marker['build_version'],'1.1.21');self.assertEqual(marker['umbrella_patch'],'event-progress-3');self.assertEqual(marker['controller_version'],'0.1.91')
+     self.assertEqual(marker['build_version'],'1.1.22');self.assertEqual(marker['umbrella_patch'],'event-progress-3');self.assertEqual(marker['controller_version'],'0.1.91')
      controller=json.loads((ROOT/'controller-source/manifest91.json').read_text())['files']
      actual={n[len('addons/script.blacklanturn.preview/'):]:hashlib.sha256(z.read(n)).hexdigest()for n in z.namelist()if n.startswith('addons/script.blacklanturn.preview/')}
      self.assertEqual(actual,controller)
+     with zipfile.ZipFile(ROOT/'repository.blacklanturn.zip') as repo:self.assertEqual({n:z.read('addons/'+n) for n in repo.namelist()},{n:repo.read(n) for n in repo.namelist()})
      defaults=json.loads((SOURCE/'resources/playback-defaults.json').read_text())
      for name,values in defaults.items():
       raw={n.get('id'):n.text for n in E.fromstring(z.read('userdata/'+name))}

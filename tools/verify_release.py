@@ -513,8 +513,11 @@ def verify(folder):
   expected_installer={'plugin.program.blacklanturninstaller/'+str(p.relative_to(SOURCE)):p.read_bytes() for p in SOURCE.rglob('*') if p.is_file() and '__pycache__' not in p.parts and not p.name.endswith(('.pyc','.DS_Store'))}
   assert installer==expected_installer,'Installer ZIP differs from reviewed source'
  for ed in ('General','Apple-TV-Mac'):
-  with zipfile.ZipFile(folder/f'BlackLanturn-{ed}-Kodi21-1.1.21.zip') as z:
+  with zipfile.ZipFile(folder/f'BlackLanturn-{ed}-Kodi21-1.1.22.zip') as z:
    assert z.testzip() is None;m.verify_archive(z,umbrella=True,network=True,youtube=True);verify_playback_defaults(z);verify_display_defaults(z)
+   with zipfile.ZipFile(ROOT/'repository.blacklanturn.zip') as repo:
+    assert {n:z.read('addons/'+n) for n in repo.namelist()}=={n:repo.read(n) for n in repo.namelist()},'Bundled repository differs from current public source'
+   assert ET.fromstring(z.read('addons/repository.blacklanturn/addon.xml')).get('version')=='1.0.6'
    m._versions.verify_archive_metadata(z)
    umbrella_prefix='addons/plugin.video.umbrella/'
    raw_tree={n[len(umbrella_prefix):]:hashlib.sha256(z.read(n)).hexdigest() for n in z.namelist() if n.startswith(umbrella_prefix) and not n.endswith('/')}
@@ -523,7 +526,7 @@ def verify(folder):
    assert hashlib.sha256(json.dumps(raw_tree,sort_keys=True,separators=(',',':')).encode()).hexdigest()==reviewed_tree['tree_sha256']
    p=json.loads(z.read('userdata/blacklanturn-build.json'))
    assert p['schema']==3 and p['preferences_policy']=='playback-trakt-youtube-umbrella-network-autoplay-1' and p['helper_patch']=='empty-cache-1' and p['installer_min_version']=='1.0.27'
-   assert p['build_version']=='1.1.21' and p['network_patch']=='request-reliability-privacy-1' and p['umbrella_version']=='6.7.92' and p['umbrella_patch']=='event-progress-3'
+   assert p['build_version']=='1.1.22' and p['network_patch']=='request-reliability-privacy-1' and p['umbrella_version']=='6.7.92' and p['umbrella_patch']=='event-progress-3'
    assert p['controller_version']=='0.1.91' and p['helper_search_patch']=='search-batch-1' and p['helper_playback_patch']=='sampled-progress-1'
    gui={n.get('id'):n.text for n in ET.fromstring(z.read('userdata/guisettings.xml'))}
    assert {k:gui[k] for k in ('filecache.memorysize','filecache.readfactor','filecache.buffermode','filecache.chunksize')}=={'filecache.memorysize':'64','filecache.readfactor':'400','filecache.buffermode':'4','filecache.chunksize':'131072'}
@@ -538,7 +541,7 @@ def verify(folder):
    assert len(catalog['releases'])==1
    entry=catalog['releases'][0]
    assert entry['id']==p['release_id'] and entry['edition']==p['edition'] and entry['version']==p['build_version'] and entry['revision']==p['release_revision']
-   assert entry['title']=='BlackLanturn Build 1.1.21' and entry['summary']==json.loads((ROOT/'hosted-files/release-notes-1.1.21.json').read_text())['summary']
+   assert entry['title']=='BlackLanturn Build 1.1.22' and entry['summary']==json.loads((ROOT/'hosted-files/release-notes-1.1.22.json').read_text())['summary']
    assert p['youtube_saved_rows_patch']=='account-display-rows-1'
    assert all(hashlib.sha256(z.read(n)).hexdigest()==h for n,h in entry['files'].items()),'Bundled release proof differs'
    assert 'userdata/blacklanturn-install-complete.json' not in z.namelist(),'A clean package must not predeclare installation success'
