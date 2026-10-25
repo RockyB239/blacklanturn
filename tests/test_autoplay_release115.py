@@ -36,3 +36,15 @@ class AutoplayRelease(unittest.TestCase):
   with self.assertRaises(AssertionError):self.verify()
   self.receipt['resume_seconds']=self.receipt['stop_seconds'];self.receipt['preservation']['passed']=False
   with self.assertRaises(AssertionError):self.verify()
+
+class CurrentAutoplayComponentScope(unittest.TestCase):
+ def test_only_unchanged_session_component_inherits_natural_playback_evidence(self):
+  import hashlib,tempfile
+  from unittest.mock import patch
+  fn=getattr(module,'verify_inherited_autoplay_component',None)
+  self.assertTrue(callable(fn),'Missing narrow current autoplay component gate')
+  receipt=json.loads((ROOT/'compatibility/autoplay-size/natural-verification.json').read_text())
+  self.assertTrue(fn(receipt))
+  with tempfile.TemporaryDirectory()as folder:
+   root=Path(folder);target=root/'controller-source/addon';target.mkdir(parents=True);(target/'autoplay_session.py').write_text('changed implementation')
+   with patch.object(module,'ROOT',root),self.assertRaises(AssertionError):fn(receipt)

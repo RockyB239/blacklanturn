@@ -22,6 +22,7 @@ _MAX_RESPONSE = 64 * 1024
 _OFFICIAL_PREFIX = re.compile(r'^\s*official\s+(?:trailer|teaser)(?:\s*#?\d+)?\s*[:|\-–—]\s*', re.IGNORECASE)
 _YEAR = re.compile(r'(?:18|19|20|21)\d{2}\Z')
 _QUALITY = re.compile(r'(?:hd|uhd|[248]k|(?:360|480|720|1080|1440|2160|4320)p)\Z')
+_TRAILER_LABELS = (('trailer',), ('teaser',), ('final', 'trailer'), ('red', 'band', 'trailer'))
 
 
 class _NoRedirect(HTTPRedirectHandler):
@@ -78,7 +79,7 @@ def _tokens(title):
     return tuple(re.findall(r'[^\W_]+', normalized))
 
 
-def _preview_suffix(tokens):
+def _preview_suffix(tokens, media_type=None, expected_year=None):
     """Recognize metadata before the trailer marker, never sequel/subseries names.
 
     A trailer/teaser marker establishes the end of the title; publisher and other
@@ -87,15 +88,20 @@ def _preview_suffix(tokens):
     index = 0
     while index < len(tokens):
         token = tokens[index]
-        if token in ('trailer', 'teaser'):
+        # Modifiers are accepted only as a complete trailer label. They cannot
+        # consume unknown title words such as "Dune: Final Cut".
+        marker = index + 1 if token == 'official' else index
+        if any(tokens[marker:marker + len(label)] == label for label in _TRAILER_LABELS):
             return True
         if token == 'official':
-            return index + 1 == len(tokens) or tokens[index + 1] in ('trailer', 'teaser')
-        if token == 'season':
+            return marker == len(tokens)
+        if token == 'season' or token == 'installment' and media_type == 'tv':
             if index + 1 >= len(tokens) or not re.fullmatch(r'\d{1,2}', tokens[index + 1]):
                 return False
             index += 2
             continue
+        if _YEAR.fullmatch(token) and expected_year and token != str(expected_year):
+            return False
         if token == 'series' or _YEAR.fullmatch(token) or _QUALITY.fullmatch(token):
             index += 1
             continue
@@ -103,9 +109,9 @@ def _preview_suffix(tokens):
     return True
 
 
-def _matches(actual, aliases):
+def _matches(actual, aliases, media_type=None, expected_year=None):
     tokens = _tokens(_OFFICIAL_PREFIX.sub('', actual))
-    return any(tokens[:len(alias)] == alias and _preview_suffix(tokens[len(alias):])
+    return any(tokens[:len(alias)] == alias and _preview_suffix(tokens[len(alias):], media_type=media_type, expected_year=expected_year)
                for alias in aliases)
 
 
@@ -147,9 +153,10 @@ class TitleVerifier:
                 self._cache.popitem(last=False)
         return title
 
-    def filter(self, urls, titles, valid=lambda: True):
+    def filter(self, urls, titles, valid=lambda: True, media_type=None, expected_year=None):
         """Approve six rank-ordered candidates while the selection remains current.
 
+        Numbered installment labels require an explicit TV media type.
         Cancellation prevents queued network work and discards the whole result.
         An HTTP read already in progress finishes under its normal socket timeout.
         """
@@ -180,4 +187,4 @@ class TitleVerifier:
             actual_titles = [future.result() for future in futures]
         if len(actual_titles) != len(candidates) or any(title is None for title in actual_titles) or not valid():
             return []
-        return [url for (url, _), actual in zip(candidates, actual_titles) if _matches(actual, aliases)]
+        return [url for (url, _), actual in zip(candidates, actual_titles) if _matches(actual, aliases, media_type=media_type, expected_year=expected_year)]

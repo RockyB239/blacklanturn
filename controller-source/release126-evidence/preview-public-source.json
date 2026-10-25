@@ -1,0 +1,49 @@
+{
+  "approved_ids": [
+    "2cFhUp_2N00"
+  ],
+  "approved_urls": [
+    "plugin://plugin.video.youtube/play/?video_id=2cFhUp_2N00"
+  ],
+  "elapsed_seconds": 0.726,
+  "fixture": "ahs-secondary-provider.json",
+  "fixture_entry_count": 13,
+  "fixture_video_count": 12,
+  "identity": [
+    "tv",
+    "1413"
+  ],
+  "mechanism": "One installed YouTube add-on incognito search fixture, actual public oEmbed title checks",
+  "original_sha256": "be63784f3af49817721370a7a80dc60c8d92db81c646f3e470c8eff423acb3f8",
+  "passed": true,
+  "selected_title": "American Horror Story",
+  "source_query": "plugin://plugin.video.youtube/kodion/search/query/?q=%22American+Horror+Story%22+season+1+official+trailer&search_type=video&incognito=true&hide_folders=true&maxResults=12",
+  "source_request_count": 1,
+  "title_checks": {
+    "2cFhUp_2N00": {
+      "elapsed_seconds": 0.271,
+      "public_title": "American Horror Story Season 1 Trailer"
+    },
+    "3MhphYrjHnQ": {
+      "elapsed_seconds": 0.212,
+      "public_title": "American Horror Story (Season 01: Murder House) - Trailer"
+    },
+    "86BhgoRFAfM": {
+      "elapsed_seconds": 0.241,
+      "public_title": "American Horror Stories | Season 1: Official Trailer | FX"
+    },
+    "U3st9c64Vzs": {
+      "elapsed_seconds": 0.237,
+      "public_title": "American Horror Story Season 1 \"Murder House\" | Official Trailer"
+    },
+    "aOdH1wNfv0U": {
+      "elapsed_seconds": 0.212,
+      "public_title": "American Horror Story: Murder House | Season 1: Family Portrait Teaser | FX"
+    },
+    "nLJR2twdK00": {
+      "elapsed_seconds": 0.262,
+      "public_title": "American Horror Stories Season 1 Trailer | Rotten Tomatoes TV"
+    }
+  },
+  "wrong_series_id": "nLJR2twdK00"
+}

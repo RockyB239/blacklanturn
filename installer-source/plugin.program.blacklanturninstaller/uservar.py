@@ -42,7 +42,7 @@ ADVANCEDFILE = 'http://'
 #        Theming Menu Items                             #
 #########################################################
 ICONBUILDS = os.path.join(ART, 'builds.png')
-ICONMAINT = os.path.join(ART, 'maintenance.png')
+ICONMAINT = os.path.join(ART, 'maintenance-wrench.png')
 ICONSPEED = os.path.join(ART, 'speed.png')
 ICONAPK = os.path.join(ART, 'apkinstaller.png')
 ICONADDONS = os.path.join(ART, 'addoninstaller.png')

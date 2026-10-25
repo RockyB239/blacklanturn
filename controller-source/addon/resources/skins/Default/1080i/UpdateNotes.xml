@@ -1,6 +1,6 @@
 <?xml version='1.0' encoding='utf-8'?>
 <window>
-  <defaultcontrol>102</defaultcontrol>
+  <defaultcontrol>110</defaultcontrol>
   <zorder>20</zorder>
   <controls>
     <control type="image">
@@ -56,76 +56,40 @@
       <textcolor>FFBAC7CD</textcolor>
       <aligny>center</aligny>
     </control>
-    <control type="list" id="100">
+    <control type="textbox" id="100">
       <left>530</left>
       <top>365</top>
-      <width>860</width>
-      <height>420</height>
-      <onup>102</onup>
-      <ondown>101</ondown>
+      <width>815</width>
+      <height>380</height>
+      <font>font27</font>
+      <textcolor>FFE0E7EB</textcolor>
+      <pagecontrol>110</pagecontrol>
+      <scrolltime>180</scrolltime>
+    </control>
+    <control type="scrollbar" id="110">
+      <left>1370</left>
+      <top>365</top>
+      <width>20</width>
+      <height>380</height>
+      <orientation>vertical</orientation>
+      <showonepage>true</showonepage>
+      <texturesliderbackground colordiffuse="FF24343E">white.png</texturesliderbackground>
+      <texturesliderbar colordiffuse="FF8CABB7">white.png</texturesliderbar>
+      <texturesliderbarfocus colordiffuse="FF00D9E7">white.png</texturesliderbarfocus>
       <onleft>101</onleft>
       <onright>102</onright>
-      <scrolltime>180</scrolltime>
-      <itemlayout width="860" height="190">
-        <control type="image">
-          <left>0</left>
-          <top>0</top>
-          <width>860</width>
-          <height>2</height>
-          <texture>white.png</texture>
-          <colordiffuse>FF33434C</colordiffuse>
-        </control>
-        <control type="label">
-          <left>0</left>
-          <top>18</top>
-          <width>850</width>
-          <height>48</height>
-          <font>font32_title</font>
-          <label>$INFO[ListItem.Label]</label>
-          <textcolor>FFF2F5F7</textcolor>
-          <aligny>center</aligny>
-        </control>
-        <control type="textbox">
-          <left>0</left>
-          <top>78</top>
-          <width>850</width>
-          <height>108</height>
-          <font>font27</font>
-          <label>$INFO[ListItem.Property(bullets)]</label>
-          <textcolor>FFE0E7EB</textcolor>
-          <autoscroll delay="3000" time="2000" repeat="4000">Control.HasFocus(100)</autoscroll>
-        </control>
-      </itemlayout>
-      <focusedlayout width="860" height="190">
-        <control type="image">
-          <left>0</left>
-          <top>0</top>
-          <width>860</width>
-          <height>2</height>
-          <texture>white.png</texture>
-          <colordiffuse>FF33434C</colordiffuse>
-        </control>
-        <control type="label">
-          <left>0</left>
-          <top>18</top>
-          <width>850</width>
-          <height>48</height>
-          <font>font32_title</font>
-          <label>$INFO[ListItem.Label]</label>
-          <textcolor>FFF2F5F7</textcolor>
-          <aligny>center</aligny>
-        </control>
-        <control type="textbox">
-          <left>0</left>
-          <top>78</top>
-          <width>850</width>
-          <height>108</height>
-          <font>font27</font>
-          <label>$INFO[ListItem.Property(bullets)]</label>
-          <textcolor>FFE0E7EB</textcolor>
-          <autoscroll delay="3000" time="2000" repeat="4000">Control.HasFocus(100)</autoscroll>
-        </control>
-      </focusedlayout>
+      <onup>110</onup>
+      <ondown>110</ondown>
+    </control>
+    <control type="label">
+      <left>530</left>
+      <top>758</top>
+      <width>860</width>
+      <height>35</height>
+      <font>font25_title</font>
+      <label>Up / Down: scroll notes · Right: Done · Back: close</label>
+      <textcolor>FFBAC7CD</textcolor>
+      <aligny>center</aligny>
     </control>
     <control type="image">
       <left>530</left>
@@ -159,7 +123,7 @@
       <selected>String.IsEqual(Window.Property(noticesEnabled),true)</selected>
       <onleft>102</onleft>
       <onright>103</onright>
-      <onup>100</onup>
+      <onup>110</onup>
       <ondown>102</ondown>
     </control>
     <control type="button" id="103">
@@ -177,7 +141,7 @@
       <aligny>center</aligny>
       <onleft>101</onleft>
       <onright>102</onright>
-      <onup>100</onup>
+      <onup>110</onup>
       <ondown>101</ondown>
       <visible>String.IsEqual(Window.Property(updateAvailable),true)</visible>
     </control>
@@ -196,7 +160,7 @@
       <aligny>center</aligny>
       <onleft>103</onleft>
       <onright>101</onright>
-      <onup>100</onup>
+      <onup>110</onup>
       <ondown>101</ondown>
     </control>
   </controls>

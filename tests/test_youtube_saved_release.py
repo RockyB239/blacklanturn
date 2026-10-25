@@ -17,3 +17,13 @@ class SavedRelease(unittest.TestCase):
    elif mutation=='fetch':r['devices']['mac']['fresh_feed_calls']=1
    else:r['devices']['fire']['refresh_focus_retained']=False
    with self.subTest(mutation=mutation),self.assertRaises(AssertionError):gate().verify(r,self.manifest,historical=True)
+
+class HistoricalSavedComponentScope(unittest.TestCase):
+ def test_changed_saved_component_cannot_inherit_historical_acceptance(self):
+  from unittest.mock import patch
+  g=gate();receipt=json.loads((ROOT/'controller-source/release121-native-verification.json').read_text());manifest=json.loads((ROOT/'controller-source/manifest91.json').read_text())
+  current=g.inventory(ROOT/'controller-source/addon');current['youtube_saved.py']='0'*64
+  with patch.object(g,'inventory',return_value=current),self.assertRaisesRegex(AssertionError,'saved-row component'):g.verify(receipt,manifest,historical=True)
+ def test_unrelated_new_feature_does_not_expand_saved_component_claim(self):
+  g=gate();receipt=json.loads((ROOT/'controller-source/release121-native-verification.json').read_text());manifest=json.loads((ROOT/'controller-source/manifest91.json').read_text())
+  self.assertTrue(g.verify(receipt,manifest,historical=True))

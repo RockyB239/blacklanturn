@@ -353,7 +353,7 @@ def verify_display_defaults(z):
  assert config.get('RatingSources')==['rottentomatoes','metacritic','imdb','popcorn'],'Clean builds must default to four ratings with TMDb hidden'
 
 def verify_autoplay_acceptance(receipt, controller, umbrella):
- """Historical Mac autoplay84/Helper-era evidence, bound to the supplied exact92 tree.
+ """Historical Mac autoplay84/Helper-era evidence, bound to its immutable tree.
 
  Current upstream source is certified by separate current contract/install gates.
  """
@@ -389,6 +389,17 @@ def verify_autoplay_acceptance(receipt, controller, umbrella):
  assert preservation.get('core_settings')==280 and preservation.get('addon_settings_files')==16 and preservation.get('history_databases')==4
  cleanup=receipt['test_cleanup'];assert cleanup.get('session_cleared') is True and cleanup.get('prepared_policy_cleared') is True and cleanup.get('queue_size')==0
  assert receipt.get('other_devices_accessed') is False, 'Deferred devices must remain untouched'
+
+def verify_inherited_autoplay_component(receipt):
+ """Only the unchanged session state machine inherits historical Mac evidence.
+
+ Historical default/Details/playback integration is provenance, not current
+ acceptance; changed source has its own feature/transaction contracts.
+ """
+ expected=receipt['controller_files']['autoplay_session.py']
+ actual=hashlib.sha256((ROOT/'controller-source/addon/autoplay_session.py').read_bytes()).hexdigest()
+ assert actual==expected,'Previously tested autoplay session component changed'
+ return True
 
 def verify_youtube_end_acceptance(receipt, manifest, historical=False):
  """Bind the new delta to actual Mac acceptance without inventing remote tests."""
@@ -505,29 +516,34 @@ def verify(folder):
   json.loads((ROOT/'compatibility/autoplay-size/natural-verification.json').read_text()),
   json.loads((ROOT/'controller-source/manifest84.json').read_text()),
   dict(json.loads((SOURCE/'resources/managed-umbrella.json').read_text()),files=json.loads((SOURCE/'resources/managed-umbrella.json').read_text())['legacy_files']['6.7.92']))
+ verify_inherited_autoplay_component(json.loads((ROOT/'compatibility/autoplay-size/natural-verification.json').read_text()))
  verify_youtube_end_acceptance(json.loads((ROOT/'controller-source/youtube-end-native-verification.json').read_text()),json.loads((ROOT/'controller-source/manifest85.json').read_text()),historical=True)
  verify_discovery_acceptance(json.loads((ROOT/"controller-source/discovery-native-verification.json").read_text()),json.loads((ROOT/"controller-source/manifest86.json").read_text()),historical=True)
  verify_youtube_refresh_acceptance(json.loads((ROOT/"controller-source/youtube-refresh-native-verification.json").read_text()),json.loads((ROOT/"controller-source/manifest87.json").read_text()),historical=True)
  verify_youtube_context_acceptance(json.loads((ROOT/'compatibility/youtube-context/native-verification.json').read_text()))
+ feature_spec=importlib.util.spec_from_file_location('current_feature_gate',ROOT/'tools/verify_release126.py');feature_gate=importlib.util.module_from_spec(feature_spec);feature_spec.loader.exec_module(feature_gate)
+ feature_receipt=json.loads((ROOT/'controller-source/release126-feature-verification.json').read_text());feature_gate.verify(feature_receipt,json.loads((ROOT/'controller-source/manifest93.json').read_text()))
  spec=importlib.util.spec_from_file_location('managed',SOURCE/'resources/libs/managed_addons.py');m=importlib.util.module_from_spec(spec);spec.loader.exec_module(m)
  import importlib.util as update_import
  update_spec=update_import.spec_from_file_location('update_notes_gate',ROOT/'tools/verify_release_notices.py');update_gate=update_import.module_from_spec(update_spec);update_spec.loader.exec_module(update_gate)
- update_gate.verify(json.loads((ROOT/'controller-source/release-notices-native-verification.json').read_text()),json.loads((ROOT/'controller-source/manifest90.json').read_text()),historical=True,reminder_receipt=json.loads((ROOT/'compatibility/current-addons/native-install-acceptance.json').read_text()).get('reminders'))
+ update_gate.verify(json.loads((ROOT/'controller-source/release-notices-native-verification.json').read_text()),json.loads((ROOT/'controller-source/manifest90.json').read_text()),historical=True,reminder_receipt=json.loads((ROOT/'compatibility/current-addons/native-install-acceptance-1.1.26.json').read_text()).get('reminders'))
  saved_spec=update_import.spec_from_file_location('saved_gate',ROOT/'tools/verify_youtube_saved.py');saved_gate=update_import.module_from_spec(saved_spec);saved_spec.loader.exec_module(saved_gate)
  saved_gate.verify(json.loads((ROOT/'controller-source/release121-native-verification.json').read_text()),json.loads((ROOT/'controller-source/manifest91.json').read_text()),historical=True)
  build_spec=importlib.util.spec_from_file_location('current_release_build',ROOT/'tools/build_release.py');current_build=importlib.util.module_from_spec(build_spec);build_spec.loader.exec_module(current_build)
  current_build.verify_prior_source_acceptance(json.loads((ROOT/'compatibility/current-addons/native-source-verification-6.18.1.json').read_text()))
  current_build.verify_current_source_contract(json.loads((ROOT/'compatibility/current-addons/current-source-contract.json').read_text()))
  install_spec=update_import.spec_from_file_location('current_native_install_gate',ROOT/'tools/verify_current_install.py');install_gate=update_import.module_from_spec(install_spec);install_spec.loader.exec_module(install_gate)
- install_gate.verify(json.loads((ROOT/'compatibility/current-addons/native-install-acceptance.json').read_text()),folder)
- with zipfile.ZipFile(folder/'plugin.program.blacklanturninstaller-1.0.30.zip') as z:
+ install_receipt=json.loads((ROOT/'compatibility/current-addons/native-install-acceptance-1.1.26.json').read_text())
+ install_gate.verify(install_receipt,folder)
+ install_gate.verify_startup_notice(install_receipt.get('startup_notice',{}),install_receipt['artifacts'],feature_receipt['files'],feature_receipt['installer_files'])
+ with zipfile.ZipFile(folder/'plugin.program.blacklanturninstaller-1.0.31.zip') as z:
   assert z.testzip() is None
   installer={n:z.read(n) for n in z.namelist()}
   assert all(n.startswith('plugin.program.blacklanturninstaller/') for n in installer)
   expected_installer={'plugin.program.blacklanturninstaller/'+str(p.relative_to(SOURCE)):p.read_bytes() for p in SOURCE.rglob('*') if p.is_file() and '__pycache__' not in p.parts and not p.name.endswith(('.pyc','.DS_Store'))}
   assert installer==expected_installer,'Installer ZIP differs from reviewed source'
  for ed in ('General','Apple-TV-Mac'):
-  with zipfile.ZipFile(folder/f'BlackLanturn-{ed}-Kodi21-1.1.25.zip') as z:
+  with zipfile.ZipFile(folder/f'BlackLanturn-{ed}-Kodi21-1.1.26.zip') as z:
    assert z.testzip() is None;m.verify_archive(z,umbrella=True,network=True,youtube=True);verify_playback_defaults(z);verify_display_defaults(z)
    with zipfile.ZipFile(ROOT/'repository.blacklanturn.zip') as repo:
     assert {n:z.read('addons/'+n) for n in repo.namelist()}=={n:repo.read(n) for n in repo.namelist()},'Bundled repository differs from current public source'
@@ -545,8 +561,8 @@ def verify(folder):
    current_build.verify_dependency_closure(packaged)
    p=json.loads(z.read('userdata/blacklanturn-build.json'))
    assert p['schema']==3 and p['preferences_policy']=='playback-trakt-youtube-umbrella-network-autoplay-1' and p['helper_patch']=='empty-cache-1' and p['installer_min_version']=='1.0.30'
-   assert p['build_version']=='1.1.25' and p['network_patch']=='request-reliability-privacy-1' and p['umbrella_version']=='6.7.97' and p['umbrella_patch']=='event-progress-3'
-   assert p['controller_version']=='0.1.92' and p['helper_search_patch']=='search-batch-1' and p['helper_playback_patch']=='sampled-progress-1'
+   assert p['build_version']=='1.1.26' and p['network_patch']=='request-reliability-privacy-1' and p['umbrella_version']=='6.7.97' and p['umbrella_patch']=='event-progress-3'
+   assert p['controller_version']=='0.1.93' and p['helper_search_patch']=='search-batch-1' and p['helper_playback_patch']=='sampled-progress-1'
    gui={n.get('id'):n.text for n in ET.fromstring(z.read('userdata/guisettings.xml'))}
    assert {k:gui[k] for k in ('filecache.memorysize','filecache.readfactor','filecache.buffermode','filecache.chunksize')}=={'filecache.memorysize':'64','filecache.readfactor':'400','filecache.buffermode':'4','filecache.chunksize':'131072'}
    assert next(n.text for n in ET.fromstring(z.read('userdata/addon_data/plugin.video.themoviedb.helper/settings.xml')) if n.get('id')=='artwork_quality')=='1'
@@ -560,14 +576,14 @@ def verify(folder):
    assert len(catalog['releases'])==1
    entry=catalog['releases'][0]
    assert entry['id']==p['release_id'] and entry['edition']==p['edition'] and entry['version']==p['build_version'] and entry['revision']==p['release_revision']
-   assert entry['title']=='BlackLanturn Build 1.1.25' and entry['summary']==json.loads((ROOT/'hosted-files/release-notes-1.1.25.json').read_text())['summary']
+   assert entry['title']=='BlackLanturn Build 1.1.26' and entry['summary']==json.loads((ROOT/'hosted-files/release-notes-1.1.26.json').read_text())['summary']
    assert p['youtube_saved_rows_patch']=='account-display-rows-1'
    assert all(hashlib.sha256(z.read(n)).hexdigest()==h for n,h in entry['files'].items()),'Bundled release proof differs'
    assert 'userdata/blacklanturn-install-complete.json' not in z.namelist(),'A clean package must not predeclare installation success'
    assert 'userdata/addon_data/script.blacklanturn.preview/release-notices.json' not in z.namelist(),'A clean package must not copy notice history'
    assert hashlib.sha256(z.read('addons/plugin.video.youtube/resources/lib/youtube_plugin/kodion/context/xbmc/xbmc_context.py')).hexdigest()==json.loads((ROOT/'compatibility/youtube-context/manifest.json').read_text())['candidate_sha256']
    assert p['autoplay_patch']=='same-show-source-1'
-   expected=json.loads((ROOT/'controller-source/manifest92.json').read_text())['files']
+   expected=json.loads((ROOT/'controller-source/manifest93.json').read_text())['files']
    actual={n[len('addons/script.blacklanturn.preview/'):]:hashlib.sha256(z.read(n)).hexdigest() for n in z.namelist() if n.startswith('addons/script.blacklanturn.preview/')}
    assert actual==expected
    skin=json.loads((ROOT/'controller-source/manifest85.json').read_text())['skin']
@@ -581,6 +597,6 @@ def verify(folder):
    assert config.get('YouTubeEndSuggestions') is True and config.get('YouTubeEndAutoplay') is False
    for n,d in installer.items():assert z.read('addons/'+n)==d,'Installer mismatch'
    assert z.read('addons/plugin.program.blacklanturninstaller/resources/libs/managed_addons.py')==(SOURCE/'resources/libs/managed_addons.py').read_bytes()
- print('PASS: both Build1.1.25 packages, exact Installer1.0.30, complete pinned current addon sources, dependency minima and protected defaults; retained historical feature evidence and source-bound prior Fire current-source playback checked separately from release-install acceptance')
+ print('PASS: both Build1.1.26 packages, exact Installer1.0.31, complete pinned current addon sources, dependency minima and protected defaults; retained historical feature evidence and source-bound prior Fire current-source playback checked separately from release-install acceptance')
 if __name__=='__main__':
  p=argparse.ArgumentParser();p.add_argument('artifacts',type=Path);verify(p.parse_args().artifacts)

@@ -23,6 +23,8 @@ from live_runtime import read_controller_config
 from row_feedback import RowResultCache, provider_page_label, row_message
 from filtered_pages import provider_path
 from preview_identity import TitleVerifier
+from preview_fallback import SecondaryPreviewLookup
+from related_titles import load_related
 from youtube_core import preview_path,video_id,automatic_preview,is_youtube,resume_allowed
 
 
@@ -68,7 +70,7 @@ class ExperimentLifecycle(unittest.TestCase):
             'page_ahead_eligible': lambda path: False,
             'get_list': lambda path: [{'file': path + '/title'}],
             'PreviewAttempts': PreviewAttempts,
-            'TitleVerifier': TitleVerifier,
+            'TitleVerifier': TitleVerifier, 'SecondaryPreviewLookup':SecondaryPreviewLookup, 'load_related':load_related,
             'cached_title_aliases':lambda *a:[],
             'xbmcvfs':SimpleNamespace(translatePath=lambda _:folder),
             'Path':Path,

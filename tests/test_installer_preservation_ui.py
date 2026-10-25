@@ -135,6 +135,50 @@ class InstallerPreservationUI(unittest.TestCase):
             self.load('gui/window.py').show_save_data_settings()
         self.assertEqual(self.writes, [])
 
+    def test_installed_build_does_not_prompt_for_reinstall_keep_choices(self):
+        self.values.update(first_install='true', installed='true', buildversion='1.1.25')
+        with patch.dict(sys.modules, self.modules):
+            window = self.load('gui/window.py')
+            with patch.object(window, 'show_save_data_settings') as show:
+                self.assertFalse(window.show_initial_save_data_settings())
+                show.assert_not_called()
+        self.assertEqual(self.writes, [])
+
+    def test_new_install_still_offers_initial_keep_choices(self):
+        self.values.update(first_install='true', installed='false', buildversion='')
+        with patch.dict(sys.modules, self.modules):
+            window = self.load('gui/window.py')
+            with patch.object(window, 'show_save_data_settings') as show:
+                self.assertTrue(window.show_initial_save_data_settings())
+                show.assert_called_once_with()
+
+    def test_first_run_explains_update_preserves_everything_without_keep_choices(self):
+        with patch.dict(sys.modules, self.modules):
+            self.load('gui/window.py').show_save_data_settings()
+        text = FakeWindow.last.getControl(102).label
+        self.assertIn('reinstall', text.lower())
+        self.assertIn('Update BlackLanturn', text)
+        self.assertIn('everything', text)
+
+    def test_legacy_installer_self_update_preserves_preferences_without_setup_prompt(self):
+        from unittest.mock import Mock
+        self.config.ADDON_VERSION = '1.0.30'
+        self.config.PACKAGES = str(self.fixture.root / 'packages')
+        Path(self.config.PACKAGES).mkdir()
+        self.modules['resources.libs.common.tools'].open_url = lambda *a, **k: True
+        removed = self.modules['resources.libs.common.tools'].remove_file = Mock()
+        self.modules['resources.libs.check'].check_wizard = lambda *a: ('installer', '1.0.31', 'https://example.invalid/installer.zip')
+        self.modules['xbmcgui'].Dialog = lambda: types.SimpleNamespace(yesno=lambda *a, **k: True)
+        self.modules['resources.libs.downloader'].Downloader = lambda: types.SimpleNamespace(download=Mock())
+        extracted = self.modules['resources.libs.extract'].all = Mock(return_value=(100, 0, ''))
+        self.modules['resources.libs.gui.window'] = types.SimpleNamespace(show_save_data_settings=Mock())
+        with patch.dict(sys.modules, self.modules):
+            self.load('update.py').wizard_update()
+        extracted.assert_called_once()
+        removed.assert_not_called()
+        self.modules['resources.libs.gui.window'].show_save_data_settings.assert_not_called()
+        self.assertEqual(self.writes, [])
+
     def test_save_data_exposes_persisted_account_only_mode_without_changing_it(self):
         self.values['authonlyclean'] = 'true'
         with patch.dict(sys.modules, self.modules):

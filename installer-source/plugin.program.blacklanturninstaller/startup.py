@@ -336,9 +336,8 @@ check.check_paths()
 
 
 # FIRST RUN SETTINGS
-if CONFIG.get_setting('first_install') == 'true':
+if window.show_initial_save_data_settings():
     logging.log("[First Run] Showing Save Data Settings", level=xbmc.LOGNOTICE)
-    window.show_save_data_settings()
 else:
     logging.log("[First Run] Skipping Save Data Settings", level=xbmc.LOGNOTICE)
 

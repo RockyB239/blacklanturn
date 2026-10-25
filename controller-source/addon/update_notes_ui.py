@@ -39,7 +39,7 @@ def mark_seen(event):
 def request_update():
     if xbmc.Player().isPlaying():return False
     # Fixed native Installer destination: catalog text never supplies commands.
-    xbmc.executebuiltin('RunPlugin(plugin://plugin.program.blacklanturninstaller/?mode=builds)')
+    xbmc.executebuiltin('RunPlugin(plugin://plugin.program.blacklanturninstaller/?mode=updates)')
     return True
 
 class UpdateNotes(xbmcgui.WindowXMLDialog):
@@ -51,11 +51,11 @@ class UpdateNotes(xbmcgui.WindowXMLDialog):
         self.setProperty('subtitle',self.entry['title'] if self.entry else 'BlackLanturn release notes')
         available=bool(self.entry and state['available'] and self.entry['id']==state['available']['id'])
         self.setProperty('updateAvailable','true' if available else 'false')
-        listing=self.getControl(100);listing.reset()
         sections=self.entry['sections'] if self.entry else [{'heading':'BlackLanturn releases','bullets':['New BlackLanturn releases and our compatibility patches will be explained here.']}]
-        for section in sections:
-            item=xbmcgui.ListItem(section['heading']);item.setProperty('bullets','\n'.join('• '+s for s in section['bullets']));listing.addItem(item)
-        self.setFocusId(102)
+        text='\n\n'.join('[B]'+section['heading']+'[/B]\n'+
+                         '\n\n'.join('• '+line for line in section['bullets']) for section in sections)
+        body=self.getControl(100);body.setText(text);body.scroll(0)
+        self.setFocusId(110)
     def onClick(self,cid):
         if cid==101:
             enabled=self.getProperty('noticesEnabled')!='true';save_preference(enabled);self.setProperty('noticesEnabled','true' if enabled else 'false')

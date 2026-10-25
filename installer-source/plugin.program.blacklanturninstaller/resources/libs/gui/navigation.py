@@ -7,7 +7,8 @@ from resources.libs.common import directory, tools
 from resources.libs.gui.navigation_model import Navigation, capture, entry, encode, perform, activation, handoff
 
 SIDEBAR=[('Home',{},'home.png'),('Builds',{'mode':'builds'},'builds.png'),
- ('Maintenance',{'mode':'maint'},'maintenance.png'),('Save Data',{'mode':'savedata'},'savedata.png'),
+ ('Updates',{'mode':'updates'},'updates.png'),
+ ('Maintenance',{'mode':'maint'},'maintenance-wrench.png'),('Save Data',{'mode':'savedata'},'savedata.png'),
  ('Addon Installer',{'mode':'addons'},'addoninstaller.png'),('More tools',{'mode':'tools'},'settings.png')]
 MAINT={'clean':'clean_menu','addon':'addon_menu','logging':'logging_menu','misc':'misc_menu','backup':'backup_menu','tweaks':'tweaks_menu'}
 SIMPLE={'savedata':'save_menu','trakt':'trakt_menu','realdebrid':'debrid_menu','login':'login_menu',
@@ -22,6 +23,9 @@ def sidebar_items():
 
 def producer(route):
     mode=route.get('mode');name=route.get('name')
+    if mode=='updates':
+        from resources.libs.gui.updates_menu import get_listing
+        return get_listing
     if mode=='builds':
         from resources.libs.gui.build_menu import BuildMenu
         return BuildMenu().get_listing
@@ -64,7 +68,7 @@ def rows_for(route):
     if not route:
         specs=[('Browse builds',{'mode':'builds'},'Choose the edition made for your device.','builds.png'),
           ('Save your data',{'mode':'savedata'},'Review the accounts and settings to keep before installing.','savedata.png'),
-          ('Maintenance',{'mode':'maint'},'Cleaning, backups, logs and tools for your Kodi setup.','maintenance.png'),
+          ('Maintenance',{'mode':'maint'},'Cleaning, backups, logs and tools for your Kodi setup.','maintenance-wrench.png'),
           ('Installer settings',{'mode':'settings','name':CONFIG.ADDON_ID},'Adjust installation preferences and automatic maintenance.','settings.png')]
         return [entry(t,p,d,p['mode']!='settings',os.path.join(CONFIG.ADDON_PATH,'resources','media',i)) for t,p,d,i in specs]
     fn=producer(route)
@@ -93,7 +97,7 @@ class InstallerNavigation(xbmcgui.WindowXMLDialog):
         self.setProperty('addon.icon',CONFIG.ADDON_ICON);self.setProperty('layout',layout);self.setProperty('heading',self.nav.title)
         self.setProperty('brand.version','Installer '+CONFIG.ADDON_VERSION)
         self.setProperty('breadcrumb',' / '.join([s[1] for s in self.nav.stack]+[self.nav.title]))
-        subtitles={'home':'Your BlackLanturn setup, all in one place.','builds':'Choose a build, then review its installation options.','savedata':'Choose which accounts and settings to preserve.','maint':'Keep your setup running smoothly.'}
+        subtitles={'home':'Your BlackLanturn setup, all in one place.','builds':'Choose a build, then review its installation options.','updates':'Updates keep your entire setup automatically. Reinstalls use Keep choices.','savedata':'Choose which accounts and settings to preserve.','maint':'Keep your setup running smoothly.'}
         self.setProperty('subtitle',subtitles.get(mode or 'home','Select a tool or press Back to return.'))
         sidebar=self.getControl(100);sidebar.reset();active_index=0
         self.sidebar=sidebar_items()

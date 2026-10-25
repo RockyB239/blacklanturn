@@ -130,6 +130,40 @@ class PreviewIdentity(unittest.TestCase):
         verifier = identity.TitleVerifier(fetcher=lambda key: 'American Horror Story | Season 12 Official Trailer')
         self.assertEqual(verifier.filter([video(1)], ['American Horror Story']), [video(1)])
 
+    def test_installment_number_is_season_metadata_after_the_exact_series_title(self):
+        # FX uses "Installment" for American Horror Story's numbered seasons.
+        verifier = identity.TitleVerifier(fetcher=lambda key: 'American Horror Story | Installment 13 Official Teaser | FX')
+        self.assertEqual(verifier.filter([video(1)], ['American Horror Story'], media_type='tv'), [video(1)])
+        self.assertEqual(verifier.filter([video(1)], ['American Horror Stories'], media_type='tv'), [])
+
+    def test_installment_number_is_not_identity_evidence_without_a_tv_type(self):
+        verifier = identity.TitleVerifier(fetcher=lambda key: 'It Installment 2 Official Trailer')
+        self.assertEqual(verifier.filter([video(1)], ['It']), [])
+        for media_type in (None, 'movie', 'unknown'):
+            with self.subTest(media_type=media_type):
+                self.assertEqual(verifier.filter([video(1)], ['It'], media_type=media_type), [])
+
+    def test_final_and_red_band_trailer_labels_preserve_the_exact_title(self):
+        # Public studio title fixtures: Paramount nRwLyKIBNU8; Sony rze8QYwWGMs.
+        for selected, actual in [
+                ('Scream', 'Scream (2022) - Final Trailer - Paramount Pictures'),
+                ('Scream', 'Scream - Official Final Trailer (2022)'),
+                ('Kraven the Hunter', 'KRAVEN THE HUNTER – Official Red Band Trailer (HD)')]:
+            with self.subTest(actual=actual):
+                verifier = identity.TitleVerifier(fetcher=lambda key: actual)
+                self.assertEqual(verifier.filter([video(1)], [selected]), [video(1)])
+
+    def test_trailer_modifiers_cannot_hide_title_extensions(self):
+        for selected, actual in [
+                ('It', 'It Ends With Us Final Trailer'),
+                ('Dune', 'Dune Part Two Official Red Band Trailer'),
+                ('Dune', 'Dune Final Cut Official Trailer'),
+                ('American Horror Story', 'American Horror Stories Installment 3 Official Teaser'),
+                ('American Horror Story', 'American Horror Story Installment Unknown Official Teaser')]:
+            with self.subTest(actual=actual):
+                verifier = identity.TitleVerifier(fetcher=lambda key: actual)
+                self.assertEqual(verifier.filter([video(1)], [selected]), [])
+
     def test_short_titles_cannot_match_inside_another_title(self):
         for selected, actual in [('Up', "DON'T LOOK UP | Official Trailer"),
                                  ('It', 'It Ends With Us | Official Trailer')]:

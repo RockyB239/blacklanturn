@@ -30,6 +30,8 @@ from browse_controls import AnimeMetadata,can_choose_genre,should_exclude_anime,
 from filtered_pages import first_page_keep,first_page_minimum, provider_path,upstream_path,logical_files,needs_fill,fill_page,PageCancelled
 from preview_language import cached_video_metadata,cached_title_aliases
 from preview_identity import TitleVerifier
+from preview_fallback import SecondaryPreviewLookup
+from related_titles import load_related
 from preview_geometry import preview_fill_viewmode,preview_display_aspect,PreviewRendererGuard
 from preview_bars import PreviewBarScan,PreviewFramingCache,top_aligned_viewmode,framing_key
 from live_core import caption_fit_step,my_stuff_rows,row_items
@@ -156,7 +158,7 @@ class LiveReview(YouTubeBrowser,xbmcgui.WindowXML):
         self.nav_state_lock=threading.RLock();self.nav_focus_intent=None;self.nav_revision=0;self.nav_width_requested=82;self.nav_width_applied=None
         self.preview_input_generation=self.input_generation
         self.preview_dispatch_lock=threading.RLock();self.preview_dispatched=False
-        self.player=PreviewPlayer();self.preview_attempts=None;self.preview_cache={};self.preview_title_verifier=TitleVerifier();self.browse_sources=[];self.owned_preview=False;self.preview_mode='manual';self.dwell=time.monotonic();self.preview_key=None
+        self.player=PreviewPlayer();self.preview_attempts=None;self.preview_cache={};self.preview_title_verifier=TitleVerifier();self.preview_secondary_lookup=SecondaryPreviewLookup();self.browse_sources=[];self.owned_preview=False;self.preview_mode='manual';self.dwell=time.monotonic();self.preview_key=None
         self.hover=HoverScroll();self.focus_key=None;self.selected=None;self.last_row=0;self.rows=[[],[]];self.paths=['',''];self.histories=[PageHistory(),PageHistory()];self.return_focus=900
         self.anime_metadata=AnimeMetadata(PROFILE/'addon_data/plugin.video.themoviedb.helper')
         self.cast_people=[];self.person_context=None;self.episode_browser_context=None;self.preview_requested_at=0;self.preview_playing=False
@@ -1309,14 +1311,15 @@ class LiveReview(YouTubeBrowser,xbmcgui.WindowXML):
         focus=self.getFocusId()
         failed=any(value=='error' for value in getattr(self,'row_states',{}).values())
         n=focus-900 if focus in (900,901) else getattr(self,'last_row',0)
-        histories=getattr(self,'histories',[])
+        related_focus=focus==3100 and self.mode=='details'
+        histories=[self.related_history] if related_focus else getattr(self,'histories',[])
+        if related_focus:n=0
         item=self.chosen(focus) if focus in (101,102,103,105,106,900,901,3100) else None
         if focus in (900,901) and not self.rows[focus-900]:item=None
         if item and item.get('_page_control'):item=None
         options=[]
         if not item:
             if getattr(self,'youtube_home_visible',lambda:False)():options.append(('youtube_refresh','Refresh recommendations'))
-            if can_choose_genre(self):options.append(('genre','Choose genre…'))
             if n<len(histories) and histories[n].pages:options.append(('previous','Previous page'))
         discovery=discovery_result(item) if item else None
         command=trakt_command(item) if item and not discovery else None
@@ -1329,6 +1332,8 @@ class LiveReview(YouTubeBrowser,xbmcgui.WindowXML):
             options.extend([('details','Details'),('local','Remove from My Stuff on this device' if saved else 'Save to My Stuff on this device')])
             if command:options.append(('trakt','Trakt: Watched, progress & lists'))
             if self.rating_identity(item):options.append(('discover','Discover collections & creator credits'))
+        if can_choose_genre(self):options.append(('genre','Choose genre…'))
+        if item and not discovery:
             if getattr(self,'youtube_home_visible',lambda:False)():options.append(('youtube_refresh','Refresh recommendations'))
             if getattr(self,'source_session_label',lambda *a,**k: '')(item,refresh=True):options.append(('normal_autoplay','Return to normal autoplay'))
             if player_path:options.append(('default_player','Set default player…'))
@@ -1349,8 +1354,12 @@ class LiveReview(YouTubeBrowser,xbmcgui.WindowXML):
             self.browse_source()
             if getattr(self,'generation',0)==generation:self.setFocusId(focus)
         elif action=='previous':
-            prior=self.histories[n].pop()
-            if prior:self.load_path(n,prior[0],back=True,position=prior[1])
+            if related_focus:
+                if self.related_history.pages:
+                    prior=self.related_history.pages[-1];self.load_related_page(prior[0],back=True,position=prior[1])
+            else:
+                prior=self.histories[n].pop()
+                if prior:self.load_path(n,prior[0],back=True,position=prior[1])
         elif action=='settings':self.settings()
         elif action=='open_discovery':self.open_discovery(discovery)
         elif action=='play':self.update(item);self.onClick(101)
@@ -1375,59 +1384,116 @@ class LiveReview(YouTubeBrowser,xbmcgui.WindowXML):
         for cid in (10,50,15,101,102,103,105,106,600,900,901,3000,3100,700,701,710,711,712,713,720,721):
             self.getControl(cid).setEnabled(enabled)
     def details(self,item,cast_position=None):
-        if not item:return
-        lifetime=getattr(self,'window_lifetime',None)
-        discovery=discovery_result(item)
-        if discovery:self.open_discovery(discovery);return
-        self.setProperty('captionRows','false')
-        self.stop_preview();self.return_focus=self.getFocusId();self.mode='details';self.setProperty('page','details');self.setProperty('scroll','top')
-        youtube=is_youtube(item);self.setProperty('youtubeDetails','true' if youtube else 'false');self.update(item)
-        preview_available=self.getProperty('previewsReady')=='true'
-        self.getControl(101).controlDown(self.getControl(3000));self.getControl(103).controlDown(self.getControl(3000));self.getControl(105).controlDown(self.getControl(3000))
-        self.getControl(101).controlRight(self.getControl(105 if preview_available else 103))
-        self.getControl(105).controlLeft(self.getControl(101));self.getControl(105).controlRight(self.getControl(103))
-        self.getControl(103).controlLeft(self.getControl(105 if preview_available else 101));self.getControl(103).controlRight(self.getControl(106 if show_identity(item) and not self.episode_browser_context else 103))
-        self.getControl(106).controlDown(self.getControl(3000));self.getControl(106).controlLeft(self.getControl(103))
-        self.getControl(3000).reset();self.getControl(3100).reset();self.related=[];self.cast_people=[];self.setFocusId(101)
-        if youtube:
-            for cid in (101,103,105,106):self.getControl(cid).controlDown(self.getControl(cid))
-            self.setProperty('notice','YouTube · Back returns to browsing');return
-        source_key=item.get('file');self.setProperty('notice','Loading details…')
-        def current():return self.alive and lifetime is getattr(self,'window_lifetime',None) and self.mode=='details' and (self.selected or {}).get('file')==source_key
+        with self.preview_dispatch_lock:
+            if not item:return
+            lifetime=getattr(self,'window_lifetime',None)
+            discovery=discovery_result(item)
+            if discovery:self.open_discovery(discovery);return
+            self.setProperty('captionRows','false')
+            self.stop_preview();self.return_focus=self.getFocusId();self.mode='details';self.setProperty('page','details');self.setProperty('scroll','top')
+            youtube=is_youtube(item);self.setProperty('youtubeDetails','true' if youtube else 'false');self.update(item)
+            preview_available=self.getProperty('previewsReady')=='true'
+            self.getControl(101).controlDown(self.getControl(3000));self.getControl(103).controlDown(self.getControl(3000));self.getControl(105).controlDown(self.getControl(3000))
+            self.getControl(101).controlRight(self.getControl(105 if preview_available else 103))
+            self.getControl(105).controlLeft(self.getControl(101));self.getControl(105).controlRight(self.getControl(103))
+            self.getControl(103).controlLeft(self.getControl(105 if preview_available else 101));self.getControl(103).controlRight(self.getControl(106 if show_identity(item) and not self.episode_browser_context else 103))
+            self.getControl(106).controlDown(self.getControl(3000));self.getControl(106).controlLeft(self.getControl(103))
+            self.related_history=PageHistory();self.related_path='';self.related_owner=object();owner=self.related_owner;self.related_request=None
+            self.related=[];self.cast_people=[]
+            self.getControl(3000).reset();self.getControl(3100).reset();self.setFocusId(101)
+            if youtube:
+                for cid in (101,103,105,106):self.getControl(cid).controlDown(self.getControl(cid))
+                self.setProperty('notice','YouTube · Back returns to browsing');return
+            source_key=item.get('file');self.setProperty('notice','Loading details…')
+            def current():return self.alive and lifetime is getattr(self,'window_lifetime',None) and owner is self.related_owner and self.mode=='details' and (self.selected or {}).get('file')==source_key
+            def work():
+                try:
+                    if not current():return
+                    params=title_details_params(item);kind=params.pop('tmdb_type');identity=params.get('tmdb_id')
+                    detail=item
+                    if identity:
+                        found=get_list(tmdb('details',kind,**params))
+                        if found:detail=merge_title_details(item,found[0])
+                    if not current():return
+                    self.update(detail)
+                    if not current():return
+                    cast=[];self.cast_people=[]
+                    people=get_list(tmdb('cast',kind,tmdb_id=identity)) if identity else []
+                    if not current():return
+                    roles={p.get('name',''):p.get('role','') for p in detail.get('cast',[])}
+                    for person in people:
+                        if not current():return
+                        name=person.get('title') or person.get('label','')
+                        if not person_identity(person.get('file','')):continue
+                        art=person.get('art',{})
+                        li=xbmcgui.ListItem(label=name,label2=roles.get(name,''));li.setArt({'poster':art.get('poster') or art.get('thumb') or person.get('thumbnail','')});cast.append(li);self.cast_people.append(person)
+                    if not current():return
+                    self.getControl(3000).addItems(cast)
+                    if cast_position is not None and cast:
+                        self.getControl(3000).selectItem(min(cast_position,len(cast)-1));self.setFocusId(3000)
+                    self.setProperty('notice','Director: '+', '.join(detail.get('director',[])) if detail.get('director') else 'Live title details')
+                    event('details_loaded',cast=len(cast),rating=bool(rating_line(detail)))
+                    if identity:
+                        related_path,related=load_related(tmdb,get_list,kind,identity,valid=current)
+                        with self.preview_dispatch_lock:
+                            if not current():return
+                            related,_=page_cards(related,self.related_history,related_path)
+                            items=[media_item(d) for d in related]
+                            if not current():return
+                            control=self.getControl(3100);control.addItems(items)
+                            if not current():
+                                if self.alive and lifetime is getattr(self,'window_lifetime',None) and self.mode=='details':
+                                    control.reset();control.addItems([media_item(d) for d in self.related])
+                                return
+                            self.related_path=related_path;self.related=related
+                except Exception as exc:
+                    if current():event('details_error',error=str(exc));self.setProperty('notice','Available title details shown; additional metadata unavailable')
+            threading.Thread(target=work,name='BlackLanturnLiveDetails',daemon=True).start()
+    def load_related_page(self,path,back=False,position=0):
+        if self.mode!='details' or not valid_source(path):return
+        lifetime=getattr(self,'window_lifetime',None);owner=self.related_owner
+        source_key=(self.selected or {}).get('file');request=object();self.related_request=request
+        previous=self.related_path;previous_position=self.getControl(3100).getSelectedPosition();focus_before=self.getFocusId()
+        self.setProperty('notice','Loading more like this…')
+        def current():
+            return (self.alive and self.mode=='details' and lifetime is getattr(self,'window_lifetime',None)
+                    and owner is self.related_owner and request is self.related_request
+                    and (self.selected or {}).get('file')==source_key)
         def work():
             try:
                 if not current():return
-                params=title_details_params(item);kind=params.pop('tmdb_type');identity=params.get('tmdb_id')
-                detail=item
-                if identity:
-                    found=get_list(tmdb('details',kind,**params))
-                    if found:detail=merge_title_details(item,found[0])
+                files=get_list(path)
                 if not current():return
-                self.update(detail)
-                if not current():return
-                cast=[];self.cast_people=[]
-                people=get_list(tmdb('cast',kind,tmdb_id=identity)) if identity else []
-                if not current():return
-                roles={p.get('name',''):p.get('role','') for p in detail.get('cast',[])}
-                for person in people:
+                history=PageHistory();history.pages=list(self.related_history.pages)
+                if back:history.pop()
+                else:history.push(previous,previous_position)
+                files,selected=page_cards(files,history,path,position,display_position=back)
+                items=[media_item(d) for d in files]
+                # Serialize with Details ownership changes. Native calls may
+                # reenter on this thread, so check again before publishing state.
+                with self.preview_dispatch_lock:
                     if not current():return
-                    name=person.get('title') or person.get('label','')
-                    if not person_identity(person.get('file','')):continue
-                    art=person.get('art',{})
-                    li=xbmcgui.ListItem(label=name,label2=roles.get(name,''));li.setArt({'poster':art.get('poster') or art.get('thumb') or person.get('thumbnail','')});cast.append(li);self.cast_people.append(person)
-                if not current():return
-                self.getControl(3000).addItems(cast)
-                if cast_position is not None and cast:
-                    self.getControl(3000).selectItem(min(cast_position,len(cast)-1));self.setFocusId(3000)
-                self.setProperty('notice','Director: '+', '.join(detail.get('director',[])) if detail.get('director') else 'Live title details')
-                event('details_loaded',cast=len(cast),rating=bool(rating_line(detail)))
-                if identity:
-                    related=get_list(tmdb('similar',kind,tmdb_id=identity))
-                    if current():
-                        self.related=related;self.getControl(3100).addItems([media_item(d) for d in related])
+                    control=self.getControl(3100);control.reset()
+                    if not current():
+                        if self.alive and lifetime is getattr(self,'window_lifetime',None) and self.mode=='details':
+                            control.reset();control.addItems([media_item(d) for d in self.related])
+                        return
+                    control.addItems(items)
+                    if not current():
+                        if self.alive and lifetime is getattr(self,'window_lifetime',None) and self.mode=='details':
+                            control.reset();control.addItems([media_item(d) for d in self.related])
+                        return
+                    if files:control.selectItem(selected)
+                    if not current():return
+                    self.related_history=history;self.related_path=path;self.related=files
+                    if focus_before==3100 and self.getFocusId()==3100:
+                        self.setProperty('scroll','related');self.setFocusId(3100)
+                    if current():self.setProperty('notice','More like this · Back returns to browsing')
             except Exception as exc:
-                if current():event('details_error',error=str(exc));self.setProperty('notice','Available title details shown; additional metadata unavailable')
-        threading.Thread(target=work,name='BlackLanturnLiveDetails',daemon=True).start()
+                if current():
+                    self.setProperty('notice','More like this unavailable; current titles retained. Select the page card to retry.')
+                    event('similar_page_error',error_type=type(exc).__name__)
+        threading.Thread(target=work,name='BlackLanturnSimilarPage',daemon=True).start()
     def browse_all_episodes(self):
         item=self.selected or {};identity=show_identity(item)
         if not identity:return
@@ -1537,7 +1603,7 @@ class LiveReview(YouTubeBrowser,xbmcgui.WindowXML):
             aliases=tuple(dict.fromkeys(str(item[k]) for k in names if item.get(k))) or (item.get('label',''),)
             helper_profile=Path(xbmcvfs.translatePath('special://profile/'))/'addon_data/plugin.video.themoviedb.helper'
             if identity:aliases=tuple(dict.fromkeys(aliases+tuple(cached_title_aliases(helper_profile,identity))))
-            language=self.config.get('PreviewLanguage','en');cache_key=(key,identity,language,aliases,'verified-title-1')
+            language=self.config.get('PreviewLanguage','en');cache_key=(key,identity,language,aliases,'verified-title-2')
             def current():return self.alive and not self.nav and token==self.preview_generation and self.owned_preview and getattr(self,'input_generation',0)==input_generation and (self.selected or {}).get('file')==key
             if not current():return
             cached=self.preview_cache.get(cache_key)
@@ -1550,7 +1616,10 @@ class LiveReview(YouTubeBrowser,xbmcgui.WindowXML):
                 if not current():return
                 metadata=cached_video_metadata(helper_profile,identity) if identity else {}
                 ranked=preview_candidates(item.get('trailer',''),videos,metadata=metadata,preferred_language=language)
-                candidates=self.preview_title_verifier.filter(ranked,aliases,valid=current)
+                candidates=self.preview_title_verifier.filter(ranked,aliases,valid=current,media_type=identity[0] if identity else None)
+                if not current():return
+                if not candidates:
+                    candidates=self.preview_secondary_lookup.lookup(candidates,identity,aliases,get_list,self.preview_title_verifier,preferred_language=language,year=item.get('year'),valid=current)
                 if not current():return
                 if candidates:
                     self.preview_cache[cache_key]=(time.monotonic(),candidates)
@@ -2073,6 +2142,12 @@ class LiveReview(YouTubeBrowser,xbmcgui.WindowXML):
             if item.get('_youtube_more'):
                 self.request_youtube_more(cid-900 if cid in (900,901) else 0,explicit=True);return
             if item.get('_page_control'):
+                if cid==3100:
+                    if item['_page_control']=='previous':
+                        if self.related_history.pages:
+                            prior=self.related_history.pages[-1];self.load_related_page(prior[0],back=True,position=prior[1])
+                    else:self.load_related_page(item['file'])
+                    return
                 n=cid-900 if cid in (900,901) else 0
                 if item['_page_control']=='previous':
                     prior=self.histories[n].pop()

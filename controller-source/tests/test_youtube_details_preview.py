@@ -8,7 +8,7 @@ from xml.etree import ElementTree as E
 
 from test_window_lifecycle import ROOT, extract
 from live_core import (show_identity, title_details_params, episode_heading,
-                       title_presentation, rating_badges, watch_state)
+                       title_presentation, rating_badges, watch_state, PageHistory)
 from episode_ui import episode_card
 from search_ui import discovery_result, entity_kind, search_caption
 
@@ -54,7 +54,7 @@ class YouTubeDetailsPreview(unittest.TestCase):
         namespace = dict(show_identity=show_identity, title_details_params=title_details_params,
                          discovery_result=discovery_result, episode_heading=episode_heading,
                          title_presentation=title_presentation, episode_card=episode_card,
-                         rating_badges=rating_badges, watch_state=watch_state,
+                         rating_badges=rating_badges, watch_state=watch_state, PageHistory=PageHistory,
                          entity_kind=entity_kind, search_caption=search_caption,
                          event=lambda *a, **k: None, threading=SimpleNamespace(Thread=Thread))
         window = SimpleNamespace(mode=mode, section='YouTube', preview_mode=movie, previews_ready=False,

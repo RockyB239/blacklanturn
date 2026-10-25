@@ -1,0 +1,51 @@
+{
+  "core_differences": [],
+  "core_preferences_checked": 280,
+  "healthy_databases": 57,
+  "history_observations": [
+    {
+      "generic_local_dash_preview_timestamp_updates": 1,
+      "preserved": true,
+      "rows": 145,
+      "type": "watched",
+      "unchanged": false,
+      "watched_counts_unchanged": true
+    },
+    {
+      "preserved": true,
+      "rows": 4,
+      "type": "resume",
+      "unchanged": true
+    },
+    {
+      "preserved": true,
+      "rows": 0,
+      "type": "storage_v2",
+      "unchanged": true
+    },
+    {
+      "preserved": true,
+      "rows": 74,
+      "type": "storage_v2",
+      "unchanged": true
+    }
+  ],
+  "history_preserved": true,
+  "notice_state_files": {
+    "userdata/addon_data/script.blacklanturn.preview/release-notices.json": {
+      "after": "2fd9ac095cf14f75ce728f705c136fc2cb18de35342b776d37c766488d0fc45c",
+      "before": "2fd9ac095cf14f75ce728f705c136fc2cb18de35342b776d37c766488d0fc45c"
+    },
+    "userdata/blacklanturn-install-complete.json": {
+      "after": "d60b011066c3828889421efda90e69ea0f36cbea9fa51fd86c83aa74edfe3936",
+      "before": "d60b011066c3828889421efda90e69ea0f36cbea9fa51fd86c83aa74edfe3936"
+    }
+  },
+  "original_sha256": "75630273efa02636786d801568ec343505fb1acd587f5e706eb7daf01349ebe5",
+  "package_source_differences": [],
+  "passed": true,
+  "setting_values_checked": 3433,
+  "settings_differences": {},
+  "unrelated_addon_source_checked": 22612,
+  "unrelated_source_differences": []
+}

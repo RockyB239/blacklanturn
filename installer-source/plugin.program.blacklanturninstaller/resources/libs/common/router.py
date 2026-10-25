@@ -50,7 +50,29 @@ class Router:
             MainMenu().get_listing()
             self._finish(handle)
 
+        elif mode == 'updates':
+            from resources.libs.gui.updates_menu import get_listing
+            get_listing()
+            self._finish(handle)
+
+        elif mode in ('updatescheck', 'updatespref'):
+            from resources.libs.gui import updates_menu
+            try:
+                if mode == 'updatescheck':
+                    updates_menu.check_now()
+                else:
+                    updates_menu.toggle_preference()
+            except (OSError, ValueError, KeyError, TypeError):
+                import xbmcgui
+                xbmcgui.Dialog().ok('BlackLanturn', 'Update information could not be saved. Your setup has been kept. Please try again.')
+            xbmc.executebuiltin('Container.Refresh()')
+
         elif mode == 'updatenotes':
+            from resources.libs.gui import updates_menu
+            try:
+                updates_menu.refresh_notes()
+            except (OSError, ValueError, KeyError, TypeError):
+                pass  # Existing saved notes remain readable if the marker is unavailable.
             if xbmc.getCondVisibility('System.HasAddon(script.blacklanturn.preview)'):
                 xbmc.executebuiltin('RunScript(script.blacklanturn.preview,updates)')
             else:

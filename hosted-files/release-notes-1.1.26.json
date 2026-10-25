@@ -1,0 +1,34 @@
+{
+  "title": "BlackLanturn Build 1.1.26",
+  "summary": "Better title discovery, more reliable previews and easier BlackLanturn updates.",
+  "sections": [
+    {
+      "heading": "Easier updates",
+      "bullets": [
+        "Installer 1.0.31 adds an Updates sidebar with your installed version, update checks, release notes and notification controls.",
+        "Release notes scroll with Up and Down. Update BlackLanturn keeps your complete setup automatically; Keep choices apply to reinstalling."
+      ]
+    },
+    {
+      "heading": "Better browsing",
+      "bullets": [
+        "Choose genre is available in main Movies and Shows title options, including lower rows. It stays hidden while browsing episodes and other unrelated views.",
+        "More like this uses Recommendations first, with Similar as a fallback. Branded Next and Previous retain your title and browsing position."
+      ]
+    },
+    {
+      "heading": "More reliable previews",
+      "bullets": [
+        "Valid Final Trailer, Red Band Trailer and TV installment labels are recognized while wrong-series checks stay active.",
+        "When the usual list has no suitable preview, one limited, cached YouTube lookup can find another. Previews remain excluded from YouTube watch history."
+      ]
+    },
+    {
+      "heading": "Keep your setup",
+      "bullets": [
+        "Your authorizations, playback settings, watched and resume progress, sources, favourites and other saved data stay in place.",
+        "Included add-ons and tested patches update together. Other add-ons you installed are left alone. Close and reopen Kodi after updating."
+      ]
+    }
+  ]
+}

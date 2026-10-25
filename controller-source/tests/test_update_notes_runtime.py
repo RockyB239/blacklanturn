@@ -112,7 +112,7 @@ class HomeUpdatesRuntimeTests(unittest.TestCase):
   ns['timeout'](obj);self.assertTrue(obj.finished);self.assertEqual(self.calls,['closed'])
  def test_update_uses_only_fixed_installer_catalog_and_not_during_playback(self):
   self.ui.xbmc.executebuiltin=lambda cmd:self.calls.append(cmd)
-  self.assertTrue(self.ui.request_update());self.assertEqual(self.calls,['RunPlugin(plugin://plugin.program.blacklanturninstaller/?mode=builds)'])
+  self.assertTrue(self.ui.request_update());self.assertEqual(self.calls,['RunPlugin(plugin://plugin.program.blacklanturninstaller/?mode=updates)'])
   self.playing=True;self.assertFalse(self.ui.request_update());self.assertEqual(len(self.calls),1)
  def test_catalog_is_cached_and_no_inventory_rpc_is_used(self):
   from unittest.mock import patch

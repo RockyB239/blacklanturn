@@ -11,7 +11,7 @@
                 <posx>0</posx>
                 <posy>0</posy>
                 <width>650</width>
-                <height>765</height>
+                <height>825</height>
                 <texture border="12">blacklanturn/panel.png</texture>
             </control>
             <control type="image">
@@ -39,7 +39,7 @@
                 <left>20</left>
                 <top>60</top>
                 <width>610</width>
-                <height>80</height>
+                <height>140</height>
                 <font>font12</font>
                 <align>left</align>
                 <aligny>top</aligny>
@@ -49,7 +49,7 @@
         </control>
         <control type="scrollbar" id="17">
             <left>630</left>
-            <top>139</top>
+            <top>199</top>
             <width>15</width>
             <height>520</height>
             <visible>true</visible>
@@ -61,7 +61,7 @@
         </control>
         <control type="grouplist" id="9000">
             <left>20</left>
-            <top>140</top>
+            <top>200</top>
             <width>610</width>
             <height>520</height>
             <itemgap>-3</itemgap>
@@ -361,7 +361,7 @@
         <control type="group" id="9001">
             <control type="button" id="201">
                 <left>350</left>
-                <top>685</top>
+                <top>745</top>
                 <width>300</width>
                 <height>60</height>
                 <font>font13</font>

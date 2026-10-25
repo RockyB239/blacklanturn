@@ -240,6 +240,17 @@ def show_speed_test(img):
     del popup
 
 
+def show_initial_save_data_settings():
+    """Keep choices configure reinstalls, not an installed build's updates."""
+    if CONFIG.get_setting('first_install') != 'true':
+        return False
+    if (CONFIG.get_setting('installed') == 'true' and
+            CONFIG.get_setting('buildversion')):
+        return False
+    show_save_data_settings()
+    return True
+
+
 def show_save_data_settings():
     class FirstRun(xbmcgui.WindowXMLDialog):
 
@@ -280,9 +291,10 @@ def show_save_data_settings():
                     self.getControl(item).setSelected(True)
 
         def show_dialog(self):
-            self.getControl(self.title).setLabel(CONFIG.ADDONTITLE)
+            self.getControl(self.title).setLabel('Keep choices for reinstalling')
             from resources.libs.wizard import install_mode
             self.getControl(102).setText(
+                'Update BlackLanturn keeps everything automatically. These choices only apply to a reinstall.\n' +
                 'Mode: ' + install_mode(CONFIG) + '. ' +
                 ('Only selected accounts are kept; other Keep choices apply to Standard. Change mode in Save Data.'
                  if CONFIG.get_setting('authonlyclean') == 'true' else

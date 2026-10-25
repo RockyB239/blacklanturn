@@ -11,11 +11,11 @@ class ReleaseLayoutTests(unittest.TestCase):
  def test_notes_match_mockup_hierarchy_and_separate_sections(self):
   t=E.parse(ROOT/'UpdateNotes.xml')
   self.assertTrue(any(n.text=='What’s new' for n in t.findall('.//label')))
-  self.assertEqual(t.find('.//control[@id="100"]').get('type'),'list')
-  self.assertIsNotNone(t.find('.//itemlayout/control/label'))
+  self.assertEqual(t.find('.//control[@id="100"]').get('type'),'textbox')
+  self.assertIsNotNone(t.find('.//control[@id="110"][@type="scrollbar"]'))
   self.assertNotIn('Installed add-on changes',(ROOT/'UpdateNotes.xml').read_text())
- def test_long_section_body_is_scrollable_in_both_item_layouts(self):
+ def test_long_section_body_has_a_native_page_control(self):
   tree=E.parse(ROOT/'UpdateNotes.xml')
-  for kind in ('itemlayout','focusedlayout'):
-   box=tree.find('.//'+kind+'/control[@type="textbox"]')
-   self.assertIsNotNone(box.find('autoscroll'),'Valid long release notes must remain readable in '+kind)
+  box=tree.find('.//control[@id="100"]')
+  self.assertEqual(box.findtext('pagecontrol'),'110')
+  self.assertIsNone(box.find('autoscroll'),'Readers control the pace of long release notes')

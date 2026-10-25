@@ -69,6 +69,7 @@ class MainMenu:
         else:
             directory.add_dir('None', {'mode': 'builds'}, themeit=CONFIG.THEME4)
         directory.add_separator()
+        directory.add_dir('Updates', {'mode': 'updates'}, icon=CONFIG.ICONBUILDS, themeit=CONFIG.THEME1)
         directory.add_dir('Builds', {'mode': 'builds'}, icon=CONFIG.ICONBUILDS, themeit=CONFIG.THEME1)
         directory.add_dir('Maintenance', {'mode': 'maint'}, icon=CONFIG.ICONMAINT, themeit=CONFIG.THEME1)
         if (tools.platform() == 'android' or CONFIG.DEVELOPER == 'true'):

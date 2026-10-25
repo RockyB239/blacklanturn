@@ -11,7 +11,9 @@ def verify(receipt,manifest,*,historical=False,reminder_receipt=None):
  assert receipt.get('files')==manifest['files'],'Recorded notice source differs from native acceptance'
  current=inventory(ROOT/'controller-source/addon');installer=inventory(ROOT/'installer-source/plugin.program.blacklanturninstaller')
  if historical:
-  for name in ('release_updates.py','resources/skins/Default/1080i/UpdateNotes.xml'):
+  # Historical acceptance certifies unchanged state/notes engine only.
+  # Release126 separately requires current source-bound Updates/notes UI proof.
+  for name in ('release_updates.py','update_notes.py'):
    assert current[name]==manifest['files'][name],'Notice state/notes changed; fresh notice acceptance required'
   changed=('update_notes_ui.py','resources/skins/Default/1080i/UpdateNotice.xml')
   if any(current[n]!=manifest['files'][n] for n in changed):

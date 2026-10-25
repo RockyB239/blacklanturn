@@ -9,9 +9,11 @@ def verify(receipt,manifest,*,historical=False):
  assert receipt.get('files')==manifest.get('files'),'Saved-row acceptance identity differs'
  current=inventory(ROOT/'controller-source/addon')
  if historical:
-  exceptions={'addon.xml','update_notes_ui.py','resources/skins/Default/1080i/UpdateNotice.xml'}
-  assert set(current)==set(manifest['files'])
-  assert all(current[n]==digest for n,digest in manifest['files'].items() if n not in exceptions),'Previously tested saved-row code changed'
+  # Historical Mac/Fire evidence covers these unchanged saved-row/playback
+  # components. It cannot approve changed Details, preview or notice UI.
+  # Fresh release126 feature and exact-artifact install gates cover that delta.
+  components=('youtube_saved.py','youtube_saved_runtime.py','youtube_rows.py','youtube_core.py','youtube_browser.py','youtube_provider.py','youtube_home.py','youtube_end.py','live_runtime.py','playback_runtime.py','autoplay_session.py')
+  assert all(current.get(n)==manifest['files'].get(n) for n in components),'Previously tested saved-row component changed'
  else:assert manifest['files']==current,'Untested controller source'
  assert set(receipt.get('devices',{}))=={'mac','fire'} and receipt.get('apple_tv_accessed') is False
  for dev in receipt['devices'].values():

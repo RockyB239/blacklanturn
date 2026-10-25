@@ -115,7 +115,7 @@ class ControllerControls(unittest.TestCase):
             self.assertEqual(s.rows[0],original)
             s.search_state=None;s.active_page='animation';s.config={'Genres':[{'id':'animation','label':'Animation'}]}
             s.set_rows([{'label':'Animation','path':path}]);self.assertEqual(s.rows[0],original)
-    def test_genre_remains_on_page_controls_without_mixing_into_title_actions(self):
+    def test_genre_is_available_from_titles_and_page_controls(self):
         m=module(self)
         for selected in [item(1),{'_page_control':'previous','file':'blacklanturn://previous','label':'Previous'}]:
             calls=[];history=PageHistory();history.push('plugin://test/one',2)
@@ -126,7 +126,43 @@ class ControllerControls(unittest.TestCase):
             ns={'xbmcgui':SimpleNamespace(Dialog=lambda:SimpleNamespace(contextmenu=lambda opts:opts.index('Choose genre…') if 'Choose genre…' in opts else -1)),
                 'can_choose_genre':m.can_choose_genre,'trakt_command':lambda _:None,'choose_player_path':lambda _:None,'discovery_result':lambda _:None,'resume_options':lambda _: {},'event':lambda *a,**kw:None}
             extract(ROOT/'live_review.py','title_actions',ns,'LiveReview')(state)
-            self.assertEqual(calls,['genre'] if selected.get('_page_control') else []);self.assertFalse(state.actions_open)
+            self.assertEqual(calls,['genre']);self.assertFalse(state.actions_open)
+    def test_genre_is_after_title_actions_before_settings_on_each_visible_row(self):
+        m=module(self)
+        for section in ('Movies','Shows'):
+            for focus in (900,901,101):
+                with self.subTest(section=section,focus=focus):
+                    selected=item(1);menus=[];calls=[]
+                    state=SimpleNamespace(section=section,mode='home',search_state=None,episode_browser_context=None,discovery_stack=[],nav=False,
+                        getFocusId=lambda:focus,rows=[[selected],[selected]],histories=[PageHistory(),PageHistory()],last_row=1,row_states={},
+                        chosen=lambda cid:selected,config={'Saved':[]},rating_identity=lambda _:('movie','1'),
+                        stop_preview=lambda:None,actions_open=False,browse_source=lambda:calls.append('genre'),setFocusId=lambda n:None)
+                    def menu(options):
+                        menus.append(options)
+                        return options.index('Choose genre…') if 'Choose genre…' in options else -1
+                    ns={'xbmcgui':SimpleNamespace(Dialog=lambda:SimpleNamespace(contextmenu=menu)),
+                        'can_choose_genre':m.can_choose_genre,'trakt_command':lambda _:'trakt',
+                        'choose_player_path':lambda _:'plugin://player','discovery_result':lambda _:None,'resume_options':lambda _: {},'event':lambda *a,**kw:None}
+                    extract(ROOT/'live_review.py','title_actions',ns,'LiveReview')(state)
+                    self.assertEqual(calls,['genre'])
+                    choices=menus[0];genre=choices.index('Choose genre…')
+                    for label in ('Play','Play using…','Details','Save to My Stuff on this device','Trakt: Watched, progress & lists'):
+                        self.assertLess(choices.index(label),genre)
+                    for label in ('Set default player…','Refresh watched status'):
+                        self.assertGreater(choices.index(label),genre)
+    def test_title_genre_shortcut_is_excluded_from_seasons_episodes_youtube_and_details(self):
+        m=module(self)
+        for section,mode,episode_context in [('Shows','home',{'season':1}),('Shows','home',{'episode':2}),('YouTube','home',None),('Movies','details',None)]:
+            with self.subTest(section=section,mode=mode,episode_context=episode_context):
+                selected=item(1);menus=[]
+                state=SimpleNamespace(section=section,mode=mode,search_state=None,episode_browser_context=episode_context,discovery_stack=[],nav=False,
+                    getFocusId=lambda:901,rows=[[selected],[selected]],histories=[PageHistory(),PageHistory()],last_row=1,row_states={},
+                    chosen=lambda cid:selected,config={'Saved':[]},rating_identity=lambda _:None,stop_preview=lambda:None,actions_open=False)
+                ns={'xbmcgui':SimpleNamespace(Dialog=lambda:SimpleNamespace(contextmenu=lambda opts:menus.append(opts) or -1)),
+                    'can_choose_genre':m.can_choose_genre,'trakt_command':lambda _:None,'choose_player_path':lambda _:None,
+                    'discovery_result':lambda _:None,'resume_options':lambda _: {},'event':lambda *a,**kw:None}
+                extract(ROOT/'live_review.py','title_actions',ns,'LiveReview')(state)
+                self.assertNotIn('Choose genre…',menus[0])
     def test_clicking_previous_restores_that_rows_path_and_position(self):
         m=module(self);history=PageHistory();history.push('plugin://test/first',6);calls=[]
         state=SimpleNamespace(actions_open=False,histories=[PageHistory(),history],chosen=lambda cid:{'_page_control':'previous','file':'blacklanturn://previous'},
