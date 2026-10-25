@@ -1,0 +1,14 @@
+BlackLanturn 1.1.28 — Update navigation polish
+
+Both General and Apple TV / Mac editions include Installer 1.0.33 and Controller 0.1.95.
+
+- Notification Update opens the installed edition's Update BlackLanturn confirmation directly.
+- Successful completion focuses Close Kodi; Close later remains available. Reopen Kodi after closing.
+- Older update prompts use the same true in-place updater.
+- Details artwork and previews share compact framing and soft edge fades.
+- An unavailable update catalog shows a retry message without changing your setup.
+- Choose genre follows Details in main Movies/Shows Options, and stays hidden inside seasons and episodes.
+
+Use Update BlackLanturn. Included add-ons, Installer and tested patches update together; all saved settings, authorizations, playback preferences and unrelated installed add-ons stay in place. Installations already on Build1.1.27 / Installer1.0.32 can receive Installer1.0.33 through the build update itself. Earlier installations need the supported Installer capability first.
+
+Validation and platform limits are recorded with the release evidence. No personal device is automatically updated or acknowledged during publication.
