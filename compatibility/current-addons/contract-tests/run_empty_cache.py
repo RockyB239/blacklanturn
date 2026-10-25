@@ -14,7 +14,6 @@ import types
 S=Path(__file__).resolve().parents[1]
 H=S/'candidate/plugin.video.themoviedb.helper'
 J=S/'candidate/script.module.jurialmunkey/resources/modules/jurialmunkey'
-R=Path(__file__).resolve().parents[4]/'youtube-refresh-mac-2026-10-22/repo'
 # Explicit argument accepts the saved, read-only regression suite.
 REGRESSION=Path(sys.argv[1])
 def module(name,**kw):
