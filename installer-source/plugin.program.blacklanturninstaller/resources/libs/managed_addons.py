@@ -99,12 +99,28 @@ def _source_files(addon, message):
         actual[relative.as_posix()] = _digest(addon.name, relative.as_posix(), path.read_bytes())
     return actual
 
+def _verify_installed_helper(home):
+    addon = Path(home) / 'addons' / HELPER
+    if not addon.exists() and not addon.is_symlink():
+        return
+    message = 'Installed Helper has unreviewed source or version. Your current build has been kept; update compatibility support before installing.'
+    try:
+        actual = _source_files(addon, message)
+        version = _versions.upstream_version(HELPER, (addon / 'addon.xml').read_bytes())
+        manifest = json.loads((Path(__file__).parents[1] / 'managed-helper.json').read_text())
+        if _tree_digest(actual) not in manifest.get('installed_tree_sha256', {}).get(version, ()):
+            raise ProtectionError(message)
+    except (OSError, ValueError, KeyError, E.ParseError) as exc:
+        raise ProtectionError(message) from exc
+
+
 def verify_installed(home, network=False, youtube=False):
-    """Reject unknown installed Umbrella/shared code before cleanup or native setup.
+    """Reject unknown installed managed code before cleanup or native setup.
 
     Only reviewed complete trees and explicit player variants are accepted.
     Runtime bytecode is excluded; foreign files, links and oversized trees fail.
     """
+    _verify_installed_helper(home)
     if youtube:
         _verify_installed_youtube(home)
     if network:

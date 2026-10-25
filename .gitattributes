@@ -1,4 +1,4 @@
 # Preserve exact reviewed vendor bytes for source hashes on every checkout.
 compatibility/managed-updates/metadata/** -text
-compatibility/managed-updates/umbrella/** -text
+compatibility/managed-updates/umbrella/** -text whitespace=cr-at-eol
 compatibility/managed-updates/kodi-omega/** -text

@@ -1,0 +1,77 @@
+{
+  "schema": 1,
+  "passed": true,
+  "scope": "Previously completed native current-source Fire validation, before this packaging task. No device contacted by release builder.",
+  "runtime": "21.3",
+  "device": "Fire Stick",
+  "release_install_acceptance": false,
+  "tested_installer_version": "1.0.28",
+  "sources": {
+    "plugin.video.umbrella": {
+      "version": "1:6.7.97+blacklanturn.1",
+      "tree_sha256": "5dce3331bddbbc29764c3e0744cbf0790bc8abc1e0d6485ba1dcdd339ce0154d",
+      "file_count": 1686
+    },
+    "plugin.video.themoviedb.helper": {
+      "version": "1:6.18.1+blacklanturn.1",
+      "tree_sha256": "6ef80f51fdf54ab1e161420acfbb0ea302656c31d2b081a9537f51969f066a8a",
+      "file_count": 496
+    },
+    "script.module.infotagger": {
+      "version": "0.1.0",
+      "tree_sha256": "d712b4f492726293a59ad218afff96570cdc30373f88dc26b3b6c579a2d31747",
+      "file_count": 4
+    },
+    "script.module.cocoscrapers": {
+      "version": "1.0.45",
+      "tree_sha256": "20a753354d228306a17d371bba385113c5089d2b5130f03b32ec46dce95eaad5",
+      "file_count": 98
+    },
+    "script.skinvariables": {
+      "version": "2.2.10",
+      "tree_sha256": "f07a510fe2bb25860464fb5fefe2af609e6b5a3ca8f94741f850260030e9d038",
+      "file_count": 49
+    },
+    "resource.language.en_us": {
+      "version": "11.0.84",
+      "tree_sha256": "932e9b6b462e9354fb0a1b7f8892ab352f4662936f00db5eff41feef3fb96a98",
+      "file_count": 4
+    },
+    "script.module.inputstreamhelper": {
+      "version": "0.8.6",
+      "tree_sha256": "3da28a6ee3c1023e78092a0211d76c2ae5718976ec1bf3b1fbf7aec3160c24ce",
+      "file_count": 33
+    }
+  },
+  "source_readback": {
+    "plugin.video.umbrella": {
+      "version": "1:6.7.97+blacklanturn.1",
+      "exact_files": 1686
+    },
+    "plugin.video.themoviedb.helper": {
+      "version": "1:6.18.1+blacklanturn.1",
+      "exact_files": 496
+    },
+    "script.module.infotagger": {
+      "version": "0.1.0",
+      "exact_files": 4
+    }
+  },
+  "playback_started": true,
+  "startup_seconds": 7.5,
+  "playback_advanced": true,
+  "preservation_passed": true,
+  "temporary_favourite_removed": true,
+  "owned_staging_removed": true,
+  "control_tunnel_closed": true,
+  "handed_back_for_use": true,
+  "private_evidence_sha256": {
+    "current-ready.json": "98168abefc6be87c9847d9f74cf404b9fda9a864c1ce80da234d5538a150f34e",
+    "managed-after/capture.json": "af193376f2b3dc22b5921eef14692ad5eee1b0379834e150e65c24e743cf8360"
+  },
+  "limits": [
+    "Does not prove clean or Standard installation of Build 1.1.23 / Installer 1.0.29.",
+    "Does not rerun every historical progress/cache/autoplay acceptance scenario on new upstream.",
+    "Does not provide new Apple TV or Mac current-source native acceptance."
+  ]
+}

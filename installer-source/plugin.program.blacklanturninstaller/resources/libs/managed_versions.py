@@ -38,18 +38,43 @@ def normalize_metadata(addon_id, raw):
     return raw
 
 
+def _adapter_variants(variant):
+    return (variant, *variant.get('legacy_variants', ()))
+
+
+def _adapter_for_metadata(data, key, variant):
+    addon_id = key.split('/', 1)[0]
+    metadata = data.get('addons/' + addon_id + '/addon.xml')
+    if metadata is None:
+        raise ValueError('Missing managed source adapter metadata: ' + addon_id)
+    reviewed_metadata = {v[field] for v in policy()['addons'].get(addon_id, ())
+                         for field in ('upstream_sha256', 'managed_sha256')}
+    if _sha(metadata) not in reviewed_metadata:
+        raise ValueError('Unreviewed managed source adapter metadata: ' + addon_id)
+    try:
+        version = upstream_version(addon_id, metadata)
+    except E.ParseError as exc:
+        raise ValueError('Invalid managed source adapter metadata') from exc
+    for reviewed in _adapter_variants(variant):
+        if reviewed.get('upstream_version') == version:
+            return reviewed
+    raise ValueError('Unreviewed managed source adapter version: ' + addon_id)
+
+
 def source_digest(addon_id, name, raw):
     """Validate the new overlay independently while retaining historical gates."""
     digest = _sha(raw)
     variant = policy().get('source_adapters', {}).get(addon_id + '/' + name)
-    if variant and digest == variant['managed_sha256']:
-        return variant['upstream_sha256']
+    for reviewed in _adapter_variants(variant) if variant else ():
+        if digest == reviewed['managed_sha256']:
+            return reviewed['upstream_sha256']
     return digest
 
 
 def apply_source_adapters(data, candidates):
     changes = {}
     for key, variant in policy()['source_adapters'].items():
+        variant = _adapter_for_metadata(data, key, variant)
         target = 'addons/' + key
         raw = data.get(target)
         candidate = candidates.get(key)
@@ -64,6 +89,7 @@ def verify_source_adapters(data, addon_id=None):
     for key, variant in policy()['source_adapters'].items():
         if addon_id is not None and key.split('/', 1)[0] != addon_id:
             continue
+        variant = _adapter_for_metadata(data, key, variant)
         raw = data.get('addons/' + key)
         if raw is None or _sha(raw) != variant['managed_sha256']:
             raise ValueError('The managed version source adapter is missing or unreviewed: ' + key)
@@ -75,7 +101,8 @@ def verify_adapter_sets(data):
     for addon_id in addons:
         metadata = data.get('addons/' + addon_id + '/addon.xml')
         protected = metadata is not None and normalize_metadata(addon_id, metadata) != metadata
-        adapted = any(data.get('addons/' + key) is not None and _sha(data['addons/' + key]) == variant['managed_sha256']
+        adapted = any(data.get('addons/' + key) is not None
+                      and _sha(data['addons/' + key]) in {v['managed_sha256'] for v in _adapter_variants(variant)}
                       for key, variant in policy()['source_adapters'].items() if key.split('/', 1)[0] == addon_id)
         if protected or adapted:
             verify_source_adapters(data, addon_id)

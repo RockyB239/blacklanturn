@@ -1,0 +1,34 @@
+{
+  "title": "BlackLanturn Build 1.1.23",
+  "summary": "Important compatibility update: current add-ons with BlackLanturn fixes and safer Standard updates.",
+  "sections": [
+    {
+      "heading": "Current tested add-ons and patches",
+      "bullets": [
+        "Includes Umbrella 6.7.97 and TMDbHelper 6.18.2 with BlackLanturn playback, progress, cache and privacy fixes.",
+        "Current CocoScrapers, Skin Variables, InputStream Helper, InfoTagger and English language resources are included."
+      ]
+    },
+    {
+      "heading": "Update through BlackLanturn",
+      "bullets": [
+        "Update BlackLanturn Installer, then install this build using Standard. Separate updates of patched add-ons are unnecessary.",
+        "Managed versions prevent ordinary upstream updates from silently replacing the patches. Future compatibility fixes arrive in BlackLanturn releases."
+      ]
+    },
+    {
+      "heading": "Keep your setup",
+      "bullets": [
+        "Standard preserves selected settings and authorizations, local Kodi viewing databases and YouTube watch history. Clean and account-only reset deliberately use build defaults.",
+        "Newer compatible ordinary dependencies are kept as complete trees during Standard update. Unknown managed source stops before cleanup."
+      ]
+    },
+    {
+      "heading": "Playback and platform compatibility",
+      "bullets": [
+        "Existing source selection, Play Next, language/subtitle defaults, automatic YouTube quality and platform-specific workarounds remain included.",
+        "Current Helper uses its watched-source setting for watched status and playback progress; the removed separate playback-source default is no longer written."
+      ]
+    }
+  ]
+}

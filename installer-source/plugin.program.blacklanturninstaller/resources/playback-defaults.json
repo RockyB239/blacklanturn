@@ -6,7 +6,6 @@
   "addon_data/plugin.video.themoviedb.helper/settings.xml": {
     "trakt_watchedindicators": "true",
     "sync_source_watched": "Trakt",
-    "sync_source_playback": "Trakt",
     "trakt_scrobbling": "true"
   },
   "addon_data/plugin.video.youtube/settings.xml": {

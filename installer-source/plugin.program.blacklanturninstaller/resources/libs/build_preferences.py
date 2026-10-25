@@ -17,6 +17,7 @@ YOUTUBE_CHOICES={'kodion.history.remote','kodion.history.local','kodion.video.qu
  'kodion.live_stream.selection.1','kodion.live_stream.selection.2','kodion.support.alternative_player',
  'kodion.alternative_player.web_urls','kodion.alternative_player.mpd','kodion.default_player.web_urls','kodion.default_player.fallback_video'}
 CAPTURE_CHOICES={YOUTUBE:YOUTUBE_CHOICES,
+ 'addon_data/plugin.video.themoviedb.helper/settings.xml':{'sync_source_playback'},
  'guisettings.xml':{'videoplayer.usemediacodecsurface','videoplayer.usemediacodec'},
  'addon_data/plugin.video.umbrella/settings.xml':{'remove.hdr','remove.dolby.vision','remove.hevc'}}
 MAX_BYTES=4*1024*1024

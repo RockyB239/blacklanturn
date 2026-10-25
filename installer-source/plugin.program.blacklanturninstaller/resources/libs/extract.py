@@ -33,15 +33,23 @@ from resources.libs.common import logging
 from resources.libs.common import tools
 
 
-def all(_in, _out, ignore=None, title=None):
+def all(_in, _out, ignore=None, title=None, standard_plan=None):
     progress_dialog = xbmcgui.DialogProgress()
     progress_dialog.create(CONFIG.ADDONTITLE, "Extracting Content")
     
-    return all_with_progress(_in, _out, progress_dialog, ignore, title)
+    return all_with_progress(_in, _out, progress_dialog, ignore, title, standard_plan=standard_plan)
 
 
-def all_with_progress(_in, _out, dp, ignore, title):
+def all_with_progress(_in, _out, dp, ignore, title, standard_plan=None):
     from resources.libs import whitelist
+
+    if standard_plan:
+        from resources.libs import standard_addons
+        try:
+            standard_addons.verify(_out, standard_plan)
+        except standard_addons.ProtectionError:
+            return 0, 1, ('A retained add-on changed after preparation; cleanup has already run. '
+                          'Installation stopped before extraction. Keep the pending account backup and retry this installation.')
 
     count = 0
     errors = 0
@@ -102,7 +110,11 @@ def all_with_progress(_in, _out, dp, ignore, title):
                                                                                      zipsize)
         line3 = '[COLOR {0}]{1}[/COLOR]'.format(CONFIG.COLOR1, item.filename)
         
-        if (file[0] == 'addons' and len(file) > 1 and file[1] in ('inputstream.adaptive', 'script.module.pil')) or (file[0] == 'userdata' and len(file) > 2 and file[1] == 'addon_data' and file[2] in ('inputstream.adaptive', 'script.module.pil')) or (file[0] == 'userdata' and len(file) > 2 and file[1] == 'Database' and file[-1].startswith('Addons') and file[-1].endswith('.db')):
+        if standard_plan and (standard_addons.keep_state_file(item.filename, standard_plan) or standard_addons.keep_state_directory(item.filename.rstrip('/'), standard_plan)):
+            skip = True
+        elif standard_plan and file[0] == 'addons' and len(file) > 1 and file[1] in (set(standard_plan['preserve']) | set(standard_plan.get('excluded', ()))):
+            skip = True
+        elif (file[0] == 'addons' and len(file) > 1 and file[1] in ('inputstream.adaptive', 'script.module.pil')) or (file[0] == 'userdata' and len(file) > 2 and file[1] == 'addon_data' and file[2] in ('inputstream.adaptive', 'script.module.pil')) or (file[0] == 'userdata' and len(file) > 2 and file[1] == 'Database' and file[-1].startswith('Addons') and file[-1].endswith('.db')):
             skip = True
         elif item.filename == 'userdata/sources.xml' and CONFIG.KEEPSOURCES == 'true':
             skip = True

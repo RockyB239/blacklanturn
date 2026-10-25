@@ -185,6 +185,23 @@ class Wizard:
                                'KEEPADVANCED', 'KEEPGUISETTINGS', 'KEEPREPOS', 'KEEPSUPER',
                                'KEEPWHITELIST'):
                     setattr(CONFIG, option, 'false')
+            from resources.libs import standard_addons
+            try:
+                ordinary_kept = set()
+                if not auth_only and CONFIG.KEEPWHITELIST == 'true':
+                    from resources.libs import whitelist
+                    ordinary_kept = {entry[2] for entry in whitelist.whitelist('read')}
+                    for addon in tuple(ordinary_kept):
+                        for dependency in db.depends_list(addon):
+                            ordinary_kept.add(dependency)
+                            ordinary_kept.update(db.depends_list(dependency))
+                standard_plan = standard_addons.prepare(lib, CONFIG.HOME, xbmc, auth_only=auth_only, kept=ordinary_kept, excluded=CONFIG.EXCLUDES)
+                prepared['addon_ids'] = sorted(set(prepared['addon_ids']) | set(standard_plan['preserve']))
+            except (standard_addons.ProtectionError, OSError, ValueError, TypeError, IndexError) as exc:
+                self.dialogProgress.close()
+                self.dialog.ok(CONFIG.ADDONTITLE, str(exc))
+                return
+
             if protected_helper:
                 from resources.libs import managed_addons
                 try:
@@ -216,7 +233,7 @@ class Wizard:
                     self.dialog.ok(CONFIG.ADDONTITLE, str(exc))
                     return
 
-            if install.wipe(accounts_prepared=protected_helper, auth_only=auth_only) is False:
+            if install.wipe(accounts_prepared=protected_helper, auth_only=auth_only, standard_plan=standard_plan) is False:
                 self.dialogProgress.close()
                 return
 
@@ -225,7 +242,7 @@ class Wizard:
             
             title = '[COLOR {0}][B]Installing:[/B][/COLOR] [COLOR {1}]{2} v{3}[/COLOR]'.format(CONFIG.COLOR2, CONFIG.COLOR1, name, check.check_build(name, 'version'))
             self.dialogProgress.update(0, '{}\n\nPlease Wait'.format(title))
-            percent, errors, error = extract.all(lib, CONFIG.HOME, title=title)
+            percent, errors, error = extract.all(lib, CONFIG.HOME, title=title, standard_plan=standard_plan)
             
             skin.skin_to_default('Build Install')
 

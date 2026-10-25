@@ -2,7 +2,7 @@
 import copy,importlib.util,io,json,tempfile,types,unittest,xml.etree.ElementTree as E,zipfile
 from pathlib import Path
 ROOT=Path(__file__).resolve().parents[1];LIB=ROOT/'installer-source/plugin.program.blacklanturninstaller/resources/libs'
-EXPECTED={'guisettings.xml':{'locale.audiolanguage':'default','locale.subtitlelanguage':'forced_only'},'addon_data/plugin.video.themoviedb.helper/settings.xml':{'trakt_watchedindicators':'true','sync_source_watched':'Trakt','sync_source_playback':'Trakt','trakt_scrobbling':'true'},'addon_data/plugin.video.umbrella/settings.xml':{'indicators.alt':'1','indicators':'Trakt','scrobble.source':'1','scrobble':'Trakt'}}
+EXPECTED={'guisettings.xml':{'locale.audiolanguage':'default','locale.subtitlelanguage':'forced_only'},'addon_data/plugin.video.themoviedb.helper/settings.xml':{'trakt_watchedindicators':'true','sync_source_watched':'Trakt','trakt_scrobbling':'true'},'addon_data/plugin.video.umbrella/settings.xml':{'indicators.alt':'1','indicators':'Trakt','scrobble.source':'1','scrobble':'Trakt'}}
 EXPECTED['addon_data/plugin.video.youtube/settings.xml']={'kodion.mpd.quality.selection':'6','kodion.mpd.stream.select':'1','kodion.mpd.stream.features':'avc1,mp4a,vtt,filter,alt_sort,vp9','kodion.video.quality.isa':'true','kodion.mpd.videos':'true','kodion.video.stream.select':'1'}
 IDS=['plugin.video.themoviedb.helper','plugin.video.umbrella','plugin.video.youtube']
 import sys

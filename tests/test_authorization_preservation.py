@@ -47,7 +47,7 @@ class AuthorizationPreservation(unittest.TestCase):
   startup=(ROOT.parents[1]/'startup.py').read_text()
   self.assertIn("CONFIG.get_setting('authorizationsrestored') != 'true'",startup)
   wizard=(ROOT/'wizard.py').read_text()
-  self.assertIn('install.wipe(accounts_prepared=protected_helper, auth_only=auth_only)',wizard)
+  self.assertIn('install.wipe(accounts_prepared=protected_helper, auth_only=auth_only, standard_plan=standard_plan)',wizard)
   self.assertIn("CONFIG.set_setting('authorizationsrestored', 'true' if protected_helper else 'false')",wizard)
  def test_password_based_accounts_keep_complete_login_not_just_token(self):
   aid='plugin.video.umbrella';values={'opensubsusername':'u','opensubspassword':'p','opensubstoken':'t','tmdbusername':'u','tmdbpassword':'p','tmdb.sessionid':'s'}

@@ -1,4 +1,4 @@
-"""Real Standard/account-only cleanup/extraction with complete reviewed Umbrella92."""
+"""Real Standard/account-only cleanup/extraction with current Umbrella97 with legacy preference marker18; fullrelease29 gate tested separately."""
 import importlib.util,json,shutil,sqlite3,sys,types,unittest,xml.etree.ElementTree as E,zipfile
 from pathlib import Path
 from unittest.mock import patch
@@ -10,7 +10,7 @@ ROOT=LIB.parents[3];PROGRESS=ROOT/'compatibility/umbrella-progress'
 ID='plugin.video.umbrella';PLAYER='resources/lib/modules/player.py'
 POLICY={'schema':3,'edition':'apple','kodi_major':21,'helper_patch':'empty-cache-1',
  'preferences_policy':'playback-trakt-youtube-umbrella-1','installer_min_version':'1.0.18',
- 'umbrella_patch':'event-progress-3','umbrella_version':'6.7.92'}
+ 'umbrella_patch':'event-progress-3','umbrella_version':'6.7.97'}
 
 class UmbrellaInstallFlow(unittest.TestCase):
  setUp=compatibility.CompatibilityTests.setUp;tearDown=compatibility.CompatibilityTests.tearDown
@@ -18,12 +18,15 @@ class UmbrellaInstallFlow(unittest.TestCase):
  def provider(self,patched=True):
   with zipfile.ZipFile(PROGRESS/'upstream-6.7.92.zip')as z:data={n.split('/',1)[1]:z.read(n)for n in z.namelist()if not n.endswith('/')}
   if patched:
-   for candidate in (ROOT/'compatibility/autoplay-size/candidate').rglob('*.py'):
-    data[candidate.relative_to(ROOT/'compatibility/autoplay-size/candidate').as_posix()]=candidate.read_bytes()
+   spec=importlib.util.spec_from_file_location('current_install_builder',ROOT/'tools/build_release.py');build=importlib.util.module_from_spec(spec);spec.loader.exec_module(build)
+   record=build.current_addon_manifest()[ID]
+   data=build.current_addon_files(ID,record)
   return data
  def packaged(self,change=None,policy=None):
   h=helper_fixture.ManagedTests();h.root=self.root
   with zipfile.ZipFile(h.archive())as z:data={n:z.read(n)for n in z.namelist()}
+  spec=importlib.util.spec_from_file_location('current_helper_install_builder',ROOT/'tools/build_release.py');build=importlib.util.module_from_spec(spec);spec.loader.exec_module(build)
+  build.apply_current_addons(data,('plugin.video.themoviedb.helper','script.module.infotagger'))
   data.update({'addons/'+ID+'/'+n:b for n,b in self.provider().items()})
   data['addons/plugin.video.youtube/addon.xml']=b'<addon id="plugin.video.youtube" version="7.3.0"/>'
   for name,fields in EXPECTED.items():data['userdata/'+name]=('<settings>'+''.join('<setting id="'+k+'">'+v+'</setting>'for k,v in fields.items())+'</settings>').encode()
@@ -128,10 +131,13 @@ class UmbrellaInstallFlow(unittest.TestCase):
     self.assertNotIn('UpdateLocalAddons',k.commands)
  def test_exact_managed_whitelist_target_is_allowed_and_keeps_its_userdata(self):
   k,cfg,mods=self.environment();cfg.KEEPWHITELIST='true';h=Path(cfg.HOME)
-  for n,b in self.provider().items():(h/'addons'/ID/n).write_bytes(b)
+  shutil.rmtree(h/'addons'/ID)
+  for n,b in self.provider().items():
+   p=h/'addons'/ID/n;p.parent.mkdir(parents=True,exist_ok=True);p.write_bytes(b)
   mods['resources.libs.whitelist'].whitelist=lambda mode:[('Umbrella',ID,ID)]
+  messages=[];mods['xbmcgui'].Dialog().ok=lambda *args:messages.append(args)
   self.install(cfg,mods)
-  self.assertFalse((h/'userdata/keep-before-preflight.txt').exists())
+  self.assertFalse((h/'userdata/keep-before-preflight.txt').exists(),messages)
   self.assertEqual((h/'addons'/ID/PLAYER).read_bytes(),self.provider()[PLAYER])
   self.assertEqual(self.values(h/'userdata/addon_data'/ID/'settings.xml')['remove.hdr'],'true')
 

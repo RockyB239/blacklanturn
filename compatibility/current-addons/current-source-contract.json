@@ -1,0 +1,28 @@
+{
+  "schema": 1,
+  "passed": true,
+  "physical_fire_tested": false,
+  "release_install_acceptance": false,
+  "sources": {
+    "plugin.video.themoviedb.helper": {
+      "version": "1:6.18.2+blacklanturn.1",
+      "tree_sha256": "06c5649d7305f1be880d226437a521a7fccb544211d12daf519b7c090ed2faf9",
+      "file_count": 497
+    }
+  },
+  "tests": {
+    "count": 49,
+    "failures": 0,
+    "errors": 0
+  },
+  "evidence": {
+    "progress_search_shared_contracts_sha256": "e721179919bbf5cbf672c905acc22854441aa3ca48e4db6ee9e763ddb335222d",
+    "real_cache_sqlite_contracts_sha256": "27c1d54c742587bebbd8cf374d71b7c0c7f53e0e8f0bd9c8edf2c083edf3ccf7"
+  },
+  "limits": [
+    "Host-side actual current source classes and SQLite cache tests; Kodi APIs simulated.",
+    "The physical Fire Stick tested Helper6.18.1 and remains untouched.",
+    "Current18.2 isolated exact-artifact native installation acceptance is recorded separately.",
+    "Upstream auth and STRM resolver changes retained; no new physical long-binge proof is claimed."
+  ]
+}

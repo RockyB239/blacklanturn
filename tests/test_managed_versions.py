@@ -27,7 +27,7 @@ class ManagedVersions(unittest.TestCase):
         for key in self.policy['source_adapters']:
             data['addons/' + key] = (ROOT / 'compatibility/managed-updates/umbrella/upstream' / key.split('/', 1)[1]).read_bytes()
         for aid, variants in self.policy['addons'].items():
-            variant = variants[-1] if apple else variants[0]
+            variant = variants[-1] if apple and aid == 'plugin.video.youtube' else variants[0]
             name = aid + '-' + variant['upstream_version'] + '.xml'
             data['addons/' + aid + '/addon.xml'] = (ROOT / 'compatibility/managed-updates/metadata' / name).read_bytes()
         return data
@@ -173,7 +173,7 @@ class ManagedVersions(unittest.TestCase):
         self.assertTrue(callable(stage), 'Both package editions must receive bulk-update protection')
         data = self.data(); stage(data); self.m.verify_metadata(data)
 
-    def test_new_policy_requires_installer27_and_exact_metadata(self):
+    def test_new_policy_requires_current_installer_and_exact_metadata(self):
         import io
         data = self.data(); self.m.apply_metadata(data)
         self.m.apply_source_adapters(data, {key:(ROOT / 'compatibility/managed-updates/umbrella/candidate' / key.split('/',1)[1]).read_bytes() for key in self.policy['source_adapters']})
@@ -183,8 +183,8 @@ class ManagedVersions(unittest.TestCase):
         with zipfile.ZipFile(stream) as z:
             gate = getattr(self.m, 'prepare_policy', None)
             self.assertTrue(callable(gate), 'Protected packages need a pre-cleanup installer gate')
-            good = {'managed_update_policy': 'kodi-version-epoch-1', 'installer_min_version': '1.0.27', 'youtube_refresh_patch': 'youtube-freshness-2'}
-            self.assertEqual(gate(good, z), '1.0.27')
+            good = {'managed_update_policy': 'kodi-version-epoch-1', 'installer_min_version': self.policy['installer_min_version'], 'youtube_refresh_patch': 'youtube-freshness-2'}
+            self.assertEqual(gate(good, z), self.policy['installer_min_version'])
             self.assertIsNone(gate({}, z))
             for bad in (good | {'installer_min_version':'1.0.24'},good | {'installer_min_version':'1.0.25'}, good | {'managed_update_policy':'future'}, good | {'youtube_refresh_patch':'unknown'}):
                 with self.assertRaises(ValueError): gate(bad, z)

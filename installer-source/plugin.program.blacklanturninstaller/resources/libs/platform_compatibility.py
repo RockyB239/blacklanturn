@@ -103,7 +103,7 @@ def prepare(path, kodi, home=None):
                         if managed_network and policy.get('network_patch') != 'request-reliability-privacy-1':
                             raise CompatibilityError('Update BlackLanturn Installer before installing this build.')
                         if managed_umbrella and (policy.get('umbrella_patch') != 'event-progress-3'
-                                                 or policy.get('umbrella_version') != '6.7.92'):
+                                                 or policy.get('umbrella_version') != managed_addons._umbrella_manifest()['version']):
                             raise CompatibilityError('Update BlackLanturn Installer before installing this build.')
                     try:
                         if managed_umbrella:

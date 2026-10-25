@@ -1,0 +1,463 @@
+{
+  "schema": 1,
+  "checked_date": "2026-10-24",
+  "catalogs": {
+    "official-omega": {
+      "url": "https://mirrors.kodi.tv/addons/omega/addons.xml.gz",
+      "file": "catalogs/official-omega-addons.xml.gz",
+      "sha256": "fd3756722d1816feab6c8b88496dbab0fbb4ed33064aaec704aeb61bc924d711"
+    },
+    "jurialmunkey": {
+      "url": "https://raw.githubusercontent.com/jurialmunkey/repository.jurialmunkey/master/omega/zips/addons.xml",
+      "file": "catalogs/jurialmunkey-addons.xml",
+      "sha256": "26c802c088252184dad496751d09f167a8e9003a1bfc93db7e241492540dda78"
+    },
+    "umbrella": {
+      "url": "https://raw.githubusercontent.com/umbrellaplug/umbrellaplug.github.io/master/omega/zips/addons.xml",
+      "file": "catalogs/umbrella-addons.xml",
+      "sha256": "e07252be5dfddf78d61c0ecda77c5739ec17a45cedbd963b1427fdef42c6530e"
+    },
+    "cocoscrapers": {
+      "url": "https://raw.githubusercontent.com/not-coco-joe/repository.cocoscrapers/master/zips/addons.xml",
+      "file": "catalogs/cocoscrapers-addons.xml",
+      "sha256": "a0a73632c177006d8a535d5a49947ed42140302a32bac42085a14078c9761649"
+    },
+    "umbrella-repository": {
+      "url": "https://raw.githubusercontent.com/umbrellaplug/umbrellaplug.github.io/master/repository.umbrella-2.2.6.zip",
+      "sha256": "055105e00c7da090cc124947bc5c5e9cdae310f8687fc4c16f83d51b89750128"
+    },
+    "jurialmunkey-repository": {
+      "url": "https://raw.githubusercontent.com/jurialmunkey/repository.jurialmunkey/master/repo/zips/addons.xml",
+      "file": "catalogs/jurialmunkey-repo.xml",
+      "sha256": "6c65399e42e542fcef26bff356d904fdc17b99e3d922bb71ff6b75acfc1459c4"
+    }
+  },
+  "addons": {
+    "plugin.program.blacklanturninstaller": {
+      "bundled": "1.0.29",
+      "official_omega": null,
+      "editions": [
+        "General",
+        "Apple-TV-Mac"
+      ],
+      "classification": "BlackLanturn reviewed source, replaced by current release builder"
+    },
+    "plugin.video.youtube": {
+      "bundled": "1:7.4.4a+blacklanturn.1",
+      "official_omega": "7.4.4",
+      "editions": [
+        "General",
+        "Apple-TV-Mac"
+      ],
+      "repository_versions": {
+        "official-omega": "7.4.4",
+        "umbrella": "7.4.4a"
+      },
+      "classification": "official7.4.4 complete reviewed platform source with managed7.4.4a compatibility metadata; separately listed Umbrella7.4.4a is not source authority"
+    },
+    "repository.blacklanturn": {
+      "bundled": "1.0.6",
+      "official_omega": null,
+      "editions": [
+        "General",
+        "Apple-TV-Mac"
+      ],
+      "classification": "BlackLanturn reviewed source, replaced by current release builder"
+    },
+    "repository.cocoscrapers": {
+      "bundled": "1.0.0",
+      "official_omega": null,
+      "editions": [
+        "General",
+        "Apple-TV-Mac"
+      ],
+      "repository_versions": {
+        "cocoscrapers": "1.0.0"
+      },
+      "classification": "current upstream version checked; retained reviewed source patches where managed"
+    },
+    "repository.jurialmunkey": {
+      "bundled": "3.5",
+      "official_omega": null,
+      "editions": [
+        "General",
+        "Apple-TV-Mac"
+      ],
+      "classification": "current upstream repository metadata checked",
+      "repository_versions": {
+        "jurialmunkey-repository": "3.5"
+      }
+    },
+    "repository.umbrella": {
+      "bundled": "2.2.6",
+      "official_omega": null,
+      "editions": [
+        "General",
+        "Apple-TV-Mac"
+      ],
+      "classification": "current official repository archive metadata checked",
+      "repository_versions": {
+        "upstream-root-repository": "2.2.6"
+      }
+    },
+    "resource.font.robotocjksc": {
+      "bundled": "0.0.3",
+      "official_omega": null,
+      "editions": [
+        "General",
+        "Apple-TV-Mac"
+      ],
+      "repository_versions": {
+        "jurialmunkey": "0.0.3"
+      },
+      "classification": "current Jurial compatible resource version checked"
+    },
+    "resource.images.weathericons.white": {
+      "bundled": "0.0.6",
+      "official_omega": "0.0.6",
+      "editions": [
+        "General",
+        "Apple-TV-Mac"
+      ],
+      "repository_versions": {
+        "official-omega": "0.0.6"
+      },
+      "classification": "current upstream version checked; retained reviewed source patches where managed"
+    },
+    "script.blacklanturn.preview": {
+      "bundled": "0.1.91",
+      "official_omega": null,
+      "editions": [
+        "General",
+        "Apple-TV-Mac"
+      ],
+      "classification": "BlackLanturn reviewed source, replaced by current release builder"
+    },
+    "script.module.addon.signals": {
+      "bundled": "0.0.6+matrix.1",
+      "official_omega": "0.0.6+matrix.1",
+      "editions": [
+        "General",
+        "Apple-TV-Mac"
+      ],
+      "repository_versions": {
+        "official-omega": "0.0.6+matrix.1"
+      },
+      "classification": "current upstream version checked; retained reviewed source patches where managed"
+    },
+    "script.module.arrow": {
+      "bundled": "1.2.3",
+      "official_omega": "1.2.3",
+      "editions": [
+        "General",
+        "Apple-TV-Mac"
+      ],
+      "repository_versions": {
+        "official-omega": "1.2.3"
+      },
+      "classification": "current upstream version checked; retained reviewed source patches where managed"
+    },
+    "script.module.beautifulsoup4": {
+      "bundled": "4.12.2",
+      "official_omega": "4.12.2",
+      "editions": [
+        "General",
+        "Apple-TV-Mac"
+      ],
+      "repository_versions": {
+        "official-omega": "4.12.2"
+      },
+      "classification": "current upstream version checked; retained reviewed source patches where managed"
+    },
+    "script.module.certifi": {
+      "bundled": "2023.5.7",
+      "official_omega": "2023.5.7",
+      "editions": [
+        "General",
+        "Apple-TV-Mac"
+      ],
+      "repository_versions": {
+        "official-omega": "2023.5.7"
+      },
+      "classification": "current upstream version checked; retained reviewed source patches where managed"
+    },
+    "script.module.chardet": {
+      "bundled": "5.1.0",
+      "official_omega": "5.1.0",
+      "editions": [
+        "General",
+        "Apple-TV-Mac"
+      ],
+      "repository_versions": {
+        "official-omega": "5.1.0"
+      },
+      "classification": "current upstream version checked; retained reviewed source patches where managed"
+    },
+    "script.module.dateutil": {
+      "bundled": "2.8.2",
+      "official_omega": "2.8.2",
+      "editions": [
+        "General",
+        "Apple-TV-Mac"
+      ],
+      "repository_versions": {
+        "official-omega": "2.8.2"
+      },
+      "classification": "current upstream version checked; retained reviewed source patches where managed"
+    },
+    "script.module.idna": {
+      "bundled": "3.10.0",
+      "official_omega": "3.10.0",
+      "editions": [
+        "General",
+        "Apple-TV-Mac"
+      ],
+      "repository_versions": {
+        "official-omega": "3.10.0"
+      },
+      "classification": "current upstream version checked; retained reviewed source patches where managed"
+    },
+    "script.module.jurialmunkey": {
+      "bundled": "0.2.35",
+      "official_omega": "0.2.28",
+      "editions": [
+        "General",
+        "Apple-TV-Mac"
+      ],
+      "repository_versions": {
+        "official-omega": "0.2.28",
+        "jurialmunkey": "0.2.35"
+      },
+      "classification": "current upstream version checked; retained reviewed source patches where managed"
+    },
+    "script.module.pysocks": {
+      "bundled": "1.7.0+matrix.1",
+      "official_omega": "1.7.0+matrix.1",
+      "editions": [
+        "General",
+        "Apple-TV-Mac"
+      ],
+      "repository_versions": {
+        "official-omega": "1.7.0+matrix.1"
+      },
+      "classification": "current upstream version checked; retained reviewed source patches where managed"
+    },
+    "script.module.qrcode": {
+      "bundled": "6.1.0+matrix.3",
+      "official_omega": "6.1.0+matrix.3",
+      "editions": [
+        "General",
+        "Apple-TV-Mac"
+      ],
+      "repository_versions": {
+        "official-omega": "6.1.0+matrix.3"
+      },
+      "classification": "current upstream version checked; retained reviewed source patches where managed"
+    },
+    "script.module.requests": {
+      "bundled": "2.31.0",
+      "official_omega": "2.31.0",
+      "editions": [
+        "General",
+        "Apple-TV-Mac"
+      ],
+      "repository_versions": {
+        "official-omega": "2.31.0"
+      },
+      "classification": "current upstream version checked; retained reviewed source patches where managed"
+    },
+    "script.module.routing": {
+      "bundled": "0.2.3+matrix.1",
+      "official_omega": "0.2.3+matrix.1",
+      "editions": [
+        "General",
+        "Apple-TV-Mac"
+      ],
+      "repository_versions": {
+        "official-omega": "0.2.3+matrix.1"
+      },
+      "classification": "current upstream version checked; retained reviewed source patches where managed"
+    },
+    "script.module.six": {
+      "bundled": "1.16.0+matrix.1",
+      "official_omega": "1.16.0+matrix.1",
+      "editions": [
+        "General",
+        "Apple-TV-Mac"
+      ],
+      "repository_versions": {
+        "official-omega": "1.16.0+matrix.1"
+      },
+      "classification": "current upstream version checked; retained reviewed source patches where managed"
+    },
+    "script.module.soupsieve": {
+      "bundled": "2.4.1",
+      "official_omega": "2.4.1",
+      "editions": [
+        "General",
+        "Apple-TV-Mac"
+      ],
+      "repository_versions": {
+        "official-omega": "2.4.1"
+      },
+      "classification": "current upstream version checked; retained reviewed source patches where managed"
+    },
+    "script.module.trakt": {
+      "bundled": "4.4.0+matrix.1",
+      "official_omega": "4.4.0+matrix.1",
+      "editions": [
+        "General",
+        "Apple-TV-Mac"
+      ],
+      "repository_versions": {
+        "official-omega": "4.4.0+matrix.1"
+      },
+      "classification": "current upstream version checked; retained reviewed source patches where managed"
+    },
+    "script.module.typing_extensions": {
+      "bundled": "4.7.1",
+      "official_omega": "4.7.1",
+      "editions": [
+        "General",
+        "Apple-TV-Mac"
+      ],
+      "repository_versions": {
+        "official-omega": "4.7.1"
+      },
+      "classification": "current upstream version checked; retained reviewed source patches where managed"
+    },
+    "script.module.urllib3": {
+      "bundled": "2.2.3",
+      "official_omega": "2.2.3",
+      "editions": [
+        "General",
+        "Apple-TV-Mac"
+      ],
+      "repository_versions": {
+        "official-omega": "2.2.3"
+      },
+      "classification": "current upstream version checked; retained reviewed source patches where managed"
+    },
+    "service.blacklanturn.previewcheck": {
+      "bundled": "1.0.0",
+      "official_omega": null,
+      "editions": [
+        "General"
+      ],
+      "classification": "BlackLanturn reviewed source, replaced by current release builder"
+    },
+    "service.upnext": {
+      "bundled": "1.1.9+matrix.1",
+      "official_omega": "1.1.9+matrix.1",
+      "editions": [
+        "General",
+        "Apple-TV-Mac"
+      ],
+      "repository_versions": {
+        "official-omega": "1.1.9+matrix.1"
+      },
+      "classification": "current upstream version checked; retained reviewed source patches where managed"
+    },
+    "skin.blacklanturn.preview": {
+      "bundled": "0.1.39",
+      "official_omega": null,
+      "editions": [
+        "General",
+        "Apple-TV-Mac"
+      ],
+      "classification": "BlackLanturn reviewed source, replaced by current release builder"
+    },
+    "plugin.video.umbrella": {
+      "bundled": "1:6.7.97+blacklanturn.1",
+      "official_omega": null,
+      "editions": [
+        "General",
+        "Apple-TV-Mac"
+      ],
+      "repository_versions": {
+        "umbrella": "6.7.97"
+      },
+      "classification": "current upstream version checked; retained reviewed source patches where managed"
+    },
+    "plugin.video.themoviedb.helper": {
+      "bundled": "1:6.18.2+blacklanturn.1",
+      "official_omega": "5.4.16",
+      "editions": [
+        "General",
+        "Apple-TV-Mac"
+      ],
+      "repository_versions": {
+        "official-omega": "5.4.16",
+        "jurialmunkey": "6.18.2"
+      },
+      "classification": "current upstream version checked; retained reviewed source patches where managed"
+    },
+    "script.module.infotagger": {
+      "bundled": "0.1.0",
+      "official_omega": "0.0.8",
+      "editions": [
+        "General",
+        "Apple-TV-Mac"
+      ],
+      "repository_versions": {
+        "official-omega": "0.0.8",
+        "jurialmunkey": "0.1.0"
+      },
+      "classification": "current upstream version checked; retained reviewed source patches where managed"
+    },
+    "script.module.cocoscrapers": {
+      "bundled": "1.0.45",
+      "official_omega": null,
+      "editions": [
+        "General",
+        "Apple-TV-Mac"
+      ],
+      "repository_versions": {
+        "cocoscrapers": "1.0.45"
+      },
+      "classification": "current upstream version checked; retained reviewed source patches where managed"
+    },
+    "script.skinvariables": {
+      "bundled": "2.2.10",
+      "official_omega": "2.1.33",
+      "editions": [
+        "General",
+        "Apple-TV-Mac"
+      ],
+      "repository_versions": {
+        "official-omega": "2.1.33",
+        "jurialmunkey": "2.2.10"
+      },
+      "classification": "current upstream version checked; retained reviewed source patches where managed"
+    },
+    "resource.language.en_us": {
+      "bundled": "11.0.84",
+      "official_omega": "11.0.84",
+      "editions": [
+        "General",
+        "Apple-TV-Mac"
+      ],
+      "repository_versions": {
+        "official-omega": "11.0.84"
+      },
+      "classification": "current upstream version checked; retained reviewed source patches where managed"
+    },
+    "script.module.inputstreamhelper": {
+      "bundled": "0.8.6",
+      "official_omega": "0.8.6",
+      "editions": [
+        "General",
+        "Apple-TV-Mac"
+      ],
+      "repository_versions": {
+        "official-omega": "0.8.6"
+      },
+      "classification": "current upstream version checked; retained reviewed source patches where managed"
+    }
+  },
+  "limits": [
+    "Repository metadata audit, not new native acceptance on every platform.",
+    "Kodi system-installed scrapers and versioncheck omitted from distribution are outside the bundled source inventory.",
+    "Unchanged baseline source remains pinned by the two original clean archive SHA256 identities."
+  ]
+}

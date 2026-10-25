@@ -8,6 +8,8 @@ class AutoplayRelease(unittest.TestCase):
   self.receipt=json.loads((ROOT/'compatibility/autoplay-size/natural-verification.json').read_text())
   self.controller=json.loads((ROOT/'controller-source/manifest84.json').read_text())
   self.umbrella=json.loads((ROOT/'installer-source/plugin.program.blacklanturninstaller/resources/managed-umbrella.json').read_text())
+  # Natural Mac receipt tested complete Umbrella92, retained as historical input.
+  self.umbrella=dict(self.umbrella,version='6.7.92',files=self.umbrella['legacy_files']['6.7.92'])
  def verify(self):
   fn=getattr(module,'verify_autoplay_acceptance',None);self.assertTrue(callable(fn),'Missing source-bound natural playback acceptance gate')
   fn(self.receipt,self.controller,self.umbrella)

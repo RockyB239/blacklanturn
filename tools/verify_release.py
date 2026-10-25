@@ -39,7 +39,7 @@ def verify_umbrella_progress_acceptance(receipt, manifest):
  devices=receipt.get('devices', {})
  assert set(devices)=={'fire', 'mac', 'apple_tv'}, 'Progress acceptance is incomplete on the three devices'
  for name, device in devices.items():
-  assert device.get('version')=='6.7.92', 'Both release editions package Umbrella 6.7.92; an older native variant cannot approve '+name
+  assert device.get('version')=='6.7.92', 'Historical Umbrella 6.7.92 receipt expected for '+name
   variant=manifest['variants'].get(device.get('version'))
   assert variant and device.get('candidate_sha256')==variant['after_sha256'], 'Untested progress source on '+name
   trace=device.get('loaded_trace_sha256')
@@ -198,7 +198,12 @@ def verify_fire_browsing_v2(speed, manifest):
  assert manifest==current and current.get('controller')=='0.1.83' and baseline.get('controller')=='0.1.82'
  assert len(current.get('files',{}))==len(baseline.get('files',{}))==311,'Full historical/current controller inventories required'
  helper=json.loads((ROOT/'installer-source/plugin.program.blacklanturninstaller/resources/managed-helper.json').read_text())
- assert len(helper.get('files',{}))==471 and helper.get('playback_patch')=='sampled-progress-1','Full current sampled-progress Helper inventory required'
+ # These immutable controller82/83 native runs loaded Helper6.17.9. Their
+ # historical source remains required; it cannot certify current Helper6.18.x.
+ if helper.get('upstream_version')!='6.17.9':
+  assert '6.17.9' in helper.get('legacy_files',{}),'Missing exact historical Helper6.17.9 inventory'
+  helper=dict(helper,upstream_version='6.17.9',files=helper['legacy_files']['6.17.9'])
+ assert len(helper.get('files',{}))==471 and helper.get('playback_patch')=='sampled-progress-1','Full historical sampled-progress Helper6.17.9 inventory required'
  refs=speed.get('native_receipts',{});assert set(refs)=={'before','after'},'Both exact public native receipts required'
  assert set(speed.get('max_observation_gap_seconds',{}))=={'before','after'},'Both observed timing gaps must be reported'
  runs={};gaps={};order=[(c,s) for c in (1,2,3) for s in sections]
@@ -211,7 +216,7 @@ def verify_fire_browsing_v2(speed, manifest):
   assert run.get('protocol')==protocol and run.get('metric')==speed['metric']
   assert run.get('controller')==run.get('loaded_version')==source['controller'],'Loaded native controller version differs'
   assert run.get('source_files')==source['files'],'Native controller source inventory differs'
-  assert run.get('helper_files')==helper['files'],'Native Helper inventory differs from full current source'
+  assert run.get('helper_files')==helper['files'],'Native Helper inventory differs from full historical6.17.9 source'
   for key in ('completed','measurement_valid','source_exact','helper_source_exact','settings_preserved','save_method_restored'):
    assert run.get(key) is True,'Incomplete native v2 acceptance: '+key
   assert run.get('preview_suppression')=='in-memory manual movie / YouTube disabled','V2 preview measurement conditions differ'
@@ -317,7 +322,7 @@ def verify_release112_acceptance(receipt,manifest,*,require_v2=False):
   assert abs(progress*duration/100-position)<=1,'Fire paused-stop position differs from '+key
 
 def verify_helper_progress_acceptance(receipt,approved):
- """Historical empty-cache proof cannot authorize the newly sampled Helper source."""
+ """Historical Helper6.17.9 cache receipt; cannot approve current upstream by itself."""
  assert receipt.get('source_version')==approved.get('upstream_version')=='6.17.9'
  assert receipt.get('playback_patch')==approved.get('playback_patch')=='sampled-progress-1'
  assert len(approved.get('files',{}))==471,'Full current Helper source inventory required'
@@ -348,7 +353,10 @@ def verify_display_defaults(z):
  assert config.get('RatingSources')==['rottentomatoes','metacritic','imdb','popcorn'],'Clean builds must default to four ratings with TMDb hidden'
 
 def verify_autoplay_acceptance(receipt, controller, umbrella):
- """Current Mac evidence; historical three-device tests cannot certify this delta."""
+ """Historical Mac autoplay84/Helper-era evidence, bound to the supplied exact92 tree.
+
+ Current upstream source is certified by separate current contract/install gates.
+ """
  assert receipt.get('passed') is True and receipt.get('device')=='Mac Kodi 21.3'
  assert receipt.get('tested_commit')=='0b674a3be14cb48ed2fa336e6121fbb597a5f7de'
  assert receipt.get('tested_controller')=='0.1.83' and controller.get('controller')=='0.1.84'
@@ -365,7 +373,7 @@ def verify_autoplay_acceptance(receipt, controller, umbrella):
  for path,digest in receipt['tested_files'].items():
   _,addon,relative=path.split('/',2)
   actual=umbrella['files'][relative] if addon=='plugin.video.umbrella' else controller['files'][relative]
-  assert actual==digest, 'Packaged implementation differs from native evidence: '+path
+  assert actual==digest, 'Historical implementation differs from native evidence: '+path
  assert umbrella.get('autoplay_patch')=='same-show-source-1'
  assert receipt.get('natural_episodes_completed')==4 and receipt.get('native_eof_callbacks')==4
  assert receipt.get('prepared_source_matches')==4 and receipt.get('simulated_viewing_count') is False
@@ -485,7 +493,8 @@ def verify(folder):
  verify_stall_acceptance(json.loads((ROOT/'controller-source/youtube-stall-mac-verification.json').read_text()),json.loads((ROOT/'controller-source/youtube-stall-native-verification.json').read_text()),json.loads((ROOT/'controller-source/manifest76.json').read_text()))
  receipt=json.loads((ROOT/'compatibility/helper-progress/native-verification.json').read_text())
  approved=json.loads((SOURCE/'resources/managed-helper.json').read_text())
- verify_helper_progress_acceptance(receipt,approved)
+ historical_helper=dict(approved,upstream_version='6.17.9',files=approved['legacy_files']['6.17.9'])
+ verify_helper_progress_acceptance(receipt,historical_helper)
  verify_umbrella_progress_acceptance(
   json.loads((ROOT/'compatibility/umbrella-progress/native-verification.json').read_text()),
   json.loads((ROOT/'compatibility/umbrella-progress/manifest-duration.json').read_text()))
@@ -495,7 +504,7 @@ def verify(folder):
  verify_autoplay_acceptance(
   json.loads((ROOT/'compatibility/autoplay-size/natural-verification.json').read_text()),
   json.loads((ROOT/'controller-source/manifest84.json').read_text()),
-  json.loads((SOURCE/'resources/managed-umbrella.json').read_text()))
+  dict(json.loads((SOURCE/'resources/managed-umbrella.json').read_text()),files=json.loads((SOURCE/'resources/managed-umbrella.json').read_text())['legacy_files']['6.7.92']))
  verify_youtube_end_acceptance(json.loads((ROOT/'controller-source/youtube-end-native-verification.json').read_text()),json.loads((ROOT/'controller-source/manifest85.json').read_text()),historical=True)
  verify_discovery_acceptance(json.loads((ROOT/"controller-source/discovery-native-verification.json").read_text()),json.loads((ROOT/"controller-source/manifest86.json").read_text()),historical=True)
  verify_youtube_refresh_acceptance(json.loads((ROOT/"controller-source/youtube-refresh-native-verification.json").read_text()),json.loads((ROOT/"controller-source/manifest87.json").read_text()),historical=True)
@@ -506,14 +515,19 @@ def verify(folder):
  update_gate.verify(json.loads((ROOT/'controller-source/release-notices-native-verification.json').read_text()),json.loads((ROOT/'controller-source/manifest90.json').read_text()),historical=True)
  saved_spec=update_import.spec_from_file_location('saved_gate',ROOT/'tools/verify_youtube_saved.py');saved_gate=update_import.module_from_spec(saved_spec);saved_spec.loader.exec_module(saved_gate)
  saved_gate.verify(json.loads((ROOT/'controller-source/release121-native-verification.json').read_text()),json.loads((ROOT/'controller-source/manifest91.json').read_text()))
- with zipfile.ZipFile(folder/'plugin.program.blacklanturninstaller-1.0.28.zip') as z:
+ build_spec=importlib.util.spec_from_file_location('current_release_build',ROOT/'tools/build_release.py');current_build=importlib.util.module_from_spec(build_spec);build_spec.loader.exec_module(current_build)
+ current_build.verify_prior_source_acceptance(json.loads((ROOT/'compatibility/current-addons/native-source-verification-6.18.1.json').read_text()))
+ current_build.verify_current_source_contract(json.loads((ROOT/'compatibility/current-addons/current-source-contract.json').read_text()))
+ install_spec=update_import.spec_from_file_location('current_native_install_gate',ROOT/'tools/verify_current_install.py');install_gate=update_import.module_from_spec(install_spec);install_spec.loader.exec_module(install_gate)
+ install_gate.verify(json.loads((ROOT/'compatibility/current-addons/native-install-acceptance.json').read_text()),folder)
+ with zipfile.ZipFile(folder/'plugin.program.blacklanturninstaller-1.0.29.zip') as z:
   assert z.testzip() is None
   installer={n:z.read(n) for n in z.namelist()}
   assert all(n.startswith('plugin.program.blacklanturninstaller/') for n in installer)
   expected_installer={'plugin.program.blacklanturninstaller/'+str(p.relative_to(SOURCE)):p.read_bytes() for p in SOURCE.rglob('*') if p.is_file() and '__pycache__' not in p.parts and not p.name.endswith(('.pyc','.DS_Store'))}
   assert installer==expected_installer,'Installer ZIP differs from reviewed source'
  for ed in ('General','Apple-TV-Mac'):
-  with zipfile.ZipFile(folder/f'BlackLanturn-{ed}-Kodi21-1.1.22.zip') as z:
+  with zipfile.ZipFile(folder/f'BlackLanturn-{ed}-Kodi21-1.1.23.zip') as z:
    assert z.testzip() is None;m.verify_archive(z,umbrella=True,network=True,youtube=True);verify_playback_defaults(z);verify_display_defaults(z)
    with zipfile.ZipFile(ROOT/'repository.blacklanturn.zip') as repo:
     assert {n:z.read('addons/'+n) for n in repo.namelist()}=={n:repo.read(n) for n in repo.namelist()},'Bundled repository differs from current public source'
@@ -521,12 +535,17 @@ def verify(folder):
    m._versions.verify_archive_metadata(z)
    umbrella_prefix='addons/plugin.video.umbrella/'
    raw_tree={n[len(umbrella_prefix):]:hashlib.sha256(z.read(n)).hexdigest() for n in z.namelist() if n.startswith(umbrella_prefix) and not n.endswith('/')}
-   reviewed_tree=json.loads((ROOT/'compatibility/managed-updates/managed-umbrella-tree.json').read_text())
+   reviewed_tree=json.loads((ROOT/'compatibility/managed-updates/managed-umbrella-6.7.97-tree.json').read_text())
    assert raw_tree==reviewed_tree['files'],'Managed-version Umbrella source differs from reviewed complete tree'
    assert hashlib.sha256(json.dumps(raw_tree,sort_keys=True,separators=(',',':')).encode()).hexdigest()==reviewed_tree['tree_sha256']
+   packaged={n:z.read(n) for n in z.namelist()}
+   for aid,record in current_build.current_addon_manifest().items():
+    prefix='addons/'+aid+'/'
+    assert {n[len(prefix):]:raw for n,raw in packaged.items() if n.startswith(prefix)}==current_build.current_addon_files(aid,record),'Complete current addon source differs: '+aid
+   current_build.verify_dependency_closure(packaged)
    p=json.loads(z.read('userdata/blacklanturn-build.json'))
-   assert p['schema']==3 and p['preferences_policy']=='playback-trakt-youtube-umbrella-network-autoplay-1' and p['helper_patch']=='empty-cache-1' and p['installer_min_version']=='1.0.27'
-   assert p['build_version']=='1.1.22' and p['network_patch']=='request-reliability-privacy-1' and p['umbrella_version']=='6.7.92' and p['umbrella_patch']=='event-progress-3'
+   assert p['schema']==3 and p['preferences_policy']=='playback-trakt-youtube-umbrella-network-autoplay-1' and p['helper_patch']=='empty-cache-1' and p['installer_min_version']=='1.0.29'
+   assert p['build_version']=='1.1.23' and p['network_patch']=='request-reliability-privacy-1' and p['umbrella_version']=='6.7.97' and p['umbrella_patch']=='event-progress-3'
    assert p['controller_version']=='0.1.91' and p['helper_search_patch']=='search-batch-1' and p['helper_playback_patch']=='sampled-progress-1'
    gui={n.get('id'):n.text for n in ET.fromstring(z.read('userdata/guisettings.xml'))}
    assert {k:gui[k] for k in ('filecache.memorysize','filecache.readfactor','filecache.buffermode','filecache.chunksize')}=={'filecache.memorysize':'64','filecache.readfactor':'400','filecache.buffermode':'4','filecache.chunksize':'131072'}
@@ -541,7 +560,7 @@ def verify(folder):
    assert len(catalog['releases'])==1
    entry=catalog['releases'][0]
    assert entry['id']==p['release_id'] and entry['edition']==p['edition'] and entry['version']==p['build_version'] and entry['revision']==p['release_revision']
-   assert entry['title']=='BlackLanturn Build 1.1.22' and entry['summary']==json.loads((ROOT/'hosted-files/release-notes-1.1.22.json').read_text())['summary']
+   assert entry['title']=='BlackLanturn Build 1.1.23' and entry['summary']==json.loads((ROOT/'hosted-files/release-notes-1.1.23.json').read_text())['summary']
    assert p['youtube_saved_rows_patch']=='account-display-rows-1'
    assert all(hashlib.sha256(z.read(n)).hexdigest()==h for n,h in entry['files'].items()),'Bundled release proof differs'
    assert 'userdata/blacklanturn-install-complete.json' not in z.namelist(),'A clean package must not predeclare installation success'
@@ -562,6 +581,6 @@ def verify(folder):
    assert config.get('YouTubeEndSuggestions') is True and config.get('YouTubeEndAutoplay') is False
    for n,d in installer.items():assert z.read('addons/'+n)==d,'Installer mismatch'
    assert z.read('addons/plugin.program.blacklanturninstaller/resources/libs/managed_addons.py')==(SOURCE/'resources/libs/managed_addons.py').read_bytes()
- print('PASS: both packages, protected schema, exact installer, full managed Helper/Umbrella manifests historical progress evidence and historical natural Mac autoplay acceptance and retained historical YouTube end-screen acceptance plus historical Mac first-page discovery and exact-source Mac YouTube freshness acceptance; remote acceptance recorded separately')
+ print('PASS: both Build1.1.23 packages, exact Installer1.0.29, complete pinned current addon sources, dependency minima and protected defaults; retained historical feature evidence and source-bound prior Fire current-source playback checked separately from release-install acceptance')
 if __name__=='__main__':
  p=argparse.ArgumentParser();p.add_argument('artifacts',type=Path);verify(p.parse_args().artifacts)

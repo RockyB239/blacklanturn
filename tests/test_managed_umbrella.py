@@ -12,6 +12,7 @@ import tempfile
 import unittest
 from unittest.mock import patch
 import zipfile
+import xml.etree.ElementTree as E
 
 import test_managed_helper as helper_fixture
 
@@ -27,16 +28,16 @@ class ManagedUmbrellaTests(unittest.TestCase):
         self.tmp=tempfile.TemporaryDirectory();self.addCleanup(self.tmp.cleanup);self.root=Path(self.tmp.name)
         self.spec=importlib.util.spec_from_file_location('managed_umbrella_under_test',LIB/'managed_addons.py')
         self.m=importlib.util.module_from_spec(self.spec);self.spec.loader.exec_module(self.m)
-        with zipfile.ZipFile(SOURCE) as archive:
-            self.provider={n.removeprefix(UMBRELLA+'/'):archive.read(n)for n in archive.namelist()if not n.endswith('/')}
+        self.provider=helper_fixture.current_data(UMBRELLA)
+        self.version=E.fromstring(self.provider['addon.xml']).get('version')
         self.resources=self.root/'installer/resources';(self.resources/'libs').mkdir(parents=True)
         self.m.__file__=str(self.resources/'libs/managed_addons.py')
         shutil.copyfile(LIB.parent/'managed-helper.json',self.resources/'managed-helper.json')
         # Hash-only contract fixture deliberately uses upstream code. It is not
         # a claim that upstream player.py is an accepted production candidate.
-        self.manifest={'addon_id':UMBRELLA,'version':'6.7.92','playback_patch':'event-progress-3',
+        self.manifest={'addon_id':UMBRELLA,'version':self.version,'playback_patch':'event-progress-3',
             'files':{n:hashlib.sha256(b).hexdigest()for n,b in self.provider.items()},
-            'installed_player_hashes':{'6.7.92':[hashlib.sha256(self.provider['resources/lib/modules/player.py']).hexdigest()]},'legacy_files':{}}
+            'installed_player_hashes':{self.version:[hashlib.sha256(self.provider['resources/lib/modules/player.py']).hexdigest()]},'legacy_files':{}}
         (self.resources/'managed-umbrella.json').write_text(json.dumps(self.manifest))
 
     def invoke(self,method,*args,**kwargs):
@@ -58,7 +59,7 @@ class ManagedUmbrellaTests(unittest.TestCase):
         home=self.root/'home';addon=home/'addons'/UMBRELLA
         for name,raw in self.provider.items():
             path=addon/name;path.parent.mkdir(parents=True,exist_ok=True);path.write_bytes(raw)
-        if version:(addon/'addon.xml').write_bytes(self.provider['addon.xml'].replace(b'6.7.92',version.encode()))
+        if version:(addon/'addon.xml').write_bytes(self.provider['addon.xml'].replace(('version="'+self.version+'"').encode(),('version="'+version+'"').encode(),1))
         if change:change(addon)
         return home
 
@@ -77,13 +78,27 @@ class ManagedUmbrellaTests(unittest.TestCase):
     def rules(self,path):
         with sqlite3.connect(path)as db:return list(db.execute('SELECT addonID,updateRule FROM update_rules ORDER BY id'))
 
-    def test_source_archive_and_full_manifest_have_exact_official_provenance(self):
+    def test_legacy692_source_archive_and_full_manifest_have_exact_official_provenance(self):
         provenance=json.loads((ROOT/'compatibility/umbrella-progress/upstream-provenance.json').read_text())
         self.assertEqual(provenance['archive_sha256'],'8dc3b19e70d0e02deb32d06579441288dbe1911ecaec2628d298590e1333853f')
         self.assertEqual(hashlib.sha256(SOURCE.read_bytes()).hexdigest(),provenance['archive_sha256'])
         manifest=json.loads((ROOT/'compatibility/umbrella-progress/upstream-6.7.92-manifest.json').read_text())
         self.assertEqual(len(manifest['files']),1682)
-        self.assertEqual(manifest['files'],self.manifest['files'])
+        with zipfile.ZipFile(SOURCE) as z:legacy={n.removeprefix(UMBRELLA+'/'):hashlib.sha256(z.read(n)).hexdigest()for n in z.namelist()if not n.endswith('/')}
+        self.assertEqual(manifest['files'],legacy)
+
+    def test_legacy692_archive_is_not_current_approved_target(self):
+        def legacy(data):
+            for name in list(data):
+                if name.startswith(PREFIX):del data[name]
+            with zipfile.ZipFile(SOURCE) as archive:
+                data.update({PREFIX+n.removeprefix(UMBRELLA+'/'):archive.read(n) for n in archive.namelist() if not n.endswith('/')})
+        with zipfile.ZipFile(self.archive(legacy)) as archive,self.assertRaises(self.m.ProtectionError):
+            self.m.verify_archive(archive,umbrella=True)
+
+    def test_current_pinned_complete_tree_passes_actual_production_install_guard(self):
+        self.m.__file__=str(LIB/'managed_addons.py')
+        self.assertEqual(self.guard(self.installed()),UMBRELLA)
 
     def test_optional_full_provider_archive_verification_accepts_exact_tree(self):
         with zipfile.ZipFile(self.archive())as archive:self.assertEqual(self.invoke(self.m.verify_archive,archive,umbrella=True),HELPER)
@@ -95,7 +110,7 @@ class ManagedUmbrellaTests(unittest.TestCase):
                     if mode=='reverted':data[PREFIX+'resources/lib/modules/trakt.py']=b'foreign provider source'
                     elif mode=='missing':del data[PREFIX+'resources/lib/modules/trakt.py']
                     elif mode=='added':data[PREFIX+'foreign.py']=b'pass'
-                    else:data[PREFIX+'addon.xml']=data[PREFIX+'addon.xml'].replace(b'6.7.92',b'6.8.0')
+                    else:data[PREFIX+'addon.xml']=data[PREFIX+'addon.xml'].replace(('version="'+self.version+'"').encode(),b'version="999.0.0"',1)
                 with zipfile.ZipFile(self.archive(change))as archive:
                     self.assertIn('umbrella',inspect.signature(self.m.verify_archive).parameters,'Optional provider verification missing')
                     with self.assertRaises(self.m.ProtectionError):self.m.verify_archive(archive,umbrella=True)
@@ -140,7 +155,7 @@ class ManagedUmbrellaTests(unittest.TestCase):
     def test_known_installed_tree_and_reviewed_player_variant_pass(self):
         home=self.installed();self.assertEqual(self.guard(home),UMBRELLA)
         path=home/'addons'/UMBRELLA/'resources/lib/modules/player.py';path.write_bytes(b'# known alternate fixture\n')
-        self.manifest['installed_player_hashes']['6.7.92'].append(hashlib.sha256(path.read_bytes()).hexdigest())
+        self.manifest['installed_player_hashes'][self.version].append(hashlib.sha256(path.read_bytes()).hexdigest())
         (self.resources/'managed-umbrella.json').write_text(json.dumps(self.manifest))
         self.assertEqual(self.guard(home),UMBRELLA)
 
@@ -151,7 +166,11 @@ class ManagedUmbrellaTests(unittest.TestCase):
         self.m.__file__=str(LIB/'managed_addons.py')
         for variant in ('published','tested'):
             with self.subTest(variant=variant):
-                home=self.installed();addon=home/'addons'/UMBRELLA
+                home=self.root/'home';addon=home/'addons'/UMBRELLA
+                with zipfile.ZipFile(SOURCE) as archive:
+                    for name in archive.namelist():
+                        if name.endswith('/'):continue
+                        target=addon/name.removeprefix(UMBRELLA+'/');target.parent.mkdir(parents=True,exist_ok=True);target.write_bytes(archive.read(name))
                 if variant=='published':
                     (addon/'resources/lib/modules/player.py').write_bytes((ROOT/'compatibility/umbrella-progress/duration-candidate/6.7.92/player.py').read_bytes())
                 else:
@@ -164,7 +183,7 @@ class ManagedUmbrellaTests(unittest.TestCase):
         home=self.installed();addon=home/'addons'/UMBRELLA
         old=dict(self.manifest['files'])
         self.manifest['files']=dict(old, **{'resources/lib/modules/sources.py':'0'*64})
-        self.manifest['installed_tree_sha256']={'6.7.92':[self.full_tree_digest(old)]}
+        self.manifest['installed_tree_sha256']={self.version:[self.full_tree_digest(old)]}
         (self.resources/'managed-umbrella.json').write_text(json.dumps(self.manifest))
         self.assertEqual(self.guard(home),UMBRELLA)
 
@@ -173,8 +192,8 @@ class ManagedUmbrellaTests(unittest.TestCase):
         old=dict(self.manifest['files']);new=dict(old)
         alternate=b'# reviewed alternate player\n';new['resources/lib/modules/player.py']=hashlib.sha256(alternate).hexdigest()
         new['resources/lib/modules/sources.py']='0'*64
-        self.manifest['installed_tree_sha256']={'6.7.92':[self.full_tree_digest(old),self.full_tree_digest(new)]}
-        self.manifest['installed_player_hashes']['6.7.92'].append(new['resources/lib/modules/player.py'])
+        self.manifest['installed_tree_sha256']={self.version:[self.full_tree_digest(old),self.full_tree_digest(new)]}
+        self.manifest['installed_player_hashes'][self.version].append(new['resources/lib/modules/player.py'])
         (self.resources/'managed-umbrella.json').write_text(json.dumps(self.manifest))
         (addon/'resources/lib/modules/player.py').write_bytes(alternate)
         before={p.relative_to(home):p.read_bytes() for p in home.rglob('*') if p.is_file()}
@@ -196,7 +215,7 @@ class ManagedUmbrellaTests(unittest.TestCase):
                 shutil.rmtree(home)
 
     def test_known_legacy_version_requires_its_entire_reviewed_tree(self):
-        legacy=dict(self.provider);legacy['addon.xml']=legacy['addon.xml'].replace(b'6.7.92',b'6.7.90')
+        legacy=dict(self.provider);legacy['addon.xml']=legacy['addon.xml'].replace(('version="'+self.version+'"').encode(),b'version="6.7.90"',1)
         self.manifest['legacy_files']['6.7.90']={n:hashlib.sha256(raw).hexdigest()for n,raw in legacy.items()}
         self.manifest['installed_player_hashes']['6.7.90']=[hashlib.sha256(legacy['resources/lib/modules/player.py']).hexdigest()]
         (self.resources/'managed-umbrella.json').write_text(json.dumps(self.manifest))

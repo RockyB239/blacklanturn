@@ -1,0 +1,79 @@
+{
+  "passed": true,
+  "personal_profile_accessed": false,
+  "scope": "native Mac Kodi API / production install core; transport and Wizard UI tested separately",
+  "cases": [
+    {
+      "edition": "General",
+      "platform_identity": "simulated Android only; all installer file/registry APIs native macOS",
+      "release_state_verified": true,
+      "completion_receipt_verified": true,
+      "mode": "clean",
+      "passed": true,
+      "source_files_exact": 3895,
+      "payload_sha256": "349e54302d83ca98ab2e3053cb5259c6e4794631c2386c6da0dc1ccd6c699585",
+      "installer_sha256": "f5102a6db46239108d93a935f47da2619f15eacbc19244f6a4d7090b7d31f8f3",
+      "native_registry_preserved": true,
+      "synthetic_history_choice_preserved": true,
+      "synthetic_playback_state_paths_preserved": 0,
+      "clean_cleared_synthetic_playback_state": true
+    },
+    {
+      "edition": "General",
+      "platform_identity": "simulated Android only; all installer file/registry APIs native macOS",
+      "release_state_verified": true,
+      "completion_receipt_verified": true,
+      "mode": "standard",
+      "passed": true,
+      "source_files_exact": 3895,
+      "payload_sha256": "349e54302d83ca98ab2e3053cb5259c6e4794631c2386c6da0dc1ccd6c699585",
+      "installer_sha256": "f5102a6db46239108d93a935f47da2619f15eacbc19244f6a4d7090b7d31f8f3",
+      "native_registry_preserved": true,
+      "synthetic_history_choice_preserved": true,
+      "synthetic_playback_state_paths_preserved": 12,
+      "clean_cleared_synthetic_playback_state": false
+    },
+    {
+      "edition": "Apple-TV-Mac",
+      "platform_identity": "native macOS",
+      "release_state_verified": true,
+      "completion_receipt_verified": true,
+      "mode": "clean",
+      "passed": true,
+      "source_files_exact": 3891,
+      "payload_sha256": "4d30154120a7ab7ce6a6a053bb91ed2e2360020414d1c8b0174ec87df8dac73a",
+      "installer_sha256": "f5102a6db46239108d93a935f47da2619f15eacbc19244f6a4d7090b7d31f8f3",
+      "native_registry_preserved": true,
+      "synthetic_history_choice_preserved": true,
+      "synthetic_playback_state_paths_preserved": 0,
+      "clean_cleared_synthetic_playback_state": true
+    },
+    {
+      "edition": "Apple-TV-Mac",
+      "platform_identity": "native macOS",
+      "release_state_verified": true,
+      "completion_receipt_verified": true,
+      "mode": "standard",
+      "passed": true,
+      "source_files_exact": 3891,
+      "payload_sha256": "4d30154120a7ab7ce6a6a053bb91ed2e2360020414d1c8b0174ec87df8dac73a",
+      "installer_sha256": "f5102a6db46239108d93a935f47da2619f15eacbc19244f6a4d7090b7d31f8f3",
+      "native_registry_preserved": true,
+      "synthetic_history_choice_preserved": true,
+      "synthetic_playback_state_paths_preserved": 12,
+      "clean_cleared_synthetic_playback_state": false
+    }
+  ],
+  "driver_sha256": "33d5803413a0f6a70c33dfdad81859a11544b3aac451a53e6c3b13d0a1c40049",
+  "artifacts": {
+    "plugin.program.blacklanturninstaller-1.0.29.zip": "f5102a6db46239108d93a935f47da2619f15eacbc19244f6a4d7090b7d31f8f3",
+    "BlackLanturn-General-Kodi21-1.1.23.zip": "349e54302d83ca98ab2e3053cb5259c6e4794631c2386c6da0dc1ccd6c699585",
+    "BlackLanturn-Apple-TV-Mac-Kodi21-1.1.23.zip": "4d30154120a7ab7ce6a6a053bb91ed2e2360020414d1c8b0174ec87df8dac73a"
+  },
+  "network_blocked": true,
+  "personal_profile_denied": true,
+  "runtime": "21.3",
+  "physical_fire_tested": false,
+  "physical_apple_tv_tested": false,
+  "native_log_sha256": "66909218ea575afbd8c3da2905c139357bc8ca299eaf336c83f5e992635bb9d3"
+}

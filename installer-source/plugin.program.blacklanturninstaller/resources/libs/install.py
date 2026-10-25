@@ -34,12 +34,20 @@ from resources.libs.common.config import CONFIG
 ###########################
 
 
-def wipe(accounts_prepared=False, auth_only=False):
+def wipe(accounts_prepared=False, auth_only=False, standard_plan=None):
     from resources.libs import db
     from resources.libs.common import logging
     from resources.libs import skin
     from resources.libs.common import tools
     from resources.libs import update
+
+    if standard_plan:
+        from resources.libs import standard_addons
+        try:
+            standard_addons.verify(CONFIG.HOME, standard_plan)
+        except standard_addons.ProtectionError as exc:
+            xbmcgui.Dialog().ok(CONFIG.ADDONTITLE, str(exc))
+            return False
 
     if not accounts_prepared:
         if CONFIG.KEEPTRAKT == 'true':
@@ -121,6 +129,8 @@ def wipe(accounts_prepared=False, auth_only=False):
             excluded = any(part in exclude_dirs for part in parts[:-1])
             if auth_only and len(parts) > 2 and parts[0] == 'addon_data' and parts[1] in ('inputstream.adaptive', 'script.module.pil'):
                 excluded = False
+            if standard_plan and standard_addons.keep_state_file('userdata/' + '/'.join(parts), standard_plan):
+                continue
             if excluded or (len(parts) == 1 and parts[0] in keep_xml) or parts[-1] in CONFIG.LOGFILES:
                 continue
             settings_store.delete(path)
@@ -133,11 +143,20 @@ def wipe(accounts_prepared=False, auth_only=False):
     latestAddonDB = db.latest_db('Addons')
     for root, dirs, files in os.walk(xbmcPath, topdown=True):
         dirs[:] = [d for d in dirs if d not in exclude_dirs or (auth_only and os.path.normpath(root) == os.path.normpath(CONFIG.ADDON_DATA) and d in ('inputstream.adaptive', 'script.module.pil'))]
+        if standard_plan and os.path.normpath(root) == os.path.normpath(CONFIG.ADDONS):
+            # Exact code-tree decisions override legacy global dependency keeps.
+            dirs[:] = [d for d in os.listdir(root) if os.path.isdir(os.path.join(root, d))
+                       and d not in standard_plan['preserve']
+                       and (d not in CONFIG.EXCLUDES or (d == standard_addons.OWN_REPO and d in standard_plan['replace']))
+                       and d != CONFIG.ADDON_ID
+                       and (d in standard_plan['replace'] or d not in exclude_dirs)]
         for name in files:
             del_file += 1
             fold = root.replace('/', '\\').split('\\')
             x = len(fold)-1
-            if name == 'sources.xml' and fold[-1] == 'userdata' and CONFIG.KEEPSOURCES == 'true':
+            if standard_plan and standard_addons.keep_state_file(os.path.relpath(os.path.join(root, name), CONFIG.HOME).replace(os.sep, '/'), standard_plan):
+                continue
+            elif name == 'sources.xml' and fold[-1] == 'userdata' and CONFIG.KEEPSOURCES == 'true':
                 logging.log("Keep sources.xml: {0}".format(os.path.join(root, name)))
             elif name == 'favourites.xml' and fold[-1] == 'userdata' and CONFIG.KEEPFAVS == 'true':
                 logging.log("Keep favourites.xml: {0}".format(os.path.join(root, name)))
@@ -178,7 +197,16 @@ def wipe(accounts_prepared=False, auth_only=False):
             return False
     for root, dirs, files in os.walk(xbmcPath, topdown=True):
         dirs[:] = [d for d in dirs if d not in exclude_dirs or (auth_only and os.path.normpath(root) == os.path.normpath(CONFIG.ADDON_DATA) and d in ('inputstream.adaptive', 'script.module.pil'))]
+        if standard_plan and os.path.normpath(root) == os.path.normpath(CONFIG.ADDONS):
+            # Exact code-tree decisions override legacy global dependency keeps.
+            dirs[:] = [d for d in os.listdir(root) if os.path.isdir(os.path.join(root, d))
+                       and d not in standard_plan['preserve']
+                       and (d not in CONFIG.EXCLUDES or (d == standard_addons.OWN_REPO and d in standard_plan['replace']))
+                       and d != CONFIG.ADDON_ID
+                       and (d in standard_plan['replace'] or d not in exclude_dirs)]
         for name in dirs:
+            if standard_plan and standard_addons.keep_state_directory(os.path.relpath(os.path.join(root, name), CONFIG.HOME).replace(os.sep, '/'), standard_plan):
+                continue
             progress_dialog.update(
             100,
             'Cleaning Up Empty Folder: [COLOR {0}]{1}[/COLOR]'.format(CONFIG.COLOR1, name))

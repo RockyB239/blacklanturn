@@ -79,11 +79,11 @@ def addon_database(addon=None, state=1, array=False):
 def latest_db(db):
     if db in CONFIG.DB_FILES:
         match = glob.glob(os.path.join(CONFIG.DATABASE, '{0}*.db'.format(db)))
-        comp = '{0}(.+?).db'.format(db[1:])
+        comp = re.compile(re.escape(db) + r'([0-9]+)\.db')
         highest = 0
         for file in match:
             try:
-                check = int(re.compile(comp).findall(file)[0])
+                check = int(comp.fullmatch(os.path.basename(file)).group(1))
             except:
                 check = 0
             if highest < check:

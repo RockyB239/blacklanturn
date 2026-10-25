@@ -1,0 +1,37 @@
+{
+  "build": "1.1.23",
+  "installer": "1.0.29",
+  "source_tests": {
+    "installer-tests-final": 751,
+    "controller-tests": 832,
+    "autoplay-tests": 36,
+    "probe-tests": 16,
+    "youtube-context-tests": 7
+  },
+  "current_helper_patch_contracts": 49,
+  "exact_wizard_cases": 12,
+  "isolated_native_install_core_cases": 4,
+  "artifacts": {
+    "BlackLanturn-Apple-TV-Mac-Kodi21-1.1.23.zip": {
+      "sha256": "4d30154120a7ab7ce6a6a053bb91ed2e2360020414d1c8b0174ec87df8dac73a",
+      "bytes": 92633593
+    },
+    "BlackLanturn-General-Kodi21-1.1.23.zip": {
+      "sha256": "349e54302d83ca98ab2e3053cb5259c6e4794631c2386c6da0dc1ccd6c699585",
+      "bytes": 91813488
+    },
+    "plugin.program.blacklanturninstaller-1.0.29.zip": {
+      "sha256": "f5102a6db46239108d93a935f47da2619f15eacbc19244f6a4d7090b7d31f8f3",
+      "bytes": 4088623
+    }
+  },
+  "native_receipt_sha256": "0651932b4a00d4b5d26be50c90beb08959eb3a624f24f4d4d4f42c88a88079c2",
+  "fire_stick_contacted": false,
+  "apple_tv_contacted": false,
+  "personal_kodi_profile_accessed": false,
+  "limits": [
+    "General Android identity simulated in isolated macOS native install-core acceptance.",
+    "Physical Fire Stick and Apple TV were not retested or updated in this release task.",
+    "Current Helper6.18.2 source contracts are separate from earlier physicalFire6.18.1 playback evidence."
+  ]
+}

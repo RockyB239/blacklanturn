@@ -47,6 +47,13 @@ class NativePerformanceV2(unittest.TestCase):
    with self.subTest(field=field):self.reject(lambda r:r[field].pop(next(iter(r[field]))))
   for field,value in (('loaded_version','0.1.82'),('controller','0.1.82'),('source_exact',False),('helper_source_exact',False)):
    with self.subTest(field=field):self.reject(lambda r:r.update({field:value}))
+ def test_current_helper_inventory_cannot_replace_missing_historical_inventory(self):
+  path=self.root/'installer-source/plugin.program.blacklanturninstaller/resources/managed-helper.json'
+  manifest=json.loads(path.read_text())
+  self.assertNotEqual(manifest['upstream_version'],'6.17.9')
+  self.check()
+  del manifest['legacy_files']['6.17.9'];path.write_text(json.dumps(manifest))
+  with self.assertRaisesRegex(AssertionError,'historical Helper6.17.9 inventory'):self.check()
  def test_before_source_cannot_claim_current_controller(self):self.reject(lambda r:r['source_files'].update(self.manifest['files']),'before')
  def test_loaded_origins_preservation_and_preview_conditions_required(self):
   for key,value in (('settings_preserved',False),('save_method_restored',False),('completed',False),('measurement_valid',False),('preview_suppression','normal'),('preservation_scope','all personal device/history data'),('loaded_method_origins',{'load_section':'elsewhere.py'})):

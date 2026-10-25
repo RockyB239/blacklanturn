@@ -6,6 +6,28 @@ LIB=ROOT/'installer-source/plugin.program.blacklanturninstaller/resources/libs'
 BASE=ROOT/'compatibility/helper-empty-cache/upstream-6.17.9.zip'
 PATCH=ROOT/'compatibility/helper-empty-cache/candidate'
 ID='plugin.video.themoviedb.helper'
+
+def current_data(addon_id, normalize=True):
+ """Complete pinned current tree; no fixture silently reuses a legacy target."""
+ directory=ROOT/'compatibility/current-addons'
+ manifest=json.loads((directory/'manifest.json').read_text())['addons'][addon_id]
+ archive=directory/manifest['archive']
+ if hashlib.sha256(archive.read_bytes()).hexdigest()!=manifest['archive_sha256']:
+  raise AssertionError('Current fixture source checksum differs: '+addon_id)
+ with zipfile.ZipFile(archive) as z:
+  data={n.removeprefix(addon_id+'/'):z.read(n) for n in z.namelist() if n.startswith(addon_id+'/') and not n.endswith('/')}
+ if {n:hashlib.sha256(b).hexdigest() for n,b in data.items()}!=manifest['files']:
+  raise AssertionError('Current complete fixture inventory differs: '+addon_id)
+ if normalize:
+  spec=importlib.util.spec_from_file_location('fixture_managed_versions',LIB/'managed_versions.py'); versions=importlib.util.module_from_spec(spec);spec.loader.exec_module(versions)
+  data['addon.xml']=versions.normalize_metadata(addon_id,data['addon.xml'])
+  for key,adapter in versions.policy()['source_adapters'].items():
+   aid,name=key.split('/',1)
+   if aid==addon_id and hashlib.sha256(data[name]).hexdigest()==adapter['managed_sha256']:
+    raw=(ROOT/'compatibility/managed-updates/umbrella/upstream'/name).read_bytes()
+    if hashlib.sha256(raw).hexdigest()!=adapter['upstream_sha256']:raise AssertionError('Fixture adapter source differs')
+    data[name]=raw
+ return data
 class ManagedTests(unittest.TestCase):
  def setUp(self):
   self.tmp=tempfile.TemporaryDirectory();self.root=Path(self.tmp.name)
@@ -15,9 +37,7 @@ class ManagedTests(unittest.TestCase):
   s=importlib.util.spec_from_file_location('managed_addons',p);m=importlib.util.module_from_spec(s);s.loader.exec_module(m);return m
  def archive(self,change=None):
   p=self.root/'helper.zip'
-  with zipfile.ZipFile(BASE) as z:data={n:z.read(n) for n in z.namelist() if n.startswith('addons/'+ID+'/')}
-  for name,rel in [('lists_default.py','lists_default.py'),('lists_trakt.py','trakt/lists_standard.py'),('lists_search.py','tmdb/lists_search.py')]:data['addons/'+ID+'/resources/tmdbhelper/lib/items/directories/'+rel]=(PATCH/name).read_bytes()
-  for name in ('player.py','scrobbler.py','service.py'):data['addons/'+ID+'/resources/tmdbhelper/lib/monitor/'+name]=(ROOT/'compatibility/helper-progress/candidate'/name).read_bytes()
+  data={'addons/'+ID+'/'+n:raw for n,raw in current_data(ID).items()}
   if change:change(data)
   with zipfile.ZipFile(p,'w') as z:
    for n,d in data.items():z.writestr(n,d)
@@ -31,13 +51,21 @@ class ManagedTests(unittest.TestCase):
  def test_verified_payload_accepted(self):
   m=self.module()
   with zipfile.ZipFile(self.archive()) as z:self.assertEqual(m.verify_archive(z),ID)
+ def test_legacy6179_payload_is_not_current_approved_target(self):
+  with zipfile.ZipFile(BASE) as source:
+   data={n:source.read(n) for n in source.namelist() if n.startswith('addons/'+ID+'/')}
+  path=self.root/'explicit-legacy6179.zip'
+  with zipfile.ZipFile(path,'w') as z:
+   for name,raw in data.items():z.writestr(name,raw)
+  m=self.module()
+  with zipfile.ZipFile(path) as z,self.assertRaises(m.ProtectionError):m.verify_archive(z)
  def test_reverted_cache_fix_rejected(self):
   m=self.module()
   with zipfile.ZipFile(self.archive(lambda d:d.__setitem__('addons/'+ID+'/resources/tmdbhelper/lib/items/directories/lists_default.py',b'old code'))) as z:
    with self.assertRaises(m.ProtectionError):m.verify_archive(z)
  def test_unknown_future_helper_rejected(self):
   m=self.module()
-  with zipfile.ZipFile(self.archive(lambda d:d.__setitem__('addons/'+ID+'/addon.xml',d['addons/'+ID+'/addon.xml'].replace(b'6.17.9',b'6.18.0')))) as z:
+  with zipfile.ZipFile(self.archive(lambda d:d.__setitem__('addons/'+ID+'/addon.xml',d['addons/'+ID+'/addon.xml'].replace(b'version="',b'version="999.',1)))) as z:
    with self.assertRaises(m.ProtectionError):m.verify_archive(z)
  def test_added_python_code_rejected(self):
   m=self.module()
@@ -93,7 +121,7 @@ class ManagedInstallTests(CompatibilityTests):
   self.assertEqual(prefs.read_text(),'preserve native prefs')
   with sqlite3.connect(db) as c:self.assertEqual(c.execute('SELECT addonID,updateRule FROM update_rules ORDER BY id').fetchall(),[('repository.keep',2),(ID,1)])
   installed=Path(cfg.HOME)/'addons'/ID/'resources/tmdbhelper/lib/items/directories/lists_default.py'
-  self.assertEqual(hashlib.sha256(installed.read_bytes()).hexdigest(),'f2b0ae2a7165499177147aa5d13150271460ea3331c83e471ad453a38682c02a')
+  self.assertEqual(installed.read_bytes(),current_data(ID)['resources/tmdbhelper/lib/items/directories/lists_default.py'])
   self.assertIn('UpdateLocalAddons',k.commands)
 
 class OldInstallerTests(ManagedInstallTests):
