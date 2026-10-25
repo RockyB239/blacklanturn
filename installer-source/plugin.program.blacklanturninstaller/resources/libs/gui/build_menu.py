@@ -189,6 +189,12 @@ class BuildMenu:
                     '[I]Build designed for Kodi v{0} (installed: v{1})[/I]'.format(str(kodi), str(CONFIG.KODIV)),
                     fanart=fanart, icon=icon, themeit=CONFIG.THEME3)
                     
+            from resources.libs import inplace_update
+            if inplace_update.available(CONFIG.HOME):
+                directory.add_file('Update BlackLanturn', {'mode': 'install', 'action': 'update', 'name': name},
+                                   description='Update included add-ons and patches together. Keep all saved data, settings, accounts and other add-ons.',
+                                   fanart=fanart, icon=icon, themeit=CONFIG.THEME1)
+
             directory.add_separator('INSTALL')
             from resources.libs.wizard import install_mode, install_summary
             directory.add_file('Install - ' + install_mode(CONFIG), {'mode': 'install', 'action': 'build', 'name': name}, description=install_summary(CONFIG), fanart=fanart,
@@ -294,7 +300,7 @@ class BuildMenu:
         buildname = quote_plus(name)
         menu_items.append((CONFIG.THEME2.format(name), 'RunAddon({0}, ?mode=viewbuild&name={1})'.format(CONFIG.ADDON_ID, buildname)))
         menu_items.append((CONFIG.THEME3.format('Fresh Install'), 'RunPlugin(plugin://{0}/?mode=install&name={1}&url=fresh)'.format(CONFIG.ADDON_ID, buildname)))
-        menu_items.append((CONFIG.THEME3.format('Normal Install'), 'RunPlugin(plugin://{0}/?mode=install&name={1}&url=normal)'.format(CONFIG.ADDON_ID, buildname)))
+        menu_items.append((CONFIG.THEME3.format('Update BlackLanturn'), 'RunPlugin(plugin://{0}/?mode=install&name={1}&action=update)'.format(CONFIG.ADDON_ID, buildname)))
         menu_items.append((CONFIG.THEME3.format('Apply guiFix'), 'RunPlugin(plugin://{0}/?mode=install&name={1}&url=gui)'.format(CONFIG.ADDON_ID, buildname)))
         menu_items.append((CONFIG.THEME3.format('Build Information'), 'RunPlugin(plugin://{0}/?mode=buildinfo&name={1})'.format(CONFIG.ADDON_ID, buildname)))
         menu_items.append((CONFIG.THEME2.format('{0} Settings'.format(CONFIG.ADDONTITLE)), 'RunPlugin(plugin://{0}/?mode=settings)'.format(CONFIG.ADDON_ID)))

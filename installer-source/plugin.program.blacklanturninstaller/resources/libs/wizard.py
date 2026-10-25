@@ -22,6 +22,7 @@ import xbmcgui
 
 import time
 import os
+import tempfile
 
 from resources.libs import check
 from resources.libs import db
@@ -83,6 +84,64 @@ class Wizard:
                            nolabel='[B][COLOR red]No[/COLOR][/B]',
                            yeslabel='[B][COLOR springgreen]Yes[/COLOR][/B]'):
             install.wipe()
+
+    def update(self, name):
+        """Update bundled code in place; saved-data switches never apply here."""
+        from resources.libs import inplace_update, managed_addons
+        if xbmc.Player().isPlaying():
+            self.dialog.ok(CONFIG.ADDONTITLE, 'Stop playback before updating BlackLanturn. Nothing has been changed.')
+            return
+        try:
+            if inplace_update.recover(CONFIG.HOME):
+                self.dialog.ok(CONFIG.ADDONTITLE, 'An interrupted update has been recovered. Start Update BlackLanturn again to continue.')
+                return
+        except inplace_update.UpdateError as exc:
+            self.dialog.ok(CONFIG.ADDONTITLE, str(exc))
+            return
+        target_version = check.check_build(name, 'version')
+        if not self.dialog.yesno('Update BlackLanturn v' + target_version,
+                'Update included add-ons and BlackLanturn patches together.\n'
+                'Keep all saved data, accounts, settings and other installed add-ons.\n'
+                'Kodi will need to restart afterward.', nolabel='Cancel', yeslabel='Update'):
+            return
+        os.makedirs(CONFIG.MYBUILDS, exist_ok=True)
+        descriptor, archive = tempfile.mkstemp(prefix='BlackLanturn-update-', suffix='.zip', dir=CONFIG.MYBUILDS)
+        os.close(descriptor)
+        plan = None
+        self.dialogProgress.create(CONFIG.ADDONTITLE, 'Downloading BlackLanturn update…')
+        try:
+            if Downloader().download(check.check_build(name, 'url'), archive) is False:
+                return
+            self.dialogProgress.update(0, 'Checking update and staging bundled add-ons…')
+            plan = inplace_update.prepare(archive, CONFIG.HOME, xbmc)
+            if xbmc.Player().isPlaying():
+                raise inplace_update.UpdateError('Playback started while preparing the update. Nothing has been replaced; stop playback and retry.')
+            managed_addons.protect(os.path.join(CONFIG.DATABASE, db.latest_db('Addons')), umbrella=True, network=True, youtube=True)
+            self.dialogProgress.update(50, 'Updating BlackLanturn add-ons and patches. Saved data stays in place…')
+            applying, plan = plan, None
+            result = inplace_update.apply(applying)
+            # Only the Installer's own build bookkeeping changes. Do not run
+            # account/settings restoration, skin switching or registry resets.
+            for key, value in (('buildname', name), ('buildversion', result['version']),
+                               ('latestversion', result['version']), ('installed', 'true'),
+                               ('nextbuildcheck', tools.get_date(days=CONFIG.UPDATECHECK, formatted=True))):
+                CONFIG.set_setting(key, value)
+            xbmc.executebuiltin('UpdateLocalAddons', wait=True)
+        except (inplace_update.UpdateError, managed_addons.ProtectionError, OSError, RuntimeError) as exc:
+            self.dialog.ok(CONFIG.ADDONTITLE, str(exc))
+            return
+        finally:
+            if plan is not None:
+                inplace_update.cancel(plan)
+            self.dialogProgress.close()
+            try: os.remove(archive)
+            except OSError: pass
+        if self.dialog.yesno(CONFIG.ADDONTITLE,
+                'BlackLanturn v' + result['version'] + ' updated.\n'
+                'Your accounts, settings, saved data and other add-ons were kept.\n'
+                'Close Kodi now, then reopen it to use the updated add-ons.',
+                nolabel='Close later', yeslabel='Close Kodi'):
+            xbmc.executebuiltin('Quit')
 
     def build(self, name, over=False):
         # if action == 'normal':
@@ -525,8 +584,10 @@ class Wizard:
 def wizard(action, name, url):
     cls = Wizard()
 
-    if action in ['fresh', 'normal']:
-        cls.build(action, name)
+    if action in ('update', 'normal'):
+        cls.update(name)
+    elif action == 'fresh':
+        cls.build(name)
     elif action == 'gui':
         cls.gui(name)
     elif action == 'theme':

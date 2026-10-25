@@ -381,8 +381,8 @@ def show_update_window(name='Testing Window', current='1.0', new='1.1', icon=CON
             self.new = kwargs['new']
             self.icon = kwargs['icon']
             self.fanart = kwargs['fanart']
-            self.msgupdate = "Update avaliable for installed build:\n[COLOR {0}]{1}[/COLOR]\n\nCurrent Version: v[COLOR {2}]{3}[/COLOR]\nLatest Version: v[COLOR {4}]{5}[/COLOR]\n\n[COLOR {6}]*Recommened: Fresh install[/COLOR]".format(CONFIG.COLOR1, self.name, CONFIG.COLOR1, self.current, CONFIG.COLOR1, self.new, CONFIG.COLOR1)
-            self.msgcurrent = "Running latest version of installed build:\n[COLOR {0}]{1}[/COLOR]\n\nCurrent Version: v[COLOR {2}]{3}[/COLOR]\nLatest Version: v[COLOR {4}]{5}[/COLOR]\n\n[COLOR {6}]*Recommended: Fresh install[/COLOR]".format(CONFIG.COLOR1, self.name, CONFIG.COLOR1, self.current, CONFIG.COLOR1, self.new, CONFIG.COLOR1)
+            self.msgupdate = "Update avaliable for installed build:\n[COLOR {0}]{1}[/COLOR]\n\nCurrent Version: v[COLOR {2}]{3}[/COLOR]\nLatest Version: v[COLOR {4}]{5}[/COLOR]\n\n[COLOR {6}]Update keeps all saved data and other add-ons[/COLOR]".format(CONFIG.COLOR1, self.name, CONFIG.COLOR1, self.current, CONFIG.COLOR1, self.new, CONFIG.COLOR1)
+            self.msgcurrent = "Running latest version of installed build:\n[COLOR {0}]{1}[/COLOR]\n\nCurrent Version: v[COLOR {2}]{3}[/COLOR]\nLatest Version: v[COLOR {4}]{5}[/COLOR]\n\n[COLOR {6}]Update keeps all saved data and other add-ons[/COLOR]".format(CONFIG.COLOR1, self.name, CONFIG.COLOR1, self.current, CONFIG.COLOR1, self.new, CONFIG.COLOR1)
 
         def onInit(self):
             self.imagefanart = 101
@@ -409,7 +409,7 @@ def show_update_window(name='Testing Window', current='1.0', new='1.1', icon=CON
         def do_normal_install(self):
             logging.log("[Check Updates] [Installed Version: {0}] [Current Version: {1}] [User Selected: Normal Install build]".format(CONFIG.BUILDVERSION, CONFIG.BUILDLATEST))
             logging.log("[Check Updates] [Next Check: {0}]".format(tools.get_date(days=CONFIG.UPDATECHECK, formatted=True)))
-            url = 'plugin://{0}/?mode=install&name={1}&action=normal'.format(CONFIG.ADDON_ID, quote_plus(CONFIG.BUILDNAME))
+            url = 'plugin://{0}/?mode=install&name={1}&action=update'.format(CONFIG.ADDON_ID, quote_plus(CONFIG.BUILDNAME))
             xbmc.executebuiltin('RunPlugin({0})'.format(url))
             self.close()
 

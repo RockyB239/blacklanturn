@@ -35,7 +35,7 @@ def _compatible(aid, details):
     if not version: return False
     return version[0] == 21 if aid == 'inputstream.adaptive' else version >= (1,1,7)
 
-def prepare(path, kodi, home=None):
+def prepare(path, kodi, home=None, allow_native_changes=True):
     """Called after download, before OpenWizard performs any profile cleanup."""
     try:
         with zipfile.ZipFile(path) as archive:
@@ -152,6 +152,8 @@ def prepare(path, kodi, home=None):
             if kodi.Monitor().abortRequested():
                 raise CompatibilityError('Installation cancelled. Your current build has been kept.')
             details = _details(kodi,aid)
+            if not allow_native_changes and not _compatible(aid, details):
+                raise CompatibilityError('Install or enable '+aid+' through Kodi’s official repository, then retry the update. Your current setup has been kept.')
             if details and not details.get('enabled'):
                 _rpc(kodi,'Addons.SetAddonEnabled',{'addonid':aid,'enabled':True})
                 details = _details(kodi,aid)

@@ -210,8 +210,12 @@ def prepare_policy(marker, archive):
     revision = marker.get('managed_update_policy')
     if revision is None:
         return None
-    if (revision != policy()['policy'] or marker.get('installer_min_version') != policy()['installer_min_version']
+    update_policy = marker.get('inplace_update_policy')
+    if update_policy not in (None, 'bundled-code-1'):
+        raise ValueError('Update BlackLanturn Installer before installing this build.')
+    minimum = '1.0.30' if update_policy else policy()['installer_min_version']
+    if (revision != policy()['policy'] or marker.get('installer_min_version') != minimum
             or marker.get('youtube_refresh_patch') != 'youtube-freshness-2'):
         raise ValueError('Update BlackLanturn Installer before installing this build.')
     verify_archive_metadata(archive)
-    return policy()['installer_min_version']
+    return minimum

@@ -87,7 +87,9 @@ class Router:
         elif mode == 'install':  # Builds -> Fresh Install/Standard Install/Apply guifix
             from resources.libs.wizard import Wizard
 
-            if action == 'build':
+            if action in ('update', 'normal'):
+                Wizard().update(name)
+            elif action in ('build', 'fresh'):
                 Wizard().build(name)
             elif action == 'gui':
                 Wizard().gui(name)

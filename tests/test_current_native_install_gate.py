@@ -10,8 +10,8 @@ class CurrentNativeInstallGate(unittest.TestCase):
    (self.root/n).write_bytes(n.encode());self.artifacts[n]=hashlib.sha256(n.encode()).hexdigest()
   self.receipt={'passed':True,'network_blocked':True,'personal_profile_denied':True,'personal_profile_accessed':False,'artifacts':self.artifacts,'cases':[]}
   for e in ('General','Apple-TV-Mac'):
-   for m in ('clean','standard'):
-    self.receipt['cases'].append({'edition':e,'mode':m,'passed':True,'source_files_exact':3800,'release_state_verified':True,'native_registry_preserved':True,'synthetic_history_choice_preserved':True,'payload_sha256':self.artifacts['BlackLanturn-'+e+'-Kodi21-1.1.23.zip'],'installer_sha256':self.artifacts[gate.INSTALLER],'synthetic_playback_state_paths_preserved':12 if m=='standard' else 0,'clean_cleared_synthetic_playback_state':m=='clean'})
+   for m in ('clean','standard','update'):
+    self.receipt['cases'].append({'edition':e,'mode':m,'passed':True,'source_files_exact':3800,'release_state_verified':True,'native_registry_preserved':True,'synthetic_history_choice_preserved':True,'payload_sha256':self.artifacts['BlackLanturn-'+e+'-Kodi21-1.1.24.zip'],'installer_sha256':self.artifacts[gate.INSTALLER],'synthetic_playback_state_paths_preserved':12 if m!='clean' else 0,'clean_cleared_synthetic_playback_state':m=='clean','native_managed_versions_verified':m=='update','all_saved_data_unchanged':m=='update','unrelated_addon_unchanged':m=='update'})
  def test_exact_current_four_case_native_receipt_passes(self):self.assertTrue(gate.verify(self.receipt,self.root))
  def test_missing_or_duplicate_case_refuses(self):
   for change in ('missing','duplicate'):
