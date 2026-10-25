@@ -17,7 +17,7 @@
             </assets>
         </extension>
     </addon>
-    <addon id="plugin.program.blacklanturninstaller" name="BlackLanturn Installer" version="1.0.33" provider-name="BlackLanturn">
+    <addon id="plugin.program.blacklanturninstaller" name="BlackLanturn Installer" version="1.0.34" provider-name="BlackLanturn">
         <requires>
             <import addon="xbmc.python" version="3.0.1" />
             <import addon="script.module.requests" />

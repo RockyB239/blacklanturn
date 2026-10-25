@@ -1,0 +1,7 @@
+BlackLanturn Build 1.1.29 includes Installer 1.0.34 in both General and Apple TV/Mac packages.
+
+Updates now uses the newest known release for your installed edition instead of an older saved manual check. Update BlackLanturn is selected when entering Updates if an update is available; returning retains your selection. Opening the page adds no network requests.
+
+Use Update BlackLanturn for the in-place update. Bundled add-ons, Installer and reviewed patches update together while settings, authorizations, playback preferences, history, sources and other add-ons stay in place. Close and reopen Kodi after updating.
+
+Controller0.1.95 and playback code are unchanged. Validation uses isolated synthetic profiles; no personal device or notice history was changed.
