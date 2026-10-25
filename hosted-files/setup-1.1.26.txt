@@ -1,0 +1,13 @@
+BlackLanturn Build 1.1.26 includes Installer 1.0.31 and Controller 0.1.93 in both General and Apple TV/Mac editions.
+
+- Dedicated Updates sidebar, scrollable release notes, distinct Updates/Maintenance icons and clearer update-versus-reinstall wording.
+- Choose genre restored in main Movies/Shows title options, including lower rows.
+- Recommendations-first More like this, Similar fallback and independent branded Next/Previous navigation.
+- Broader valid trailer labels plus one limited, cached missing-preview lookup with wrong-series and conflicting-year checks. Previews remain excluded from YouTube watch history.
+- Existing managed add-on versions, tested patches, platform playback workarounds and clean defaults retained.
+
+Update BlackLanturn preserves authorizations, playback preferences, watched/resume/history data, sources, favourites and unrelated add-ons. Update Installer through the repository, then use Updates → Check now → Update BlackLanturn. Installer 1.0.30 remains the supported update-format minimum; Installer 1.0.31 is bundled and is the recommended interface. Standard/Fresh are separate installation modes. Close and reopen Kodi after updating.
+
+Available-update notices repeat each Kodi launch unless explicitly hidden for that release; future releases remain eligible. Personal devices have not been updated or their real release notices acknowledged during publication, so users can observe the normal startup notification.
+
+Release acceptance is bound to exact immutable packages: clean, Standard, in-place preservation, native Kodi21.3 and production startup-notification checks. General platform identity in macOS native tests is simulated; this does not claim fresh physical Fire Stick/tvOS playback acceptance.
