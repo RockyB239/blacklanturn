@@ -498,6 +498,144 @@
         "addons/script.module.jurialmunkey/resources/modules/jurialmunkey/reqapi.py": "9d232490dba165c07fd6ceab42c512ebe90997a794b610fbca14c64429668d59",
         "addons/skin.blacklanturn.preview/xml/Home.xml": "7495994a5f5a1f0a71ad9e7e71d5dd43387433c822fabf179cac20050227586a"
       }
+    },
+    {
+      "id": "blacklanturn-general-1.1.25-r0",
+      "edition": "general",
+      "version": "1.1.25",
+      "revision": 0,
+      "title": "BlackLanturn Build 1.1.25",
+      "summary": "Important update: update bundled add-ons and patches together while keeping your complete Kodi setup.",
+      "sections": [
+        {
+          "heading": "True in-place update",
+          "bullets": [
+            "Update BlackLanturn Installer, open your build and choose Update BlackLanturn. No reinstall or Save Data choices are needed.",
+            "Included add-ons and tested BlackLanturn patches update together. Ordinary upstream updates cannot silently replace managed patches."
+          ]
+        },
+        {
+          "heading": "Keep your complete setup",
+          "bullets": [
+            "All accounts, playback settings, sources, favourites, watched progress, history and other saved data stay in place.",
+            "Other add-ons you installed are left alone. Newer compatible ordinary dependencies are retained as complete trees."
+          ]
+        },
+        {
+          "heading": "Recovery and compatibility",
+          "bullets": [
+            "The update is checked and staged before replacing code. A failed update rolls back; an interrupted update can recover when you reopen the updater.",
+            "Restart Kodi after updating. Fresh and Standard installations remain separate options for setting up a build."
+          ]
+        },
+        {
+          "heading": "Update reminders",
+          "bullets": [
+            "Available updates return once each Kodi session until installed. Later, Back or timeout means remind me next startup.",
+            "Choose Don\u2019t show again for this update to hide that version only. Future releases still notify; completed confirmations appear once."
+          ]
+        }
+      ],
+      "files": {
+        "addons/repository.blacklanturn/addon.xml": "b8e7d0694906ebd2635ef1e87d557575bfa0297c41f4badf705babd788bc59d4",
+        "addons/repository.blacklanturn/icon.png": "0c5f1885226d28aa8052f17cb2137ebd494cacb2216daa9824bb605c93b4f4de",
+        "addons/script.blacklanturn.preview/addon.xml": "b866f80a845fcf9ac40e4b2eaab8e8a23a81a479815f091f45818d8c1133bc10",
+        "addons/script.blacklanturn.preview/default.py": "243202c135f5bd624f67864baf85dc65ae5714f189a5bd0a959a4df12e3f5868",
+        "addons/script.blacklanturn.preview/live_review.py": "393dc718b0ada8f4192727e88b9092cb6ee19b56e44647c527cd9e9d6097f32c",
+        "addons/script.blacklanturn.preview/filtered_pages.py": "72c4cc2dedcb9640f4cc8fcd6043fd8dbee1a8cf7370c3b424f7b659e501ab57",
+        "addons/script.blacklanturn.preview/youtube_saved.py": "b9db5de7514140c60fd1b0f90a428f2dd691759a615f301dfc04086519408bf1",
+        "addons/script.blacklanturn.preview/youtube_saved_runtime.py": "85ab82569cf4be737c0996df3fe117ca5d5e64f5139f8233083e052387f9d791",
+        "addons/script.blacklanturn.preview/youtube_browser.py": "60f4fdb7e66bcf7190b12ddce47c244b79372fca969016dfad2576b6b79d426e",
+        "addons/script.blacklanturn.preview/youtube_rows.py": "797f7912b1658d5c247a310071aae817686b97310895672c16c8baf73fa15afa",
+        "addons/script.blacklanturn.preview/release_updates.py": "093fb139a2e38eea24ba4a5a68d3d42c014afe2238f09780ee23e63a56539669",
+        "addons/script.blacklanturn.preview/update_notes_ui.py": "12c18ede3861c4fbef5155e4b7b799e43f6bcfdf9b244dcc2da79e0f39de0d9f",
+        "addons/script.blacklanturn.preview/resources/skins/Default/1080i/UpdateNotice.xml": "0e17f227bde4a238894847fd0f6509a7622d204f90ae3326b6226a97294b3da3",
+        "addons/script.blacklanturn.preview/resources/skins/Default/1080i/UpdateNotes.xml": "388f7431108a25ec785ad5b57ed05d074dc217601c4227bd6acdb3f8861b538c",
+        "addons/plugin.program.blacklanturninstaller/addon.xml": "15c037ba3a8ef8ed2e83533d9773839de2f2a13a90f018c078290054d0c8ea5e",
+        "addons/plugin.program.blacklanturninstaller/resources/libs/wizard.py": "12648fe1ae597bfb8bf7d5948ec9edb8602319a7a0e0aef320f2eef4e647829e",
+        "addons/plugin.program.blacklanturninstaller/resources/libs/inplace_update.py": "cc75597807ee1d5853a37d72ea470972c8c20441de5a5737a1f9f8c8946f999f",
+        "addons/plugin.program.blacklanturninstaller/resources/libs/build_preferences.py": "40a179502e72d9150be0bd5e1f3cfb667b65958413953c71bbdf0685dfabe0a7",
+        "addons/plugin.program.blacklanturninstaller/resources/libs/release_notice_state.py": "093fb139a2e38eea24ba4a5a68d3d42c014afe2238f09780ee23e63a56539669",
+        "addons/plugin.program.blacklanturninstaller/resources/libs/managed_addons.py": "6b8f3f777fcfff9c40e3ffbb2323df8cfcc956d2ca092c137f4e421c059f63a1",
+        "addons/plugin.program.blacklanturninstaller/resources/libs/managed_versions.py": "12d39a05508ce6a64fcaa816a464d55ec279b4d0daa5876f8a54588a6faa693b",
+        "addons/plugin.video.themoviedb.helper/resources/tmdbhelper/lib/items/directories/tmdb/lists_search.py": "3cc1c1165fd57b233b868fb35e4ceca1cf2449a85a44fb5b9f04cde4b6ae2862",
+        "addons/plugin.video.themoviedb.helper/resources/tmdbhelper/lib/monitor/player.py": "cc8c8f4e6f499f54bfab551a8a23687d9979a43a1562fc0fc6f066a09f9112ec",
+        "addons/plugin.video.umbrella/resources/lib/modules/player.py": "1dded07360b8c2b7c264678e9c45fc83b2614c43e84b1645d360452726d44cd7",
+        "addons/plugin.video.umbrella/resources/lib/modules/control.py": "b580a0a0a2edd8e88bab6a82f5f7d1cd32f7afe124e8ab5cd230ba99c5b00ca6",
+        "addons/plugin.video.youtube/resources/lib/youtube_plugin/kodion/context/xbmc/xbmc_context.py": "6eb2526020c082553ba9ec688db1b00a2ca2a497ae97ab0734752b3d896d0c75",
+        "addons/plugin.video.youtube/resources/lib/youtube_plugin/kodion/sql_store/function_cache.py": "7418d1ba8afa569d0b0f3ccef78748c75c6b6560e8d096b6bf6c1e83efa830cb",
+        "addons/script.module.jurialmunkey/resources/modules/jurialmunkey/reqapi.py": "9d232490dba165c07fd6ceab42c512ebe90997a794b610fbca14c64429668d59",
+        "addons/skin.blacklanturn.preview/xml/Home.xml": "7495994a5f5a1f0a71ad9e7e71d5dd43387433c822fabf179cac20050227586a"
+      }
+    },
+    {
+      "id": "blacklanturn-apple-1.1.25-r0",
+      "edition": "apple",
+      "version": "1.1.25",
+      "revision": 0,
+      "title": "BlackLanturn Build 1.1.25",
+      "summary": "Important update: update bundled add-ons and patches together while keeping your complete Kodi setup.",
+      "sections": [
+        {
+          "heading": "True in-place update",
+          "bullets": [
+            "Update BlackLanturn Installer, open your build and choose Update BlackLanturn. No reinstall or Save Data choices are needed.",
+            "Included add-ons and tested BlackLanturn patches update together. Ordinary upstream updates cannot silently replace managed patches."
+          ]
+        },
+        {
+          "heading": "Keep your complete setup",
+          "bullets": [
+            "All accounts, playback settings, sources, favourites, watched progress, history and other saved data stay in place.",
+            "Other add-ons you installed are left alone. Newer compatible ordinary dependencies are retained as complete trees."
+          ]
+        },
+        {
+          "heading": "Recovery and compatibility",
+          "bullets": [
+            "The update is checked and staged before replacing code. A failed update rolls back; an interrupted update can recover when you reopen the updater.",
+            "Restart Kodi after updating. Fresh and Standard installations remain separate options for setting up a build."
+          ]
+        },
+        {
+          "heading": "Update reminders",
+          "bullets": [
+            "Available updates return once each Kodi session until installed. Later, Back or timeout means remind me next startup.",
+            "Choose Don\u2019t show again for this update to hide that version only. Future releases still notify; completed confirmations appear once."
+          ]
+        }
+      ],
+      "files": {
+        "addons/repository.blacklanturn/addon.xml": "b8e7d0694906ebd2635ef1e87d557575bfa0297c41f4badf705babd788bc59d4",
+        "addons/repository.blacklanturn/icon.png": "0c5f1885226d28aa8052f17cb2137ebd494cacb2216daa9824bb605c93b4f4de",
+        "addons/script.blacklanturn.preview/addon.xml": "b866f80a845fcf9ac40e4b2eaab8e8a23a81a479815f091f45818d8c1133bc10",
+        "addons/script.blacklanturn.preview/default.py": "243202c135f5bd624f67864baf85dc65ae5714f189a5bd0a959a4df12e3f5868",
+        "addons/script.blacklanturn.preview/live_review.py": "393dc718b0ada8f4192727e88b9092cb6ee19b56e44647c527cd9e9d6097f32c",
+        "addons/script.blacklanturn.preview/filtered_pages.py": "72c4cc2dedcb9640f4cc8fcd6043fd8dbee1a8cf7370c3b424f7b659e501ab57",
+        "addons/script.blacklanturn.preview/youtube_saved.py": "b9db5de7514140c60fd1b0f90a428f2dd691759a615f301dfc04086519408bf1",
+        "addons/script.blacklanturn.preview/youtube_saved_runtime.py": "85ab82569cf4be737c0996df3fe117ca5d5e64f5139f8233083e052387f9d791",
+        "addons/script.blacklanturn.preview/youtube_browser.py": "60f4fdb7e66bcf7190b12ddce47c244b79372fca969016dfad2576b6b79d426e",
+        "addons/script.blacklanturn.preview/youtube_rows.py": "797f7912b1658d5c247a310071aae817686b97310895672c16c8baf73fa15afa",
+        "addons/script.blacklanturn.preview/release_updates.py": "093fb139a2e38eea24ba4a5a68d3d42c014afe2238f09780ee23e63a56539669",
+        "addons/script.blacklanturn.preview/update_notes_ui.py": "12c18ede3861c4fbef5155e4b7b799e43f6bcfdf9b244dcc2da79e0f39de0d9f",
+        "addons/script.blacklanturn.preview/resources/skins/Default/1080i/UpdateNotice.xml": "0e17f227bde4a238894847fd0f6509a7622d204f90ae3326b6226a97294b3da3",
+        "addons/script.blacklanturn.preview/resources/skins/Default/1080i/UpdateNotes.xml": "388f7431108a25ec785ad5b57ed05d074dc217601c4227bd6acdb3f8861b538c",
+        "addons/plugin.program.blacklanturninstaller/addon.xml": "15c037ba3a8ef8ed2e83533d9773839de2f2a13a90f018c078290054d0c8ea5e",
+        "addons/plugin.program.blacklanturninstaller/resources/libs/wizard.py": "12648fe1ae597bfb8bf7d5948ec9edb8602319a7a0e0aef320f2eef4e647829e",
+        "addons/plugin.program.blacklanturninstaller/resources/libs/inplace_update.py": "cc75597807ee1d5853a37d72ea470972c8c20441de5a5737a1f9f8c8946f999f",
+        "addons/plugin.program.blacklanturninstaller/resources/libs/build_preferences.py": "40a179502e72d9150be0bd5e1f3cfb667b65958413953c71bbdf0685dfabe0a7",
+        "addons/plugin.program.blacklanturninstaller/resources/libs/release_notice_state.py": "093fb139a2e38eea24ba4a5a68d3d42c014afe2238f09780ee23e63a56539669",
+        "addons/plugin.program.blacklanturninstaller/resources/libs/managed_addons.py": "6b8f3f777fcfff9c40e3ffbb2323df8cfcc956d2ca092c137f4e421c059f63a1",
+        "addons/plugin.program.blacklanturninstaller/resources/libs/managed_versions.py": "12d39a05508ce6a64fcaa816a464d55ec279b4d0daa5876f8a54588a6faa693b",
+        "addons/plugin.video.themoviedb.helper/resources/tmdbhelper/lib/items/directories/tmdb/lists_search.py": "3cc1c1165fd57b233b868fb35e4ceca1cf2449a85a44fb5b9f04cde4b6ae2862",
+        "addons/plugin.video.themoviedb.helper/resources/tmdbhelper/lib/monitor/player.py": "cc8c8f4e6f499f54bfab551a8a23687d9979a43a1562fc0fc6f066a09f9112ec",
+        "addons/plugin.video.umbrella/resources/lib/modules/player.py": "1dded07360b8c2b7c264678e9c45fc83b2614c43e84b1645d360452726d44cd7",
+        "addons/plugin.video.umbrella/resources/lib/modules/control.py": "b580a0a0a2edd8e88bab6a82f5f7d1cd32f7afe124e8ab5cd230ba99c5b00ca6",
+        "addons/plugin.video.youtube/resources/lib/youtube_plugin/kodion/context/xbmc/xbmc_context.py": "6eb2526020c082553ba9ec688db1b00a2ca2a497ae97ab0734752b3d896d0c75",
+        "addons/plugin.video.youtube/resources/lib/youtube_plugin/kodion/sql_store/function_cache.py": "7418d1ba8afa569d0b0f3ccef78748c75c6b6560e8d096b6bf6c1e83efa830cb",
+        "addons/script.module.jurialmunkey/resources/modules/jurialmunkey/reqapi.py": "9d232490dba165c07fd6ceab42c512ebe90997a794b610fbca14c64429668d59",
+        "addons/skin.blacklanturn.preview/xml/Home.xml": "7495994a5f5a1f0a71ad9e7e71d5dd43387433c822fabf179cac20050227586a"
+      }
     }
   ]
 }

@@ -44,7 +44,7 @@
 - [x] Build both candidates and Installer, test exact-artifact in-place updates including older/current/newer dependency cases and untouched-data byte comparisons.
 - [x] Run isolated native Mac Kodi tests; retain separate clean/Standard regression acceptance and native limits.
 - [x] Review once, fix findings with regressions, run full suites and privacy checks before publishing.
-- [ ] Publish accepted immutable artifacts and verify public hashes/catalog. Fire Stick remains untouched.
+- [x] Publish accepted immutable artifacts and verify public hashes/catalog. Fire Stick remains untouched.
 
 ### User-requested amendment: startup reminders
 - [x] Add a per-session notice marker and explicit per-release opt-out in Controller0.1.92, preserving the global preference and completed notice history.

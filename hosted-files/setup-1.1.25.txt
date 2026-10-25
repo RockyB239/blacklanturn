@@ -1,0 +1,13 @@
+BlackLanturn 1.1.25 and Installer 1.0.30 add a true in-place update in the existing Installer.
+
+For an existing installation: update BlackLanturn Installer through the BlackLanturn Repository, then open Installer → Builds → your installed edition → Update BlackLanturn. Close and reopen Kodi when prompted. Do not choose Standard for this update. Save Data switches are not needed for Update BlackLanturn.
+
+The update stages complete bundled add-on versions and their BlackLanturn patches together. All personal settings, accounts, sources, history, playback choices and other saved data stay in place. Unrelated add-ons remain installed; newer compatible ordinary dependencies remain whole. Kodi-native components stay owned by Kodi. Fresh and Standard installation remain separate setup tools.
+
+A writer lock, unique downloads, source/dependency checks and a recovery journal protect the batch. Failed updates roll back. After an interruption, reopening Update BlackLanturn recovers the previous code before retrying. The update does not report completion until complete code readback and release metadata commit finish.
+
+Both editions include the previously validated current Helper 6.18.2, Umbrella 6.7.97, current bundled dependencies and managed update protection. No new background updater service or browsing work is added.
+
+Acceptance includes exact-package in-place updates from Build 1.1.22 and 1.1.23, newer ordinary dependencies, saved-data byte comparisons, failure/interruption/concurrency regressions, clean/Standard regression installs and isolated native Kodi 21.3 installation/update checks. General uses simulated Android identity for the Mac native harness; this does not claim new physical Fire Stick or tvOS testing. No personal device was updated. The Fire Stick was left alone while in use.
+
+Available-update reminders now return once per Kodi session until installed. Later, Back or timeout means remind next startup. Don’t show again for this update suppresses that version only; future releases still notify. Completed confirmations remain one-time.
