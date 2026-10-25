@@ -1,0 +1,10 @@
+BlackLanturn Build 1.1.27 includes Installer 1.0.32 and Controller 0.1.94 in both General and Apple TV/Mac editions.
+
+- The protected in-place transaction now updates the Installer together with bundled add-ons and BlackLanturn patches. Newer installed Installer versions are kept.
+- Installer replacement occurs last, and interrupted updates restore it first. A separate controller startup entrypoint can recover it even if its folder is missing.
+- The outgoing Installer navigation closes after updating, avoiding old code continuing against new files.
+- Settings, authorizations, playback preferences, watched/resume/history data, sources, favourites and unrelated add-ons stay in place. Existing platform workarounds remain included.
+
+Existing Installer 1.0.31 and older need to receive 1.0.32 through Kodi's normal repository update once. After Build 1.1.27 and Installer 1.0.32 are installed, Update BlackLanturn includes future Installer versions without a separate manual Installer step. Close and reopen Kodi after updating.
+
+Both editions are tested with isolated Kodi21.3 install/update and startup recovery checks. Android identity in macOS acceptance is simulated; this does not claim new physical Fire Stick or tvOS testing. Personal devices and real notification acknowledgements are left untouched so the user can observe the published update notice.
