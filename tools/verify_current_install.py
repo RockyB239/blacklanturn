@@ -6,7 +6,7 @@ covered by the exact-artifact Wizard matrix.
 """
 import hashlib
 INSTALLER='plugin.program.blacklanturninstaller-1.0.30.zip'
-NAMES=(INSTALLER,'BlackLanturn-General-Kodi21-1.1.24.zip','BlackLanturn-Apple-TV-Mac-Kodi21-1.1.24.zip')
+NAMES=(INSTALLER,'BlackLanturn-General-Kodi21-1.1.25.zip','BlackLanturn-Apple-TV-Mac-Kodi21-1.1.25.zip')
 def verify(receipt,folder):
  assert receipt.get('passed') is True and receipt.get('network_blocked') is True and receipt.get('personal_profile_denied') is True
  assert receipt.get('personal_profile_accessed') is False,'Personal profile isolation was not proved'
@@ -17,7 +17,7 @@ def verify(receipt,folder):
  for c in cases:
   assert c.get('passed') is True and type(c.get('source_files_exact')) is int and c['source_files_exact']>3000
   assert all(c.get(k) is True for k in ('release_state_verified','native_registry_preserved','synthetic_history_choice_preserved'))
-  assert c.get('payload_sha256')==actual['BlackLanturn-'+c['edition']+'-Kodi21-1.1.24.zip'] and c.get('installer_sha256')==actual[INSTALLER]
+  assert c.get('payload_sha256')==actual['BlackLanturn-'+c['edition']+'-Kodi21-1.1.25.zip'] and c.get('installer_sha256')==actual[INSTALLER]
   if c['mode']!='clean':assert c.get('synthetic_playback_state_paths_preserved')==12
   else:assert c.get('clean_cleared_synthetic_playback_state') is True
   if c['mode']=='update': assert c.get('native_managed_versions_verified') is True and c.get('all_saved_data_unchanged') is True and c.get('unrelated_addon_unchanged') is True

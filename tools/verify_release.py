@@ -442,7 +442,7 @@ def verify_youtube_refresh_acceptance(receipt, manifest, historical=False):
   saved_manifest=json.loads((ROOT/'controller-source/manifest91.json').read_text())
   saved_spec=importlib.util.spec_from_file_location('saved_history_gate',ROOT/'tools/verify_youtube_saved.py')
   saved_gate=importlib.util.module_from_spec(saved_spec);saved_spec.loader.exec_module(saved_gate)
-  saved_gate.verify(json.loads((ROOT/'controller-source/release121-native-verification.json').read_text()),saved_manifest)
+  saved_gate.verify(json.loads((ROOT/'controller-source/release121-native-verification.json').read_text()),saved_manifest,historical=True)
   for name in ('live_runtime.py','youtube_rows.py','youtube_provider.py','youtube_core.py','youtube_home.py','youtube_end.py','playback_runtime.py','autoplay_session.py'):
    expected=saved_manifest['files'][name] if name in saved_names else manifest['files'][name]
    assert actual[name]==expected, 'Previously accepted playback/YouTube source changed: '+name
@@ -512,9 +512,9 @@ def verify(folder):
  spec=importlib.util.spec_from_file_location('managed',SOURCE/'resources/libs/managed_addons.py');m=importlib.util.module_from_spec(spec);spec.loader.exec_module(m)
  import importlib.util as update_import
  update_spec=update_import.spec_from_file_location('update_notes_gate',ROOT/'tools/verify_release_notices.py');update_gate=update_import.module_from_spec(update_spec);update_spec.loader.exec_module(update_gate)
- update_gate.verify(json.loads((ROOT/'controller-source/release-notices-native-verification.json').read_text()),json.loads((ROOT/'controller-source/manifest90.json').read_text()),historical=True)
+ update_gate.verify(json.loads((ROOT/'controller-source/release-notices-native-verification.json').read_text()),json.loads((ROOT/'controller-source/manifest90.json').read_text()),historical=True,reminder_receipt=json.loads((ROOT/'compatibility/current-addons/native-install-acceptance.json').read_text()).get('reminders'))
  saved_spec=update_import.spec_from_file_location('saved_gate',ROOT/'tools/verify_youtube_saved.py');saved_gate=update_import.module_from_spec(saved_spec);saved_spec.loader.exec_module(saved_gate)
- saved_gate.verify(json.loads((ROOT/'controller-source/release121-native-verification.json').read_text()),json.loads((ROOT/'controller-source/manifest91.json').read_text()))
+ saved_gate.verify(json.loads((ROOT/'controller-source/release121-native-verification.json').read_text()),json.loads((ROOT/'controller-source/manifest91.json').read_text()),historical=True)
  build_spec=importlib.util.spec_from_file_location('current_release_build',ROOT/'tools/build_release.py');current_build=importlib.util.module_from_spec(build_spec);build_spec.loader.exec_module(current_build)
  current_build.verify_prior_source_acceptance(json.loads((ROOT/'compatibility/current-addons/native-source-verification-6.18.1.json').read_text()))
  current_build.verify_current_source_contract(json.loads((ROOT/'compatibility/current-addons/current-source-contract.json').read_text()))
@@ -527,7 +527,7 @@ def verify(folder):
   expected_installer={'plugin.program.blacklanturninstaller/'+str(p.relative_to(SOURCE)):p.read_bytes() for p in SOURCE.rglob('*') if p.is_file() and '__pycache__' not in p.parts and not p.name.endswith(('.pyc','.DS_Store'))}
   assert installer==expected_installer,'Installer ZIP differs from reviewed source'
  for ed in ('General','Apple-TV-Mac'):
-  with zipfile.ZipFile(folder/f'BlackLanturn-{ed}-Kodi21-1.1.24.zip') as z:
+  with zipfile.ZipFile(folder/f'BlackLanturn-{ed}-Kodi21-1.1.25.zip') as z:
    assert z.testzip() is None;m.verify_archive(z,umbrella=True,network=True,youtube=True);verify_playback_defaults(z);verify_display_defaults(z)
    with zipfile.ZipFile(ROOT/'repository.blacklanturn.zip') as repo:
     assert {n:z.read('addons/'+n) for n in repo.namelist()}=={n:repo.read(n) for n in repo.namelist()},'Bundled repository differs from current public source'
@@ -545,8 +545,8 @@ def verify(folder):
    current_build.verify_dependency_closure(packaged)
    p=json.loads(z.read('userdata/blacklanturn-build.json'))
    assert p['schema']==3 and p['preferences_policy']=='playback-trakt-youtube-umbrella-network-autoplay-1' and p['helper_patch']=='empty-cache-1' and p['installer_min_version']=='1.0.30'
-   assert p['build_version']=='1.1.24' and p['network_patch']=='request-reliability-privacy-1' and p['umbrella_version']=='6.7.97' and p['umbrella_patch']=='event-progress-3'
-   assert p['controller_version']=='0.1.91' and p['helper_search_patch']=='search-batch-1' and p['helper_playback_patch']=='sampled-progress-1'
+   assert p['build_version']=='1.1.25' and p['network_patch']=='request-reliability-privacy-1' and p['umbrella_version']=='6.7.97' and p['umbrella_patch']=='event-progress-3'
+   assert p['controller_version']=='0.1.92' and p['helper_search_patch']=='search-batch-1' and p['helper_playback_patch']=='sampled-progress-1'
    gui={n.get('id'):n.text for n in ET.fromstring(z.read('userdata/guisettings.xml'))}
    assert {k:gui[k] for k in ('filecache.memorysize','filecache.readfactor','filecache.buffermode','filecache.chunksize')}=={'filecache.memorysize':'64','filecache.readfactor':'400','filecache.buffermode':'4','filecache.chunksize':'131072'}
    assert next(n.text for n in ET.fromstring(z.read('userdata/addon_data/plugin.video.themoviedb.helper/settings.xml')) if n.get('id')=='artwork_quality')=='1'
@@ -560,14 +560,14 @@ def verify(folder):
    assert len(catalog['releases'])==1
    entry=catalog['releases'][0]
    assert entry['id']==p['release_id'] and entry['edition']==p['edition'] and entry['version']==p['build_version'] and entry['revision']==p['release_revision']
-   assert entry['title']=='BlackLanturn Build 1.1.24' and entry['summary']==json.loads((ROOT/'hosted-files/release-notes-1.1.24.json').read_text())['summary']
+   assert entry['title']=='BlackLanturn Build 1.1.25' and entry['summary']==json.loads((ROOT/'hosted-files/release-notes-1.1.25.json').read_text())['summary']
    assert p['youtube_saved_rows_patch']=='account-display-rows-1'
    assert all(hashlib.sha256(z.read(n)).hexdigest()==h for n,h in entry['files'].items()),'Bundled release proof differs'
    assert 'userdata/blacklanturn-install-complete.json' not in z.namelist(),'A clean package must not predeclare installation success'
    assert 'userdata/addon_data/script.blacklanturn.preview/release-notices.json' not in z.namelist(),'A clean package must not copy notice history'
    assert hashlib.sha256(z.read('addons/plugin.video.youtube/resources/lib/youtube_plugin/kodion/context/xbmc/xbmc_context.py')).hexdigest()==json.loads((ROOT/'compatibility/youtube-context/manifest.json').read_text())['candidate_sha256']
    assert p['autoplay_patch']=='same-show-source-1'
-   expected=json.loads((ROOT/'controller-source/manifest91.json').read_text())['files']
+   expected=json.loads((ROOT/'controller-source/manifest92.json').read_text())['files']
    actual={n[len('addons/script.blacklanturn.preview/'):]:hashlib.sha256(z.read(n)).hexdigest() for n in z.namelist() if n.startswith('addons/script.blacklanturn.preview/')}
    assert actual==expected
    skin=json.loads((ROOT/'controller-source/manifest85.json').read_text())['skin']
@@ -581,6 +581,6 @@ def verify(folder):
    assert config.get('YouTubeEndSuggestions') is True and config.get('YouTubeEndAutoplay') is False
    for n,d in installer.items():assert z.read('addons/'+n)==d,'Installer mismatch'
    assert z.read('addons/plugin.program.blacklanturninstaller/resources/libs/managed_addons.py')==(SOURCE/'resources/libs/managed_addons.py').read_bytes()
- print('PASS: both Build1.1.24 packages, exact Installer1.0.30, complete pinned current addon sources, dependency minima and protected defaults; retained historical feature evidence and source-bound prior Fire current-source playback checked separately from release-install acceptance')
+ print('PASS: both Build1.1.25 packages, exact Installer1.0.30, complete pinned current addon sources, dependency minima and protected defaults; retained historical feature evidence and source-bound prior Fire current-source playback checked separately from release-install acceptance')
 if __name__=='__main__':
  p=argparse.ArgumentParser();p.add_argument('artifacts',type=Path);verify(p.parse_args().artifacts)

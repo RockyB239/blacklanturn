@@ -34,7 +34,8 @@ class HomeUpdatesRuntimeTests(unittest.TestCase):
    def close(self):self.closed=True
   fake=types.SimpleNamespace(Player=lambda:types.SimpleNamespace(isPlaying=lambda:self.playing),getGlobalIdleTime=lambda:10,LOGWARNING=2,log=lambda *a:self.calls.append('error'),Monitor=lambda:types.SimpleNamespace(waitForAbort=lambda t:False))
   self.playing=False
-  modules={'xbmc':fake,'xbmcgui':types.SimpleNamespace(WindowXMLDialog=Window,getCurrentWindowDialogId=lambda:0),'xbmcaddon':types.SimpleNamespace(),'xbmcvfs':types.SimpleNamespace()}
+  self.session=Window()
+  modules={'xbmc':fake,'xbmcgui':types.SimpleNamespace(WindowXMLDialog=Window,Window=lambda wid:self.session,getCurrentWindowDialogId=lambda:0),'xbmcaddon':types.SimpleNamespace(),'xbmcvfs':types.SimpleNamespace()}
   with patch.dict(sys.modules,modules):
    spec=importlib.util.spec_from_file_location('update_ui_test',Path(__file__).resolve().parents[1]/'addon/update_notes_ui.py');self.ui=importlib.util.module_from_spec(spec);spec.loader.exec_module(self.ui)
   self.path=Path(self.temp.name)/'state.json';self.ui.state_path=lambda:self.path
@@ -49,18 +50,48 @@ class HomeUpdatesRuntimeTests(unittest.TestCase):
   self.runtime.state=self.state;self.runtime.due=float('inf')
   calls=self.calls
   class Notice(Window):
-   def doModal(self):calls.append('notice');self.view=False;self.update=False
+   def doModal(self):calls.append('notice');self.view=False;self.update=False;self.never=False
+  self.nativeNotice=self.ui.UpdateNotice
   self.ui.UpdateNotice=Notice
- def test_real_ack_path_persists_and_does_not_redisplay(self):
+ def test_later_repeats_on_next_kodi_launch_but_not_home_reentry(self):
   from release_updates import pending,read_state
-  self.runtime.tick();self.assertEqual(self.calls,['notice']);self.assertFalse(pending(read_state(self.path)))
-  self.runtime.tick();self.assertEqual(self.calls,['notice']);self.assertFalse(self.owner.actions_open)
+  self.runtime.tick();self.assertEqual(self.calls,['notice']);self.assertTrue(pending(read_state(self.path)))
+  self.runtime.tick();other=self.ui.HomeUpdates(self.owner,lambda *a:{});other.state=self.state;other.due=float('inf');other.tick();self.assertEqual(self.calls,['notice'])
+  self.session.props.clear();other.tick();self.assertEqual(self.calls,['notice','notice'])
+ def test_old_later_ack_does_not_hide_new_startup_reminder(self):
+  from release_updates import write_state
+  self.state['seen']=['available:release2'];write_state(self.path,self.state);self.runtime.state=self.state
+  self.runtime.tick();self.assertEqual(self.calls,['notice']);self.assertTrue(self.ui.notice_pending(self.ui.releases.read_state(self.path)))
+ def test_do_not_show_again_applies_only_to_this_release(self):
+  from release_updates import pending,read_state
+  import copy
+  class Never(self.ui.UpdateNotice):
+   def doModal(n):self.calls.append('notice');n.view=False;n.update=False;n.never=True
+  self.ui.UpdateNotice=Never;self.runtime.tick();state=read_state(self.path);self.assertIsNone(pending(state));self.assertTrue(state['enabled'])
+  newer=copy.deepcopy(state['available']);newer['id']='release3';newer['version']='1.1.21';state['available']=newer;self.assertEqual(pending(state)['release']['id'],'release3')
+ def test_explicit_optout_survives_full_legacy_seen_history(self):
+  from release_updates import read_state,write_state
+  self.state['seen']=['available:release2']+['completed:old'+str(i) for i in range(79)];write_state(self.path,self.state)
+  event={'kind':'available','release':self.state['available']};self.ui.mark_seen(event)
+  self.assertIsNone(self.ui.notice_pending(read_state(self.path)))
+ def test_real_dont_show_button_suppresses_available_release_only(self):
+  from unittest.mock import patch,MagicMock
+  for kind in ('available','completed'):
+   dialog=self.nativeNotice();dialog.event={'kind':kind,'release':self.state['available']}
+   with patch.object(self.ui.threading,'Thread',return_value=MagicMock()):dialog.onInit()
+   dialog.onClick(104);self.assertEqual(dialog.never,kind=='available');self.assertTrue(dialog.closed)
+ def test_completed_confirmation_remains_one_time(self):
+  from release_updates import pending,read_state,write_state
+  self.state['completed']=self.state['available'];self.state['available']=None;write_state(self.path,self.state);self.runtime.state=self.state
+  self.runtime.tick();self.session.props.clear();self.assertIsNone(pending(read_state(self.path)))
  def test_corrupt_read_cannot_kill_home_monitor(self):
   self.path.write_text('{bad');self.runtime.tick();self.assertEqual(self.calls,['error']);self.assertTrue(self.owner.alive)
  def test_failed_ack_does_not_escape_or_redisplay_in_tight_loop(self):
   from unittest.mock import patch
   with patch.object(self.ui,'mark_seen',side_effect=OSError('disk full')):
-   self.runtime.tick();self.runtime.tick()
+   class Never(self.ui.UpdateNotice):
+    def doModal(n):self.calls.append('notice');n.view=False;n.update=False;n.never=True
+   self.ui.UpdateNotice=Never;self.runtime.tick();self.runtime.tick()
   self.assertEqual(self.calls,['notice','error']);self.assertFalse(self.owner.actions_open)
  def test_playback_and_old_lifetime_do_not_open_notice(self):
   self.playing=True;self.runtime.tick();self.assertEqual(self.calls,[])

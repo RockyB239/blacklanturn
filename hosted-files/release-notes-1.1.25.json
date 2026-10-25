@@ -1,0 +1,34 @@
+{
+  "title": "BlackLanturn Build 1.1.25",
+  "summary": "Important update: update bundled add-ons and patches together while keeping your complete Kodi setup.",
+  "sections": [
+    {
+      "heading": "True in-place update",
+      "bullets": [
+        "Update BlackLanturn Installer, open your build and choose Update BlackLanturn. No reinstall or Save Data choices are needed.",
+        "Included add-ons and tested BlackLanturn patches update together. Ordinary upstream updates cannot silently replace managed patches."
+      ]
+    },
+    {
+      "heading": "Keep your complete setup",
+      "bullets": [
+        "All accounts, playback settings, sources, favourites, watched progress, history and other saved data stay in place.",
+        "Other add-ons you installed are left alone. Newer compatible ordinary dependencies are retained as complete trees."
+      ]
+    },
+    {
+      "heading": "Recovery and compatibility",
+      "bullets": [
+        "The update is checked and staged before replacing code. A failed update rolls back; an interrupted update can recover when you reopen the updater.",
+        "Restart Kodi after updating. Fresh and Standard installations remain separate options for setting up a build."
+      ]
+    },
+    {
+      "heading": "Update reminders",
+      "bullets": [
+        "Available updates return once each Kodi session until installed. Later, Back or timeout means remind me next startup.",
+        "Choose Don’t show again for this update to hide that version only. Future releases still notify; completed confirmations appear once."
+      ]
+    }
+  ]
+}

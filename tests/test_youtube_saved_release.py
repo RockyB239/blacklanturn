@@ -7,7 +7,7 @@ def gate():
 class SavedRelease(unittest.TestCase):
  def setUp(self):
   self.receipt=json.loads((ROOT/'controller-source/release121-native-verification.json').read_text());self.manifest=json.loads((ROOT/'controller-source/manifest91.json').read_text())
- def test_exact_native_tested_source_is_accepted(self):self.assertTrue(gate().verify(self.receipt,self.manifest))
+ def test_exact_native_tested_source_is_accepted(self):self.assertTrue(gate().verify(self.receipt,self.manifest,historical=True))
  def test_missing_device_or_lost_history_or_wrong_source_is_rejected(self):
   for mutation in ('device','history','source','fetch','focus'):
    r=copy.deepcopy(self.receipt)
@@ -16,4 +16,4 @@ class SavedRelease(unittest.TestCase):
    elif mutation=='source':r['files']['youtube_saved.py']='0'*64
    elif mutation=='fetch':r['devices']['mac']['fresh_feed_calls']=1
    else:r['devices']['fire']['refresh_focus_retained']=False
-   with self.subTest(mutation=mutation),self.assertRaises(AssertionError):gate().verify(r,self.manifest)
+   with self.subTest(mutation=mutation),self.assertRaises(AssertionError):gate().verify(r,self.manifest,historical=True)

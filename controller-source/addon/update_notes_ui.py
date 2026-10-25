@@ -1,5 +1,5 @@
 """Curated BlackLanturn releases: available before update, confirmed afterward."""
-import json,threading,time
+import hashlib,json,threading,time
 from pathlib import Path
 import xbmc,xbmcgui,xbmcaddon,xbmcvfs
 import release_updates as releases
@@ -13,7 +13,29 @@ def home_path():return Path(xbmcvfs.translatePath('special://home/'))
 def catalog_source():return releases.FEED
 
 def save_preference(enabled):return releases.transact(state_path(),lambda s:dict(s,enabled=bool(enabled)),legacy_path())
-def mark_seen(event):return releases.transact(state_path(),lambda s:releases.dismiss(s,event),legacy_path())
+def session_key(event):
+    profile=hashlib.sha256(str(state_path()).encode()).hexdigest()[:12]
+    return 'BlackLanturn.ReleaseNotice.'+profile+'.'+event['kind']+':'+event['release']['id']
+
+def session_seen(event):return xbmcgui.Window(10000).getProperty(session_key(event))=='true'
+def mark_session(event):xbmcgui.Window(10000).setProperty(session_key(event),'true')
+
+def notice_pending(state):
+    # Older Later/Back/timeout actions wrote available:<id>. Only the new
+    # explicit opt-out is durable; completed acknowledgements remain unchanged.
+    if not state:return None
+    seen=state.get('seen',[])
+    visible=dict(state,seen=[key for key in seen if not key.startswith('available:') or 'never:'+key.split(':',1)[1] in seen])
+    return releases.pending(visible)
+
+def mark_seen(event):
+    def acknowledge(state):
+        updated=releases.dismiss(state,event)
+        if event['kind']=='available':
+            keys=['available:'+event['release']['id'],'never:'+event['release']['id']]
+            updated['seen']=([key for key in updated['seen'] if key not in keys]+keys)[-80:]
+        return updated
+    return releases.transact(state_path(),acknowledge,legacy_path())
 def request_update():
     if xbmc.Player().isPlaying():return False
     # Fixed native Installer destination: catalog text never supplies commands.
@@ -51,7 +73,7 @@ def show_notes(event=None):
 
 class UpdateNotice(xbmcgui.WindowXMLDialog):
     def onInit(self):
-        self.view=False;self.update=False;self.finished=False;self.opened=time.monotonic()
+        self.view=False;self.update=False;self.never=False;self.finished=False;self.opened=time.monotonic()
         available=self.event['kind']=='available'
         self.setProperty('available','true' if available else 'false')
         self.setProperty('heading','BlackLanturn update available' if available else 'BlackLanturn updated')
@@ -64,7 +86,10 @@ class UpdateNotice(xbmcgui.WindowXMLDialog):
             if xbmc.Player().isPlaying() or time.monotonic()-self.opened>=20:
                 self.finished=True;self.close();return
     def onClick(self,cid):
-        if cid in (101,102,103):self.view=cid==101;self.update=cid==103;self.finished=True;self.close()
+        if cid in (101,102,103,104):
+            self.view=cid==101;self.update=cid==103
+            self.never=cid==104 and self.event['kind']=='available'
+            self.finished=True;self.close()
     def onAction(self,action):
         if action.getId() in (9,10,92):self.finished=True;self.close()
 
@@ -117,16 +142,17 @@ class HomeUpdates:
         if time.monotonic()>=self.due and not self.busy and not loading and not xbmc.Player().isPlaying():
             self.due=time.monotonic()+120;self.busy=True
             threading.Thread(target=self.refresh,name='BlackLanturnReleaseCheck',daemon=True).start()
-        if not self.state or not releases.pending(self.state):return
+        if not self.state or not notice_pending(self.state):return
         if not notice_allowed(home=owner.mode=='home' and not owner.nav,loading=loading,
           playing=xbmc.Player().isPlaying(),dialog=has_dialog(xbmcgui.getCurrentWindowDialogId()),settings=owner.settings_open or owner.actions_open,idle=xbmc.getGlobalIdleTime()):return
-        self.state=releases.read_state(state_path(),legacy_path());event=releases.pending(self.state)
-        if not event:return
+        self.state=releases.read_state(state_path(),legacy_path());event=notice_pending(self.state)
+        if not event or session_seen(event):return
         dialog=UpdateNotice('UpdateNotice.xml',str(ROOT),'Default','1080i');dialog.event=event
         owner.actions_open=True
         try:
-            dialog.doModal();view=dialog.view;update=dialog.update;dialog.finished=True;del dialog
-            mark_seen(event)
+            dialog.doModal();view=dialog.view;update=dialog.update;never=getattr(dialog,'never',False);dialog.finished=True;del dialog
+            mark_session(event)
+            if event['kind']=='completed' or never:mark_seen(event)
             if update:request_update()
             elif view and not xbmc.Player().isPlaying():show_notes(event)
             self.state=releases.read_state(state_path(),legacy_path())

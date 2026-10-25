@@ -3,10 +3,16 @@ import hashlib,math
 from pathlib import Path
 ROOT=Path(__file__).resolve().parents[1]
 def inventory(root):return {p.relative_to(root).as_posix():hashlib.sha256(p.read_bytes()).hexdigest() for p in root.rglob('*') if p.is_file() and '__pycache__' not in p.parts and p.suffix not in ('.pyc','.pyo') and p.name!='.DS_Store'}
-def verify(receipt,manifest):
+def verify(receipt,manifest,*,historical=False):
  assert receipt.get('schema')==1 and receipt.get('feature')=='youtube-saved-rows-1' and receipt.get('passed') is True
  assert receipt.get('controller')==manifest.get('controller')=='0.1.91'
- assert receipt.get('files')==manifest.get('files')==inventory(ROOT/'controller-source/addon'),'Untested controller source'
+ assert receipt.get('files')==manifest.get('files'),'Saved-row acceptance identity differs'
+ current=inventory(ROOT/'controller-source/addon')
+ if historical:
+  exceptions={'addon.xml','update_notes_ui.py','resources/skins/Default/1080i/UpdateNotice.xml'}
+  assert set(current)==set(manifest['files'])
+  assert all(current[n]==digest for n,digest in manifest['files'].items() if n not in exceptions),'Previously tested saved-row code changed'
+ else:assert manifest['files']==current,'Untested controller source'
  assert set(receipt.get('devices',{}))=={'mac','fire'} and receipt.get('apple_tv_accessed') is False
  for dev in receipt['devices'].values():
   for key in ('native_source_exact','measurement_valid','native_watch_matches','refresh_focus_retained','navigable_after','preservation_passed','history_preserved'):assert dev.get(key) is True,key

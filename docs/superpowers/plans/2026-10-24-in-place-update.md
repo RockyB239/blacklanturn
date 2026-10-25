@@ -45,3 +45,8 @@
 - [x] Run isolated native Mac Kodi tests; retain separate clean/Standard regression acceptance and native limits.
 - [x] Review once, fix findings with regressions, run full suites and privacy checks before publishing.
 - [ ] Publish accepted immutable artifacts and verify public hashes/catalog. Fire Stick remains untouched.
+
+### User-requested amendment: startup reminders
+- [x] Add a per-session notice marker and explicit per-release opt-out in Controller0.1.92, preserving the global preference and completed notice history.
+- [x] Keep legacy Later/Back/timeout acknowledgements from silently suppressing the new reminders.
+- [x] Verify across two actual disposable Kodi launches, then publish combined Build1.1.25 with unchanged Installer1.0.30. Build1.1.24 assets remain immutable and its catalog was not activated.

@@ -11,7 +11,7 @@
       "mode": "clean",
       "passed": true,
       "source_files_exact": 3896,
-      "payload_sha256": "54f6223bb762ee35624c01b859c4aef819600af86998be2c5c13a02bb20c9189",
+      "payload_sha256": "36aa863bb9482eadb50c7d947e308c09591d05a6efe393c3ce654f495258d4c4",
       "installer_sha256": "f11b885d3a3de60007ec6d971a4777293098bae231eeec5abd300c3c9da241dd",
       "native_registry_preserved": true,
       "synthetic_history_choice_preserved": true,
@@ -29,7 +29,7 @@
       "mode": "standard",
       "passed": true,
       "source_files_exact": 3896,
-      "payload_sha256": "54f6223bb762ee35624c01b859c4aef819600af86998be2c5c13a02bb20c9189",
+      "payload_sha256": "36aa863bb9482eadb50c7d947e308c09591d05a6efe393c3ce654f495258d4c4",
       "installer_sha256": "f11b885d3a3de60007ec6d971a4777293098bae231eeec5abd300c3c9da241dd",
       "native_registry_preserved": true,
       "synthetic_history_choice_preserved": true,
@@ -47,7 +47,7 @@
       "mode": "update",
       "passed": true,
       "source_files_exact": 3896,
-      "payload_sha256": "54f6223bb762ee35624c01b859c4aef819600af86998be2c5c13a02bb20c9189",
+      "payload_sha256": "36aa863bb9482eadb50c7d947e308c09591d05a6efe393c3ce654f495258d4c4",
       "installer_sha256": "f11b885d3a3de60007ec6d971a4777293098bae231eeec5abd300c3c9da241dd",
       "native_registry_preserved": true,
       "synthetic_history_choice_preserved": true,
@@ -65,7 +65,7 @@
       "mode": "clean",
       "passed": true,
       "source_files_exact": 3892,
-      "payload_sha256": "e4bfd552c8f84fba748673764f371c1bc2b19346121f045c508a8f019eb5d55d",
+      "payload_sha256": "228a4cd37c9b44f108543bf30975924de615543bd8cb23c34b5d0132f79d8997",
       "installer_sha256": "f11b885d3a3de60007ec6d971a4777293098bae231eeec5abd300c3c9da241dd",
       "native_registry_preserved": true,
       "synthetic_history_choice_preserved": true,
@@ -83,7 +83,7 @@
       "mode": "standard",
       "passed": true,
       "source_files_exact": 3892,
-      "payload_sha256": "e4bfd552c8f84fba748673764f371c1bc2b19346121f045c508a8f019eb5d55d",
+      "payload_sha256": "228a4cd37c9b44f108543bf30975924de615543bd8cb23c34b5d0132f79d8997",
       "installer_sha256": "f11b885d3a3de60007ec6d971a4777293098bae231eeec5abd300c3c9da241dd",
       "native_registry_preserved": true,
       "synthetic_history_choice_preserved": true,
@@ -101,7 +101,7 @@
       "mode": "update",
       "passed": true,
       "source_files_exact": 3892,
-      "payload_sha256": "e4bfd552c8f84fba748673764f371c1bc2b19346121f045c508a8f019eb5d55d",
+      "payload_sha256": "228a4cd37c9b44f108543bf30975924de615543bd8cb23c34b5d0132f79d8997",
       "installer_sha256": "f11b885d3a3de60007ec6d971a4777293098bae231eeec5abd300c3c9da241dd",
       "native_registry_preserved": true,
       "synthetic_history_choice_preserved": true,
@@ -112,12 +112,31 @@
       "unrelated_addon_unchanged": true
     }
   ],
-  "driver_sha256": "98fdd551980d6eacecfc06f5fad6667beb3bb80b96d562876c8e09c89344ce56",
+  "driver_sha256": "c1d10db3fd2c3271aedafc3a6e711bca7424d0c97ca2b2b2c3149df8d68edca3",
   "artifacts": {
     "plugin.program.blacklanturninstaller-1.0.30.zip": "f11b885d3a3de60007ec6d971a4777293098bae231eeec5abd300c3c9da241dd",
-    "BlackLanturn-General-Kodi21-1.1.24.zip": "54f6223bb762ee35624c01b859c4aef819600af86998be2c5c13a02bb20c9189",
-    "BlackLanturn-Apple-TV-Mac-Kodi21-1.1.24.zip": "e4bfd552c8f84fba748673764f371c1bc2b19346121f045c508a8f019eb5d55d"
+    "BlackLanturn-General-Kodi21-1.1.25.zip": "36aa863bb9482eadb50c7d947e308c09591d05a6efe393c3ce654f495258d4c4",
+    "BlackLanturn-Apple-TV-Mac-Kodi21-1.1.25.zip": "228a4cd37c9b44f108543bf30975924de615543bd8cb23c34b5d0132f79d8997"
   },
   "network_blocked": true,
-  "personal_profile_denied": true
+  "personal_profile_denied": true,
+  "reminders": {
+    "passed": true,
+    "native_kodi_launches": 2,
+    "cases": {
+      "later_repeats_next_session": true,
+      "same_session_once": true,
+      "legacy_later_not_suppressed": true,
+      "never_only_this_release": true,
+      "future_release_not_suppressed": true,
+      "completed_once": true,
+      "button_visible": true,
+      "settings_preserved": true
+    },
+    "protected_settings_paths_compared": 8,
+    "files": {
+      "update_notes_ui.py": "12c18ede3861c4fbef5155e4b7b799e43f6bcfdf9b244dcc2da79e0f39de0d9f",
+      "resources/skins/Default/1080i/UpdateNotice.xml": "0e17f227bde4a238894847fd0f6509a7622d204f90ae3326b6226a97294b3da3"
+    }
+  }
 }
