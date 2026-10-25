@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<?xml version='1.0' encoding='UTF-8'?>
 <addons>
     <addon id="repository.blacklanturn" name="BlackLanturn Repository" version="1.0.6" provider-name="RockyB239">
         <extension point="xbmc.addon.repository" name="BlackLanturn Repository">
@@ -17,7 +17,7 @@
             </assets>
         </extension>
     </addon>
-    <addon id="plugin.program.blacklanturninstaller" name="BlackLanturn Installer" version="1.0.28" provider-name="BlackLanturn">
+    <addon id="plugin.program.blacklanturninstaller" name="BlackLanturn Installer" version="1.0.29" provider-name="BlackLanturn">
         <requires>
             <import addon="xbmc.python" version="3.0.1" />
             <import addon="script.module.requests" />

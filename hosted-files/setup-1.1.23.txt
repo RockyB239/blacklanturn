@@ -1,0 +1,11 @@
+# BlackLanturn 1.1.23 — Important add-on compatibility update
+
+Both editions include actual Umbrella 6.7.97 and TMDbHelper 6.18.2 source with BlackLanturn playback, source-selection, progress, cache and privacy patches. CocoScrapers1.0.45, InfoTagger0.1.0, SkinVariables2.2.10, InputStreamHelper0.8.6 and EnglishUS11.0.84 are included. Current shared0.2.35 and platform-specific YouTube7.4.4 variants remain protected.
+
+Update Installer to1.0.29, then choose your edition and Install - Standard. Review Save Data to keep your desired settings/accounts. Separate updates of patched add-ons are unnecessary. Managed version ordering and automatic-update rules prevent ordinary stock updates from silently replacing patches. Future reviewed patches arrive through BlackLanturn releases.
+
+Standard preserves selected authorizations and supported preferences, Kodi viewing databases and YouTube local history. Newer compatible ordinary dependencies remain intact as complete trees. Unknown managed source refuses before cleanup. Clean/account-only reset deliberately uses build defaults and clears local history. Native platform components are retained.
+
+Validation passed:751 Installer/package checks,832 Controller checks,36 playback lifecycle checks,16 probe checks,7 YouTube-context checks,49 current Helper/shared source contracts,12 exact-artifact Wizard scenarios and4 isolated native Kodi installation-core cases. Both editions and Installer rebuilt byte-identically. Private-value scanning found no leaked saved credentials. The Fire Stick was intentionally not contacted during packaging; it remains available for the owner to use. New native release install acceptance uses an isolated Mac Kodi21.3 profile with network/personal-profile access denied; Android identity is simulated for the General install-core case. This is not new physicalFire/tvOS playback certification. Earlier physicalFire playback used Umbrella97/Helper18.1; the newly advertised18.2 Helper source passes current-source tests separately.
+
+Verified:751 Installer/package,832 Controller,36 playback lifecycle,16 probes,7 YouTube-context checks;49 current Helper/shared patch contracts;12 exact-artifact Wizard scenarios and4 isolated native install-core cases. Update Installer first, then Standard, review Save Data and follow the restart prompt.
