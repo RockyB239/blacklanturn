@@ -36,13 +36,13 @@ def perform(params,dispatch,refresh):
 
 class Navigation:
     def __init__(self,route=None,title='Home'):
-        self.route=dict(route or {});self.title=title;self.selected=0;self.stack=[]
+        self.route=dict(route or {});self.title=title;self.selected=0;self.stack=[];self.initial_selection=True
     def push(self,route,title):
         self.stack.append((self.route,self.title,self.selected))
-        self.route=dict(route);self.title=title;self.selected=0
+        self.route=dict(route);self.title=title;self.selected=0;self.initial_selection=True
     def switch(self,route,title):
-        self.stack=[];self.route=dict(route);self.title=title;self.selected=0
+        self.stack=[];self.route=dict(route);self.title=title;self.selected=0;self.initial_selection=True
     def back(self):
-        if self.stack:self.route,self.title,self.selected=self.stack.pop();return True
+        if self.stack:self.route,self.title,self.selected=self.stack.pop();self.initial_selection=False;return True
         if self.route:self.switch({},'Home');return True
         return False

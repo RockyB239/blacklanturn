@@ -79,11 +79,12 @@ class InstallerUpdates(unittest.TestCase):
         self.assertEqual(row['params']['name'],'BlackLanturn General')
 
     def test_current_or_newer_installed_build_does_not_offer_downgrade(self):
-        m=self.updates();self.f.modules['resources.libs.check'].check_build=lambda *a:'1.1.23'
+        m=self.updates();self.marker.write_text(json.dumps({'schema':3,'edition':'apple','build_version':'1.1.26'}))
+        self.f.modules['resources.libs.check'].check_build=lambda *a:'1.1.23'
         with patch.object(m.releases,'fetch_catalog',return_value=self.catalog(m)):m.check_now(self.home,now=1720000000)
         self.assertFalse(any(r['label']=='Update BlackLanturn' for r in m.rows(self.home)))
 
-    def test_failed_catalog_check_keeps_last_success_but_hides_update_and_explains_retry(self):
+    def test_failed_catalog_check_keeps_known_update_and_explains_retry(self):
         m=self.updates();self.f.modules['resources.libs.check'].check_build=lambda *a:'1.1.25'
         with patch.object(m.releases,'fetch_catalog',return_value=self.catalog(m)):m.check_now(self.home,now=1720000000)
         self.f.modules['resources.libs.check'].check_build=lambda *a:False
@@ -91,7 +92,38 @@ class InstallerUpdates(unittest.TestCase):
         rows=m.rows(self.home)
         self.assertTrue(any('1.1.25' in r['label'] for r in rows))
         self.assertTrue(any('failed' in r['label'].lower() for r in rows))
-        self.assertFalse(any(r['label']=='Update BlackLanturn' for r in rows))
+        self.assertTrue(any(r['label']=='Update BlackLanturn' for r in rows))
+
+    def test_newer_home_catalog_overrides_old_success_without_extra_network(self):
+        m=self.updates();self.f.modules['resources.libs.check'].check_build=lambda *a:'1.1.24'
+        with patch.object(m.releases,'fetch_catalog',return_value=self.catalog(m,[self.release(version='1.1.24')])):
+            m.check_now(self.home,now=1720000000)
+        self.catalog(m,[self.release(),self.release('general','9.0.0')])
+        before={p.relative_to(self.home):p.read_bytes() for p in self.home.rglob('*') if p.is_file()}
+        with patch.object(m.releases,'fetch_catalog',side_effect=AssertionError('Opening Updates performed network')):
+            rows=m.rows(self.home)
+        self.assertIn('Latest known: v1.1.25',[r['label'] for r in rows])
+        self.assertIn('Update BlackLanturn',[r['label'] for r in rows])
+        self.assertNotIn('BlackLanturn is up to date',[r['label'] for r in rows])
+        self.assertEqual(before,{p.relative_to(self.home):p.read_bytes() for p in self.home.rglob('*') if p.is_file()})
+
+    def test_known_newer_release_needs_no_separate_check_now(self):
+        m=self.updates();self.catalog(m)
+        row=next(r for r in m.rows(self.home) if r['label']=='Update BlackLanturn')
+        self.assertEqual(row['params'],{'mode':'install','action':'update','name':'BlackLanturn Apple TV & Mac'})
+
+    def test_updates_initial_focus_is_update_but_remembers_subsequent_selection(self):
+        m=self.updates();self.catalog(m);nav=self.f.load('gui/navigation.py');model=self.f.load('gui/navigation_model.py')
+        state=model.Navigation({'mode':'updates'},'Updates');rows=m.rows(self.home)
+        screen=nav.InstallerNavigation('unused',navigation=state,rows=rows);screen.onInit()
+        listing=screen.getControl(screen.control)
+        self.assertEqual(rows[listing.position]['label'],'Update BlackLanturn')
+        listing.position=0;screen.remember()
+        again=nav.InstallerNavigation('unused',navigation=state,rows=rows);again.onInit()
+        self.assertEqual(again.getControl(again.control).position,0)
+        state.switch({'mode':'updates'},'Updates')
+        entered=nav.InstallerNavigation('unused',navigation=state,rows=rows);entered.onInit()
+        self.assertEqual(rows[entered.getControl(entered.control).position]['label'],'Update BlackLanturn')
 
     def test_failed_notes_fetch_still_allows_valid_build_update_with_bundled_notes(self):
         m=self.updates();self.catalog(m);self.f.modules['resources.libs.check'].check_build=lambda *a:'1.1.25'

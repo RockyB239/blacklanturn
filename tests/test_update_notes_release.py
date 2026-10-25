@@ -6,7 +6,7 @@ class UpdateNotesRelease(unittest.TestCase):
   addon=ROOT/'controller-source/addon'
   self.assertEqual(E.parse(addon/'addon.xml').getroot().get('version'),'0.1.95')
   source=ROOT/'installer-source/plugin.program.blacklanturninstaller'
-  self.assertEqual(E.parse(source/'addon.xml').getroot().get('version'),'1.0.33')
+  self.assertEqual(E.parse(source/'addon.xml').getroot().get('version'),'1.0.34')
   self.assertEqual((addon/'update_notes.py').read_bytes(),(source/'resources/libs/update_notes_state.py').read_bytes())
  def test_notes_source_is_bounded_and_nonempty(self):
   notes=json.loads((ROOT/'controller-source/addon/update-releases.json').read_text())

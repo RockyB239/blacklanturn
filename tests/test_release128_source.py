@@ -7,7 +7,9 @@ class Release128Source(unittest.TestCase):
  def gate(self):
   spec=importlib.util.spec_from_file_location('release128_gate',ROOT/'tools/verify_release128.py');g=importlib.util.module_from_spec(spec);spec.loader.exec_module(g);return g
  def test_exact_reviewed_source_and_unchanged_method_scopes(self):
-  g=self.gate();self.assertTrue(g.verify_source(json.loads((ROOT/'controller-source/manifest95.json').read_text()),g.inventory(ROOT/'installer-source/plugin.program.blacklanturninstaller')))
+  g=self.gate();original=g.inventory;baseline=__import__('tools.verify_release129',fromlist=['baseline_installer']).baseline_installer()
+  with patch.object(g,'inventory',side_effect=lambda p:baseline if p==ROOT/'installer-source/plugin.program.blacklanturninstaller' else original(p)):
+   self.assertTrue(g.verify_source(json.loads((ROOT/'controller-source/manifest95.json').read_text()),baseline))
  def test_unrelated_controller_or_installer_change_is_rejected(self):
   g=self.gate();controller=g.inventory(ROOT/'controller-source/addon');installer=g.inventory(ROOT/'installer-source/plugin.program.blacklanturninstaller')
   for path,side in [('preview_fallback.py','controller'),('resources/libs/inplace_update.py','installer'),('resources/libs/managed_versions.py','installer')]:

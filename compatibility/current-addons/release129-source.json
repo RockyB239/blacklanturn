@@ -1,0 +1,9 @@
+{
+  "scope": "Installer presentation only; transaction, controller and playback unchanged",
+  "changed_files": {
+    "addon.xml": "a659ec2b81ad7e49994ecaa497b35d1056622901011f4f0226254b39c5f97aac",
+    "resources/libs/gui/navigation.py": "0c62b807547da88d73170d8a1d12078b13680ecf109a51375fe5ce6717ef1c33",
+    "resources/libs/gui/navigation_model.py": "d7af69cc2ec3bff561628c0165b305e110cebb22dea1051d85df5459b9a68e3a",
+    "resources/libs/gui/updates_menu.py": "396f29cb2c34d12265d9a1d492a42caee2ff2903a9abcdf710fca77d90935766"
+  }
+}

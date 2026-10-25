@@ -123,6 +123,9 @@ class InstallerNavigation(xbmcgui.WindowXMLDialog):
                 li.setProperty('card.subtitle',('Kodi '+str(CONFIG.KODIV)+'  •  v'+version.group(1) if version else 'Kodi '+str(CONFIG.KODIV))+'\n'+('Apple TV / macOS' if 'Apple TV & Mac' in name else 'Fire TV / Android' if name == 'BlackLanturn General' else 'Experimental' if 'Experimental' in name else 'Apple Silicon' if 'Apple Silicon' in name else 'ARM32' if 'ARM32' in name else ''))
             li.setProperty('kind','Open' if r['folder'] else 'Select' if r['params'] else 'Info')
             listing.addItem(li)
+        if mode=='updates' and getattr(self.nav,'initial_selection',False):
+            self.nav.selected=next((i for i,r in enumerate(self.rows) if r['params'].get('mode')=='install' and r['params'].get('action')=='update'),self.nav.selected)
+        self.nav.initial_selection=False
         listing.selectItem(min(self.nav.selected,len(self.rows)-1));self.setFocusId(self.control)
         self.setProperty('footer','Back: previous screen     •     Left: sidebar     •     Select: open')
     def remember(self):self.nav.selected=self.getControl(self.control).getSelectedPosition()

@@ -148,11 +148,14 @@ def rows(home=None):
     same_edition = [e for e in catalog['releases'] if e['edition'] == installed['edition']]
     latest_note = max(same_edition, key=releases.order) if same_edition else None
     latest = status.get('latest') if status else None
-    known = latest or (latest_note['version'] if latest_note else None)
+    versions = [v for v in (latest, latest_note['version'] if latest_note else None) if v]
+    known = max(versions, key=releases.version) if versions else None
+    checked_latest = bool(status and status['ok'] and latest == known)
+    newer_note = bool(latest_note and releases.order(latest_note) > releases.order(installed))
     add('Installed: v'+installed['version'], description=BUILDS[installed['edition']])
-    add('Latest '+('checked' if status and status['ok'] else 'known')+': '+('v'+known if known else 'Not checked'),
+    add('Latest '+('checked' if checked_latest else 'known')+': '+('v'+known if known else 'Not checked'),
         description='Use Check now to refresh the build catalog for your installed edition.')
-    if status and status['ok'] and latest and releases.version(latest) > releases.version(installed['version']):
+    if newer_note or (known and releases.version(known) > releases.version(installed['version'])):
         add('Update BlackLanturn', {'mode': 'install', 'action': 'update', 'name': BUILDS[installed['edition']]}, PRESERVE)
     elif status and status['ok']:
         add('BlackLanturn is up to date', description=PRESERVE)

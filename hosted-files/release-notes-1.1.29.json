@@ -1,0 +1,27 @@
+{
+  "title": "BlackLanturn 1.1.29",
+  "summary": "Current update information and direct Update selection.",
+  "sections": [
+    {
+      "heading": "Clearer update availability",
+      "bullets": [
+        "Updates shows the newest release already known to BlackLanturn, even when an older manual check is saved.",
+        "A known available update is ready without a separate Check now. The last manual-check time and result remain visible."
+      ]
+    },
+    {
+      "heading": "Easier navigation",
+      "bullets": [
+        "Update BlackLanturn is selected when you enter Updates and a newer release is available.",
+        "Returning from another page keeps your place. Opening Updates adds no network requests."
+      ]
+    },
+    {
+      "heading": "Keep your complete setup",
+      "bullets": [
+        "Update BlackLanturn updates bundled add-ons, Installer and tested patches together.",
+        "Settings, accounts, playback preferences, sources, watched progress and other add-ons stay in place. Close and reopen Kodi after updating."
+      ]
+    }
+  ]
+}
