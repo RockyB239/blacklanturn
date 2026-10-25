@@ -129,7 +129,7 @@ class CompatibilityTests(unittest.TestCase):
         progress=types.SimpleNamespace(create=lambda *a:None,update=lambda *a:None,close=lambda:None,iscanceled=lambda:False)
         dialog=types.SimpleNamespace(yesno=lambda *a,**k:True,ok=lambda *a:None)
         for n,obj in [('resources.libs.common.logging',log),('resources.libs.common.tools',tools),('resources.libs.skin',skin),('resources.libs.update',types.SimpleNamespace(addon_updates=lambda *a:None)),('resources.libs.db',types.SimpleNamespace(latest_db=lambda *a:'Addons33.db',fix_metas=lambda:None,addon_database=lambda *a,**k:None,force_check_updates=lambda **k:None)),('resources.libs.check',types.SimpleNamespace(check_build=lambda name,key:{'kodi':'21.3','version':'1.0','url':'https://example.invalid/build.zip','theme':'http://'}[key])),('resources.libs.extract',types.SimpleNamespace(all=lambda *a,**kw:(100,0,''))),('resources.libs.common.config',types.SimpleNamespace(CONFIG=cfg)),('resources.libs.gui.build_menu',types.SimpleNamespace(BuildMenu=lambda:types.SimpleNamespace(theme_count=lambda name:0)))]:modules[n]=obj
-        modules['xbmc']=kodi;modules['xbmcgui']=types.SimpleNamespace(Dialog=lambda:dialog,DialogProgress=lambda:progress)
+        modules['xbmc']=kodi;modules['xbmcgui']=types.SimpleNamespace(Dialog=lambda:dialog,DialogProgress=lambda:progress,DLG_YESNO_YES_BTN=11)
         kodi.sleep=lambda t:None
         # Use the real path/config initialization and real wipe in a disposable filesystem.
         tree=ast.parse((ROOT/'common/config.py').read_text());cls=next(n for n in tree.body if isinstance(n,ast.ClassDef))

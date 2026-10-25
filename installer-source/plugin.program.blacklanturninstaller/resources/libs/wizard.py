@@ -23,6 +23,7 @@ import xbmcgui
 import time
 import os
 import tempfile
+import re
 
 from resources.libs import check
 from resources.libs import db
@@ -99,6 +100,9 @@ class Wizard:
             self.dialog.ok(CONFIG.ADDONTITLE, str(exc))
             return
         target_version = check.check_build(name, 'version')
+        if not isinstance(target_version, str) or not re.fullmatch(r'\d+(?:\.\d+){1,3}', target_version):
+            self.dialog.ok(CONFIG.ADDONTITLE, 'The update catalog is unavailable. Check your connection and try again. Nothing has been changed.')
+            return
         if not self.dialog.yesno('Update BlackLanturn v' + target_version,
                 'Update included add-ons and BlackLanturn patches together.\n'
                 'Keep all saved data, accounts, settings and other installed add-ons.\n'
@@ -140,7 +144,8 @@ class Wizard:
                 'BlackLanturn v' + result['version'] + ' updated.\n'
                 'Your accounts, settings, saved data and other add-ons were kept.\n'
                 'Close Kodi now, then reopen it to use the updated add-ons.',
-                nolabel='Close later', yeslabel='Close Kodi'):
+                nolabel='Close later', yeslabel='Close Kodi',
+                defaultbutton=xbmcgui.DLG_YESNO_YES_BTN):
             xbmc.executebuiltin('Quit')
 
     def build(self, name, over=False):

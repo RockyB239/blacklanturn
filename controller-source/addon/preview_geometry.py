@@ -68,3 +68,6 @@ def preview_fill_viewmode(stream,aspect_label='',compact=True):
     zoom=max(target/aspect,aspect/target)
     if not math.isfinite(zoom) or zoom>4:return 'zoom'
     return {'zoom':zoom,'pixelratio':1.0,'verticalshift':0.0,'nonlinearstretch':False}
+
+def preview_uses_compact_hero(mode,hero_compact):
+    return mode=='details' or (mode=='home' and bool(hero_compact))

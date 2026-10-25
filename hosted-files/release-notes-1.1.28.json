@@ -1,0 +1,35 @@
+{
+  "title": "BlackLanturn 1.1.28",
+  "summary": "Direct update access, clearer completion and easier genre navigation.",
+  "sections": [
+    {
+      "heading": "Easier updates",
+      "bullets": [
+        "Update from a BlackLanturn notification opens your installed build update confirmation directly.",
+        "After a successful update, Close Kodi is selected. Close later remains available; reopen Kodi after closing.",
+        "Older BlackLanturn update prompts also use the in-place updater."
+      ]
+    },
+    {
+      "heading": "Genre navigation",
+      "bullets": [
+        "Choose genre now follows Details in main Movies and Shows Options.",
+        "Genre choices stay hidden while browsing episodes and seasons."
+      ]
+    },
+    {
+      "heading": "Consistent Details artwork and previews",
+      "bullets": [
+        "Details artwork and previews now use the same compact hero area and soft edge fades as other previews.",
+        "An unavailable update catalog shows a retry message and leaves your setup unchanged."
+      ]
+    },
+    {
+      "heading": "Keep your complete setup",
+      "bullets": [
+        "Included add-ons, Installer and tested patches update together through Update BlackLanturn.",
+        "Settings, accounts, playback preferences, sources, watched progress and unrelated add-ons remain in place."
+      ]
+    }
+  ]
+}

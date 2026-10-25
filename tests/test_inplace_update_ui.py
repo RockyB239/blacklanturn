@@ -26,6 +26,38 @@ class UpdateFlow(unittest.TestCase):
   self.k.Player=lambda:types.SimpleNamespace(isPlaying=lambda:True);self.run_update();self.tx.prepare.assert_not_called();self.tx.apply.assert_not_called();self.assertEqual(self.k.commands,[])
  def test_failed_update_does_not_advance_installed_version(self):
   self.tx.apply.side_effect=ValueError('failed');self.run_update();self.assertFalse(any(k=='buildversion' for k,v in self.events))
+ def test_only_completed_update_defaults_to_close_kodi(self):
+  self.mods['xbmcgui'].DLG_YESNO_YES_BTN=11
+  dialog=self.mods['xbmcgui'].Dialog();dialog.yesno=MagicMock(return_value=True)
+  self.run_update();confirm,completed=dialog.yesno.call_args_list
+  self.assertNotIn('defaultbutton',confirm.kwargs)
+  self.assertEqual(completed.kwargs['defaultbutton'],11)
+  self.assertEqual(completed.kwargs['yeslabel'],'Close Kodi')
+  self.assertEqual(completed.kwargs['nolabel'],'Close later')
+  self.assertIn('Quit',self.k.commands)
+ def test_close_later_keeps_kodi_running_after_successful_update(self):
+  self.mods['xbmcgui'].DLG_YESNO_YES_BTN=11
+  dialog=self.mods['xbmcgui'].Dialog();dialog.yesno=MagicMock(side_effect=[True,False])
+  self.run_update();self.tx.apply.assert_called_once();self.assertNotIn('Quit',self.k.commands)
+ def test_legacy_update_notice_uses_update_without_standard_install(self):
+  import ast
+  source=LIB/'gui/window.py';tree=ast.parse(source.read_text())
+  fn=next(n for n in tree.body if isinstance(n,ast.FunctionDef) and n.name=='show_update_window')
+  self.cfg.ADDON_ICON='icon.png';self.cfg.ADDON_FANART='fanart.jpg';self.cfg.BUILDNAME='Old saved build name'
+  self.mods['xbmcgui'].WindowXMLDialog=object
+  wizard=MagicMock();self.mods['resources.libs.wizard']=types.SimpleNamespace(Wizard=lambda:wizard)
+  env={'CONFIG':self.cfg,'xbmcgui':self.mods['xbmcgui']}
+  with patch.dict(sys.modules,self.mods):
+   exec(compile(ast.Module(body=[fn],type_ignores=[]),str(source),'exec'),env)
+   env['show_update_window'](name='BlackLanturn General',current='1.1.26',new='1.1.27')
+  wizard.update.assert_called_once_with('BlackLanturn General');wizard.build.assert_not_called()
+ def test_unavailable_catalog_shows_retry_without_download_or_install(self):
+  for value in (False,None,'', 'not-a-version'):
+   with self.subTest(value=value):
+    self.mods['resources.libs.check'].check_build=lambda *args,v=value:v
+    dialog=self.mods['xbmcgui'].Dialog();dialog.ok=MagicMock()
+    self.run_update();self.tx.prepare.assert_not_called();self.tx.apply.assert_not_called()
+    dialog.ok.assert_called_once();self.assertIn('try again',dialog.ok.call_args.args[1])
  def test_preflight_failure_cannot_fall_back_to_build_install(self):
   self.tx.prepare.side_effect=ValueError('foreign source');self.run_update();self.tx.apply.assert_not_called();self.mods['resources.libs.install'].wipe.assert_not_called()
  def test_each_download_uses_its_own_archive(self):

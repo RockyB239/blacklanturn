@@ -127,7 +127,7 @@ class ControllerControls(unittest.TestCase):
                 'can_choose_genre':m.can_choose_genre,'trakt_command':lambda _:None,'choose_player_path':lambda _:None,'discovery_result':lambda _:None,'resume_options':lambda _: {},'event':lambda *a,**kw:None}
             extract(ROOT/'live_review.py','title_actions',ns,'LiveReview')(state)
             self.assertEqual(calls,['genre']);self.assertFalse(state.actions_open)
-    def test_genre_is_after_title_actions_before_settings_on_each_visible_row(self):
+    def test_genre_is_immediately_after_details_on_each_visible_row(self):
         m=module(self)
         for section in ('Movies','Shows'):
             for focus in (900,901,101):
@@ -146,9 +146,10 @@ class ControllerControls(unittest.TestCase):
                     extract(ROOT/'live_review.py','title_actions',ns,'LiveReview')(state)
                     self.assertEqual(calls,['genre'])
                     choices=menus[0];genre=choices.index('Choose genre…')
-                    for label in ('Play','Play using…','Details','Save to My Stuff on this device','Trakt: Watched, progress & lists'):
+                    self.assertEqual(genre,choices.index('Details')+1)
+                    for label in ('Play','Play using…','Details'):
                         self.assertLess(choices.index(label),genre)
-                    for label in ('Set default player…','Refresh watched status'):
+                    for label in ('Save to My Stuff on this device','Trakt: Watched, progress & lists','Discover collections & creator credits','Set default player…','Refresh watched status'):
                         self.assertGreater(choices.index(label),genre)
     def test_title_genre_shortcut_is_excluded_from_seasons_episodes_youtube_and_details(self):
         m=module(self)

@@ -110,10 +110,29 @@ class HomeUpdatesRuntimeTests(unittest.TestCase):
   ns={'xbmc':self.ui.xbmc,'time':time};exec(compile(ast.Module(body=[method],type_ignores=[]),str(source),'exec'),ns)
   obj=types.SimpleNamespace(finished=False,opened=time.monotonic()-20,close=lambda:self.calls.append('closed'))
   ns['timeout'](obj);self.assertTrue(obj.finished);self.assertEqual(self.calls,['closed'])
- def test_update_uses_only_fixed_installer_catalog_and_not_during_playback(self):
+ def test_update_opens_installed_edition_confirmation_without_catalog_detour(self):
+  import json
+  from urllib.parse import urlsplit,parse_qs
+  root=Path(self.temp.name);(root/'userdata').mkdir();self.ui.home_path=lambda:root
   self.ui.xbmc.executebuiltin=lambda cmd:self.calls.append(cmd)
-  self.assertTrue(self.ui.request_update());self.assertEqual(self.calls,['RunPlugin(plugin://plugin.program.blacklanturninstaller/?mode=updates)'])
-  self.playing=True;self.assertFalse(self.ui.request_update());self.assertEqual(len(self.calls),1)
+  for edition,name in [('general','BlackLanturn General'),('apple','BlackLanturn Apple TV & Mac')]:
+   (root/'userdata/blacklanturn-build.json').write_text(json.dumps({'edition':edition,'build_version':'1.1.27','name':'untrusted),Quit()'}))
+   self.assertTrue(self.ui.request_update());cmd=self.calls[-1]
+   self.assertTrue(cmd.startswith('RunPlugin('));url=urlsplit(cmd[len('RunPlugin('):-1])
+   self.assertEqual(url.netloc,'plugin.program.blacklanturninstaller')
+   self.assertEqual(parse_qs(url.query),{'mode':['install'],'action':['update'],'name':[name]})
+  self.playing=True;self.assertFalse(self.ui.request_update());self.assertEqual(len(self.calls),2)
+ def test_update_missing_or_invalid_marker_never_falls_back_to_install(self):
+  from unittest.mock import MagicMock
+  import json
+  root=Path(self.temp.name);(root/'userdata').mkdir();self.ui.home_path=lambda:root
+  self.ui.xbmc.executebuiltin=lambda cmd:self.calls.append(cmd)
+  dialog=MagicMock();self.ui.xbmcgui.Dialog=lambda:dialog
+  p=root/'userdata/blacklanturn-build.json'
+  for data in (None,'{broken',json.dumps({'edition':'foreign','build_version':'1.1.27'}),json.dumps({'edition':'general','build_version':'bad'})):
+   if data is not None:p.write_text(data)
+   self.assertFalse(self.ui.request_update())
+  self.assertEqual(self.calls,[]);self.assertEqual(dialog.ok.call_count,4)
  def test_catalog_is_cached_and_no_inventory_rpc_is_used(self):
   from unittest.mock import patch
   import json

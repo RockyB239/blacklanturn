@@ -38,8 +38,19 @@ def mark_seen(event):
     return releases.transact(state_path(),acknowledge,legacy_path())
 def request_update():
     if xbmc.Player().isPlaying():return False
-    # Fixed native Installer destination: catalog text never supplies commands.
-    xbmc.executebuiltin('RunPlugin(plugin://plugin.program.blacklanturninstaller/?mode=updates)')
+    from urllib.parse import urlencode
+    try:
+        marker=home_path()/'userdata/blacklanturn-build.json'
+        if marker.is_symlink() or marker.stat().st_size>16384:raise ValueError('Invalid installed release')
+        installed=releases.identity(json.loads(marker.read_text()))
+    except (OSError,ValueError):
+        xbmcgui.Dialog().ok('BlackLanturn','The installed build could not be identified. Nothing has been changed. Open BlackLanturn Installer to check your build.')
+        return False
+    # Only local validated edition selects a fixed in-place update destination.
+    # Remote release text and saved display names never supply commands.
+    name={'general':'BlackLanturn General','apple':'BlackLanturn Apple TV & Mac'}[installed['edition']]
+    query=urlencode({'mode':'install','action':'update','name':name})
+    xbmc.executebuiltin('RunPlugin(plugin://plugin.program.blacklanturninstaller/?'+query+')')
     return True
 
 class UpdateNotes(xbmcgui.WindowXMLDialog):

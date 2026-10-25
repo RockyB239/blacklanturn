@@ -456,10 +456,10 @@ def show_update_window(name='Testing Window', current='1.0', new='1.1', icon=CON
                                         build_name, current_version, latest_version)
     
     install = xbmcgui.Dialog().yesno(CONFIG.ADDONTITLE, final_msg,
-                                     yeslabel='Install', nolabel='Ignore')
+                                     yeslabel='Update', nolabel='Ignore')
     if install:
         from resources.libs.wizard import Wizard
-        Wizard().build(CONFIG.BUILDNAME)    
+        Wizard().update(name)
 
 
 def split_notify(notify):

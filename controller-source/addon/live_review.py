@@ -32,7 +32,7 @@ from preview_language import cached_video_metadata,cached_title_aliases
 from preview_identity import TitleVerifier
 from preview_fallback import SecondaryPreviewLookup
 from related_titles import load_related
-from preview_geometry import preview_fill_viewmode,preview_display_aspect,PreviewRendererGuard
+from preview_geometry import preview_fill_viewmode,preview_display_aspect,PreviewRendererGuard,preview_uses_compact_hero
 from preview_bars import PreviewBarScan,PreviewFramingCache,top_aligned_viewmode,framing_key
 from live_core import caption_fit_step,my_stuff_rows,row_items
 from discovery_core import migrate_pages,collection_pages,page_rows,window_shift
@@ -314,7 +314,7 @@ class LiveReview(YouTubeBrowser,xbmcgui.WindowXML):
         self.preview_bar_scan=None
     def start_preview_bar_scan(self,stream,aspect,fit):
         self.cancel_preview_bar_scan()
-        compact=self.getProperty('heroCompact')=='true' and self.mode=='home'
+        compact=preview_uses_compact_hero(self.mode,self.getProperty('heroCompact')=='true')
         source_aspect=preview_display_aspect(stream,aspect)
         if not source_aspect or not isinstance(fit,dict):return
         self.preview_bar_context=(self.preview_generation,compact,source_aspect,fit,framing_key(self.preview_url,compact,source_aspect))
@@ -1329,10 +1329,12 @@ class LiveReview(YouTubeBrowser,xbmcgui.WindowXML):
             saved=any(x.get('file')==item.get('file') for x in self.config['Saved'])
             options.append(('play','Open' if item.get('filetype')=='directory' or item.get('type')=='addon' else 'Resume' if resume_options(item) else 'Play'))
             if player_path:options.append(('player','Play using…'))
-            options.extend([('details','Details'),('local','Remove from My Stuff on this device' if saved else 'Save to My Stuff on this device')])
+            options.append(('details','Details'))
+            if can_choose_genre(self):options.append(('genre','Choose genre…'))
+            options.append(('local','Remove from My Stuff on this device' if saved else 'Save to My Stuff on this device'))
             if command:options.append(('trakt','Trakt: Watched, progress & lists'))
             if self.rating_identity(item):options.append(('discover','Discover collections & creator credits'))
-        if can_choose_genre(self):options.append(('genre','Choose genre…'))
+        if (not item or discovery) and can_choose_genre(self):options.append(('genre','Choose genre…'))
         if item and not discovery:
             if getattr(self,'youtube_home_visible',lambda:False)():options.append(('youtube_refresh','Refresh recommendations'))
             if getattr(self,'source_session_label',lambda *a,**k: '')(item,refresh=True):options.append(('normal_autoplay','Return to normal autoplay'))
@@ -1978,7 +1980,7 @@ class LiveReview(YouTubeBrowser,xbmcgui.WindowXML):
                         if not current():return
                         aspect=rpc('XBMC.GetInfoLabels',{'labels':['VideoPlayer.VideoAspect']}).get('result',{}).get('VideoPlayer.VideoAspect','')
                         if not current():return
-                        fit=preview_fill_viewmode(stream,aspect,self.getProperty('heroCompact')=='true' and self.mode=='home')
+                        fit=preview_fill_viewmode(stream,aspect,preview_uses_compact_hero(self.mode,self.getProperty('heroCompact')=='true'))
                         result=rpc('Player.SetViewMode',{'viewmode':fit})
                         if not current():return
                         self.preview_playing=True;self.setProperty('preview','playing');self.setProperty('notice','')
