@@ -55,6 +55,15 @@ def run_live_review():
 home=xbmcgui.Window(10000)
 owns_session=False
 try:
+    from installer_recovery import recover_installer,RecoveryError
+    try:
+        recovered=recover_installer(xbmcvfs.translatePath('special://home/'),xbmc,xbmcaddon.Addon)
+    except RecoveryError:
+        xbmcgui.Dialog().ok('BlackLanturn update recovery','An interrupted update could not be recovered. Keep the recovery data and retry. Your saved accounts and settings have not been replaced.')
+        raise SystemExit
+    if recovered:
+        xbmcgui.Dialog().ok('BlackLanturn update recovered','The interrupted update was recovered. Close and reopen Kodi before continuing. Your settings and authorizations were kept.')
+        raise SystemExit
     if 'updates' in sys.argv:
         from update_notes_ui import show_notes
         show_notes()

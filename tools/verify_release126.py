@@ -4,7 +4,7 @@ The feature run loaded local4/local3 through normal wrapped add-on ZIP updates.
 Only addon.xml's version and one terminal newline are normalized; this does not claim a build transaction
 or physical Fire/tvOS acceptance. Historical component receipts remain immutable.
 """
-import hashlib,json,re,xml.etree.ElementTree as ET
+import hashlib,json,re,xml.etree.ElementTree as ET,zipfile
 from pathlib import Path
 ROOT=Path(__file__).resolve().parents[1]
 FEATURES=('updates_page_and_distinct_icons','curated_notes_scroll_and_back','recommendations_and_paging','correct_secondary_preview_played','cached_preview_without_provider_lookup')
@@ -16,21 +16,34 @@ def evidence(receipt,key):
  raw=(ROOT/path).read_bytes()
  assert hashlib.sha256(raw).hexdigest()==ref.get('sha256'),'Native evidence changed: '+key
  return json.loads(raw)
-def verify(receipt,manifest):
+def verify(receipt,manifest,*,historical=False):
  assert receipt.get('schema')==1 and receipt.get('feature')=='approved-polish-126' and receipt.get('passed') is True
  assert receipt.get('controller')==manifest.get('controller')=='0.1.93' and receipt.get('installer')=='1.0.31'
  assert receipt.get('runtime')=='21.3' and receipt.get('native_devices')==['mac'] and receipt.get('other_devices_accessed') is False
  assert receipt.get('build_transactions_claimed') is False,'Feature add-on update is not a build install matrix'
  assert all(receipt.get('native',{}).get(k) is True for k in FEATURES),'Incomplete feature acceptance'
- assert receipt.get('files')==manifest['files']==inventory(ROOT/'controller-source/addon'),'Feature controller source differs'
- assert receipt.get('installer_files')==inventory(ROOT/'installer-source/plugin.program.blacklanturninstaller'),'Feature installer source differs'
+ assert receipt.get('files')==manifest['files'],'Historical feature controller identity differs'
+ if not historical:
+  assert receipt['files']==inventory(ROOT/'controller-source/addon'),'Feature controller source differs'
+  assert receipt.get('installer_files')==inventory(ROOT/'installer-source/plugin.program.blacklanturninstaller'),'Feature installer source differs'
+ # Historical mode revalidates this immutable run only. Current-source linkage
+ # is enforced separately by verify_release127's unchanged-file/method checks.
  binding=evidence(receipt,'installed_source')
+ accepted_installer=None
+ if historical:
+  with zipfile.ZipFile(ROOT/'plugin.program.blacklanturninstaller/plugin.program.blacklanturninstaller-1.0.31.zip')as z:
+   prefix='plugin.program.blacklanturninstaller/'
+   assert z.testzip() is None and all(n.startswith(prefix)for n in z.namelist())
+   accepted_installer={n[len(prefix):]:z.read(n)for n in z.namelist()if not n.endswith('/')}
+  assert {n:hashlib.sha256(v).hexdigest()for n,v in accepted_installer.items()}==receipt['installer_files'],'Historical Installer31 differs from complete126 acceptance'
  for component,aid,root,files,tested,final in (
   ('controller','script.blacklanturn.preview',ROOT/'controller-source/addon',receipt['files'],'0.1.93~local4','0.1.93'),
   ('installer','plugin.program.blacklanturninstaller',ROOT/'installer-source/plugin.program.blacklanturninstaller',receipt['installer_files'],'1.0.31~local3','1.0.31')):
   n=receipt['normalization'][component]
   assert n.get('kind')=='addon.xml version and terminal newline only' and n.get('tested_version')==tested and n.get('release_version')==final
-  xml=(root/'addon.xml').read_bytes();assert ET.fromstring(xml).get('version')==final
+  xml=accepted_installer['addon.xml'] if historical and component=='installer' else (root/'addon.xml').read_bytes();loaded=ET.fromstring(xml).get('version')
+  if historical:xml=xml.replace(('version="'+loaded+'"').encode(),('version="'+final+'"').encode(),1)
+  assert ET.fromstring(xml).get('version')==final and hashlib.sha256(xml).hexdigest()==files['addon.xml'],'Historical metadata changed beyond version'
   needle=('version="'+final+'"').encode();assert xml.count(needle)==1
   normalized=xml.replace(needle,('version="'+tested+'"').encode(),1)
   assert n.get('release_terminal_newline_added') is True and normalized.endswith(b'\n') and not normalized.endswith(b'\n\n')

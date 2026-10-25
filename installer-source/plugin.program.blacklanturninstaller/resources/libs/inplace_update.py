@@ -2,8 +2,9 @@
 
 One writer holds an OS lock across staging and commit. A durable intent journal
 retains the previous code until every replacement and release receipt is saved.
-An interrupted writer is rolled back on the next Installer update invocation.
+An interrupted writer is rolled back before a later update or at Kodi startup.
 """
+import errno
 import fcntl
 import hashlib
 import importlib.util
@@ -22,6 +23,10 @@ META = ('blacklanturn-build.json', 'blacklanturn-releases.json', 'blacklanturn-i
 ID = re.compile(r'[a-z0-9][a-z0-9_.-]{0,120}')
 
 class UpdateError(ValueError):
+    pass
+
+class UpdateBusy(UpdateError):
+    """A live writer owns recovery and must be allowed to finish."""
     pass
 
 def _module(name):
@@ -86,8 +91,11 @@ def _lock(home):
     lock = home/'addons/.blacklanturn-update.lock'; _plain(lock)
     descriptor = os.open(str(lock), os.O_CREAT | os.O_RDWR, 0o600)
     try: fcntl.flock(descriptor, fcntl.LOCK_EX | fcntl.LOCK_NB)
-    except (OSError, BlockingIOError):
-        os.close(descriptor); raise UpdateError('Another BlackLanturn update is running. Please wait for it to finish.') from None
+    except OSError as exc:
+        os.close(descriptor)
+        if exc.errno in (errno.EACCES, errno.EAGAIN):
+            raise UpdateBusy('Another BlackLanturn update is running. Please wait for it to finish.') from None
+        raise
     return {'home': str(home), 'work': str(home/'addons/.blacklanturn-update'), '_lock': descriptor}
 
 def release(plan):
@@ -111,12 +119,15 @@ def _recover_locked(plan):
     if (state.get('schema') != 1 or state.get('status') not in ('prepared', 'applying', 'committed')
             or not isinstance(state.get('addons'), dict) or not isinstance(state.get('metadata'), dict)):
         raise UpdateError('Update recovery information needs attention. Keep the recovery folder.')
-    if any(not ID.fullmatch(aid) or aid in NATIVE | {SELF} for aid in state['addons']):
+    if any(not ID.fullmatch(aid) or aid in NATIVE for aid in state['addons']):
         raise UpdateError('Update recovery targets are invalid. Keep the recovery folder.')
     if set(state['metadata']) != set(META): raise UpdateError('Update recovery metadata is invalid.')
     if state['status'] != 'committed':
         discard = work/'discard'; discard.mkdir(exist_ok=True)
-        for aid, entry in reversed(list(state['addons'].items())):
+        # Restore the Installer first so a second interrupted recovery still has
+        # its normal entry point. JSON key order is not transaction order.
+        for aid in sorted(state['addons'], key=lambda aid: (aid == SELF, aid), reverse=True):
+            entry = state['addons'][aid]
             target = home/'addons'/aid; old = work/'old'/aid; _plain(target); _plain(old)
             if old.exists():
                 if target.exists():
@@ -136,9 +147,16 @@ def _recover_locked(plan):
     shutil.rmtree(work)
     return True
 
-def recover(home):
+def recover(home, before_recover=None):
     plan = _lock(home)
-    try: return _recover_locked(plan)
+    try:
+        # The independent startup caller must preserve registration intent
+        # outside our work folder before recovery can remove the journal.
+        if before_recover is not None:
+            try: before_recover()
+            except Exception as exc:
+                raise UpdateError('Recovery preparation failed: '+str(exc)) from exc
+        return _recover_locked(plan)
     except (OSError, ValueError, KeyError, TypeError) as exc:
         raise UpdateError('The previous update could not be recovered. Keep the recovery folder and retry: ' + str(exc)) from exc
     finally: release(plan)
@@ -203,10 +221,6 @@ def prepare(archive_path, home, kodi):
             work.mkdir(); (work/'old').mkdir()
             for aid, node in bundled.items():
                 root = home/'addons'/aid; before = _tree(root)
-                if aid == SELF:
-                    if before is None or versions.compare(versions._meta((root/'addon.xml').read_bytes(), aid).get('version'), node.get('version')) < 0:
-                        raise UpdateError('Update BlackLanturn Installer through its repository first, then retry.')
-                    chosen[aid] = versions._meta((root/'addon.xml').read_bytes(), aid); retained.append(aid); continue
                 if before is not None and aid not in MANAGED:
                     current = versions._meta((root/'addon.xml').read_bytes(), aid)
                     if versions.compare(current.get('version'), node.get('version')) > 0:
@@ -216,9 +230,25 @@ def prepare(archive_path, home, kodi):
                 files = {name[len(prefix):]: archive.read(name) for name in archive.namelist() if name.startswith(prefix) and not name.endswith('/')}
                 after = {name: hashlib.sha256(raw).hexdigest() for name, raw in files.items()}
                 if before == after: retained.append(aid); continue
+                if aid == SELF:
+                    # A later rollback must restore a Controller that can retry
+                    # Installer registration after an interrupted cold recovery.
+                    controller = home/'addons/script.blacklanturn.preview'
+                    required = 'Update to BlackLanturn Build 1.1.27 before updating the Installer with the build.'
+                    if _tree(controller) is None or not (controller/'installer_recovery.py').is_file():
+                        raise UpdateError(required)
+                    current_controller = versions._meta((controller/'addon.xml').read_bytes(), 'script.blacklanturn.preview')
+                    if versions.compare(current_controller.get('version'), '0.1.94') < 0:
+                        raise UpdateError(required)
                 for name, raw in files.items(): _write(work/'new'/aid/name, raw)
                 if _tree(work/'new'/aid) != after: raise UpdateError('Staged add-on verification failed: '+aid)
                 entries[aid] = {'before': before, 'after': after, 'started': False}
+                if aid == SELF:
+                    response = json.loads(kodi.executeJSONRPC(json.dumps({'jsonrpc': '2.0', 'id': 1, 'method': 'Addons.GetAddonDetails', 'params': {'addonid': SELF, 'properties': ['enabled']}})))
+                    enabled = response.get('result', {}).get('addon', {}).get('enabled')
+                    if type(enabled) is not bool:
+                        raise UpdateError('The Installer enabled state could not be checked. Nothing has been updated; restart Kodi and retry.')
+                    entries[aid]['enabled_before'] = enabled
             _closure(home, chosen, kodi)
             completion = dict(schema=1, id=target['release_id'], edition=target['edition'], version=target['build_version'], revision=target.get('release_revision', 0), complete=True)
             incoming = {META[0]: target_raw, META[1]: archive.read('userdata/'+META[1]), META[2]: json.dumps(completion, sort_keys=True).encode()}
@@ -245,7 +275,9 @@ def apply(plan):
         for aid, entry in state['addons'].items():
             if _tree(home/'addons'/aid) != entry['before']: raise UpdateError('An add-on changed while preparing the update. Please retry.')
         state['status'] = 'applying'; _journal(plan, state)
-        for aid, entry in state['addons'].items():
+        # Replace our own tree last, after every other add-on has passed readback.
+        for aid in sorted(state['addons'], key=lambda aid: (aid == SELF, aid)):
+            entry = state['addons'][aid]
             if _tree(home/'addons'/aid) != entry['before']: raise UpdateError('An add-on changed during the update. Previous code will be restored.')
             target = home/'addons'/aid; entry['started'] = True; _journal(plan, state)
             if target.exists(): os.replace(target, work/'old'/aid); _sync(home/'addons'); _sync(work/'old')

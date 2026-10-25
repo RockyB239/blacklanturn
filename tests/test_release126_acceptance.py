@@ -12,7 +12,7 @@ class Release126Acceptance(unittest.TestCase):
   gate=self.gate();receipt=json.loads((ROOT/'controller-source/release126-feature-verification.json').read_text())
   manifest=json.loads((ROOT/'controller-source/manifest93.json').read_text());return gate,receipt,manifest
  def test_real_evidence_matches_current_implementation(self):
-  gate,receipt,manifest=self.inputs();self.assertTrue(gate.verify(receipt,manifest))
+  gate,receipt,manifest=self.inputs();self.assertTrue(gate.verify(receipt,manifest,historical=True))
  def test_source_ui_device_and_evidence_drift_are_rejected(self):
   gate,receipt,manifest=self.inputs()
   for mode in ('controller','installer','normalization','device','discovery','preview','preservation','evidence'):
@@ -31,3 +31,10 @@ class Release126Acceptance(unittest.TestCase):
   inventory=gate.inventory
   def altered(root):return actual if root==ROOT/'controller-source/addon' else inventory(root)
   with patch.object(gate,'inventory',altered),self.assertRaises(AssertionError):gate.verify(receipt,manifest)
+
+ def test_historical_proof_uses_immutable126_source_instead_of_new_startup(self):
+  gate,receipt,manifest=self.inputs()
+  with patch.object(gate,'inventory',return_value={'new_recovery.py':'0'*64}):
+   self.assertTrue(gate.verify(receipt,manifest,historical=True))
+  bad=copy.deepcopy(receipt);bad['files']['related_titles.py']='0'*64
+  with self.assertRaises(AssertionError):gate.verify(bad,manifest,historical=True)

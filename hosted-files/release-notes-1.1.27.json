@@ -1,0 +1,27 @@
+{
+  "title": "BlackLanturn Build 1.1.27",
+  "summary": "The Installer now updates with the build, keeping your complete setup.",
+  "sections": [
+    {
+      "heading": "One BlackLanturn update",
+      "bullets": [
+        "The Installer, included add-ons and tested BlackLanturn patches update together.",
+        "Once Build 1.1.27 and Installer 1.0.32 are installed, future build updates no longer require a separate Installer update through the repository."
+      ]
+    },
+    {
+      "heading": "Protected update and recovery",
+      "bullets": [
+        "Updates are staged and checked before replacing code. Interrupted Installer updates can recover when BlackLanturn starts.",
+        "Close and reopen Kodi after updating to load the complete new version."
+      ]
+    },
+    {
+      "heading": "Keep your complete setup",
+      "bullets": [
+        "Your playback settings, authorizations, watched progress, sources, favourites and other saved data stay in place.",
+        "Other add-ons you installed stay untouched; platform playback fixes remain included."
+      ]
+    }
+  ]
+}

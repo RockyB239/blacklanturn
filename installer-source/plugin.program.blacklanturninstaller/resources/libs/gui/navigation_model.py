@@ -25,11 +25,14 @@ def capture(directory, producer):
 
 def activation(row,supported):return 'open' if supported else 'action'
 def handoff(params):
-    return params.get('mode') in {'forceskin','forceprofile','buildpreview','viewVideo','kodiapk','speedtest'}
+    return (params.get('mode') in {'forceskin','forceprofile','buildpreview','viewVideo','kodiapk','speedtest'}
+            or (params.get('mode') == 'install' and params.get('action') in {'update','normal'}))
 
 def perform(params,dispatch,refresh):
     dispatch(dict(params))
-    refresh()
+    # An update may have replaced this running Installer. Its old Python
+    # session must finish without reading new settings or reopening navigation.
+    if not handoff(params):refresh()
 
 class Navigation:
     def __init__(self,route=None,title='Home'):
