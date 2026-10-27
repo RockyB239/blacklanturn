@@ -1,0 +1,9 @@
+BlackLanturn Build 1.1.30 / Installer 1.0.35
+
+Faster cached YouTube browsing, bounded visible-row scheduling and fewer disposable cache writes. Watched status and account checks remain current. Choose genre stays after Details in Movies and Shows browsing and is omitted inside seasons and episodes.
+
+Personal pages and icon packs can register outside managed code, allowing BlackLanturn updates to preserve those extensions. Personal Fight Zone and personal icon assets are not included in public packages.
+
+Update BlackLanturn updates included add-ons, Installer and tested patches together in place. Accounts, settings, playback choices, sources, favourites, watched progress, history and unrelated add-ons stay saved. Compatible 1.1.29 installations using Installer 1.0.35 can download verified smaller component packages; other installations use the complete package with the same preservation and recovery protections. Close and reopen Kodi afterward.
+
+Validation includes 933 controller and 898 installer/tool checks, eight isolated native clean/Standard/in-place/component install cases, exact-source and saved-setting checks on Mac, Apple TV and Fire Stick, and 100 measured navigation visits on each device. Cached YouTube warm medians improved about 32% on Mac, 41% on Apple TV and 25% on Fire Stick. Other sections vary; this is not a promise of universal network speed. Historical timing checks that could accept stale rows were corrected and superseded by matched native measurements.

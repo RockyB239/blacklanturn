@@ -1,10 +1,10 @@
 # Current validation state —27 October2026
 
-Public release remains Build 1.1.29 / Installer 1.0.34. All three personal devices run private optimization Build 1.1.30 / Installer 1.0.35 / Controller 0.1.96, with personal Fight Zone 0.3.4 and external icons1.0.0. Nothing from this task was publicly published.
+Public release: Build 1.1.30 / Installer 1.0.35 / Controller 0.1.96. Both editions, Installer and exact-base component downloads were rebuilt identically, passed source CI40559803243, and anonymously downloaded with exact SHA256 and ZIP CRC verification. Repository1.0.6 remains the current repository addon; its catalog and Installer metadata advance to this release.
 
-Both clean editions and component packages derive from pinned1.1.29. Source/default/patch/private-data checks,933 controller/898 installer/126 personal tests, independent review and 8 isolated native install cases passed. Live exact-source parity, native settings/auth preservation and100-visit sustained-use checks pass on all three. Final matched comparisons pass; legacy timing-check errors, superseding corrected comparisons and limits are disclosed in docs/OPTIMIZATION_1_1_30_VALIDATION.md and the project optimization report. No displayed-object retention remains in final source.
+Both clean editions and component packages derive from pinned1.1.29. Source/default/patch/private-data checks,933 controller/898 installer/126 personal tests, independent review and8 isolated native install cases passed. Live exact-source parity, native settings/auth preservation and100-visit sustained-use checks passed on all three personal devices before publication. Final matched comparisons pass; corrected timing checks and limitations are disclosed in docs/OPTIMIZATION_1_1_30_VALIDATION.md. No displayed-object retention remains.
 
-Canonical package versions come from tools/release_report.py. Source-bound sanitized performance receipts are under validation/optimization130-performance.json. Component URLs are not public; future catalogs can advertise the smaller verified transfer with full fallback. Personal extensions register through contained descriptors and never modify managed controller code.
+Canonical package versions come from tools/release_report.py. Source-bound sanitized performance receipts are under validation/optimization130-performance.json. The public catalog advertises verified component URLs only for an exact supported base, with complete-package fallback. Personal Fight Zone0.3.4 and external icons1.0.0 register outside managed controller code and remain excluded from all public assets.
 
 Historical records below retain their original version claims; this current-state block supersedes them.
 
