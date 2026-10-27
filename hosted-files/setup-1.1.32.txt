@@ -1,0 +1,14 @@
+# BlackLanturn 1.1.32 / Installer 1.0.36
+
+Update BlackLanturn keeps your entire saved setup and updates included add-ons and tested BlackLanturn patches together.
+
+- Installer1.0.36 streams reconstruction/staging in small chunks, reducing additional memory use in the tested Fire Stick component reconstruction by about64%. Reconstruction itself can take longer.
+- New background row requests and owned previews pause during accepted updates. Keep Kodi open until completion.
+- Interrupted-update recovery was tested on a physical Fire Stick, followed by a successful retry and normal Close Kodi/reopen.
+- More small browsing rows can be reused within the same2MiB session/disk byte budgets. Repeat downward browsing improved in matched Fire Stick tests; first network fetches still take longer.
+- Account/config isolation, recommendation expiry and watched-status hydration remain active.
+- Both approved icon packs, existing provider patches and platform workarounds remain included. Personal Fight Zone remains excluded.
+
+Your settings, authorizations, sources, favourites, watched progress and unrelated installed add-ons stay in place. Use **Update BlackLanturn** for an in-place update. Clean/Standard installation remains separate.
+
+The new engine is in Installer1.0.36. An update begun in an older Installer initially uses its older code until the bundled replacement and Kodi restart. Subsequent updates use the new engine; the ordinary repository Installer update route also remains available.

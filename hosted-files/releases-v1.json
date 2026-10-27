@@ -1658,6 +1658,208 @@
         "addons/script.module.jurialmunkey/resources/modules/jurialmunkey/reqapi.py": "9d232490dba165c07fd6ceab42c512ebe90997a794b610fbca14c64429668d59",
         "addons/skin.blacklanturn.preview/xml/Home.xml": "7495994a5f5a1f0a71ad9e7e71d5dd43387433c822fabf179cac20050227586a"
       }
+    },
+    {
+      "id": "blacklanturn-general-1.1.32-r0",
+      "edition": "general",
+      "version": "1.1.32",
+      "revision": 0,
+      "title": "BlackLanturn 1.1.32",
+      "summary": "Lower update memory use, safer recovery and faster return to lower browsing rows.",
+      "sections": [
+        {
+          "heading": "Lighter, protected updates",
+          "bullets": [
+            "Update files are processed in small chunks, reducing memory pressure on Fire Stick.",
+            "Kodi pauses new background row requests and automatic previews while updating. Keep Kodi open until the update finishes.",
+            "An interrupted update recovers the previous complete add-ons and patches before retrying."
+          ]
+        },
+        {
+          "heading": "Faster lower-row browsing",
+          "bullets": [
+            "More small rows can be reused within the same cache byte limit, reducing repeated loading as you browse deeper.",
+            "Recommendation freshness and watched-status refreshes remain active."
+          ]
+        },
+        {
+          "heading": "Your complete setup stays saved",
+          "bullets": [
+            "Update BlackLanturn keeps your accounts, settings, sources, favourites, watched progress and other installed add-ons.",
+            "Both approved icon packs remain included. Personal Fight Zone remains outside the public packages."
+          ]
+        }
+      ],
+      "files": {
+        "addons/plugin.program.blacklanturninstaller/addon.xml": "80c1302809e009b753433a3a5246121c2ce4ed90a8b042b66cad66ddf01e27d0",
+        "addons/plugin.program.blacklanturninstaller/resources/libs/build_preferences.py": "40a179502e72d9150be0bd5e1f3cfb667b65958413953c71bbdf0685dfabe0a7",
+        "addons/plugin.program.blacklanturninstaller/resources/libs/check.py": "b33d825a7c58a12f4a61f634b5cc6cb43a635c500419ff280d4bb2fc5b51caf0",
+        "addons/plugin.program.blacklanturninstaller/resources/libs/common/router.py": "0a5a52428c2cda53be3afb29c37466e6d2da18a7191b616c37ff52f0ec254dd8",
+        "addons/plugin.program.blacklanturninstaller/resources/libs/component_update.py": "8d383743e68f090ba85eb7694b57f085a86702b164c8ccf90b3d2ef93f915364",
+        "addons/plugin.program.blacklanturninstaller/resources/libs/downloader.py": "5424e3ce3d858f1c2295870da10df6d2e08768b05a184810d33e3f9f1cfd589e",
+        "addons/plugin.program.blacklanturninstaller/resources/libs/gui/navigation.py": "0c62b807547da88d73170d8a1d12078b13680ecf109a51375fe5ce6717ef1c33",
+        "addons/plugin.program.blacklanturninstaller/resources/libs/gui/navigation_model.py": "d7af69cc2ec3bff561628c0165b305e110cebb22dea1051d85df5459b9a68e3a",
+        "addons/plugin.program.blacklanturninstaller/resources/libs/gui/updates_menu.py": "396f29cb2c34d12265d9a1d492a42caee2ff2903a9abcdf710fca77d90935766",
+        "addons/plugin.program.blacklanturninstaller/resources/libs/gui/window.py": "fcd4ae4de025f93bd080d4bf356388a0d01ee80c1da708a00beaa9a195e4d78f",
+        "addons/plugin.program.blacklanturninstaller/resources/libs/inplace_update.py": "bf5fbec543e82faab5c4e58e61433799abdb648b9b18524f6a9f8190f38004d4",
+        "addons/plugin.program.blacklanturninstaller/resources/libs/managed_addons.py": "6b8f3f777fcfff9c40e3ffbb2323df8cfcc956d2ca092c137f4e421c059f63a1",
+        "addons/plugin.program.blacklanturninstaller/resources/libs/managed_versions.py": "12d39a05508ce6a64fcaa816a464d55ec279b4d0daa5876f8a54588a6faa693b",
+        "addons/plugin.program.blacklanturninstaller/resources/libs/portable_lock.py": "865d9506f5a919b657969e292e37a0857fd7ff06ffb835fefe79c0bf67c0ae8a",
+        "addons/plugin.program.blacklanturninstaller/resources/libs/release_notice_state.py": "093fb139a2e38eea24ba4a5a68d3d42c014afe2238f09780ee23e63a56539669",
+        "addons/plugin.program.blacklanturninstaller/resources/libs/stream_io.py": "7fdad2fc4afdf6257c8b49f68ce18961f85083bea6c1d6a06d4f335994d3678f",
+        "addons/plugin.program.blacklanturninstaller/resources/libs/update.py": "0f3d04ccf5d45ba43ab56a7fbb50a6fb9f95dd240a7a3441e81118bbc6be246e",
+        "addons/plugin.program.blacklanturninstaller/resources/libs/update_activity.py": "34213459137cf55a2a5f44b7b3dc91593778d234dfea9f8e17e99bd4228712d5",
+        "addons/plugin.program.blacklanturninstaller/resources/libs/wizard.py": "51860e7d71db841661123c2e5a9b06451485825742adf584992e7ea3c364afe1",
+        "addons/plugin.program.blacklanturninstaller/resources/media/maintenance-wrench.png": "63dc0ea0ae43f3cbbcf32dace8b674f6316193b0693003c5db35471febbc0402",
+        "addons/plugin.program.blacklanturninstaller/resources/media/updates.png": "377db80c2f7977076cfda251aaec8c866c902fdf098fff8e3349a75fea2fe3bf",
+        "addons/plugin.program.blacklanturninstaller/resources/skins/Default/1080i/FirstRunSaveData.xml": "3e05128f4a2011026289be312e40f84193acc77c3444cc3c3253fff3b892250a",
+        "addons/plugin.program.blacklanturninstaller/resources/skins/Default/1080i/InstallerNavigation.xml": "227aea9e1a062b92f6b10548d82860755d3dd399ed1045e7259eb353d4ede97a",
+        "addons/plugin.program.blacklanturninstaller/startup.py": "c2386e074b93b9ce23b9288b5cfe6bf9c7aa1539d52904200dcb295f569724fc",
+        "addons/plugin.program.blacklanturninstaller/uservar.py": "3c65764a500c0a2f0b91e3c2d1db434ec291403324430bce157e56e324e86806",
+        "addons/plugin.video.themoviedb.helper/resources/tmdbhelper/lib/items/directories/tmdb/lists_search.py": "3cc1c1165fd57b233b868fb35e4ceca1cf2449a85a44fb5b9f04cde4b6ae2862",
+        "addons/plugin.video.themoviedb.helper/resources/tmdbhelper/lib/monitor/player.py": "cc8c8f4e6f499f54bfab551a8a23687d9979a43a1562fc0fc6f066a09f9112ec",
+        "addons/plugin.video.umbrella/resources/lib/modules/control.py": "b580a0a0a2edd8e88bab6a82f5f7d1cd32f7afe124e8ab5cd230ba99c5b00ca6",
+        "addons/plugin.video.umbrella/resources/lib/modules/player.py": "1dded07360b8c2b7c264678e9c45fc83b2614c43e84b1645d360452726d44cd7",
+        "addons/plugin.video.youtube/resources/lib/youtube_plugin/kodion/context/xbmc/xbmc_context.py": "6eb2526020c082553ba9ec688db1b00a2ca2a497ae97ab0734752b3d896d0c75",
+        "addons/plugin.video.youtube/resources/lib/youtube_plugin/kodion/sql_store/function_cache.py": "7418d1ba8afa569d0b0f3ccef78748c75c6b6560e8d096b6bf6c1e83efa830cb",
+        "addons/repository.blacklanturn/addon.xml": "b8e7d0694906ebd2635ef1e87d557575bfa0297c41f4badf705babd788bc59d4",
+        "addons/repository.blacklanturn/icon.png": "0c5f1885226d28aa8052f17cb2137ebd494cacb2216daa9824bb605c93b4f4de",
+        "addons/script.blacklanturn.preview/addon.xml": "5007aaa02cfd67d5972e49cb854c5bb4946a61eb638a16ebb48ca306136075d2",
+        "addons/script.blacklanturn.preview/backend_core.py": "ac5082a5c63f510d9c958165b82165368544dea559907251c5d8d4069bb06754",
+        "addons/script.blacklanturn.preview/backend_ui.py": "5f5521d603b5fea945337135a4e04c76d68ffce5507b4f119fe04a86a5e275d5",
+        "addons/script.blacklanturn.preview/browse_controls.py": "148fc0327976cbf70f47555b7d2a7f61f262728f082b7c74ed37bd4d095b2173",
+        "addons/script.blacklanturn.preview/default.py": "6248fd26a17ea4fdd5d13cedd17d7cf4f509641d2a9ec89f466f15158ac68e09",
+        "addons/script.blacklanturn.preview/extensions.py": "660b0ef4fd04637e74b5d0a4b8f2c501ba574468a10b840308cc82a0618f5824",
+        "addons/script.blacklanturn.preview/filtered_pages.py": "72c4cc2dedcb9640f4cc8fcd6043fd8dbee1a8cf7370c3b424f7b659e501ab57",
+        "addons/script.blacklanturn.preview/icon_packs.py": "5d6f457ea1783dcbbfde0bcbe4e9bfe9bf9e021ae6509ae4ac9d7bcf1ea1d3d4",
+        "addons/script.blacklanturn.preview/icon_picker.py": "766670359ed6125ff2d61fdea68f8fa521456b4951af755339896866ca03d158",
+        "addons/script.blacklanturn.preview/installer_recovery.py": "65290790f2bbb9b0c6260c0d2b050c9a95a1ada58c5732094f1f170f71b36a3b",
+        "addons/script.blacklanturn.preview/live_review.py": "7e1dd4da129f1fc8b166e173b12ff85fd657528286ea19fe0423ec801268852b",
+        "addons/script.blacklanturn.preview/navigation_core.py": "5bdd4897be395ba094486d8064478e51643f28ef26c1ae60b1cf76537cf87169",
+        "addons/script.blacklanturn.preview/preview_fallback.py": "1cc9b6bad93fe093001dabc870cf46a6ec3adc367429ada8a8e29d177d4d2578",
+        "addons/script.blacklanturn.preview/preview_identity.py": "0fc0d2bd90596faaeaf5cc6d3ffee8eccb53a09689aa1cfa262e8227f8518c34",
+        "addons/script.blacklanturn.preview/provider_work.py": "31157cf49d6d50c32fb07df277b6d114d3f65f75c9ef57a7d9089fd3e285c6fd",
+        "addons/script.blacklanturn.preview/public_rows.py": "030089d927a587907a1dba0ca054fc533ec8ab4232fb2e07a49a5e75a640292f",
+        "addons/script.blacklanturn.preview/related_titles.py": "e209ae3d7e4015972fdbc163a5e2e60709b14d44317d55e723ea6d3d32492753",
+        "addons/script.blacklanturn.preview/release_updates.py": "093fb139a2e38eea24ba4a5a68d3d42c014afe2238f09780ee23e63a56539669",
+        "addons/script.blacklanturn.preview/resources/icon-packs/blacklanturn-icons.json": "fabae3009ce64bbd1388a5e57accd140633d3686c379c836c090574f3b341b58",
+        "addons/script.blacklanturn.preview/resources/icon-packs/packs/sculpted-silver/home.png": "9e4ecd41726d569ee3d23af33643808ae9852ff019bc71490dcf657be66b0344",
+        "addons/script.blacklanturn.preview/resources/icon-packs/packs/smoked-glass/home.png": "97c273b1a6ca226f37a1e8d83a7da1de0a6f5a73d0766a00344fec96f5e9167b",
+        "addons/script.blacklanturn.preview/resources/skins/Default/1080i/LiveReview.xml": "1ea78c4523d52b4f57f2da724fb564b6114a225e5e4557774adc9e00991104e1",
+        "addons/script.blacklanturn.preview/resources/skins/Default/1080i/UpdateNotes.xml": "5c153b5eeb46cef556e6503572c9896a198f791a52a2e0ecf16dfb6f36fe46b7",
+        "addons/script.blacklanturn.preview/resources/skins/Default/1080i/UpdateNotice.xml": "0e17f227bde4a238894847fd0f6509a7622d204f90ae3326b6226a97294b3da3",
+        "addons/script.blacklanturn.preview/row_feedback.py": "2e332bf865a8682cf9079d1561a59dec430d71d37af141fa0adef2e6b7cf50b1",
+        "addons/script.blacklanturn.preview/update_activity.py": "5303693b4a892722fe6736d13508f0d649525a748330364a6fabe768605f61fe",
+        "addons/script.blacklanturn.preview/update_notes_ui.py": "39d7d695c21cf714d55a3553cab3decbf88a16f08432faafc8c7ab3d053e52b1",
+        "addons/script.blacklanturn.preview/watch_metadata.py": "683c171ab2b4509f25af2467f7050c71ad4a06bf35b5b637c14cb1bae2bff9b2",
+        "addons/script.blacklanturn.preview/youtube_browser.py": "44230a897bde1b3c4dd0500131f9706de6f99a00d2e68297c410350d6cfb0da0",
+        "addons/script.blacklanturn.preview/youtube_rows.py": "797f7912b1658d5c247a310071aae817686b97310895672c16c8baf73fa15afa",
+        "addons/script.blacklanturn.preview/youtube_saved.py": "b9db5de7514140c60fd1b0f90a428f2dd691759a615f301dfc04086519408bf1",
+        "addons/script.blacklanturn.preview/youtube_saved_runtime.py": "6210ffdda32be337a97a33729c93b2da61f2c03530771cd05c8e4120007c38a3",
+        "addons/script.module.jurialmunkey/resources/modules/jurialmunkey/reqapi.py": "9d232490dba165c07fd6ceab42c512ebe90997a794b610fbca14c64429668d59",
+        "addons/skin.blacklanturn.preview/xml/Home.xml": "7495994a5f5a1f0a71ad9e7e71d5dd43387433c822fabf179cac20050227586a"
+      }
+    },
+    {
+      "id": "blacklanturn-apple-1.1.32-r0",
+      "edition": "apple",
+      "version": "1.1.32",
+      "revision": 0,
+      "title": "BlackLanturn 1.1.32",
+      "summary": "Lower update memory use, safer recovery and faster return to lower browsing rows.",
+      "sections": [
+        {
+          "heading": "Lighter, protected updates",
+          "bullets": [
+            "Update files are processed in small chunks, reducing memory pressure on Fire Stick.",
+            "Kodi pauses new background row requests and automatic previews while updating. Keep Kodi open until the update finishes.",
+            "An interrupted update recovers the previous complete add-ons and patches before retrying."
+          ]
+        },
+        {
+          "heading": "Faster lower-row browsing",
+          "bullets": [
+            "More small rows can be reused within the same cache byte limit, reducing repeated loading as you browse deeper.",
+            "Recommendation freshness and watched-status refreshes remain active."
+          ]
+        },
+        {
+          "heading": "Your complete setup stays saved",
+          "bullets": [
+            "Update BlackLanturn keeps your accounts, settings, sources, favourites, watched progress and other installed add-ons.",
+            "Both approved icon packs remain included. Personal Fight Zone remains outside the public packages."
+          ]
+        }
+      ],
+      "files": {
+        "addons/plugin.program.blacklanturninstaller/addon.xml": "80c1302809e009b753433a3a5246121c2ce4ed90a8b042b66cad66ddf01e27d0",
+        "addons/plugin.program.blacklanturninstaller/resources/libs/build_preferences.py": "40a179502e72d9150be0bd5e1f3cfb667b65958413953c71bbdf0685dfabe0a7",
+        "addons/plugin.program.blacklanturninstaller/resources/libs/check.py": "b33d825a7c58a12f4a61f634b5cc6cb43a635c500419ff280d4bb2fc5b51caf0",
+        "addons/plugin.program.blacklanturninstaller/resources/libs/common/router.py": "0a5a52428c2cda53be3afb29c37466e6d2da18a7191b616c37ff52f0ec254dd8",
+        "addons/plugin.program.blacklanturninstaller/resources/libs/component_update.py": "8d383743e68f090ba85eb7694b57f085a86702b164c8ccf90b3d2ef93f915364",
+        "addons/plugin.program.blacklanturninstaller/resources/libs/downloader.py": "5424e3ce3d858f1c2295870da10df6d2e08768b05a184810d33e3f9f1cfd589e",
+        "addons/plugin.program.blacklanturninstaller/resources/libs/gui/navigation.py": "0c62b807547da88d73170d8a1d12078b13680ecf109a51375fe5ce6717ef1c33",
+        "addons/plugin.program.blacklanturninstaller/resources/libs/gui/navigation_model.py": "d7af69cc2ec3bff561628c0165b305e110cebb22dea1051d85df5459b9a68e3a",
+        "addons/plugin.program.blacklanturninstaller/resources/libs/gui/updates_menu.py": "396f29cb2c34d12265d9a1d492a42caee2ff2903a9abcdf710fca77d90935766",
+        "addons/plugin.program.blacklanturninstaller/resources/libs/gui/window.py": "fcd4ae4de025f93bd080d4bf356388a0d01ee80c1da708a00beaa9a195e4d78f",
+        "addons/plugin.program.blacklanturninstaller/resources/libs/inplace_update.py": "bf5fbec543e82faab5c4e58e61433799abdb648b9b18524f6a9f8190f38004d4",
+        "addons/plugin.program.blacklanturninstaller/resources/libs/managed_addons.py": "6b8f3f777fcfff9c40e3ffbb2323df8cfcc956d2ca092c137f4e421c059f63a1",
+        "addons/plugin.program.blacklanturninstaller/resources/libs/managed_versions.py": "12d39a05508ce6a64fcaa816a464d55ec279b4d0daa5876f8a54588a6faa693b",
+        "addons/plugin.program.blacklanturninstaller/resources/libs/portable_lock.py": "865d9506f5a919b657969e292e37a0857fd7ff06ffb835fefe79c0bf67c0ae8a",
+        "addons/plugin.program.blacklanturninstaller/resources/libs/release_notice_state.py": "093fb139a2e38eea24ba4a5a68d3d42c014afe2238f09780ee23e63a56539669",
+        "addons/plugin.program.blacklanturninstaller/resources/libs/stream_io.py": "7fdad2fc4afdf6257c8b49f68ce18961f85083bea6c1d6a06d4f335994d3678f",
+        "addons/plugin.program.blacklanturninstaller/resources/libs/update.py": "0f3d04ccf5d45ba43ab56a7fbb50a6fb9f95dd240a7a3441e81118bbc6be246e",
+        "addons/plugin.program.blacklanturninstaller/resources/libs/update_activity.py": "34213459137cf55a2a5f44b7b3dc91593778d234dfea9f8e17e99bd4228712d5",
+        "addons/plugin.program.blacklanturninstaller/resources/libs/wizard.py": "51860e7d71db841661123c2e5a9b06451485825742adf584992e7ea3c364afe1",
+        "addons/plugin.program.blacklanturninstaller/resources/media/maintenance-wrench.png": "63dc0ea0ae43f3cbbcf32dace8b674f6316193b0693003c5db35471febbc0402",
+        "addons/plugin.program.blacklanturninstaller/resources/media/updates.png": "377db80c2f7977076cfda251aaec8c866c902fdf098fff8e3349a75fea2fe3bf",
+        "addons/plugin.program.blacklanturninstaller/resources/skins/Default/1080i/FirstRunSaveData.xml": "3e05128f4a2011026289be312e40f84193acc77c3444cc3c3253fff3b892250a",
+        "addons/plugin.program.blacklanturninstaller/resources/skins/Default/1080i/InstallerNavigation.xml": "227aea9e1a062b92f6b10548d82860755d3dd399ed1045e7259eb353d4ede97a",
+        "addons/plugin.program.blacklanturninstaller/startup.py": "c2386e074b93b9ce23b9288b5cfe6bf9c7aa1539d52904200dcb295f569724fc",
+        "addons/plugin.program.blacklanturninstaller/uservar.py": "3c65764a500c0a2f0b91e3c2d1db434ec291403324430bce157e56e324e86806",
+        "addons/plugin.video.themoviedb.helper/resources/tmdbhelper/lib/items/directories/tmdb/lists_search.py": "3cc1c1165fd57b233b868fb35e4ceca1cf2449a85a44fb5b9f04cde4b6ae2862",
+        "addons/plugin.video.themoviedb.helper/resources/tmdbhelper/lib/monitor/player.py": "cc8c8f4e6f499f54bfab551a8a23687d9979a43a1562fc0fc6f066a09f9112ec",
+        "addons/plugin.video.umbrella/resources/lib/modules/control.py": "b580a0a0a2edd8e88bab6a82f5f7d1cd32f7afe124e8ab5cd230ba99c5b00ca6",
+        "addons/plugin.video.umbrella/resources/lib/modules/player.py": "1dded07360b8c2b7c264678e9c45fc83b2614c43e84b1645d360452726d44cd7",
+        "addons/plugin.video.youtube/resources/lib/youtube_plugin/kodion/context/xbmc/xbmc_context.py": "6eb2526020c082553ba9ec688db1b00a2ca2a497ae97ab0734752b3d896d0c75",
+        "addons/plugin.video.youtube/resources/lib/youtube_plugin/kodion/sql_store/function_cache.py": "7418d1ba8afa569d0b0f3ccef78748c75c6b6560e8d096b6bf6c1e83efa830cb",
+        "addons/repository.blacklanturn/addon.xml": "b8e7d0694906ebd2635ef1e87d557575bfa0297c41f4badf705babd788bc59d4",
+        "addons/repository.blacklanturn/icon.png": "0c5f1885226d28aa8052f17cb2137ebd494cacb2216daa9824bb605c93b4f4de",
+        "addons/script.blacklanturn.preview/addon.xml": "5007aaa02cfd67d5972e49cb854c5bb4946a61eb638a16ebb48ca306136075d2",
+        "addons/script.blacklanturn.preview/backend_core.py": "ac5082a5c63f510d9c958165b82165368544dea559907251c5d8d4069bb06754",
+        "addons/script.blacklanturn.preview/backend_ui.py": "5f5521d603b5fea945337135a4e04c76d68ffce5507b4f119fe04a86a5e275d5",
+        "addons/script.blacklanturn.preview/browse_controls.py": "148fc0327976cbf70f47555b7d2a7f61f262728f082b7c74ed37bd4d095b2173",
+        "addons/script.blacklanturn.preview/default.py": "6248fd26a17ea4fdd5d13cedd17d7cf4f509641d2a9ec89f466f15158ac68e09",
+        "addons/script.blacklanturn.preview/extensions.py": "660b0ef4fd04637e74b5d0a4b8f2c501ba574468a10b840308cc82a0618f5824",
+        "addons/script.blacklanturn.preview/filtered_pages.py": "72c4cc2dedcb9640f4cc8fcd6043fd8dbee1a8cf7370c3b424f7b659e501ab57",
+        "addons/script.blacklanturn.preview/icon_packs.py": "5d6f457ea1783dcbbfde0bcbe4e9bfe9bf9e021ae6509ae4ac9d7bcf1ea1d3d4",
+        "addons/script.blacklanturn.preview/icon_picker.py": "766670359ed6125ff2d61fdea68f8fa521456b4951af755339896866ca03d158",
+        "addons/script.blacklanturn.preview/installer_recovery.py": "65290790f2bbb9b0c6260c0d2b050c9a95a1ada58c5732094f1f170f71b36a3b",
+        "addons/script.blacklanturn.preview/live_review.py": "7e1dd4da129f1fc8b166e173b12ff85fd657528286ea19fe0423ec801268852b",
+        "addons/script.blacklanturn.preview/navigation_core.py": "5bdd4897be395ba094486d8064478e51643f28ef26c1ae60b1cf76537cf87169",
+        "addons/script.blacklanturn.preview/preview_fallback.py": "1cc9b6bad93fe093001dabc870cf46a6ec3adc367429ada8a8e29d177d4d2578",
+        "addons/script.blacklanturn.preview/preview_identity.py": "0fc0d2bd90596faaeaf5cc6d3ffee8eccb53a09689aa1cfa262e8227f8518c34",
+        "addons/script.blacklanturn.preview/provider_work.py": "31157cf49d6d50c32fb07df277b6d114d3f65f75c9ef57a7d9089fd3e285c6fd",
+        "addons/script.blacklanturn.preview/public_rows.py": "030089d927a587907a1dba0ca054fc533ec8ab4232fb2e07a49a5e75a640292f",
+        "addons/script.blacklanturn.preview/related_titles.py": "e209ae3d7e4015972fdbc163a5e2e60709b14d44317d55e723ea6d3d32492753",
+        "addons/script.blacklanturn.preview/release_updates.py": "093fb139a2e38eea24ba4a5a68d3d42c014afe2238f09780ee23e63a56539669",
+        "addons/script.blacklanturn.preview/resources/icon-packs/blacklanturn-icons.json": "fabae3009ce64bbd1388a5e57accd140633d3686c379c836c090574f3b341b58",
+        "addons/script.blacklanturn.preview/resources/icon-packs/packs/sculpted-silver/home.png": "9e4ecd41726d569ee3d23af33643808ae9852ff019bc71490dcf657be66b0344",
+        "addons/script.blacklanturn.preview/resources/icon-packs/packs/smoked-glass/home.png": "97c273b1a6ca226f37a1e8d83a7da1de0a6f5a73d0766a00344fec96f5e9167b",
+        "addons/script.blacklanturn.preview/resources/skins/Default/1080i/LiveReview.xml": "1ea78c4523d52b4f57f2da724fb564b6114a225e5e4557774adc9e00991104e1",
+        "addons/script.blacklanturn.preview/resources/skins/Default/1080i/UpdateNotes.xml": "5c153b5eeb46cef556e6503572c9896a198f791a52a2e0ecf16dfb6f36fe46b7",
+        "addons/script.blacklanturn.preview/resources/skins/Default/1080i/UpdateNotice.xml": "0e17f227bde4a238894847fd0f6509a7622d204f90ae3326b6226a97294b3da3",
+        "addons/script.blacklanturn.preview/row_feedback.py": "2e332bf865a8682cf9079d1561a59dec430d71d37af141fa0adef2e6b7cf50b1",
+        "addons/script.blacklanturn.preview/update_activity.py": "5303693b4a892722fe6736d13508f0d649525a748330364a6fabe768605f61fe",
+        "addons/script.blacklanturn.preview/update_notes_ui.py": "39d7d695c21cf714d55a3553cab3decbf88a16f08432faafc8c7ab3d053e52b1",
+        "addons/script.blacklanturn.preview/watch_metadata.py": "683c171ab2b4509f25af2467f7050c71ad4a06bf35b5b637c14cb1bae2bff9b2",
+        "addons/script.blacklanturn.preview/youtube_browser.py": "44230a897bde1b3c4dd0500131f9706de6f99a00d2e68297c410350d6cfb0da0",
+        "addons/script.blacklanturn.preview/youtube_rows.py": "797f7912b1658d5c247a310071aae817686b97310895672c16c8baf73fa15afa",
+        "addons/script.blacklanturn.preview/youtube_saved.py": "b9db5de7514140c60fd1b0f90a428f2dd691759a615f301dfc04086519408bf1",
+        "addons/script.blacklanturn.preview/youtube_saved_runtime.py": "6210ffdda32be337a97a33729c93b2da61f2c03530771cd05c8e4120007c38a3",
+        "addons/script.module.jurialmunkey/resources/modules/jurialmunkey/reqapi.py": "9d232490dba165c07fd6ceab42c512ebe90997a794b610fbca14c64429668d59",
+        "addons/skin.blacklanturn.preview/xml/Home.xml": "7495994a5f5a1f0a71ad9e7e71d5dd43387433c822fabf179cac20050227586a"
+      }
     }
   ]
 }

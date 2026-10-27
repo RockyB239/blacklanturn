@@ -86,5 +86,29 @@
       "bytes": 4132783
     }
   },
-  "publication_pending": true
+  "publication_pending": false,
+  "source_commit": "cf4082e2d877d59d6fa814ada500d90612486d95",
+  "source_ci": 40596079636,
+  "anonymous_assets_verified": true,
+  "physical_retry": {
+    "passed": true,
+    "exact_accepted_local_candidate": true,
+    "production_wizard": true,
+    "normal_close_and_reopen": true,
+    "core_settings_unchanged": 306,
+    "addon_settings_unchanged": 917
+  },
+  "native_activity_lease": {
+    "passed": true,
+    "lease_visible_to_controller": true,
+    "work_deferred": true,
+    "pending_bounded": true,
+    "resumed": true,
+    "only_latest_ran": true,
+    "lease_cleared": true
+  },
+  "final_repeat_pass_seconds": {
+    "Shows": 0.488,
+    "Movies": 0.442
+  }
 }
