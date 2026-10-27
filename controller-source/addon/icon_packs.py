@@ -13,7 +13,8 @@ _assets={}
 
 def configure(owners):
     PACK_CHOICES[:]=[('original','Original')];EXTRA_ICON_CHOICES.clear();_roots.clear();_assets.clear()
-    for root in owners:
+    # Built-in packs do not depend on Kodi registering a new image addon.
+    for root in [Path(__file__).resolve().parent/'resources/icon-packs', *owners]:
         doc=descriptor(root,'blacklanturn-icons.json') or {}
         packs=doc.get('packs',[]);icons=doc.get('icons',[])
         if not isinstance(packs,list) or not isinstance(icons,list):continue

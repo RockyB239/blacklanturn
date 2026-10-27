@@ -1,0 +1,77 @@
+{
+  "schema": 1,
+  "packs": [
+    {
+      "id": "sculpted-silver",
+      "label": "Sculpted Silver",
+      "directory": "packs/sculpted-silver"
+    },
+    {
+      "id": "smoked-glass",
+      "label": "Smoked Glass",
+      "directory": "packs/smoked-glass"
+    }
+  ],
+  "icons": [
+    [
+      "fighting-glove",
+      "Fighting glove"
+    ],
+    [
+      "updates",
+      "Updates"
+    ],
+    [
+      "maintenance",
+      "Maintenance"
+    ],
+    [
+      "backup",
+      "Backup"
+    ],
+    [
+      "restore",
+      "Restore"
+    ],
+    [
+      "genres",
+      "Genres"
+    ],
+    [
+      "notifications",
+      "Notifications"
+    ],
+    [
+      "live-events",
+      "Live events"
+    ],
+    [
+      "fight-replays",
+      "Fight replays"
+    ],
+    [
+      "boxing",
+      "Boxing"
+    ],
+    [
+      "mma",
+      "MMA"
+    ],
+    [
+      "subscriptions",
+      "Subscriptions"
+    ],
+    [
+      "channels",
+      "Channels"
+    ],
+    [
+      "fight-search",
+      "Search fights"
+    ],
+    [
+      "builds",
+      "Builds"
+    ]
+  ]
+}

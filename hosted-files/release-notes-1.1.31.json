@@ -1,0 +1,8 @@
+{
+  "title": "BlackLanturn 1.1.31",
+  "summary": "Sculpted Silver and Smoked Glass icon packs are now included in both builds.",
+  "sections": [
+    {"heading": "Branded icons included", "bullets": ["Both public editions include the complete Sculpted Silver and Smoked Glass packs, with 90 icons in each.", "New installations use Sculpted Silver. Choose Smoked Glass or Original in the icon pack selector."]},
+    {"heading": "Keep your choice and your setup", "bullets": ["Update BlackLanturn preserves your current icon pack, sidebar, accounts, playback settings, sources and watched progress.", "The icon resource is included in full installations and smaller supported updates. Personal Fight Zone setup remains private."]}
+  ]
+}

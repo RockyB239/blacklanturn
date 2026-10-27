@@ -1,0 +1,151 @@
+{
+  "schema": 1,
+  "build": "1.1.31",
+  "controller": "0.1.97",
+  "installer": "1.0.35",
+  "approved_artwork_pngs": 180,
+  "packs": [
+    "sculpted-silver",
+    "smoked-glass"
+  ],
+  "reproducibility": {
+    "passed": true,
+    "files": {
+      "BlackLanturn-Apple-TV-Mac-Kodi21-1.1.31.zip": "b1433d28a053e2c56560412ddf2caf951887fc88321668c3f6e652b1b263ad9a",
+      "BlackLanturn-General-Kodi21-1.1.31.zip": "3cdbbb7a6241a6cc2a3c092531b4453b4f587ae0e86b634e1b424d755bbd8300",
+      "BlackLanturn-Apple-TV-Mac-Update-1.1.30-to-1.1.31.zip": "997b9eb8cbe642f821db46c972cf71060ca3bbba5f45fafd4a73aeaee2e95861",
+      "plugin.program.blacklanturninstaller-1.0.35.zip": "4c1ffcc1fcd25a7dcd72b40d8a66797dc9b7a3109fc9024405637e176214b8e9",
+      "BlackLanturn-General-Update-1.1.30-to-1.1.31.zip": "9ae98b652b4d16465c088aebe72cb7975602f2eee3312ec8dd64f1b8bd0b57d4"
+    }
+  },
+  "review": {
+    "reviewer": "independent read-only review",
+    "critical_or_important_findings": [],
+    "approved_asset_files_exact": 181,
+    "runtime_delta": [
+      "addon.xml version",
+      "builtin descriptor owner first"
+    ],
+    "installer_unchanged": true,
+    "passed": true
+  },
+  "limits": [
+    "Native install tests use isolated macOS Kodi APIs; Android identity is simulated.",
+    "Physical device in-place update verification follows publication.",
+    "No new performance benchmark claimed for this artwork-only release."
+  ],
+  "native_acceptance": {
+    "native-install-result.json": {
+      "sha256": "4b12e491e707766e0f3e6190e38f60bab123b05c8e3f5e955088f3fa2e6ac53c",
+      "passed": true,
+      "network_blocked": true,
+      "personal_profile_denied": true,
+      "cases": [
+        {
+          "edition": "General",
+          "mode": "update",
+          "passed": true,
+          "builtin_packs_available": true,
+          "selected_icon_pack": "smoked-glass",
+          "both_packs_resolved": true,
+          "source_files_exact": 4090,
+          "all_saved_data_unchanged": true,
+          "unrelated_addon_unchanged": true
+        },
+        {
+          "edition": "General",
+          "mode": "clean",
+          "passed": true,
+          "builtin_packs_available": true,
+          "selected_icon_pack": "sculpted-silver",
+          "both_packs_resolved": true,
+          "source_files_exact": 4090,
+          "all_saved_data_unchanged": false,
+          "unrelated_addon_unchanged": false
+        },
+        {
+          "edition": "General",
+          "mode": "standard",
+          "passed": true,
+          "builtin_packs_available": true,
+          "selected_icon_pack": "smoked-glass",
+          "both_packs_resolved": true,
+          "source_files_exact": 4090,
+          "all_saved_data_unchanged": false,
+          "unrelated_addon_unchanged": false
+        },
+        {
+          "edition": "Apple-TV-Mac",
+          "mode": "update",
+          "passed": true,
+          "builtin_packs_available": true,
+          "selected_icon_pack": "smoked-glass",
+          "both_packs_resolved": true,
+          "source_files_exact": 4086,
+          "all_saved_data_unchanged": true,
+          "unrelated_addon_unchanged": true
+        },
+        {
+          "edition": "Apple-TV-Mac",
+          "mode": "clean",
+          "passed": true,
+          "builtin_packs_available": true,
+          "selected_icon_pack": "sculpted-silver",
+          "both_packs_resolved": true,
+          "source_files_exact": 4086,
+          "all_saved_data_unchanged": false,
+          "unrelated_addon_unchanged": false
+        },
+        {
+          "edition": "Apple-TV-Mac",
+          "mode": "standard",
+          "passed": true,
+          "builtin_packs_available": true,
+          "selected_icon_pack": "smoked-glass",
+          "both_packs_resolved": true,
+          "source_files_exact": 4086,
+          "all_saved_data_unchanged": false,
+          "unrelated_addon_unchanged": false
+        }
+      ]
+    },
+    "native-component-result.json": {
+      "sha256": "8cfb42f2fedbbd61a3fb4a4617a486cec451d3dc4c8fddf6ea34a9098a361f91",
+      "passed": true,
+      "network_blocked": true,
+      "personal_profile_denied": true,
+      "cases": [
+        {
+          "edition": "General",
+          "mode": "component",
+          "passed": true,
+          "builtin_packs_available": true,
+          "selected_icon_pack": "smoked-glass",
+          "both_packs_resolved": true,
+          "source_files_exact": 4090,
+          "all_saved_data_unchanged": true,
+          "unrelated_addon_unchanged": true
+        },
+        {
+          "edition": "Apple-TV-Mac",
+          "mode": "component",
+          "passed": true,
+          "builtin_packs_available": true,
+          "selected_icon_pack": "smoked-glass",
+          "both_packs_resolved": true,
+          "source_files_exact": 4086,
+          "all_saved_data_unchanged": true,
+          "unrelated_addon_unchanged": true
+        }
+      ]
+    }
+  },
+  "tests": {
+    "controller": 933,
+    "installer": 901,
+    "playback": 36,
+    "native_probes": 16,
+    "youtube_context": 7,
+    "passed": true
+  }
+}

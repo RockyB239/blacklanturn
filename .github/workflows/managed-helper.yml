@@ -26,6 +26,11 @@ jobs:
           for edition in General Apple-TV-Mac; do
             curl --fail --location --retry 3 "https://github.com/RockyB239/blacklanturn/releases/download/v1.1.29/BlackLanturn-${edition}-Kodi21-1.1.29.zip" -o "baselines/BlackLanturn-${edition}-Kodi21-1.1.29.zip"
           done
+      - name: Download pinned artwork release baselines
+        run: |
+          for edition in General Apple-TV-Mac; do
+            curl --fail --location --retry 3 "https://github.com/RockyB239/blacklanturn/releases/download/v1.1.30/BlackLanturn-${edition}-Kodi21-1.1.30.zip" -o "baselines/BlackLanturn-${edition}-Kodi21-1.1.30.zip"
+          done
       - name: Installer and update protection tests
         run: python -m unittest discover -s tests -v
       - name: Controller regression checks
@@ -36,11 +41,11 @@ jobs:
         run: python -m unittest discover -s tools/device_validation -p 'test_*.py'
       - name: YouTube context regression checks
         run: python -m unittest discover -s compatibility/youtube-context/tests -v
-      - name: Rebuild and verify protected editions
-        run: |
-          python tools/build_release130.py --baselines baselines --output artifacts
-          python tools/verify_release130.py artifacts --baselines baselines
-          python tools/release_report.py artifacts/BlackLanturn-General-Kodi21-1.1.30.zip --output artifacts/current-general.json
-          python tools/release_report.py artifacts/BlackLanturn-Apple-TV-Mac-Kodi21-1.1.30.zip --output artifacts/current-apple.json
-      - name: Source-bound native performance acceptance
+      - name: Retained 1.1.30 source-bound performance evidence
         run: python tools/device_validation/verify_performance_evidence.py validation/optimization130-performance.json --manifest controller-source/manifest96.json
+      - name: Verify branded icons in both full and component editions
+        run: |
+          python tools/build_release131.py --baselines baselines --output artifacts131
+          python tools/verify_release131.py artifacts131 --baselines baselines
+          python tools/release_report.py artifacts131/BlackLanturn-General-Kodi21-1.1.31.zip --output artifacts131/current-general.json
+          python tools/release_report.py artifacts131/BlackLanturn-Apple-TV-Mac-Kodi21-1.1.31.zip --output artifacts131/current-apple.json
