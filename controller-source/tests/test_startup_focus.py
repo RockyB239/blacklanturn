@@ -10,6 +10,7 @@ from live_core import row_items
 def methods(names,extra=None):
     cls=next(n for n in ast.parse((ROOT/'live_review.py').read_text()).body if isinstance(n,ast.ClassDef) and n.name=='LiveReview')
     from youtube_core import automatic_preview,video_id
+    if 'monitor' in names:names=list(names)+['update_work_paused']
     ns=dict(extra or {},row_items=row_items,automatic_preview=automatic_preview,youtube_video_id=video_id)
     exec(compile(ast.Module(body=[n for n in cls.body if isinstance(n,ast.FunctionDef) and n.name in names],type_ignores=[]),'live_review.py','exec'),ns)
     if "show_row_window" in names:
@@ -18,6 +19,7 @@ def methods(names,extra=None):
     if "monitor" in ns:
         original=ns['monitor']
         def monitor(window,*args,**kwargs):
+            window.update_work_paused=MethodType(ns['update_work_paused'],window)
             window.refresh_youtube_connection=lambda **k:None
             if not hasattr(window,'section'):window.section='Home'
             return original(window,*args,**kwargs)

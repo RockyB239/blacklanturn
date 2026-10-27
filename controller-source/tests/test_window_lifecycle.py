@@ -28,6 +28,9 @@ def extract(path, name, namespace, class_name=None):
     if class_name=="LiveReview" and name in ("onInit","monitor","run_setting"):
         def account_boundary(window,*args,**kwargs):
             if not hasattr(window,"refresh_youtube_connection"):window.refresh_youtube_connection=lambda **k:None
+            if name=="monitor" and not hasattr(window,"update_work_paused"):
+                pause=extract(ROOT/'live_review.py','update_work_paused',{},'LiveReview')
+                window.update_work_paused=lambda:pause(window)
             return method(window,*args,**kwargs)
         return account_boundary
     return method

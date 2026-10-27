@@ -8,9 +8,14 @@ import hashlib,importlib.util,json,os,re,tempfile,zipfile
 
 NAME='userdata/blacklanturn-components.json'
 ID=re.compile(r'[a-z0-9][a-z0-9_.-]{0,120}')
+_io_spec=importlib.util.spec_from_file_location('_component_stream_io',Path(__file__).with_name('stream_io.py'))
+stream_io=importlib.util.module_from_spec(_io_spec);_io_spec.loader.exec_module(stream_io)
 
 def digest(files):
     values={k:hashlib.sha256(v).hexdigest() for k,v in files.items()}
+    return digest_hashes(values)
+
+def digest_hashes(values):
     return hashlib.sha256(json.dumps(values,sort_keys=True,separators=(',',':')).encode()).hexdigest()
 
 def validate(archive):
@@ -51,7 +56,7 @@ def build(base,target,output):
 def is_component(path):
     with zipfile.ZipFile(path) as archive:return NAME in archive.namelist()
 
-def installed_tree(home,aid):
+def installed_paths(home,aid):
     root=Path(home)/'addons'/aid
     if not root.is_dir() or root.is_symlink():raise ValueError('Component base add-on is unavailable')
     result={}
@@ -64,8 +69,16 @@ def installed_tree(home,aid):
             if name.endswith(('.pyc','.pyo')):continue
             path=Path(parent)/name
             if not path.is_file():raise ValueError('Component base contains unsupported files')
-            result[path.relative_to(root).as_posix()]=path.read_bytes()
+            result[path.relative_to(root).as_posix()]=path
     return result
+
+def installed_tree(home,aid):
+    """Legacy tooling interface; runtime reconstruction uses paths and hashes."""
+    return {name:path.read_bytes() for name,path in installed_paths(home,aid).items()}
+
+def copy_entry(archive,name,source):
+    info=zipfile.ZipInfo(name,(2026,10,16,0,0,0));info.compress_type=archive.compression;info.external_attr=0o100644<<16
+    with archive.open(info,'w',force_zip64=True) as target:return stream_io.transfer(source,target)
 
 def expand(path,home,directory):
     temporary=None
@@ -81,19 +94,35 @@ def expand(path,home,directory):
                 raise ValueError('Component base release differs; use the complete update')
             for aid,value in doc['addons'].items():
                 if not ID.fullmatch(aid) or not isinstance(value,str) or not re.fullmatch(r'[a-f0-9]{64}',value):raise ValueError('Invalid component identity')
-            data={n:archive.read(n) for n in archive.namelist() if n!=NAME and not n.endswith('/')}
-        if json.loads(data['userdata/blacklanturn-build.json']).get('release_id')!=doc['target']:raise ValueError('Component target identity differs')
-        incoming=trees(data)
-        if set(incoming)!=(set(doc['addons'])-set(doc['retained'])):raise ValueError('Component add-on set differs')
-        for aid,value in doc['retained'].items():
-            files=installed_tree(home,aid)
-            if value!=doc['addons'][aid] or digest(files)!=value:raise ValueError('Component base source differs; use the complete update')
-            incoming[aid]=files
-            data.update({'addons/'+aid+'/'+name:raw for name,raw in files.items()})
-        if any(digest(files)!=doc['addons'][aid] for aid,files in incoming.items()):raise ValueError('Component source verification failed')
-        descriptor,temporary=tempfile.mkstemp(prefix='.BlackLanturn-components-',suffix='.zip',dir=directory);os.close(descriptor)
-        with zipfile.ZipFile(temporary,'w',zipfile.ZIP_STORED) as merged:
-            for name,raw in sorted(data.items()):merged.writestr(name,raw)
+            names=[n for n in archive.namelist() if n!=NAME and not n.endswith('/')]
+            marker='userdata/blacklanturn-build.json'
+            if archive.getinfo(marker).file_size>32768:raise ValueError('Component target identity exceeds limit')
+            if json.loads(archive.read(marker)).get('release_id')!=doc['target']:raise ValueError('Component target identity differs')
+            incoming={n.split('/')[1] for n in names if n.startswith('addons/') and n.count('/')>=2}
+            if incoming!=(set(doc['addons'])-set(doc['retained'])):raise ValueError('Component add-on set differs')
+            retained={}
+            # Reject a nonmatching local installation before reading payload data
+            # or creating a reconstructed archive. Only names/hashes stay in RAM.
+            candidates={aid:installed_paths(home,aid) for aid in doc['retained']}
+            # Detect small changed add-ons before hashing large fonts/resources.
+            for aid,files in sorted(candidates.items(),key=lambda pair:sum(p.stat().st_size for p in pair[1].values())):
+                value=doc['retained'][aid]
+                hashes={name:stream_io.file_hash(path) for name,path in files.items()}
+                if value!=doc['addons'][aid] or digest_hashes(hashes)!=value:raise ValueError('Component base source differs; use the complete update')
+                retained[aid]=files
+            descriptor,temporary=tempfile.mkstemp(prefix='.BlackLanturn-components-',suffix='.zip',dir=directory);os.close(descriptor)
+            actual={aid:{} for aid in doc['addons']}
+            with zipfile.ZipFile(temporary,'w',zipfile.ZIP_STORED) as merged:
+                for name in sorted(names):
+                    with archive.open(name) as source:checksum=copy_entry(merged,name,source)
+                    if name.startswith('addons/'):
+                        _,aid,relative=name.split('/',2);actual[aid][relative]=checksum
+                for aid,files in retained.items():
+                    if set(installed_paths(home,aid))!=set(files):raise ValueError('Component base source changed during reconstruction')
+                    for relative,path in sorted(files.items()):
+                        if path.is_symlink() or not path.is_file():raise ValueError('Component source changed during reconstruction')
+                        with path.open('rb') as source:actual[aid][relative]=copy_entry(merged,'addons/'+aid+'/'+relative,source)
+                if any(digest_hashes(files)!=doc['addons'][aid] for aid,files in actual.items()):raise ValueError('Component source verification failed')
         return Path(temporary)
     except Exception:
         if temporary:

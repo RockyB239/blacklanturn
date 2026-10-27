@@ -70,6 +70,8 @@ def tmdb(info,kind='movie',**params):
 
 PROPERTIES=['title','plot','year','rating','votes','genre','country','runtime','mpaa','art','thumbnail','uniqueid','cast','director','studio','trailer','season','episode','showtitle','playcount','resume','premiered','writer','set','artist']
 def get_list(path):
+    from update_activity import wait_for_idle
+    if not wait_for_idle():raise PageCancelled('Kodi is closing')
     if not valid_source(path):raise ValueError('Choose an add-on list')
     start=time.monotonic()
     query=parse_qs(urlsplit(path).query)
@@ -1942,6 +1944,11 @@ class LiveReview(YouTubeBrowser,xbmcgui.WindowXML):
         elif action=='recovery':
             from live_recovery import return_to_previous_skin
             self.finish();return_to_previous_skin()
+    def update_work_paused(self):
+        from update_activity import active
+        if not active():return False
+        if getattr(self,'owned_preview',False):self.stop_preview()
+        return True
     def monitor(self,lifetime=None):
         if lifetime is None:lifetime=getattr(self,'window_lifetime',None)
         def current():return self.alive and lifetime is getattr(self,'window_lifetime',None)
@@ -1952,6 +1959,8 @@ class LiveReview(YouTubeBrowser,xbmcgui.WindowXML):
                 skin=xbmc.getSkinDir()
                 if not current():return
                 if skin!=self.owner_skin:self.alive=False;return
+                if self.update_work_paused():
+                    time.sleep(.2);continue
                 if self.settings_open or self.actions_open:
                     time.sleep(.08);continue
                 self.refresh_youtube_connection()

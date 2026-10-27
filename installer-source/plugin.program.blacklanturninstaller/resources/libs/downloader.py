@@ -36,7 +36,7 @@ class Downloader:
         self.progress_dialog = xbmcgui.DialogProgress()
 
     def download(self, url, dest):
-        self.progress_dialog.create(CONFIG.ADDONTITLE, "Downloading Content")
+        self.progress_dialog.create(CONFIG.ADDONTITLE, "Downloading content… Keep Kodi open until the download finishes.")
         self.progress_dialog.update(0)
         response = None
         completed = False
@@ -64,7 +64,7 @@ class Downloader:
                     output.write(chunk)
                     downloaded += len(chunk)
                     percent = min(100, int(100 * downloaded / total)) if total > 0 else 0
-                    self.progress_dialog.update(percent, 'Downloaded {:.1f} MB{}'.format(downloaded / (1024 * 1024), ' of {:.1f} MB'.format(total / (1024 * 1024)) if total > 0 else ''))
+                    self.progress_dialog.update(percent, 'Keep Kodi open. Downloaded {:.1f} MB{}'.format(downloaded / (1024 * 1024), ' of {:.1f} MB'.format(total / (1024 * 1024)) if total > 0 else ''))
             if self.progress_dialog.iscanceled() or monitor.abortRequested() or not downloaded or (total > 0 and downloaded != total):
                 return False
             completed = True

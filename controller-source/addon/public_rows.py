@@ -9,7 +9,7 @@ import json,math,os,re,tempfile,threading,time
 from xml.etree import ElementTree
 
 MAX_BYTES=2*1024*1024
-MAX_ROWS=12
+MAX_ROWS=48
 MAX_ITEMS=80
 MAX_AGE=15*60
 PUBLIC_LISTS=frozenset(('popular','top_rated','upcoming','now_playing','trending_day','trending_week','airing_today','on_the_air','discover','similar','recommendations','trakt_trending','trakt_popular'))
@@ -183,14 +183,14 @@ class PublicRowSnapshots:
                 self._prune();rows=self.rows.copy();rows.pop(path,None)
                 if items:rows[path]={'path':path,'time':self.clock(),'items':items}
                 while len(rows)>MAX_ROWS:rows.popitem(last=False)
+                raw=self._encode(rows)
+                while len(raw)>MAX_BYTES:
+                    rows.popitem(last=False)
+                    if not rows:return False
+                    raw=self._encode(rows)
                 if self.batch_depth:
                     self.rows=rows;self.dirty=True
                 else:
-                    raw=self._encode(rows)
-                    while len(raw)>MAX_BYTES:
-                        rows.popitem(last=False)
-                        if not rows:return False
-                        raw=self._encode(rows)
                     self._write(raw);self.rows=rows;self.dirty=False
                 return path in rows or files==[]
         except (OSError,TypeError,ValueError,RecursionError):return False

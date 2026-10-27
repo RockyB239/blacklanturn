@@ -25,7 +25,7 @@ class SearchResultReuse(unittest.TestCase):
  def test_subresult_cache_retains_owned_copy_and_existing_memory_bounds(self):
   shared=[result('company',1)];s,calls,_=self.state(lambda p:shared if parse_qs(urlsplit(p).query)['tmdb_type']==['company'] else [result('movie',2)])
   self.all(s);path=route('search','company',query='A24');before=copy.deepcopy(shared);shared[0]['label']='later mutation'
-  self.assertEqual(s.result_cache.get(path),before);self.assertLessEqual(s.result_cache.stats()['bytes'],2*1024*1024);self.assertEqual(s.result_cache.max_rows,12)
+  self.assertEqual(s.result_cache.get(path),before);self.assertLessEqual(s.result_cache.stats()['bytes'],2*1024*1024);self.assertEqual(s.result_cache.max_rows,48)
  def test_different_query_and_exact_movie_category_are_not_substituted_by_multi_search(self):
   s,calls,_=self.state();self.all(s)
   for kind,query in (('movie','A24'),('company','Pixar')):

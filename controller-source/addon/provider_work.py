@@ -2,9 +2,11 @@
 from collections import OrderedDict
 from contextlib import nullcontext
 import threading
+from update_activity import active as update_active
 
 class LatestWorker:
-    def __init__(self):
+    def __init__(self,paused=update_active):
+        self.paused=paused
         self.condition=threading.Condition();self.jobs=OrderedDict();self.thread=None
 
     def submit(self,key,work):
@@ -27,6 +29,8 @@ class LatestWorker:
             with self.condition:
                 if not self.jobs:
                     self.thread=None;return
+                if self.paused():
+                    self.condition.wait(timeout=.2);continue
                 key,work=self.jobs.popitem(last=True)
             try:work()
             except Exception:

@@ -68,6 +68,7 @@ def _core(root):
     match=re.fullmatch(r'(\d+)\.(\d+)\.(\d+)(?:[~+][A-Za-z0-9._-]+)?',node.get('version',''))
     if node.get('id')!=SELF or not match or tuple(map(int,match.groups()))<(1,0,32):return None
     for name in ('standard_addons.py','archive_paths.py','portable_lock.py','component_update.py'):_plain(core.with_name(name))
+    if tuple(map(int,match.groups()))>=(1,0,36):_plain(core.with_name('stream_io.py'))
     spec=importlib.util.spec_from_file_location('_blacklanturn_installer_recovery',core)
     module=importlib.util.module_from_spec(spec);spec.loader.exec_module(module)
     if not hasattr(module,'UpdateBusy'):raise ValueError('Installer recovery protocol is unavailable')

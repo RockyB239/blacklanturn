@@ -88,7 +88,7 @@ class ExperimentLifecycle(unittest.TestCase):
         cls = next(node for node in ast.parse(SOURCE.read_text()).body
                    if isinstance(node, ast.ClassDef) and node.name == 'LiveReview')
         methods = [node for node in cls.body if isinstance(node, ast.FunctionDef)
-                   and node.name in ('onInit', 'start', 'monitor', 'resume_settings', 'settings', 'load_path', 'preview', 'details', 'restore_browse')]
+                   and node.name in ('onInit', 'start', 'monitor', 'update_work_paused', 'resume_settings', 'settings', 'load_path', 'preview', 'details', 'restore_browse')]
         exec(compile(ast.Module(body=methods, type_ignores=[]), str(SOURCE), 'exec'), namespace)
         props = {}
         window = SimpleNamespace(
@@ -116,7 +116,7 @@ class ExperimentLifecycle(unittest.TestCase):
             play_preview_candidate=lambda url, *a: effects.append(('preview', url)),
         )
         window.update = lambda item: (setattr(window, 'selected', item), effects.append(('update', item)))
-        for name in ('onInit', 'start', 'monitor', 'resume_settings', 'settings', 'load_path', 'preview', 'details', 'restore_browse'):
+        for name in ('onInit', 'start', 'monitor', 'update_work_paused', 'resume_settings', 'settings', 'load_path', 'preview', 'details', 'restore_browse'):
             setattr(window, name, MethodType(namespace[name], window))
         return window, queued, effects
 

@@ -90,7 +90,7 @@ class Wizard:
 
     def update(self, name):
         """Update bundled code in place; saved-data switches never apply here."""
-        from resources.libs import inplace_update, managed_addons
+        from resources.libs import inplace_update, managed_addons, update_activity
         if xbmc.Player().isPlaying():
             self.dialog.ok(CONFIG.ADDONTITLE, 'Stop playback before updating BlackLanturn. Nothing has been changed.')
             return
@@ -114,8 +114,12 @@ class Wizard:
         descriptor, archive = tempfile.mkstemp(prefix='BlackLanturn-update-', suffix='.zip', dir=CONFIG.MYBUILDS)
         os.close(descriptor)
         plan = None
-        self.dialogProgress.create(CONFIG.ADDONTITLE, 'Downloading BlackLanturn update…')
+        activity=None
         try:
+            candidate_activity=update_activity.hold()
+            candidate_activity.__enter__()
+            activity=candidate_activity
+            self.dialogProgress.create(CONFIG.ADDONTITLE, 'Downloading BlackLanturn update… Keep Kodi open until the update finishes.')
             component = None
             try:
                 marker=json.loads(Path(CONFIG.HOME,'userdata','blacklanturn-build.json').read_bytes())
@@ -154,11 +158,13 @@ class Wizard:
             self.dialog.ok(CONFIG.ADDONTITLE, str(exc))
             return
         finally:
-            if plan is not None:
-                inplace_update.cancel(plan)
-            self.dialogProgress.close()
-            try: os.remove(archive)
-            except OSError: pass
+            try:
+                if plan is not None:inplace_update.cancel(plan)
+            finally:
+                if activity is not None:activity.__exit__(None,None,None)
+                self.dialogProgress.close()
+                try: os.remove(archive)
+                except OSError: pass
         if self.dialog.yesno(CONFIG.ADDONTITLE,
                 'BlackLanturn v' + result['version'] + ' updated.\n'
                 'Your accounts, settings, saved data and other add-ons were kept.\n'

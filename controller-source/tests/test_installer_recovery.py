@@ -27,7 +27,7 @@ class Recovery(unittest.TestCase):
         where.mkdir(parents=True,exist_ok=True)
         (where/'addon.xml').write_text('<addon id="'+SELF+'" version="'+version+'"/>')
         lib=where/'resources/libs';lib.mkdir(parents=True)
-        for name in ('inplace_update.py','standard_addons.py','archive_paths.py','portable_lock.py','component_update.py'):shutil.copyfile(LIB/name,lib/name)
+        for name in ('inplace_update.py','standard_addons.py','archive_paths.py','portable_lock.py','component_update.py','stream_io.py'):shutil.copyfile(LIB/name,lib/name)
     def journal(self,status='applying'):
         self.work.mkdir(parents=True,exist_ok=True)
         state={'schema':1,'status':status,'addons':{SELF:{'before':{'old':'a'*64},'after':{'new':'b'*64},'started':True,'enabled_before':True}},'metadata':{k:{'started':False,'existed':False} for k in META}}

@@ -1,0 +1,90 @@
+{
+  "schema": 1,
+  "feature": "low-memory-updates-1",
+  "candidate_build": "1.1.32",
+  "controller": "0.1.98",
+  "installer": "1.0.36",
+  "controller_manifest_sha256": "db049b345da16d96b50e18a34d1b1dde94a7ddf044703332b242a14b8c9a002b",
+  "physical_device": "Fire Stick",
+  "memory": {
+    "old": {
+      "passed": true,
+      "variant": "old",
+      "seconds": 56.689,
+      "baseline_bytes": 195936256,
+      "peak_bytes": 396591104,
+      "delta_bytes": 200654848,
+      "samples": 2564,
+      "expanded_inventory_sha256": "610a9e87a05b80fc9c4d30ffb011f23a5d1fc019d9bfb5b1a57a6963ed50f551",
+      "files": 4104
+    },
+    "streaming": {
+      "passed": true,
+      "variant": "new",
+      "seconds": 132.705,
+      "baseline_bytes": 192684032,
+      "peak_bytes": 265854976,
+      "delta_bytes": 73170944,
+      "samples": 6177,
+      "expanded_inventory_sha256": "610a9e87a05b80fc9c4d30ffb011f23a5d1fc019d9bfb5b1a57a6963ed50f551",
+      "files": 4104
+    },
+    "same_expanded_files": true,
+    "scope": "component reconstruction on exact same public scratch base; includes Kodi RSS activity; no live apply in memory comparison"
+  },
+  "vertical_navigation": {
+    "protocol": "two passes; eight Down actions per section; both expected visible labels and provider routes must be ready; repeat-pass medians; native card objects never cached",
+    "repeat_pass_seconds": {
+      "Shows": {
+        "before": 2.024,
+        "after": 0.496
+      },
+      "Movies": {
+        "before": 2.053,
+        "after": 0.375
+      }
+    },
+    "cache_byte_budget": 2097152,
+    "cached_row_cap": 48,
+    "ttl_unchanged": true,
+    "first_fetch_still_provider_bound": true
+  },
+  "interruption": {
+    "passed": true,
+    "source_files_restored": 743,
+    "saved_data_checks": 16,
+    "private_progress_preserved": true,
+    "boundary": "outgoing Installer moved after durable applying journal; process killed; independent cold recovery"
+  },
+  "early_fallback": {
+    "passed": true,
+    "seconds": 5.417,
+    "reason": "retained Up Next differs from exact component base; full update required",
+    "hashed_bytes": 9101148,
+    "large_resource_files_hashed": false,
+    "no_reconstruction_created": true
+  },
+  "artifacts": {
+    "BlackLanturn-Apple-TV-Mac-Kodi21-1.1.32.zip": {
+      "sha256": "30f385ac242eda3913dca8ed4bdc2236564fa53f2d5fa98b3ffb099ecfebe7c8",
+      "bytes": 103142448
+    },
+    "BlackLanturn-General-Update-1.1.31-to-1.1.32.zip": {
+      "sha256": "2bb3bef574d2d1a98747ea6d7f37feecba3a2644a81a919ba97fd107bb129a9e",
+      "bytes": 22985426
+    },
+    "BlackLanturn-General-Kodi21-1.1.32.zip": {
+      "sha256": "ddb95ca3334f7ab0857a3733f8369588a574788297f1b25883f7f3c98ec6c139",
+      "bytes": 102322345
+    },
+    "BlackLanturn-Apple-TV-Mac-Update-1.1.31-to-1.1.32.zip": {
+      "sha256": "8e3f828f57280da6712c13dd21c01227ebc47a6ee9c66e118a14ed1fec9f4ae8",
+      "bytes": 22985371
+    },
+    "plugin.program.blacklanturninstaller-1.0.36.zip": {
+      "sha256": "b88fc7de9b7fa4194a610b31c00875ec7134c69652fff1f5346db41b83271c95",
+      "bytes": 4132783
+    }
+  },
+  "publication_pending": true
+}

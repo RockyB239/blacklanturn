@@ -37,13 +37,16 @@ locks = _module('portable_lock')
 fcntl = locks.fcntl  # Existing Unix failure-injection checks share the real backend.
 versions = _module('standard_addons')
 paths = _module('archive_paths')
+stream_io = _module('stream_io')
 
 def _write(path, raw):
     path = Path(path); path.parent.mkdir(parents=True, exist_ok=True)
     temporary = path.with_name(path.name + '.writing')
     try:
         with temporary.open('wb') as stream:
-            stream.write(raw); stream.flush(); os.fsync(stream.fileno())
+            if hasattr(raw, 'read'): stream_io.transfer(raw, stream)
+            else: stream.write(raw)
+            stream.flush(); os.fsync(stream.fileno())
         os.replace(temporary, path)
     finally:
         if temporary.exists(): temporary.unlink()
@@ -72,7 +75,7 @@ def _tree(path):
             aliases.add(relative.casefold())
         for name in names:
             if name.endswith(('.pyc', '.pyo')): continue
-            p = Path(parent)/name; files[p.relative_to(path).as_posix()] = hashlib.sha256(p.read_bytes()).hexdigest()
+            p = Path(parent)/name; files[p.relative_to(path).as_posix()] = stream_io.file_hash(p)
     return files
 
 def _identity(raw):
@@ -235,8 +238,10 @@ def prepare(archive_path, home, kodi):
                         chosen[aid] = current; retained.append(aid); continue
                 chosen[aid] = node
                 prefix = 'addons/'+aid+'/'
-                files = {name[len(prefix):]: archive.read(name) for name in archive.namelist() if name.startswith(prefix) and not name.endswith('/')}
-                after = {name: hashlib.sha256(raw).hexdigest() for name, raw in files.items()}
+                files = [name for name in archive.namelist() if name.startswith(prefix) and not name.endswith('/')]
+                after = {}
+                for name in files:
+                    with archive.open(name) as source: after[name[len(prefix):]] = stream_io.transfer(source)
                 if before == after: retained.append(aid); continue
                 if aid == SELF:
                     # A later rollback must restore a Controller that can retry
@@ -248,7 +253,8 @@ def prepare(archive_path, home, kodi):
                     current_controller = versions._meta((controller/'addon.xml').read_bytes(), 'script.blacklanturn.preview')
                     if versions.compare(current_controller.get('version'), '0.1.94') < 0:
                         raise UpdateError(required)
-                for name, raw in files.items(): _write(work/'new'/aid/name, raw)
+                for name in files:
+                    with archive.open(name) as source: _write(work/'new'/aid/name[len(prefix):], source)
                 if _tree(work/'new'/aid) != after: raise UpdateError('Staged add-on verification failed: '+aid)
                 entries[aid] = {'before': before, 'after': after, 'started': False}
                 if aid == SELF:

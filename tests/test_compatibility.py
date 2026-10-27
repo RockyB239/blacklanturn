@@ -196,7 +196,7 @@ class ReleaseRegressionTests(unittest.TestCase):
             def create(self,title,text):self.kind=text
             def update(self,*args):pass
             def close(self):pass
-            def iscanceled(self):return self.kind=='Downloading Content'
+            def iscanceled(self):return self.kind=='Downloading content… Keep Kodi open until the download finishes.'
         mods['xbmcgui'].DialogProgress=Progress
         with patch.dict(sys.modules,mods):
             spec=importlib.util.spec_from_file_location('real_download',ROOT/'downloader.py');dl=importlib.util.module_from_spec(spec);spec.loader.exec_module(dl)

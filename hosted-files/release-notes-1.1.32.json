@@ -1,0 +1,28 @@
+{
+  "title": "BlackLanturn 1.1.32",
+  "summary": "Lower update memory use, safer recovery and faster return to lower browsing rows.",
+  "sections": [
+    {
+      "heading": "Lighter, protected updates",
+      "bullets": [
+        "Update files are processed in small chunks, reducing memory pressure on Fire Stick.",
+        "Kodi pauses new background row requests and automatic previews while updating. Keep Kodi open until the update finishes.",
+        "An interrupted update recovers the previous complete add-ons and patches before retrying."
+      ]
+    },
+    {
+      "heading": "Faster lower-row browsing",
+      "bullets": [
+        "More small rows can be reused within the same cache byte limit, reducing repeated loading as you browse deeper.",
+        "Recommendation freshness and watched-status refreshes remain active."
+      ]
+    },
+    {
+      "heading": "Your complete setup stays saved",
+      "bullets": [
+        "Update BlackLanturn keeps your accounts, settings, sources, favourites, watched progress and other installed add-ons.",
+        "Both approved icon packs remain included. Personal Fight Zone remains outside the public packages."
+      ]
+    }
+  ]
+}

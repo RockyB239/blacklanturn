@@ -1,0 +1,9 @@
+# Low-memory BlackLanturn updates
+
+User-approved scope: reduce update memory with bounded file processing, detect component fallback before reconstruction, pause BlackLanturn previews/row refresh while installing, and verify memory/interruption recovery on the physical Fire Stick before publication. Investigate the reported row slowdown against the same prior protocol. Preserve all preferences, authorizations, progress, unrelated addons, platform workarounds and both bundled icon packs. Retain the OpenWizard installer and existing journal/locking/recovery architecture.
+
+Approach: stream file hashing, component reconstruction and addon staging with fixed-size buffers; preflight all retained component tree hashes before expanding payload bytes. Keep exact-base/hash/path/version/dependency checks. A temporary process-local update lease coordinates the installer and Controller; it expires after interruption, releases on every normal exit and never writes preferences. Normal browsing does not wait for it. Use the existing progress dialog with explicit keep-Kodi-open text. We cannot override Fire OS memory management.
+
+Alternatives: retaining whole archive/tree byte dictionaries is the demonstrated memory concern. Replacing the installer or globally disabling background activity would violate architecture or user settings. Neither is selected.
+
+Validation: matched native row timings, actual Fire memory before/after on equivalent payload/profile, large-file bounded-read regressions, drift rejected before reconstruction, existing whole-tree/version/dependency validation, cancel/failure cleanup, real process interruption with journal recovery and exact protected-state comparisons. Never force an OS memory failure; use a controlled Kodi process stop only after the journaled boundary is confirmed. Test clean/Standard and inplace/component packaging before publishing a new immutable release. Keep private Fight Zone out of public payloads.
