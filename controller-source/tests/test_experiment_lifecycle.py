@@ -96,6 +96,7 @@ class ExperimentLifecycle(unittest.TestCase):
             getProperty=lambda key: props.get(key, ''),
             restore_preview_renderer=lambda: None, refresh_preview_setup=lambda: None,
             refresh_youtube_connection=lambda **k:None,
+            configure_icon_resources=lambda:None,
             configure_row_snapshots=lambda: False,
             refresh_navigation=lambda: effects.append('recreate_navigation'),
             apply_status=lambda: None, initialize_startup_focus=lambda: None,

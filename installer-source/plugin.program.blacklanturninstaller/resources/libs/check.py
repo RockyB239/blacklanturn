@@ -39,7 +39,7 @@ def check_paths():
     from resources.libs.common import logging
 
     dialog = xbmcgui.Dialog()
-    
+
     logging.log("[Path Check] Started")
 
     path = os.path.split(CONFIG.ADDON_PATH)
@@ -194,9 +194,9 @@ def check_skin():
     from resources.libs.common import tools
 
     dialog = xbmcgui.Dialog()
-    
+
     logging.log("[Build Check] Invalid Skin Check Start")
-    
+
     gotoskin = False
     if not CONFIG.DEFAULTSKIN == '':
         if os.path.exists(os.path.join(CONFIG.ADDONS, CONFIG.DEFAULTSKIN)):
@@ -275,7 +275,7 @@ def check_sources():
 
     dialog = xbmcgui.Dialog()
     progress_dialog = xbmcgui.DialogProgress()
-    
+
     if not os.path.exists(CONFIG.SOURCES):
         logging.log_notify(CONFIG.ADDONTITLE,
                            "[COLOR {0}]No sources.xml File Found![/COLOR]".format(CONFIG.COLOR2))
@@ -297,7 +297,7 @@ def check_sources():
                           '',
                           "[COLOR {0}]Checking [COLOR {1}]{2}[/COLOR]:[/COLOR]".format(CONFIG.COLOR2, CONFIG.COLOR1, name),
                           "[COLOR {0}]{1}[/COLOR]".format(CONFIG.COLOR1, path))
-                          
+
             working = tools.open_url(path, check=True)
             if not working:
                 bad.append([name, path, sharing, working])
@@ -350,7 +350,7 @@ def check_repos():
     from resources.libs.common import tools
 
     progress_dialog = xbmcgui.DialogProgress()
-    
+
     progress_dialog.create(CONFIG.ADDONTITLE, '[COLOR {0}]Checking Repositories...[/COLOR]'.format(CONFIG.COLOR2))
     badrepos = []
     xbmc.executebuiltin('UpdateAddonRepos')
@@ -430,3 +430,20 @@ def build_count():
     return total, count17, count18, adultcount, hidden
 
 
+
+
+def check_components(name, base_release):
+    """Optional per-build update asset; only queried during an explicit update."""
+    from resources.libs.common import tools
+    response=tools.open_url(CONFIG.BUILDFILE)
+    if not response:return None
+    for block in re.split(r'\n\s*\n',response.text.replace('\r','')):
+        values=dict(re.findall(r'^([a-z_][a-z0-9_]*)="([^"\n]*)"$',block,re.M))
+        if values.get('name')!=name or values.get('updatebase')!=base_release:continue
+        url=values.get('updateurl','');digest=values.get('updatesha256','')
+        from urllib.parse import urlsplit
+        parsed=urlsplit(url)
+        if parsed.scheme!='https' or not parsed.hostname or parsed.username or parsed.password or parsed.fragment:return None
+        if not re.fullmatch(r'[a-f0-9]{64}',digest):return None
+        return {'url':url,'sha256':digest}
+    return None

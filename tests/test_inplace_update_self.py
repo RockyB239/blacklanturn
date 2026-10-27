@@ -57,7 +57,7 @@ class InstallerTransaction(unittest.TestCase):
         self.seed(aid, installed, {'obsolete.py': b'old installer'})
         self.seed('script.blacklanturn.preview', '0.1.94', {'installer_recovery.py': b'controller recovery hook'})
         # The outgoing source is a real independent cold-recovery entry point.
-        for name in ('inplace_update', 'standard_addons', 'archive_paths'):
+        for name in ('inplace_update', 'standard_addons', 'archive_paths', 'portable_lock', 'component_update'):
             destination = self.home/'addons'/aid/'resources/libs'/(name+'.py')
             destination.parent.mkdir(parents=True, exist_ok=True)
             destination.write_bytes((LIB/(name+'.py')).read_bytes())

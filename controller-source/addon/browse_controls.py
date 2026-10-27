@@ -8,12 +8,21 @@ from pathlib import Path
 from urllib.parse import parse_qs,urlsplit
 import re,sqlite3,time,threading
 
-def can_choose_genre(state):
-    return (getattr(state,'section','') in ('Movies','Shows')
+def can_choose_genre(state,item=None,row_path=''):
+    if not (getattr(state,'section','') in ('Movies','Shows')
             and getattr(state,'mode','home')=='home' and not getattr(state,'nav',False)
             and getattr(state,'search_state',None) is None
             and getattr(state,'episode_browser_context',None) is None
-            and not getattr(state,'discovery_stack',[]))
+            and not getattr(state,'discovery_stack',[])):return False
+    # Opening a show in an ordinary row does not create the dedicated
+    # All episodes context. Its current provider path still owns that row.
+    route=urlsplit(row_path);query=parse_qs(route.query)
+    if route.netloc=='plugin.video.themoviedb.helper' and query.get('info') in (['seasons'],['episodes']):return False
+    item=item or {}
+    if item.get('type') in ('season','episode'):return False
+    route=urlsplit(item.get('file',''));query=parse_qs(route.query)
+    if route.netloc=='plugin.video.themoviedb.helper' and query.get('tmdb_type')==['tv'] and ('season' in query or 'episode' in query):return False
+    return True
 
 def should_exclude_anime(state,path):
     if getattr(state,'section','') not in ('Home','Movies','Shows'):return False

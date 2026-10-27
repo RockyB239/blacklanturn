@@ -5,7 +5,6 @@ retains the previous code until every replacement and release receipt is saved.
 An interrupted writer is rolled back before a later update or at Kodi startup.
 """
 import errno
-import fcntl
 import hashlib
 import importlib.util
 import json
@@ -34,6 +33,8 @@ def _module(name):
     value = importlib.util.module_from_spec(spec); spec.loader.exec_module(value)
     return value
 
+locks = _module('portable_lock')
+fcntl = locks.fcntl  # Existing Unix failure-injection checks share the real backend.
 versions = _module('standard_addons')
 paths = _module('archive_paths')
 
@@ -48,6 +49,7 @@ def _write(path, raw):
         if temporary.exists(): temporary.unlink()
 
 def _sync(path):
+    if os.name=='nt' and Path(path).is_dir():return
     descriptor = os.open(str(path), os.O_RDONLY)
     try: os.fsync(descriptor)
     finally: os.close(descriptor)
@@ -90,7 +92,7 @@ def _lock(home):
     home = Path(home).resolve(); _plain(home/'addons'); _plain(home/'userdata')
     lock = home/'addons/.blacklanturn-update.lock'; _plain(lock)
     descriptor = os.open(str(lock), os.O_CREAT | os.O_RDWR, 0o600)
-    try: fcntl.flock(descriptor, fcntl.LOCK_EX | fcntl.LOCK_NB)
+    try: locks.acquire(descriptor)
     except OSError as exc:
         os.close(descriptor)
         if exc.errno in (errno.EACCES, errno.EAGAIN):
@@ -101,7 +103,8 @@ def _lock(home):
 def release(plan):
     descriptor = plan.pop('_lock', None)
     if descriptor is not None:
-        fcntl.flock(descriptor, fcntl.LOCK_UN); os.close(descriptor)
+        try: locks.unlock(descriptor)
+        finally: os.close(descriptor)
 
 def _journal(plan, state):
     _write(Path(plan['work'])/'journal.json', json.dumps(state, sort_keys=True).encode())
@@ -194,12 +197,17 @@ def _closure(home, chosen, kodi):
                 raise UpdateError('Update needs a compatible dependency: ' + aid + ' → ' + str(did) + '. Your add-ons have been kept.')
 
 def prepare(archive_path, home, kodi):
-    plan = _lock(home)
+    plan = _lock(home); expanded = None
     try:
         if _recover_locked(plan):
             raise UpdateError('The interrupted update has been recovered. Please start Update BlackLanturn again.')
         home = Path(plan['home']); work = Path(plan['work'])
         installed = _identity((home/'userdata'/META[0]).read_bytes())
+        components = _module('component_update')
+        if components.is_component(archive_path):
+            work.mkdir()
+            expanded = components.expand(archive_path, home, work)
+            archive_path = expanded
         from resources.libs import platform_compatibility
         validated = platform_compatibility.prepare(archive_path, kodi, home=home, allow_native_changes=False)
         target = validated.get('policy')
@@ -218,7 +226,7 @@ def prepare(archive_path, home, kodi):
                     if not ID.fullmatch(aid) or aid in NATIVE: raise UpdateError('Unsupported bundled add-on target.')
                     bundled[aid] = versions._meta(archive.read(name), aid)
             chosen = {}; entries = {}; retained = []
-            work.mkdir(); (work/'old').mkdir()
+            work.mkdir(exist_ok=True); (work/'old').mkdir()
             for aid, node in bundled.items():
                 root = home/'addons'/aid; before = _tree(root)
                 if before is not None and aid not in MANAGED:
@@ -268,6 +276,10 @@ def prepare(archive_path, home, kodi):
         finally: release(plan)
         if isinstance(exc, UpdateError): raise
         raise UpdateError('Update preparation failed. Nothing was replaced: '+str(exc)) from exc
+    finally:
+        if expanded is not None:
+            try: expanded.unlink()
+            except OSError: pass
 
 def apply(plan):
     home = Path(plan['home']); work = Path(plan['work']); state = plan['state']

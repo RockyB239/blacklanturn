@@ -19,7 +19,7 @@ class ConfigIntegrity(unittest.TestCase):
   start=next((i for i,n in enumerate(stmts) if isinstance(n,ast.Assign) and any(isinstance(x,ast.Attribute) and x.attr=='config_loaded' for x in n.targets)),None)
   self.assertIsNotNone(start,'Startup does not distinguish failed reads from writable preferences')
   end=next(i for i,n in enumerate(stmts[start:],start) if isinstance(n,ast.Assign) and any(isinstance(x,ast.Attribute) and x.attr=='snapshot_cache' for x in n.targets))
-  ns['self']=owner;exec(compile(ast.Module(body=stmts[start:end],type_ignores=[]),'controller-startup-config','exec'),ns);return owner
+  owner.configure_icon_resources=lambda:None;ns['self']=owner;exec(compile(ast.Module(body=stmts[start:end],type_ignores=[]),'controller-startup-config','exec'),ns);return owner
  def test_transient_read_failure_cannot_replace_existing_preferences_with_fallback(self):
   for error in (FileNotFoundError('temporarily unavailable'),json.JSONDecodeError('partial','{',1)):
    with self.subTest(error=type(error).__name__),tempfile.TemporaryDirectory() as folder:

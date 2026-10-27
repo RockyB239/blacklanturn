@@ -4,7 +4,7 @@ from types import SimpleNamespace
 P=Path(__file__).parents[1]/'addon/live_review.py'
 sys.path.insert(0,str(P.parent))
 def method(name):
- tree=ast.parse(P.read_text());cls=next(x for x in tree.body if isinstance(x,ast.ClassDef) and x.name=='LiveReview');node=next(x for x in cls.body if isinstance(x,ast.FunctionDef) and x.name==name);ns={'threading':threading,'event':lambda *a,**k:None};exec(compile(ast.fix_missing_locations(ast.Module(body=[node],type_ignores=[])),str(P),'exec'),ns);return ns[name]
+ tree=ast.parse(P.read_text());cls=next(x for x in tree.body if isinstance(x,ast.ClassDef) and x.name=='LiveReview');node=next(x for x in cls.body if isinstance(x,ast.FunctionDef) and x.name==name);ns={'submit_latest':__import__('provider_work').submit_latest,'threading':threading,'event':lambda *a,**k:None};exec(compile(ast.fix_missing_locations(ast.Module(body=[node],type_ignores=[])),str(P),'exec'),ns);return ns[name]
 class ForegroundSearch(unittest.TestCase):
  def test_serial_search_starts_after_home_and_old_result_is_not_published(self):
   home=threading.Event();release=threading.Event();search=threading.Event();published=[]

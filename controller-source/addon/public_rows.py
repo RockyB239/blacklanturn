@@ -1,5 +1,6 @@
 """Bounded, disposable public TMDb display snapshots. Never an account cache."""
 from collections import OrderedDict
+from contextlib import contextmanager
 from copy import deepcopy
 from hashlib import sha256
 from pathlib import Path
@@ -113,7 +114,7 @@ def _items(files):
 class PublicRowSnapshots:
     def __init__(self,path,scope,clock=time.time):
         self.path=Path(path);self.scope=scope;self.clock=clock;self.revision=0
-        self.lock=threading.RLock();self.rows=OrderedDict();self._load()
+        self.lock=threading.RLock();self.rows=OrderedDict();self.batch_depth=0;self.dirty=False;self._load()
 
     def _load(self):
         try:
@@ -155,6 +156,23 @@ class PublicRowSnapshots:
                 try:os.unlink(temporary)
                 except FileNotFoundError:pass
 
+    @contextmanager
+    def batch(self):
+        with self.lock:self.batch_depth+=1
+        try:yield self
+        finally:
+            with self.lock:
+                self.batch_depth-=1
+                if not self.batch_depth:self.flush()
+
+    def flush(self):
+        with self.lock:
+            if not self.dirty:return
+            self._prune();raw=self._encode(self.rows)
+            while len(raw)>MAX_BYTES and self.rows:
+                self.rows.popitem(last=False);raw=self._encode(self.rows)
+            self._write(raw);self.dirty=False
+
     def put(self,path,files,revision=None):
         if not public_path(path):return False
         try:
@@ -162,18 +180,24 @@ class PublicRowSnapshots:
             if not items and files!=[]:return False
             with self.lock:
                 if revision is not None and revision!=self.revision:return False
-                self._prune();rows=deepcopy(self.rows);rows.pop(path,None)
+                self._prune();rows=self.rows.copy();rows.pop(path,None)
                 if items:rows[path]={'path':path,'time':self.clock(),'items':items}
-                while len(rows)>MAX_ROWS or len(self._encode(rows))>MAX_BYTES:
-                    rows.popitem(last=False)
-                    if not rows:return False
-                self._write(self._encode(rows));self.rows=rows
+                while len(rows)>MAX_ROWS:rows.popitem(last=False)
+                if self.batch_depth:
+                    self.rows=rows;self.dirty=True
+                else:
+                    raw=self._encode(rows)
+                    while len(raw)>MAX_BYTES:
+                        rows.popitem(last=False)
+                        if not rows:return False
+                        raw=self._encode(rows)
+                    self._write(raw);self.rows=rows;self.dirty=False
                 return path in rows or files==[]
         except (OSError,TypeError,ValueError,RecursionError):return False
 
     def clear(self):
         with self.lock:
-            self.revision+=1;self.rows.clear()
+            self.revision+=1;self.rows.clear();self.dirty=False
             try:self.path.unlink()
             except FileNotFoundError:pass
             except OSError:

@@ -23,6 +23,8 @@ import xbmcgui
 import time
 import os
 import tempfile
+import json
+from pathlib import Path
 import re
 
 from resources.libs import check
@@ -114,10 +116,27 @@ class Wizard:
         plan = None
         self.dialogProgress.create(CONFIG.ADDONTITLE, 'Downloading BlackLanturn update…')
         try:
-            if Downloader().download(check.check_build(name, 'url'), archive) is False:
-                return
+            component = None
+            try:
+                marker=json.loads(Path(CONFIG.HOME,'userdata','blacklanturn-build.json').read_bytes())
+                if hasattr(check,'check_components'):component=check.check_components(name,marker.get('release_id'))
+            except (OSError,ValueError,TypeError):pass
+            url=component['url'] if component else check.check_build(name,'url')
+            if Downloader().download(url, archive) is False:return
+            if component:
+                import hashlib
+                digest=hashlib.sha256()
+                with open(archive,'rb') as stream:
+                    for chunk in iter(lambda:stream.read(1024*1024),b''):digest.update(chunk)
+                if digest.hexdigest()!=component['sha256']:
+                    raise inplace_update.UpdateError('The update download could not be verified. Your setup has been kept; retry the update.')
             self.dialogProgress.update(0, 'Checking update and staging bundled add-ons…')
-            plan = inplace_update.prepare(archive, CONFIG.HOME, xbmc)
+            try:plan = inplace_update.prepare(archive, CONFIG.HOME, xbmc)
+            except inplace_update.UpdateError:
+                if not component:raise
+                self.dialogProgress.update(0,'Your installation needs the complete update. Downloading…')
+                if Downloader().download(check.check_build(name,'url'),archive) is False:return
+                plan=inplace_update.prepare(archive,CONFIG.HOME,xbmc)
             if xbmc.Player().isPlaying():
                 raise inplace_update.UpdateError('Playback started while preparing the update. Nothing has been replaced; stop playback and retry.')
             managed_addons.protect(os.path.join(CONFIG.DATABASE, db.latest_db('Addons')), umbrella=True, network=True, youtube=True)

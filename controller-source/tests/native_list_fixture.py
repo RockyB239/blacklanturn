@@ -8,14 +8,18 @@ from youtube_core import is_youtube,caption as youtube_caption
 from watch_metadata import hydrate_watch_metadata
 
 class NativeItem:
- def __init__(self,label='',path=''):
-  self.label=label;self.path=path;self.properties={};self.info={};self.resume=(0.,0.)
+ def __init__(self,label='',path='',offscreen=False):
+  self.label=label;self.path=path;self.offscreen=offscreen;self.properties={};self.info={};self.resume=(0.,0.);self.info_calls=0;self.property_batches=0;self.property_calls=0;self.resume_calls=0
  def getPath(self):return self.path
- def setProperty(self,key,value):self.properties[key]=value
+ def setProperty(self,key,value):self.property_calls+=1;self.properties[key]=value
+ def getProperty(self,key):return self.properties.get(key,'')
+ def setProperties(self,values):
+  self.property_batches+=1
+  for key,value in values.items():self.setProperty(key,value)
  def setArt(self,art):self.art=art
- def setInfo(self,kind,info):self.info.update(info)
+ def setInfo(self,kind,info):self.info_calls+=1;self.info.update(info)
  def getVideoInfoTag(self):return self
- def setResumePoint(self,position,total):self.resume=(position,total)
+ def setResumePoint(self,position,total):self.resume_calls+=1;self.resume=(position,total)
 
 def media_functions():
  ns=dict(is_youtube=is_youtube,youtube_caption=youtube_caption,hydrate_watch_metadata=hydrate_watch_metadata,xbmcgui=SimpleNamespace(ListItem=NativeItem),watch_state=watch_state,card_artwork=card_artwork,episode_heading=episode_heading,episode_card=episode_card)

@@ -78,6 +78,7 @@ class MyStuff(unittest.TestCase):
             'revision':0, 'focus_slot': None, 'get_list': lambda path: (_ for _ in ()).throw(ValueError('Local saves cannot invoke the provider')),
             'row_items': getattr(live_core, 'row_items', None), 'row_message': lambda *args: '', 'event': lambda *args, **kwargs: None}
         ns['threading']=SimpleNamespace(Thread=lambda target,**kwargs:SimpleNamespace(start=target))
+        ns['submit_latest']=lambda owner,work:work()
         exec(compile(ast.Module(body=[outer], type_ignores=[]), str(ROOT), 'exec'), ns)
         from cache_fixture import bind
         bind(state,ns)

@@ -58,17 +58,40 @@ def _register(path,home,kodi,addon_factory):
         raise ValueError('Recovered Installer could not be opened')
     path.unlink()
 
+def _core(root):
+    _plain(root)
+    meta=root/'addon.xml';core=root/'resources/libs/inplace_update.py'
+    if not meta.is_file() or not core.is_file():return None
+    _plain(meta);_plain(core)
+    if meta.stat().st_size>65536:raise ValueError('Invalid Installer identity')
+    node=ET.fromstring(meta.read_bytes())
+    match=re.fullmatch(r'(\d+)\.(\d+)\.(\d+)(?:[~+][A-Za-z0-9._-]+)?',node.get('version',''))
+    if node.get('id')!=SELF or not match or tuple(map(int,match.groups()))<(1,0,32):return None
+    for name in ('standard_addons.py','archive_paths.py','portable_lock.py','component_update.py'):_plain(core.with_name(name))
+    spec=importlib.util.spec_from_file_location('_blacklanturn_installer_recovery',core)
+    module=importlib.util.module_from_spec(spec);spec.loader.exec_module(module)
+    if not hasattr(module,'UpdateBusy'):raise ValueError('Installer recovery protocol is unavailable')
+    return module
+
 def recover_installer(home,kodi=None,addon_factory=None):
     home=Path(home).resolve()
     work=home/'addons/.blacklanturn-update';journal=work/'journal.json'
     pending=home/'addons/.blacklanturn-installer-registration.json'
     _plain(work);_plain(pending)
-    if not journal.exists() and not pending.exists():
+    if not work.exists() and not pending.exists():
         return False
     try:
         if not journal.exists():
-            if kodi is not None:_register(pending,home,kodi,addon_factory)
-            return True
+            recovered=False
+            if work.exists():
+                module=_core(home/'addons'/SELF)
+                if module is None:raise ValueError('The Installer recovery entrypoint is missing')
+                try:recovered=module.recover(home)
+                except module.UpdateBusy:return False
+            if pending.exists():
+                if kodi is not None:_register(pending,home,kodi,addon_factory)
+                return True
+            return recovered
         _plain(journal)
         if not journal.is_file() or journal.stat().st_size>1024*1024:
             raise ValueError('Invalid update journal')
@@ -80,23 +103,8 @@ def recover_installer(home,kodi=None,addon_factory=None):
         enabled=state['addons'][SELF].get('enabled_before')
         if type(enabled)is not bool:raise ValueError('Installer enabled-state recovery is unavailable')
         for root in (home/'addons'/SELF,work/'old'/SELF):
-            _plain(root)
-            meta=root/'addon.xml';core=root/'resources/libs/inplace_update.py'
-            if not meta.is_file() or not core.is_file():
-                continue
-            _plain(meta);_plain(core)
-            if meta.stat().st_size>65536:
-                raise ValueError('Invalid Installer identity')
-            node=ET.fromstring(meta.read_bytes())
-            match=re.fullmatch(r'(\d+)\.(\d+)\.(\d+)(?:[~+][A-Za-z0-9._-]+)?',node.get('version',''))
-            if node.get('id')!=SELF or not match or tuple(map(int,match.groups()))<(1,0,32):
-                continue
-            for name in ('standard_addons.py','archive_paths.py'):
-                _plain(core.with_name(name))
-            spec=importlib.util.spec_from_file_location('_blacklanturn_installer_recovery',core)
-            module=importlib.util.module_from_spec(spec);spec.loader.exec_module(module)
-            if not hasattr(module,'UpdateBusy'):
-                raise ValueError('Installer recovery protocol is unavailable')
+            module=_core(root)
+            if module is None:continue
             try:
                 recovered=module.recover(home,before_recover=lambda:_save_registration(pending,enabled))
                 if recovered and kodi is not None:_register(pending,home,kodi,addon_factory)

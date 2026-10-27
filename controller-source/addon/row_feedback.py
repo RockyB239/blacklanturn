@@ -9,22 +9,30 @@ import time
 
 class RowResultCache:
     """Small session-only cache. Invalidation also rejects in-flight old results."""
-    def __init__(self, clock=time.monotonic, max_rows=12, max_bytes=2*1024*1024, ttl=120):
-        self.clock=clock;self.max_rows=max_rows;self.max_bytes=max_bytes;self.ttl=ttl
+    def __init__(self, clock=time.monotonic, max_rows=12, max_bytes=2*1024*1024, ttl=120, retain_stale=0):
+        self.clock=clock;self.max_rows=max_rows;self.max_bytes=max_bytes;self.ttl=ttl;self.retain_stale=retain_stale
         self.entries=OrderedDict();self.bytes=0;self.revision=0
         self.hits=0;self.misses=0;self.lock=threading.RLock()
 
     def _prune(self):
         now=self.clock()
         for key in list(self.entries):
-            if self.entries[key][0]<=now:
+            if self.entries[key][0]+self.retain_stale<=now:
                 self.bytes-=self.entries.pop(key)[1]
 
     def get(self,key):
         with self.lock:
             self._prune()
-            if key not in self.entries:self.misses+=1;return None
+            if key not in self.entries or self.entries[key][0]<=self.clock():self.misses+=1;return None
             self.hits+=1;self.entries.move_to_end(key)
+            return deepcopy(self.entries[key][2])
+
+    def get_stale(self,key):
+        """Bounded session-only display reuse; callers must prove account ownership."""
+        with self.lock:
+            self._prune()
+            if key not in self.entries:return None
+            self.entries.move_to_end(key)
             return deepcopy(self.entries[key][2])
 
     def put(self,key,files,revision=None,ttl=None,allow_empty=False):

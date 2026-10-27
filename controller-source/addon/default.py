@@ -38,6 +38,13 @@ def run_live_review():
                 target=choice['item'];playback=target['file'];options={}
             record('playback_return_ready');resume=None;playback_resume=state;continue
         if not request:return
+        if request.get('inline_extension'):
+            from extensions import run_inline
+            resolver=lambda aid:xbmcaddon.Addon(aid).getAddonInfo('path') if xbmc.getCondVisibility('System.HasAddon('+aid+')') else None
+            if not run_inline(request['inline_extension'],resolver):
+                xbmcgui.Dialog().notification('BlackLanturn','This personal page is unavailable. Its sidebar entry has been kept.')
+                continue
+            return
         gate=CoreSettingsReturn(time.monotonic())
         if request.get('parameters'):
             xbmc.executeJSONRPC(json.dumps({'jsonrpc':'2.0','id':1,'method':'GUI.ActivateWindow','params':{'window':request['target'],'parameters':request['parameters']}}))

@@ -1,7 +1,8 @@
 """Bind display snapshots to the current account and existing progressive refresh."""
 from pathlib import Path
 from hashlib import sha256
-import copy,json,re,time
+import copy,json,re,time,threading
+from contextlib import contextmanager
 from youtube_core import tab_rows,connected_account
 from youtube_home import split_page
 from youtube_saved import SavedRows,current_watch,HistoryUnavailable,FRESH_AGE
@@ -15,6 +16,22 @@ def saved_scope(identity,addon):
  return sha256(json.dumps([identity,values],separators=(',',':')).encode()).hexdigest()
 
 class SavedYouTube:
+ def invalidate_saved_youtube_settings(self):
+  self.youtube_settings_epoch=object()
+ @contextmanager
+ def youtube_saved_request(self):
+  local=getattr(self,'youtube_request_local',None)
+  if local is None:local=self.youtube_request_local=threading.local()
+  previous=getattr(local,'settings',None);local.settings={}
+  try:yield
+  finally:local.settings=previous
+ def request_saved_settings(self,identity,addon):
+  frame=getattr(getattr(self,'youtube_request_local',None),'settings',None)
+  key=(identity,getattr(self,'youtube_settings_epoch',None))
+  if frame is not None and key in frame:return frame[key]
+  value=(saved_scope(identity,addon),addon.getSettingBool('kodion.history.local'))
+  if frame is not None:frame[key]=value
+  return value
  def saved_youtube_context(self):
   import xbmcaddon,xbmcvfs
   from youtube_browser import read_account_store
@@ -25,13 +42,13 @@ class SavedYouTube:
    manager=account['access_manager'];user=manager['users'][str(manager['current_user'])];uid=user.get('id','')
    if not isinstance(uid,str) or not re.fullmatch(r'[a-fA-F0-9]{32}',uid):return None
    addon=xbmcaddon.Addon('plugin.video.youtube')
-   scope=saved_scope(identity,addon)
+   scope,local_history=self.request_saved_settings(identity,addon)
    store=getattr(self,'youtube_saved_store',None)
    if store is None or store.scope!=scope:
     root=Path(xbmcvfs.translatePath(xbmcaddon.Addon('script.blacklanturn.preview').getAddonInfo('profile')))
     store=self.youtube_saved_store=SavedRows(root/'youtube-display-rows.json',scope)
    history=Path(xbmcvfs.translatePath(addon.getAddonInfo('profile')))/uid/'history.sqlite'
-   return store,history,addon.getSettingBool('kodion.history.local')
+   return store,history,local_history
   except (OSError,ValueError,TypeError,KeyError,RuntimeError):return None
 
  def saved_youtube_home(self):

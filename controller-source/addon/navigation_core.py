@@ -15,7 +15,7 @@ def sidebar_items(config,youtube_connected=False):
 
 def sidebar_layout(count):
     total=count+2;row_height=96 if total<=9 else 80
-    return {'top':190,'height':min(864,total*row_height),'row_height':row_height,'settings_top':190+(total-1)*row_height}
+    return {'top':190,'height':864,'row_height':row_height,'settings_top':190+(total-1)*row_height}
 
 def default_icon(label,destination):
     kind=destination.get('kind')

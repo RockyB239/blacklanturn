@@ -1,0 +1,2184 @@
+{
+  "schema": 1,
+  "source_manifest_sha256": "67190fa8468f2e194b2f5c55fb619903cd3d6c4e6370872f6d99ffb2146cbf00",
+  "devices": {
+    "mac": {
+      "before": {
+        "passed": true,
+        "protocol": "Fresh-row native sidebar timing v2; batched GUI dispatch, expected labels and provider/type checked; four cycles; first excluded from warm summaries",
+        "row_visits": [
+          {
+            "section": "Shows",
+            "seconds": 0.416,
+            "cycle": 0
+          },
+          {
+            "section": "Movies",
+            "seconds": 0.531,
+            "cycle": 0
+          },
+          {
+            "section": "Home",
+            "seconds": 0.27,
+            "cycle": 0
+          },
+          {
+            "section": "YouTube",
+            "seconds": 0.405,
+            "cycle": 0
+          },
+          {
+            "section": "My Stuff",
+            "seconds": 0.333,
+            "cycle": 0
+          },
+          {
+            "section": "Shows",
+            "seconds": 0.259,
+            "cycle": 1
+          },
+          {
+            "section": "Movies",
+            "seconds": 0.369,
+            "cycle": 1
+          },
+          {
+            "section": "Home",
+            "seconds": 0.292,
+            "cycle": 1
+          },
+          {
+            "section": "YouTube",
+            "seconds": 0.532,
+            "cycle": 1
+          },
+          {
+            "section": "My Stuff",
+            "seconds": 0.293,
+            "cycle": 1
+          },
+          {
+            "section": "Shows",
+            "seconds": 0.331,
+            "cycle": 2
+          },
+          {
+            "section": "Movies",
+            "seconds": 0.313,
+            "cycle": 2
+          },
+          {
+            "section": "Home",
+            "seconds": 0.285,
+            "cycle": 2
+          },
+          {
+            "section": "YouTube",
+            "seconds": 0.347,
+            "cycle": 2
+          },
+          {
+            "section": "My Stuff",
+            "seconds": 0.315,
+            "cycle": 2
+          },
+          {
+            "section": "Shows",
+            "seconds": 0.311,
+            "cycle": 3
+          },
+          {
+            "section": "Movies",
+            "seconds": 0.303,
+            "cycle": 3
+          },
+          {
+            "section": "Home",
+            "seconds": 0.292,
+            "cycle": 3
+          },
+          {
+            "section": "YouTube",
+            "seconds": 0.511,
+            "cycle": 3
+          },
+          {
+            "section": "My Stuff",
+            "seconds": 0.305,
+            "cycle": 3
+          }
+        ]
+      },
+      "after": {
+        "passed": true,
+        "protocol": "Fresh-row native sidebar timing v2; batched GUI dispatch, expected labels and provider/type checked; four cycles; first excluded from warm summaries",
+        "row_visits": [
+          {
+            "section": "Shows",
+            "seconds": 0.364,
+            "cycle": 0
+          },
+          {
+            "section": "Movies",
+            "seconds": 0.325,
+            "cycle": 0
+          },
+          {
+            "section": "Home",
+            "seconds": 0.283,
+            "cycle": 0
+          },
+          {
+            "section": "YouTube",
+            "seconds": 0.271,
+            "cycle": 0
+          },
+          {
+            "section": "My Stuff",
+            "seconds": 0.263,
+            "cycle": 0
+          },
+          {
+            "section": "Shows",
+            "seconds": 0.258,
+            "cycle": 1
+          },
+          {
+            "section": "Movies",
+            "seconds": 0.259,
+            "cycle": 1
+          },
+          {
+            "section": "Home",
+            "seconds": 0.313,
+            "cycle": 1
+          },
+          {
+            "section": "YouTube",
+            "seconds": 0.282,
+            "cycle": 1
+          },
+          {
+            "section": "My Stuff",
+            "seconds": 0.261,
+            "cycle": 1
+          },
+          {
+            "section": "Shows",
+            "seconds": 0.339,
+            "cycle": 2
+          },
+          {
+            "section": "Movies",
+            "seconds": 0.276,
+            "cycle": 2
+          },
+          {
+            "section": "Home",
+            "seconds": 0.343,
+            "cycle": 2
+          },
+          {
+            "section": "YouTube",
+            "seconds": 0.347,
+            "cycle": 2
+          },
+          {
+            "section": "My Stuff",
+            "seconds": 0.27,
+            "cycle": 2
+          },
+          {
+            "section": "Shows",
+            "seconds": 0.363,
+            "cycle": 3
+          },
+          {
+            "section": "Movies",
+            "seconds": 0.369,
+            "cycle": 3
+          },
+          {
+            "section": "Home",
+            "seconds": 0.297,
+            "cycle": 3
+          },
+          {
+            "section": "YouTube",
+            "seconds": 0.405,
+            "cycle": 3
+          },
+          {
+            "section": "My Stuff",
+            "seconds": 0.308,
+            "cycle": 3
+          }
+        ]
+      },
+      "soak": {
+        "passed": true,
+        "protocol": "Fresh-row native navigation v2; batched GUI dispatch, labels and provider/type checked; four warmup cycles then twenty measured",
+        "row_visits": [
+          {
+            "section": "Shows",
+            "seconds": 0.292,
+            "cycle": 0
+          },
+          {
+            "section": "Movies",
+            "seconds": 0.258,
+            "cycle": 0
+          },
+          {
+            "section": "Home",
+            "seconds": 0.297,
+            "cycle": 0
+          },
+          {
+            "section": "YouTube",
+            "seconds": 0.258,
+            "cycle": 0
+          },
+          {
+            "section": "My Stuff",
+            "seconds": 0.258,
+            "cycle": 0
+          },
+          {
+            "section": "Shows",
+            "seconds": 0.254,
+            "cycle": 1
+          },
+          {
+            "section": "Movies",
+            "seconds": 0.348,
+            "cycle": 1
+          },
+          {
+            "section": "Home",
+            "seconds": 0.288,
+            "cycle": 1
+          },
+          {
+            "section": "YouTube",
+            "seconds": 0.349,
+            "cycle": 1
+          },
+          {
+            "section": "My Stuff",
+            "seconds": 0.303,
+            "cycle": 1
+          },
+          {
+            "section": "Shows",
+            "seconds": 0.254,
+            "cycle": 2
+          },
+          {
+            "section": "Movies",
+            "seconds": 0.352,
+            "cycle": 2
+          },
+          {
+            "section": "Home",
+            "seconds": 0.323,
+            "cycle": 2
+          },
+          {
+            "section": "YouTube",
+            "seconds": 0.355,
+            "cycle": 2
+          },
+          {
+            "section": "My Stuff",
+            "seconds": 0.313,
+            "cycle": 2
+          },
+          {
+            "section": "Shows",
+            "seconds": 0.259,
+            "cycle": 3
+          },
+          {
+            "section": "Movies",
+            "seconds": 0.322,
+            "cycle": 3
+          },
+          {
+            "section": "Home",
+            "seconds": 0.252,
+            "cycle": 3
+          },
+          {
+            "section": "YouTube",
+            "seconds": 0.274,
+            "cycle": 3
+          },
+          {
+            "section": "My Stuff",
+            "seconds": 0.289,
+            "cycle": 3
+          },
+          {
+            "section": "Shows",
+            "seconds": 0.272,
+            "cycle": 4
+          },
+          {
+            "section": "Movies",
+            "seconds": 0.27,
+            "cycle": 4
+          },
+          {
+            "section": "Home",
+            "seconds": 0.342,
+            "cycle": 4
+          },
+          {
+            "section": "YouTube",
+            "seconds": 0.345,
+            "cycle": 4
+          },
+          {
+            "section": "My Stuff",
+            "seconds": 0.273,
+            "cycle": 4
+          },
+          {
+            "section": "Shows",
+            "seconds": 0.312,
+            "cycle": 5
+          },
+          {
+            "section": "Movies",
+            "seconds": 0.357,
+            "cycle": 5
+          },
+          {
+            "section": "Home",
+            "seconds": 0.254,
+            "cycle": 5
+          },
+          {
+            "section": "YouTube",
+            "seconds": 0.274,
+            "cycle": 5
+          },
+          {
+            "section": "My Stuff",
+            "seconds": 0.317,
+            "cycle": 5
+          },
+          {
+            "section": "Shows",
+            "seconds": 0.262,
+            "cycle": 6
+          },
+          {
+            "section": "Movies",
+            "seconds": 0.356,
+            "cycle": 6
+          },
+          {
+            "section": "Home",
+            "seconds": 0.32,
+            "cycle": 6
+          },
+          {
+            "section": "YouTube",
+            "seconds": 0.303,
+            "cycle": 6
+          },
+          {
+            "section": "My Stuff",
+            "seconds": 0.293,
+            "cycle": 6
+          },
+          {
+            "section": "Shows",
+            "seconds": 0.352,
+            "cycle": 7
+          },
+          {
+            "section": "Movies",
+            "seconds": 0.267,
+            "cycle": 7
+          },
+          {
+            "section": "Home",
+            "seconds": 0.259,
+            "cycle": 7
+          },
+          {
+            "section": "YouTube",
+            "seconds": 0.292,
+            "cycle": 7
+          },
+          {
+            "section": "My Stuff",
+            "seconds": 0.339,
+            "cycle": 7
+          },
+          {
+            "section": "Shows",
+            "seconds": 0.25,
+            "cycle": 8
+          },
+          {
+            "section": "Movies",
+            "seconds": 0.301,
+            "cycle": 8
+          },
+          {
+            "section": "Home",
+            "seconds": 0.296,
+            "cycle": 8
+          },
+          {
+            "section": "YouTube",
+            "seconds": 0.35,
+            "cycle": 8
+          },
+          {
+            "section": "My Stuff",
+            "seconds": 0.311,
+            "cycle": 8
+          },
+          {
+            "section": "Shows",
+            "seconds": 0.314,
+            "cycle": 9
+          },
+          {
+            "section": "Movies",
+            "seconds": 0.333,
+            "cycle": 9
+          },
+          {
+            "section": "Home",
+            "seconds": 0.268,
+            "cycle": 9
+          },
+          {
+            "section": "YouTube",
+            "seconds": 0.267,
+            "cycle": 9
+          },
+          {
+            "section": "My Stuff",
+            "seconds": 0.269,
+            "cycle": 9
+          },
+          {
+            "section": "Shows",
+            "seconds": 0.267,
+            "cycle": 10
+          },
+          {
+            "section": "Movies",
+            "seconds": 0.258,
+            "cycle": 10
+          },
+          {
+            "section": "Home",
+            "seconds": 0.281,
+            "cycle": 10
+          },
+          {
+            "section": "YouTube",
+            "seconds": 0.261,
+            "cycle": 10
+          },
+          {
+            "section": "My Stuff",
+            "seconds": 0.264,
+            "cycle": 10
+          },
+          {
+            "section": "Shows",
+            "seconds": 0.259,
+            "cycle": 11
+          },
+          {
+            "section": "Movies",
+            "seconds": 0.271,
+            "cycle": 11
+          },
+          {
+            "section": "Home",
+            "seconds": 0.346,
+            "cycle": 11
+          },
+          {
+            "section": "YouTube",
+            "seconds": 0.312,
+            "cycle": 11
+          },
+          {
+            "section": "My Stuff",
+            "seconds": 0.292,
+            "cycle": 11
+          },
+          {
+            "section": "Shows",
+            "seconds": 0.266,
+            "cycle": 12
+          },
+          {
+            "section": "Movies",
+            "seconds": 0.341,
+            "cycle": 12
+          },
+          {
+            "section": "Home",
+            "seconds": 0.278,
+            "cycle": 12
+          },
+          {
+            "section": "YouTube",
+            "seconds": 0.25,
+            "cycle": 12
+          },
+          {
+            "section": "My Stuff",
+            "seconds": 0.299,
+            "cycle": 12
+          },
+          {
+            "section": "Shows",
+            "seconds": 0.267,
+            "cycle": 13
+          },
+          {
+            "section": "Movies",
+            "seconds": 0.267,
+            "cycle": 13
+          },
+          {
+            "section": "Home",
+            "seconds": 0.259,
+            "cycle": 13
+          },
+          {
+            "section": "YouTube",
+            "seconds": 0.379,
+            "cycle": 13
+          },
+          {
+            "section": "My Stuff",
+            "seconds": 0.291,
+            "cycle": 13
+          },
+          {
+            "section": "Shows",
+            "seconds": 0.258,
+            "cycle": 14
+          },
+          {
+            "section": "Movies",
+            "seconds": 0.263,
+            "cycle": 14
+          },
+          {
+            "section": "Home",
+            "seconds": 0.265,
+            "cycle": 14
+          },
+          {
+            "section": "YouTube",
+            "seconds": 0.324,
+            "cycle": 14
+          },
+          {
+            "section": "My Stuff",
+            "seconds": 0.365,
+            "cycle": 14
+          },
+          {
+            "section": "Shows",
+            "seconds": 0.369,
+            "cycle": 15
+          },
+          {
+            "section": "Movies",
+            "seconds": 0.264,
+            "cycle": 15
+          },
+          {
+            "section": "Home",
+            "seconds": 0.306,
+            "cycle": 15
+          },
+          {
+            "section": "YouTube",
+            "seconds": 0.362,
+            "cycle": 15
+          },
+          {
+            "section": "My Stuff",
+            "seconds": 0.314,
+            "cycle": 15
+          },
+          {
+            "section": "Shows",
+            "seconds": 0.258,
+            "cycle": 16
+          },
+          {
+            "section": "Movies",
+            "seconds": 0.271,
+            "cycle": 16
+          },
+          {
+            "section": "Home",
+            "seconds": 0.305,
+            "cycle": 16
+          },
+          {
+            "section": "YouTube",
+            "seconds": 0.282,
+            "cycle": 16
+          },
+          {
+            "section": "My Stuff",
+            "seconds": 0.275,
+            "cycle": 16
+          },
+          {
+            "section": "Shows",
+            "seconds": 0.27,
+            "cycle": 17
+          },
+          {
+            "section": "Movies",
+            "seconds": 0.271,
+            "cycle": 17
+          },
+          {
+            "section": "Home",
+            "seconds": 0.318,
+            "cycle": 17
+          },
+          {
+            "section": "YouTube",
+            "seconds": 0.372,
+            "cycle": 17
+          },
+          {
+            "section": "My Stuff",
+            "seconds": 0.258,
+            "cycle": 17
+          },
+          {
+            "section": "Shows",
+            "seconds": 0.346,
+            "cycle": 18
+          },
+          {
+            "section": "Movies",
+            "seconds": 0.36,
+            "cycle": 18
+          },
+          {
+            "section": "Home",
+            "seconds": 0.254,
+            "cycle": 18
+          },
+          {
+            "section": "YouTube",
+            "seconds": 0.31,
+            "cycle": 18
+          },
+          {
+            "section": "My Stuff",
+            "seconds": 0.259,
+            "cycle": 18
+          },
+          {
+            "section": "Shows",
+            "seconds": 0.255,
+            "cycle": 19
+          },
+          {
+            "section": "Movies",
+            "seconds": 0.35,
+            "cycle": 19
+          },
+          {
+            "section": "Home",
+            "seconds": 0.262,
+            "cycle": 19
+          },
+          {
+            "section": "YouTube",
+            "seconds": 0.336,
+            "cycle": 19
+          },
+          {
+            "section": "My Stuff",
+            "seconds": 0.319,
+            "cycle": 19
+          }
+        ],
+        "memory": {
+          "rss_start": 580583424,
+          "prewarm_start": 472825856,
+          "measurement": "Darwin native process resident high-water mark",
+          "rss_end": 580583424
+        }
+      }
+    },
+    "apple": {
+      "before": {
+        "passed": true,
+        "protocol": "Fresh-row native sidebar timing v2; batched GUI dispatch, expected labels and provider/type checked; four cycles; first excluded from warm summaries",
+        "row_visits": [
+          {
+            "section": "Shows",
+            "seconds": 0.655,
+            "cycle": 0
+          },
+          {
+            "section": "Movies",
+            "seconds": 1.0,
+            "cycle": 0
+          },
+          {
+            "section": "Home",
+            "seconds": 0.367,
+            "cycle": 0
+          },
+          {
+            "section": "YouTube",
+            "seconds": 0.553,
+            "cycle": 0
+          },
+          {
+            "section": "My Stuff",
+            "seconds": 0.465,
+            "cycle": 0
+          },
+          {
+            "section": "Shows",
+            "seconds": 0.35,
+            "cycle": 1
+          },
+          {
+            "section": "Movies",
+            "seconds": 0.449,
+            "cycle": 1
+          },
+          {
+            "section": "Home",
+            "seconds": 0.401,
+            "cycle": 1
+          },
+          {
+            "section": "YouTube",
+            "seconds": 0.65,
+            "cycle": 1
+          },
+          {
+            "section": "My Stuff",
+            "seconds": 0.275,
+            "cycle": 1
+          },
+          {
+            "section": "Shows",
+            "seconds": 0.43,
+            "cycle": 2
+          },
+          {
+            "section": "Movies",
+            "seconds": 0.365,
+            "cycle": 2
+          },
+          {
+            "section": "Home",
+            "seconds": 0.4,
+            "cycle": 2
+          },
+          {
+            "section": "YouTube",
+            "seconds": 0.698,
+            "cycle": 2
+          },
+          {
+            "section": "My Stuff",
+            "seconds": 0.267,
+            "cycle": 2
+          },
+          {
+            "section": "Shows",
+            "seconds": 0.428,
+            "cycle": 3
+          },
+          {
+            "section": "Movies",
+            "seconds": 0.366,
+            "cycle": 3
+          },
+          {
+            "section": "Home",
+            "seconds": 0.375,
+            "cycle": 3
+          },
+          {
+            "section": "YouTube",
+            "seconds": 0.549,
+            "cycle": 3
+          },
+          {
+            "section": "My Stuff",
+            "seconds": 0.266,
+            "cycle": 3
+          }
+        ]
+      },
+      "after": {
+        "passed": true,
+        "protocol": "Fresh-row native sidebar timing v2; batched GUI dispatch, expected labels and provider/type checked; four cycles; first excluded from warm summaries",
+        "row_visits": [
+          {
+            "section": "Shows",
+            "seconds": 0.722,
+            "cycle": 0
+          },
+          {
+            "section": "Movies",
+            "seconds": 0.85,
+            "cycle": 0
+          },
+          {
+            "section": "Home",
+            "seconds": 0.3,
+            "cycle": 0
+          },
+          {
+            "section": "YouTube",
+            "seconds": 0.404,
+            "cycle": 0
+          },
+          {
+            "section": "My Stuff",
+            "seconds": 0.406,
+            "cycle": 0
+          },
+          {
+            "section": "Shows",
+            "seconds": 0.401,
+            "cycle": 1
+          },
+          {
+            "section": "Movies",
+            "seconds": 0.405,
+            "cycle": 1
+          },
+          {
+            "section": "Home",
+            "seconds": 0.383,
+            "cycle": 1
+          },
+          {
+            "section": "YouTube",
+            "seconds": 0.386,
+            "cycle": 1
+          },
+          {
+            "section": "My Stuff",
+            "seconds": 0.269,
+            "cycle": 1
+          },
+          {
+            "section": "Shows",
+            "seconds": 0.366,
+            "cycle": 2
+          },
+          {
+            "section": "Movies",
+            "seconds": 0.412,
+            "cycle": 2
+          },
+          {
+            "section": "Home",
+            "seconds": 0.318,
+            "cycle": 2
+          },
+          {
+            "section": "YouTube",
+            "seconds": 0.365,
+            "cycle": 2
+          },
+          {
+            "section": "My Stuff",
+            "seconds": 0.267,
+            "cycle": 2
+          },
+          {
+            "section": "Shows",
+            "seconds": 0.311,
+            "cycle": 3
+          },
+          {
+            "section": "Movies",
+            "seconds": 0.434,
+            "cycle": 3
+          },
+          {
+            "section": "Home",
+            "seconds": 0.295,
+            "cycle": 3
+          },
+          {
+            "section": "YouTube",
+            "seconds": 0.442,
+            "cycle": 3
+          },
+          {
+            "section": "My Stuff",
+            "seconds": 0.266,
+            "cycle": 3
+          }
+        ]
+      },
+      "soak": {
+        "passed": true,
+        "protocol": "Fresh-row native navigation v2; batched GUI dispatch, labels and provider/type checked; four warmup cycles then twenty measured",
+        "row_visits": [
+          {
+            "section": "Shows",
+            "seconds": 0.316,
+            "cycle": 0
+          },
+          {
+            "section": "Movies",
+            "seconds": 0.375,
+            "cycle": 0
+          },
+          {
+            "section": "Home",
+            "seconds": 0.301,
+            "cycle": 0
+          },
+          {
+            "section": "YouTube",
+            "seconds": 0.389,
+            "cycle": 0
+          },
+          {
+            "section": "My Stuff",
+            "seconds": 0.272,
+            "cycle": 0
+          },
+          {
+            "section": "Shows",
+            "seconds": 0.283,
+            "cycle": 1
+          },
+          {
+            "section": "Movies",
+            "seconds": 0.42,
+            "cycle": 1
+          },
+          {
+            "section": "Home",
+            "seconds": 0.285,
+            "cycle": 1
+          },
+          {
+            "section": "YouTube",
+            "seconds": 0.44,
+            "cycle": 1
+          },
+          {
+            "section": "My Stuff",
+            "seconds": 0.267,
+            "cycle": 1
+          },
+          {
+            "section": "Shows",
+            "seconds": 0.316,
+            "cycle": 2
+          },
+          {
+            "section": "Movies",
+            "seconds": 0.407,
+            "cycle": 2
+          },
+          {
+            "section": "Home",
+            "seconds": 0.299,
+            "cycle": 2
+          },
+          {
+            "section": "YouTube",
+            "seconds": 0.482,
+            "cycle": 2
+          },
+          {
+            "section": "My Stuff",
+            "seconds": 0.287,
+            "cycle": 2
+          },
+          {
+            "section": "Shows",
+            "seconds": 0.45,
+            "cycle": 3
+          },
+          {
+            "section": "Movies",
+            "seconds": 0.41,
+            "cycle": 3
+          },
+          {
+            "section": "Home",
+            "seconds": 0.368,
+            "cycle": 3
+          },
+          {
+            "section": "YouTube",
+            "seconds": 0.406,
+            "cycle": 3
+          },
+          {
+            "section": "My Stuff",
+            "seconds": 0.281,
+            "cycle": 3
+          },
+          {
+            "section": "Shows",
+            "seconds": 0.3,
+            "cycle": 4
+          },
+          {
+            "section": "Movies",
+            "seconds": 0.367,
+            "cycle": 4
+          },
+          {
+            "section": "Home",
+            "seconds": 0.301,
+            "cycle": 4
+          },
+          {
+            "section": "YouTube",
+            "seconds": 0.387,
+            "cycle": 4
+          },
+          {
+            "section": "My Stuff",
+            "seconds": 0.27,
+            "cycle": 4
+          },
+          {
+            "section": "Shows",
+            "seconds": 0.295,
+            "cycle": 5
+          },
+          {
+            "section": "Movies",
+            "seconds": 0.402,
+            "cycle": 5
+          },
+          {
+            "section": "Home",
+            "seconds": 0.343,
+            "cycle": 5
+          },
+          {
+            "section": "YouTube",
+            "seconds": 0.365,
+            "cycle": 5
+          },
+          {
+            "section": "My Stuff",
+            "seconds": 0.269,
+            "cycle": 5
+          },
+          {
+            "section": "Shows",
+            "seconds": 0.3,
+            "cycle": 6
+          },
+          {
+            "section": "Movies",
+            "seconds": 0.396,
+            "cycle": 6
+          },
+          {
+            "section": "Home",
+            "seconds": 0.283,
+            "cycle": 6
+          },
+          {
+            "section": "YouTube",
+            "seconds": 0.389,
+            "cycle": 6
+          },
+          {
+            "section": "My Stuff",
+            "seconds": 0.273,
+            "cycle": 6
+          },
+          {
+            "section": "Shows",
+            "seconds": 0.45,
+            "cycle": 7
+          },
+          {
+            "section": "Movies",
+            "seconds": 0.412,
+            "cycle": 7
+          },
+          {
+            "section": "Home",
+            "seconds": 0.321,
+            "cycle": 7
+          },
+          {
+            "section": "YouTube",
+            "seconds": 0.414,
+            "cycle": 7
+          },
+          {
+            "section": "My Stuff",
+            "seconds": 0.267,
+            "cycle": 7
+          },
+          {
+            "section": "Shows",
+            "seconds": 0.299,
+            "cycle": 8
+          },
+          {
+            "section": "Movies",
+            "seconds": 0.358,
+            "cycle": 8
+          },
+          {
+            "section": "Home",
+            "seconds": 0.434,
+            "cycle": 8
+          },
+          {
+            "section": "YouTube",
+            "seconds": 0.44,
+            "cycle": 8
+          },
+          {
+            "section": "My Stuff",
+            "seconds": 0.284,
+            "cycle": 8
+          },
+          {
+            "section": "Shows",
+            "seconds": 0.359,
+            "cycle": 9
+          },
+          {
+            "section": "Movies",
+            "seconds": 0.317,
+            "cycle": 9
+          },
+          {
+            "section": "Home",
+            "seconds": 0.394,
+            "cycle": 9
+          },
+          {
+            "section": "YouTube",
+            "seconds": 0.382,
+            "cycle": 9
+          },
+          {
+            "section": "My Stuff",
+            "seconds": 0.266,
+            "cycle": 9
+          },
+          {
+            "section": "Shows",
+            "seconds": 0.281,
+            "cycle": 10
+          },
+          {
+            "section": "Movies",
+            "seconds": 0.315,
+            "cycle": 10
+          },
+          {
+            "section": "Home",
+            "seconds": 0.284,
+            "cycle": 10
+          },
+          {
+            "section": "YouTube",
+            "seconds": 0.384,
+            "cycle": 10
+          },
+          {
+            "section": "My Stuff",
+            "seconds": 0.266,
+            "cycle": 10
+          },
+          {
+            "section": "Shows",
+            "seconds": 0.321,
+            "cycle": 11
+          },
+          {
+            "section": "Movies",
+            "seconds": 0.374,
+            "cycle": 11
+          },
+          {
+            "section": "Home",
+            "seconds": 0.318,
+            "cycle": 11
+          },
+          {
+            "section": "YouTube",
+            "seconds": 0.353,
+            "cycle": 11
+          },
+          {
+            "section": "My Stuff",
+            "seconds": 0.273,
+            "cycle": 11
+          },
+          {
+            "section": "Shows",
+            "seconds": 0.299,
+            "cycle": 12
+          },
+          {
+            "section": "Movies",
+            "seconds": 0.283,
+            "cycle": 12
+          },
+          {
+            "section": "Home",
+            "seconds": 0.3,
+            "cycle": 12
+          },
+          {
+            "section": "YouTube",
+            "seconds": 0.44,
+            "cycle": 12
+          },
+          {
+            "section": "My Stuff",
+            "seconds": 0.275,
+            "cycle": 12
+          },
+          {
+            "section": "Shows",
+            "seconds": 0.375,
+            "cycle": 13
+          },
+          {
+            "section": "Movies",
+            "seconds": 0.406,
+            "cycle": 13
+          },
+          {
+            "section": "Home",
+            "seconds": 0.343,
+            "cycle": 13
+          },
+          {
+            "section": "YouTube",
+            "seconds": 0.417,
+            "cycle": 13
+          },
+          {
+            "section": "My Stuff",
+            "seconds": 0.339,
+            "cycle": 13
+          },
+          {
+            "section": "Shows",
+            "seconds": 0.409,
+            "cycle": 14
+          },
+          {
+            "section": "Movies",
+            "seconds": 0.333,
+            "cycle": 14
+          },
+          {
+            "section": "Home",
+            "seconds": 0.443,
+            "cycle": 14
+          },
+          {
+            "section": "YouTube",
+            "seconds": 0.382,
+            "cycle": 14
+          },
+          {
+            "section": "My Stuff",
+            "seconds": 0.266,
+            "cycle": 14
+          },
+          {
+            "section": "Shows",
+            "seconds": 0.442,
+            "cycle": 15
+          },
+          {
+            "section": "Movies",
+            "seconds": 0.39,
+            "cycle": 15
+          },
+          {
+            "section": "Home",
+            "seconds": 0.301,
+            "cycle": 15
+          },
+          {
+            "section": "YouTube",
+            "seconds": 0.39,
+            "cycle": 15
+          },
+          {
+            "section": "My Stuff",
+            "seconds": 0.27,
+            "cycle": 15
+          },
+          {
+            "section": "Shows",
+            "seconds": 0.284,
+            "cycle": 16
+          },
+          {
+            "section": "Movies",
+            "seconds": 0.37,
+            "cycle": 16
+          },
+          {
+            "section": "Home",
+            "seconds": 0.418,
+            "cycle": 16
+          },
+          {
+            "section": "YouTube",
+            "seconds": 0.382,
+            "cycle": 16
+          },
+          {
+            "section": "My Stuff",
+            "seconds": 0.281,
+            "cycle": 16
+          },
+          {
+            "section": "Shows",
+            "seconds": 0.374,
+            "cycle": 17
+          },
+          {
+            "section": "Movies",
+            "seconds": 0.395,
+            "cycle": 17
+          },
+          {
+            "section": "Home",
+            "seconds": 0.385,
+            "cycle": 17
+          },
+          {
+            "section": "YouTube",
+            "seconds": 0.394,
+            "cycle": 17
+          },
+          {
+            "section": "My Stuff",
+            "seconds": 0.266,
+            "cycle": 17
+          },
+          {
+            "section": "Shows",
+            "seconds": 0.3,
+            "cycle": 18
+          },
+          {
+            "section": "Movies",
+            "seconds": 0.461,
+            "cycle": 18
+          },
+          {
+            "section": "Home",
+            "seconds": 0.36,
+            "cycle": 18
+          },
+          {
+            "section": "YouTube",
+            "seconds": 0.369,
+            "cycle": 18
+          },
+          {
+            "section": "My Stuff",
+            "seconds": 0.278,
+            "cycle": 18
+          },
+          {
+            "section": "Shows",
+            "seconds": 0.333,
+            "cycle": 19
+          },
+          {
+            "section": "Movies",
+            "seconds": 0.299,
+            "cycle": 19
+          },
+          {
+            "section": "Home",
+            "seconds": 0.301,
+            "cycle": 19
+          },
+          {
+            "section": "YouTube",
+            "seconds": 0.492,
+            "cycle": 19
+          },
+          {
+            "section": "My Stuff",
+            "seconds": 0.282,
+            "cycle": 19
+          }
+        ],
+        "memory": {
+          "rss_start": 612007936,
+          "prewarm_start": 559202304,
+          "measurement": "Darwin native process resident high-water mark",
+          "rss_end": 652640256
+        }
+      }
+    },
+    "fire": {
+      "before": {
+        "passed": true,
+        "protocol": "Fresh-row native sidebar timing v2; batched GUI dispatch, expected labels and provider/type checked; four cycles; first excluded from warm summaries",
+        "row_visits": [
+          {
+            "section": "Shows",
+            "seconds": 7.522,
+            "cycle": 0
+          },
+          {
+            "section": "Movies",
+            "seconds": 3.452,
+            "cycle": 0
+          },
+          {
+            "section": "Home",
+            "seconds": 0.754,
+            "cycle": 0
+          },
+          {
+            "section": "YouTube",
+            "seconds": 1.51,
+            "cycle": 0
+          },
+          {
+            "section": "My Stuff",
+            "seconds": 1.384,
+            "cycle": 0
+          },
+          {
+            "section": "Shows",
+            "seconds": 0.873,
+            "cycle": 1
+          },
+          {
+            "section": "Movies",
+            "seconds": 0.903,
+            "cycle": 1
+          },
+          {
+            "section": "Home",
+            "seconds": 0.569,
+            "cycle": 1
+          },
+          {
+            "section": "YouTube",
+            "seconds": 1.589,
+            "cycle": 1
+          },
+          {
+            "section": "My Stuff",
+            "seconds": 0.789,
+            "cycle": 1
+          },
+          {
+            "section": "Shows",
+            "seconds": 0.776,
+            "cycle": 2
+          },
+          {
+            "section": "Movies",
+            "seconds": 0.737,
+            "cycle": 2
+          },
+          {
+            "section": "Home",
+            "seconds": 0.75,
+            "cycle": 2
+          },
+          {
+            "section": "YouTube",
+            "seconds": 1.646,
+            "cycle": 2
+          },
+          {
+            "section": "My Stuff",
+            "seconds": 0.523,
+            "cycle": 2
+          },
+          {
+            "section": "Shows",
+            "seconds": 0.935,
+            "cycle": 3
+          },
+          {
+            "section": "Movies",
+            "seconds": 1.021,
+            "cycle": 3
+          },
+          {
+            "section": "Home",
+            "seconds": 0.638,
+            "cycle": 3
+          },
+          {
+            "section": "YouTube",
+            "seconds": 1.519,
+            "cycle": 3
+          },
+          {
+            "section": "My Stuff",
+            "seconds": 2.099,
+            "cycle": 3
+          }
+        ]
+      },
+      "after": {
+        "passed": true,
+        "protocol": "Fresh-row native sidebar timing v2; batched GUI dispatch, expected labels and provider/type checked; four cycles; first excluded from warm summaries",
+        "row_visits": [
+          {
+            "section": "Shows",
+            "seconds": 7.058,
+            "cycle": 0
+          },
+          {
+            "section": "Movies",
+            "seconds": 3.389,
+            "cycle": 0
+          },
+          {
+            "section": "Home",
+            "seconds": 0.715,
+            "cycle": 0
+          },
+          {
+            "section": "YouTube",
+            "seconds": 1.207,
+            "cycle": 0
+          },
+          {
+            "section": "My Stuff",
+            "seconds": 1.785,
+            "cycle": 0
+          },
+          {
+            "section": "Shows",
+            "seconds": 0.804,
+            "cycle": 1
+          },
+          {
+            "section": "Movies",
+            "seconds": 0.906,
+            "cycle": 1
+          },
+          {
+            "section": "Home",
+            "seconds": 0.794,
+            "cycle": 1
+          },
+          {
+            "section": "YouTube",
+            "seconds": 1.189,
+            "cycle": 1
+          },
+          {
+            "section": "My Stuff",
+            "seconds": 0.562,
+            "cycle": 1
+          },
+          {
+            "section": "Shows",
+            "seconds": 0.964,
+            "cycle": 2
+          },
+          {
+            "section": "Movies",
+            "seconds": 0.553,
+            "cycle": 2
+          },
+          {
+            "section": "Home",
+            "seconds": 0.568,
+            "cycle": 2
+          },
+          {
+            "section": "YouTube",
+            "seconds": 1.25,
+            "cycle": 2
+          },
+          {
+            "section": "My Stuff",
+            "seconds": 0.459,
+            "cycle": 2
+          },
+          {
+            "section": "Shows",
+            "seconds": 1.03,
+            "cycle": 3
+          },
+          {
+            "section": "Movies",
+            "seconds": 0.969,
+            "cycle": 3
+          },
+          {
+            "section": "Home",
+            "seconds": 1.059,
+            "cycle": 3
+          },
+          {
+            "section": "YouTube",
+            "seconds": 1.062,
+            "cycle": 3
+          },
+          {
+            "section": "My Stuff",
+            "seconds": 0.542,
+            "cycle": 3
+          }
+        ]
+      },
+      "soak": {
+        "passed": true,
+        "protocol": "Fresh-row native navigation v2; batched GUI dispatch, labels and provider/type checked; four warmup cycles then twenty measured",
+        "row_visits": [
+          {
+            "section": "Shows",
+            "seconds": 0.901,
+            "cycle": 0
+          },
+          {
+            "section": "Movies",
+            "seconds": 0.809,
+            "cycle": 0
+          },
+          {
+            "section": "Home",
+            "seconds": 0.765,
+            "cycle": 0
+          },
+          {
+            "section": "YouTube",
+            "seconds": 1.034,
+            "cycle": 0
+          },
+          {
+            "section": "My Stuff",
+            "seconds": 0.516,
+            "cycle": 0
+          },
+          {
+            "section": "Shows",
+            "seconds": 0.703,
+            "cycle": 1
+          },
+          {
+            "section": "Movies",
+            "seconds": 0.629,
+            "cycle": 1
+          },
+          {
+            "section": "Home",
+            "seconds": 0.839,
+            "cycle": 1
+          },
+          {
+            "section": "YouTube",
+            "seconds": 1.135,
+            "cycle": 1
+          },
+          {
+            "section": "My Stuff",
+            "seconds": 0.502,
+            "cycle": 1
+          },
+          {
+            "section": "Shows",
+            "seconds": 0.89,
+            "cycle": 2
+          },
+          {
+            "section": "Movies",
+            "seconds": 0.889,
+            "cycle": 2
+          },
+          {
+            "section": "Home",
+            "seconds": 0.655,
+            "cycle": 2
+          },
+          {
+            "section": "YouTube",
+            "seconds": 1.242,
+            "cycle": 2
+          },
+          {
+            "section": "My Stuff",
+            "seconds": 0.677,
+            "cycle": 2
+          },
+          {
+            "section": "Shows",
+            "seconds": 0.689,
+            "cycle": 3
+          },
+          {
+            "section": "Movies",
+            "seconds": 1.095,
+            "cycle": 3
+          },
+          {
+            "section": "Home",
+            "seconds": 1.056,
+            "cycle": 3
+          },
+          {
+            "section": "YouTube",
+            "seconds": 1.162,
+            "cycle": 3
+          },
+          {
+            "section": "My Stuff",
+            "seconds": 0.436,
+            "cycle": 3
+          },
+          {
+            "section": "Shows",
+            "seconds": 0.638,
+            "cycle": 4
+          },
+          {
+            "section": "Movies",
+            "seconds": 0.799,
+            "cycle": 4
+          },
+          {
+            "section": "Home",
+            "seconds": 0.624,
+            "cycle": 4
+          },
+          {
+            "section": "YouTube",
+            "seconds": 1.068,
+            "cycle": 4
+          },
+          {
+            "section": "My Stuff",
+            "seconds": 0.491,
+            "cycle": 4
+          },
+          {
+            "section": "Shows",
+            "seconds": 1.073,
+            "cycle": 5
+          },
+          {
+            "section": "Movies",
+            "seconds": 1.128,
+            "cycle": 5
+          },
+          {
+            "section": "Home",
+            "seconds": 0.742,
+            "cycle": 5
+          },
+          {
+            "section": "YouTube",
+            "seconds": 1.209,
+            "cycle": 5
+          },
+          {
+            "section": "My Stuff",
+            "seconds": 0.434,
+            "cycle": 5
+          },
+          {
+            "section": "Shows",
+            "seconds": 0.643,
+            "cycle": 6
+          },
+          {
+            "section": "Movies",
+            "seconds": 0.885,
+            "cycle": 6
+          },
+          {
+            "section": "Home",
+            "seconds": 0.732,
+            "cycle": 6
+          },
+          {
+            "section": "YouTube",
+            "seconds": 1.237,
+            "cycle": 6
+          },
+          {
+            "section": "My Stuff",
+            "seconds": 0.342,
+            "cycle": 6
+          },
+          {
+            "section": "Shows",
+            "seconds": 0.74,
+            "cycle": 7
+          },
+          {
+            "section": "Movies",
+            "seconds": 0.905,
+            "cycle": 7
+          },
+          {
+            "section": "Home",
+            "seconds": 0.88,
+            "cycle": 7
+          },
+          {
+            "section": "YouTube",
+            "seconds": 1.137,
+            "cycle": 7
+          },
+          {
+            "section": "My Stuff",
+            "seconds": 0.497,
+            "cycle": 7
+          },
+          {
+            "section": "Shows",
+            "seconds": 0.798,
+            "cycle": 8
+          },
+          {
+            "section": "Movies",
+            "seconds": 0.97,
+            "cycle": 8
+          },
+          {
+            "section": "Home",
+            "seconds": 1.035,
+            "cycle": 8
+          },
+          {
+            "section": "YouTube",
+            "seconds": 1.332,
+            "cycle": 8
+          },
+          {
+            "section": "My Stuff",
+            "seconds": 0.389,
+            "cycle": 8
+          },
+          {
+            "section": "Shows",
+            "seconds": 0.791,
+            "cycle": 9
+          },
+          {
+            "section": "Movies",
+            "seconds": 0.869,
+            "cycle": 9
+          },
+          {
+            "section": "Home",
+            "seconds": 0.909,
+            "cycle": 9
+          },
+          {
+            "section": "YouTube",
+            "seconds": 1.262,
+            "cycle": 9
+          },
+          {
+            "section": "My Stuff",
+            "seconds": 0.708,
+            "cycle": 9
+          },
+          {
+            "section": "Shows",
+            "seconds": 0.85,
+            "cycle": 10
+          },
+          {
+            "section": "Movies",
+            "seconds": 0.71,
+            "cycle": 10
+          },
+          {
+            "section": "Home",
+            "seconds": 0.866,
+            "cycle": 10
+          },
+          {
+            "section": "YouTube",
+            "seconds": 1.182,
+            "cycle": 10
+          },
+          {
+            "section": "My Stuff",
+            "seconds": 0.418,
+            "cycle": 10
+          },
+          {
+            "section": "Shows",
+            "seconds": 0.873,
+            "cycle": 11
+          },
+          {
+            "section": "Movies",
+            "seconds": 1.052,
+            "cycle": 11
+          },
+          {
+            "section": "Home",
+            "seconds": 0.456,
+            "cycle": 11
+          },
+          {
+            "section": "YouTube",
+            "seconds": 1.096,
+            "cycle": 11
+          },
+          {
+            "section": "My Stuff",
+            "seconds": 0.447,
+            "cycle": 11
+          },
+          {
+            "section": "Shows",
+            "seconds": 0.769,
+            "cycle": 12
+          },
+          {
+            "section": "Movies",
+            "seconds": 0.646,
+            "cycle": 12
+          },
+          {
+            "section": "Home",
+            "seconds": 1.073,
+            "cycle": 12
+          },
+          {
+            "section": "YouTube",
+            "seconds": 1.155,
+            "cycle": 12
+          },
+          {
+            "section": "My Stuff",
+            "seconds": 0.442,
+            "cycle": 12
+          },
+          {
+            "section": "Shows",
+            "seconds": 0.668,
+            "cycle": 13
+          },
+          {
+            "section": "Movies",
+            "seconds": 0.982,
+            "cycle": 13
+          },
+          {
+            "section": "Home",
+            "seconds": 1.016,
+            "cycle": 13
+          },
+          {
+            "section": "YouTube",
+            "seconds": 1.106,
+            "cycle": 13
+          },
+          {
+            "section": "My Stuff",
+            "seconds": 0.589,
+            "cycle": 13
+          },
+          {
+            "section": "Shows",
+            "seconds": 0.795,
+            "cycle": 14
+          },
+          {
+            "section": "Movies",
+            "seconds": 1.002,
+            "cycle": 14
+          },
+          {
+            "section": "Home",
+            "seconds": 0.917,
+            "cycle": 14
+          },
+          {
+            "section": "YouTube",
+            "seconds": 1.237,
+            "cycle": 14
+          },
+          {
+            "section": "My Stuff",
+            "seconds": 0.46,
+            "cycle": 14
+          },
+          {
+            "section": "Shows",
+            "seconds": 0.888,
+            "cycle": 15
+          },
+          {
+            "section": "Movies",
+            "seconds": 0.818,
+            "cycle": 15
+          },
+          {
+            "section": "Home",
+            "seconds": 0.606,
+            "cycle": 15
+          },
+          {
+            "section": "YouTube",
+            "seconds": 1.236,
+            "cycle": 15
+          },
+          {
+            "section": "My Stuff",
+            "seconds": 0.433,
+            "cycle": 15
+          },
+          {
+            "section": "Shows",
+            "seconds": 0.818,
+            "cycle": 16
+          },
+          {
+            "section": "Movies",
+            "seconds": 0.824,
+            "cycle": 16
+          },
+          {
+            "section": "Home",
+            "seconds": 0.923,
+            "cycle": 16
+          },
+          {
+            "section": "YouTube",
+            "seconds": 1.07,
+            "cycle": 16
+          },
+          {
+            "section": "My Stuff",
+            "seconds": 0.516,
+            "cycle": 16
+          },
+          {
+            "section": "Shows",
+            "seconds": 1.053,
+            "cycle": 17
+          },
+          {
+            "section": "Movies",
+            "seconds": 0.848,
+            "cycle": 17
+          },
+          {
+            "section": "Home",
+            "seconds": 0.857,
+            "cycle": 17
+          },
+          {
+            "section": "YouTube",
+            "seconds": 1.057,
+            "cycle": 17
+          },
+          {
+            "section": "My Stuff",
+            "seconds": 0.494,
+            "cycle": 17
+          },
+          {
+            "section": "Shows",
+            "seconds": 0.674,
+            "cycle": 18
+          },
+          {
+            "section": "Movies",
+            "seconds": 0.66,
+            "cycle": 18
+          },
+          {
+            "section": "Home",
+            "seconds": 0.941,
+            "cycle": 18
+          },
+          {
+            "section": "YouTube",
+            "seconds": 1.129,
+            "cycle": 18
+          },
+          {
+            "section": "My Stuff",
+            "seconds": 0.536,
+            "cycle": 18
+          },
+          {
+            "section": "Shows",
+            "seconds": 0.924,
+            "cycle": 19
+          },
+          {
+            "section": "Movies",
+            "seconds": 0.744,
+            "cycle": 19
+          },
+          {
+            "section": "Home",
+            "seconds": 1.019,
+            "cycle": 19
+          },
+          {
+            "section": "YouTube",
+            "seconds": 1.023,
+            "cycle": 19
+          },
+          {
+            "section": "My Stuff",
+            "seconds": 0.547,
+            "cycle": 19
+          }
+        ],
+        "memory": {
+          "rss_start": 276152320,
+          "prewarm_start": 243617792,
+          "measurement": "resident bytes from procfs",
+          "rss_end": 215113728
+        }
+      }
+    }
+  }
+}

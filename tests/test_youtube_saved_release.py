@@ -1,7 +1,8 @@
 """The release may only promote the exact Mac/Fire tested controller."""
 import copy,importlib.util,json,unittest
 from pathlib import Path
-ROOT=Path(__file__).resolve().parents[1]
+from historical_release_fixture import published129
+ROOT=published129()
 def gate():
  s=importlib.util.spec_from_file_location('saved_release_gate',ROOT/'tools/verify_youtube_saved.py');m=importlib.util.module_from_spec(s);s.loader.exec_module(m);return m
 class SavedRelease(unittest.TestCase):

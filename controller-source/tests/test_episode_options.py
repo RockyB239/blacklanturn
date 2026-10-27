@@ -72,6 +72,10 @@ class EpisodeOptions(unittest.TestCase):
         self.assertEqual(state.histories[0].pages, [('original-row', 2)])
         self.assertEqual(events, ['stop-preview'])
 
+    def test_episode_options_omit_genre_without_the_all_episodes_context(self):
+        _, _, menus = self.run_menu(cancel=True)
+        self.assertNotIn('Choose genre…', menus[0])
+
     def test_active_source_reset_keeps_default_player_and_refresh_as_final_options(self):
         _, _, menus = self.run_menu(cancel=True, session_active=True)
         self.assertIn('Return to normal autoplay', menus[0])

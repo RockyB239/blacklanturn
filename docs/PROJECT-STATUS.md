@@ -1,3 +1,15 @@
+# Current validation state —27 October2026
+
+Public release remains Build 1.1.29 / Installer 1.0.34. All three personal devices run private optimization Build 1.1.30 / Installer 1.0.35 / Controller 0.1.96, with personal Fight Zone 0.3.4 and external icons1.0.0. Nothing from this task was publicly published.
+
+Both clean editions and component packages derive from pinned1.1.29. Source/default/patch/private-data checks,933 controller/898 installer/126 personal tests, independent review and 8 isolated native install cases passed. Live exact-source parity, native settings/auth preservation and100-visit sustained-use checks pass on all three. Final matched comparisons pass; legacy timing-check errors, superseding corrected comparisons and limits are disclosed in docs/OPTIMIZATION_1_1_30_VALIDATION.md and the project optimization report. No displayed-object retention remains in final source.
+
+Canonical package versions come from tools/release_report.py. Source-bound sanitized performance receipts are under validation/optimization130-performance.json. Component URLs are not public; future catalogs can advertise the smaller verified transfer with full fallback. Personal extensions register through contained descriptors and never modify managed controller code.
+
+Historical records below retain their original version claims; this current-state block supersedes them.
+
+---
+
 # Release 1.1.11 / Installer 1.0.16
 
 Controller 0.1.82 tightens recognized YouTube subject rows while retaining personalized feed ordering, adaptive Refresh, card/watch state and continuation. Fresh Fire, Mac and Apple TV category/source/preservation/startup checks passed. Installer 1.0.16 and playback defaults are unchanged. See [validation](RELEASE_1_1_11_VALIDATION.md) for counts, hashes, scope and limits. Prior release assets and private recovery remain retained.

@@ -164,6 +164,39 @@ class ControllerControls(unittest.TestCase):
                     'discovery_result':lambda _:None,'resume_options':lambda _: {},'event':lambda *a,**kw:None}
                 extract(ROOT/'live_review.py','title_actions',ns,'LiveReview')(state)
                 self.assertNotIn('Choose genre…',menus[0])
+    def test_folder_navigation_omits_genres_only_in_the_season_or_episode_row(self):
+        m=module(self)
+        show_path='plugin://plugin.video.themoviedb.helper/?info=seasons&tmdb_type=tv&tmdb_id=83659'
+        episodes=show_path.replace('info=seasons','info=episodes')+'&season=1'
+        discovery='plugin://plugin.video.themoviedb.helper/?info=popular&tmdb_type=tv'
+        show={'label':'Cabinet of Curiosities','file':show_path,'filetype':'directory'}
+        season={'label':'Season 1','file':episodes,'filetype':'directory','season':1}
+        previous={'label':'Previous','file':'blacklanturn://previous-page','_page_control':'previous'}
+        next_page={'label':'Next','file':episodes+'&page=2','_page_control':'next'}
+        for paths,focus,selected,want_genre in [
+            ([discovery,''],900,show,True),
+            ([show_path,discovery],900,season,False),
+            ([episodes,discovery],900,previous,False),
+            ([episodes,discovery],900,next_page,False),
+            ([episodes.replace('season=1','season=0'),discovery],900,next_page,False),
+            ([episodes,discovery],901,show,True),
+            ([episodes,discovery],101,previous,False),
+            ([discovery,''],900,show,True),
+        ]:
+            with self.subTest(paths=paths,focus=focus,title=selected['label']):
+                menus=[]
+                history=PageHistory();history.push(discovery,0)
+                state=SimpleNamespace(section='Shows',mode='home',nav=False,search_state=None,
+                    episode_browser_context=None,discovery_stack=[],paths=paths,last_row=0,
+                    getFocusId=lambda:focus,rows=[[selected],[selected]],
+                    histories=[history,PageHistory()],row_states={},chosen=lambda cid:selected,
+                    config={'Saved':[]},rating_identity=lambda _:None,stop_preview=lambda:None,actions_open=False)
+                ns={'xbmcgui':SimpleNamespace(Dialog=lambda:SimpleNamespace(contextmenu=lambda opts:menus.append(opts) or -1)),
+                    'can_choose_genre':m.can_choose_genre,'trakt_command':lambda _:None,'choose_player_path':lambda _:None,
+                    'discovery_result':lambda _:None,'resume_options':lambda _: {},'event':lambda *a,**kw:None}
+                extract(ROOT/'live_review.py','title_actions',ns,'LiveReview')(state)
+                self.assertEqual('Choose genre…' in menus[0],want_genre)
+                if want_genre:self.assertEqual(menus[0].index('Choose genre…'),menus[0].index('Details')+1)
     def test_clicking_previous_restores_that_rows_path_and_position(self):
         m=module(self);history=PageHistory();history.push('plugin://test/first',6);calls=[]
         state=SimpleNamespace(actions_open=False,histories=[PageHistory(),history],chosen=lambda cid:{'_page_control':'previous','file':'blacklanturn://previous'},

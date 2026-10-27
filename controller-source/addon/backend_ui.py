@@ -22,6 +22,9 @@ class BackendSettings(xbmcgui.WindowXMLDialog):
    elif action=='preview_mode':help='Current mode: '+('Automatic' if self.config.get('PreviewMode',self.preview_mode)=='auto' else 'Manual')
    elif action=='preview_delay':help='Current delay: '+str(self.config.get('PreviewDelay',5))+' seconds'
    elif action=='preview_language':help='Current preference: '+('English first, other languages as fallback' if self.config.get('PreviewLanguage','en')=='en' else 'Provider order')
+   elif action=='icon_pack':
+    from icon_packs import pack_label
+    help='Current style: '+pack_label(self.config)+'  ·  Keeps your sidebar choices and order'
    elif action=='title_logos':help='Title logos: '+('On' if self.config.get('TitleLogos',True) else 'Off')+'  ·  Plain titles remain the fallback'
    elif action=='status_display':
     from navigation_core import status_settings
@@ -37,7 +40,7 @@ class BackendSettings(xbmcgui.WindowXMLDialog):
    if category!=self.category:self.populate(category)
    self.row=self.getControl(200).getSelectedPosition()
    action=SETTINGS_GROUPS[self.category][2][self.row][0]
-   if action.startswith('kodi:') or action in ('sidebar','status_display'):
+   if action.startswith('kodi:') or action in ('sidebar','status_display','icon_pack'):
     self.result=action;self.close();return
    self.handler(action)
    row=self.row;self.loaded_category=-1;self.populate(self.category)

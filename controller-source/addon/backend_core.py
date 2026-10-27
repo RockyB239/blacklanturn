@@ -41,9 +41,10 @@ SETTINGS_GROUPS=[
   ('help','Using BlackLanturn','Browsing, search, accounts, previews and recovery.'),
   ('clear_search','Clear saved search','Remove the last search term saved on this device.'),
   ('recovery','Return to previous skin','Switch back to your previous skin; add-ons and accounts remain installed.')]),
- ('Appearance','Choose the information shown while browsing.',[
+ ('Appearance','Choose artwork and information shown while browsing.',[
   ('status_display','Time, date & weather','Independent visibility switches; weather uses your Kodi service.'),
-  ('title_logos','Title logos','Use movie and show logos when available; otherwise show the full title.')])]
+  ('title_logos','Title logos','Use movie and show logos when available; otherwise show the full title.'),
+('icon_pack','Sidebar icon style','Choose an installed icon pack. Sidebar choices and order stay saved.')])]
 
 class CoreSettingsReturn:
  """Wait for actual core activation, then Home; avoid an early-return race."""

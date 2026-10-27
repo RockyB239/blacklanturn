@@ -1,0 +1,27 @@
+{
+  "title": "BlackLanturn 1.1.30",
+  "summary": "Update-safe personal extensions and faster, bounded row loading.",
+  "sections": [
+    {
+      "heading": "Keep your personal setup",
+      "bullets": [
+        "Installed personal pages and icon packs use external registrations, so managed code can update and verify without removing them.",
+        "Accounts, authorizations, source choices, watched progress, favourites and unrelated add-ons remain saved."
+      ]
+    },
+    {
+      "heading": "Faster browsing",
+      "bullets": [
+        "YouTube reuses content preferences within each owned request while keeping account checks and watched status current.",
+        "Visible rows take priority, obsolete queued work is replaced, and disposable row writes are batched."
+      ]
+    },
+    {
+      "heading": "Clear menus and reliable updates",
+      "bullets": [
+        "Choose genre remains available after Details in Movies and Shows browsing and is omitted inside seasons and episodes.",
+        "Compatible installations can use smaller component downloads with the same verification and rollback protections."
+      ]
+    }
+  ]
+}

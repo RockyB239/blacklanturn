@@ -6,7 +6,8 @@ from navigation_core import *
 ROOT=Path(__file__).parents[1]
 def methods(names,extra):
  cls=next(n for n in ast.parse(Path(os.environ.get('BL_CONTROLLER_SOURCE',str(ROOT/'addon/live_review.py'))).read_text()).body if isinstance(n,ast.ClassDef) and n.name=='LiveReview')
- ns=dict(extra);exec(compile(ast.Module(body=[n for n in cls.body if isinstance(n,ast.FunctionDef) and n.name in names],type_ignores=[]),'live_review','exec'),ns)
+ from icon_packs import selected_pack
+ ns=dict(extra,selected_pack=selected_pack);exec(compile(ast.Module(body=[n for n in cls.body if isinstance(n,ast.FunctionDef) and n.name in names],type_ignores=[]),'live_review','exec'),ns)
  return ns
 class NavigationController(unittest.TestCase):
  def fixture(self):
@@ -38,7 +39,7 @@ class NavigationController(unittest.TestCase):
   self.assertEqual([e['id'] for e in s.config['Sidebar']],['home','movies','shows','saved']);self.assertFalse(s.config['Sidebar'][1]['enabled']);self.assertEqual(len(saved),2)
  def test_icon_grid_result_is_saved_to_the_original_shortcut(self):
   choices=iter([2,2,-1]);picked=[];saved=[]
-  def choose(current):picked.append(current);return 'bookmark'
+  def choose(current,*pack):picked.append(current);return 'bookmark'
   ns=methods(['sidebar_settings'],{'choose_icon':choose,'xbmcgui':SimpleNamespace(Dialog=lambda:SimpleNamespace(select=lambda *a,**k:next(choices))),'edit_navigation':edit_navigation,'event':lambda *a,**k:None})
   s=SimpleNamespace(alive=True,config=self.fixture(),save=lambda:saved.append(True),refresh_navigation=lambda:None)
   ns['sidebar_settings'](s)
@@ -47,7 +48,7 @@ class NavigationController(unittest.TestCase):
  def test_cancelled_icon_grid_does_not_save_or_change_preferences(self):
   from copy import deepcopy
   choices=iter([2,2,-1]);saved=[]
-  ns=methods(['sidebar_settings'],{'choose_icon':lambda current:None,'xbmcgui':SimpleNamespace(Dialog=lambda:SimpleNamespace(select=lambda *a,**k:next(choices))),'edit_navigation':edit_navigation,'event':lambda *a,**k:None})
+  ns=methods(['sidebar_settings'],{'choose_icon':lambda current,*pack:None,'xbmcgui':SimpleNamespace(Dialog=lambda:SimpleNamespace(select=lambda *a,**k:next(choices))),'edit_navigation':edit_navigation,'event':lambda *a,**k:None})
   s=SimpleNamespace(alive=True,config=self.fixture(),save=lambda:saved.append(True),refresh_navigation=lambda:None)
   before=deepcopy(s.config);ns['sidebar_settings'](s)
   self.assertEqual(s.config,before);self.assertEqual(saved,[])

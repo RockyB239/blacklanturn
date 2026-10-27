@@ -27,7 +27,7 @@ class Recovery(unittest.TestCase):
         where.mkdir(parents=True,exist_ok=True)
         (where/'addon.xml').write_text('<addon id="'+SELF+'" version="'+version+'"/>')
         lib=where/'resources/libs';lib.mkdir(parents=True)
-        for name in ('inplace_update.py','standard_addons.py','archive_paths.py'):shutil.copyfile(LIB/name,lib/name)
+        for name in ('inplace_update.py','standard_addons.py','archive_paths.py','portable_lock.py','component_update.py'):shutil.copyfile(LIB/name,lib/name)
     def journal(self,status='applying'):
         self.work.mkdir(parents=True,exist_ok=True)
         state={'schema':1,'status':status,'addons':{SELF:{'before':{'old':'a'*64},'after':{'new':'b'*64},'started':True,'enabled_before':True}},'metadata':{k:{'started':False,'existed':False} for k in META}}
@@ -37,6 +37,16 @@ class Recovery(unittest.TestCase):
         self.assertEqual(self.unrelated.read_bytes(),b'custom add-on')
     def test_normal_startup_performs_no_module_import_or_writes(self):
         self.assertFalse(self.m.recover_installer(self.home));self.assertFalse(self.work.exists());self.preserved()
+    def test_unjournaled_reconstruction_is_cleaned_without_settings_changes(self):
+        self.core(self.target);self.work.mkdir();(self.work/'partial.zip').write_bytes(b'partial archive')
+        self.assertTrue(self.m.recover_installer(self.home));self.assertFalse(self.work.exists());self.preserved()
+    def test_unjournaled_live_writer_is_left_alone(self):
+        import fcntl
+        self.core(self.target);self.work.mkdir();partial=self.work/'partial.zip';partial.write_bytes(b'active archive')
+        with (self.home/'addons/.blacklanturn-update.lock').open('a') as lock:
+            fcntl.flock(lock,fcntl.LOCK_EX|fcntl.LOCK_NB)
+            self.assertFalse(self.m.recover_installer(self.home));self.assertTrue(partial.exists())
+        self.preserved()
     def test_missing_installer_restored_from_real_backup_core(self):
         self.core(self.old);self.journal();self.assertFalse(self.target.exists())
         self.assertTrue(self.m.recover_installer(self.home))

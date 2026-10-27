@@ -5,6 +5,7 @@ import sys,unittest
 ROOT=Path(__file__).parents[1]/'addon'
 sys.path.insert(0,str(ROOT))
 from navigation_core import ICON_CHOICES
+from icon_packs import icon_path,DEFAULT_PACK
 
 class IconPickerTests(unittest.TestCase):
  def picker(self,current):
@@ -13,9 +14,9 @@ class IconPickerTests(unittest.TestCase):
   class Item:
    def __init__(self,label):self.label=label;self.art={}
    def setArt(self,art):self.art.update(art)
-  ns={'ROOT':ROOT,'ICON_CHOICES':ICON_CHOICES,'xbmcgui':SimpleNamespace(ListItem=Item)}
+  ns={'icon_path':icon_path,'ROOT':ROOT,'ICON_CHOICES':ICON_CHOICES,'xbmcgui':SimpleNamespace(ListItem=Item)}
   exec(compile(ast.Module(body=[m for m in cls.body if isinstance(m,ast.FunctionDef)],type_ignores=[]),'icon_picker','exec'),ns)
-  state=SimpleNamespace(current_icon=current,choices=ICON_CHOICES,items=[],position=0,result=None,closed=False)
+  state=SimpleNamespace(pack=DEFAULT_PACK,current_icon=current,choices=ICON_CHOICES,items=[],position=0,result=None,closed=False)
   control=SimpleNamespace(reset=lambda:state.items.clear(),addItems=lambda items:state.items.extend(items),selectItem=lambda p:setattr(state,'position',p),getSelectedPosition=lambda:state.position)
   state.getControl=lambda cid:control;state.setFocusId=lambda cid:setattr(state,'focus',cid);state.close=lambda:setattr(state,'closed',True)
   for name in ('onInit','onClick','onAction'):setattr(state,name,MethodType(ns[name],state))

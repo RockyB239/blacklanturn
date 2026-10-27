@@ -21,6 +21,7 @@ def read_account_store():
 class YouTubeBrowser(YouTubeRows,SavedYouTube):
     def refresh_youtube_connection(self,force=False):
         import xbmc
+        if force:SavedYouTube.invalidate_saved_youtube_settings(self)
         lifetime=getattr(self,'window_lifetime',None)
         def current():return getattr(self,'alive',True) and lifetime is getattr(self,'window_lifetime',None)
         if not current():return

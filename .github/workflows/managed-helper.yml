@@ -21,6 +21,11 @@ jobs:
           for edition in General Apple-TV-Mac; do
             curl --fail --location --retry 3 "https://github.com/RockyB239/blacklanturn/releases/download/v1.1.2/BlackLanturn-${edition}-Kodi21-1.1.2.zip" -o "baselines/BlackLanturn-${edition}-Kodi21-1.1.2.zip"
           done
+      - name: Download pinned update baselines
+        run: |
+          for edition in General Apple-TV-Mac; do
+            curl --fail --location --retry 3 "https://github.com/RockyB239/blacklanturn/releases/download/v1.1.29/BlackLanturn-${edition}-Kodi21-1.1.29.zip" -o "baselines/BlackLanturn-${edition}-Kodi21-1.1.29.zip"
+          done
       - name: Installer and update protection tests
         run: python -m unittest discover -s tests -v
       - name: Controller regression checks
@@ -33,5 +38,9 @@ jobs:
         run: python -m unittest discover -s compatibility/youtube-context/tests -v
       - name: Rebuild and verify protected editions
         run: |
-          python tools/build_release.py --baselines baselines --output artifacts
-          python tools/verify_release.py artifacts
+          python tools/build_release130.py --baselines baselines --output artifacts
+          python tools/verify_release130.py artifacts --baselines baselines
+          python tools/release_report.py artifacts/BlackLanturn-General-Kodi21-1.1.30.zip --output artifacts/current-general.json
+          python tools/release_report.py artifacts/BlackLanturn-Apple-TV-Mac-Kodi21-1.1.30.zip --output artifacts/current-apple.json
+      - name: Source-bound native performance acceptance
+        run: python tools/device_validation/verify_performance_evidence.py validation/optimization130-performance.json --manifest controller-source/manifest96.json

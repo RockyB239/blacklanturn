@@ -2,10 +2,11 @@
 import importlib.util,json,unittest
 from pathlib import Path
 from unittest.mock import patch
-ROOT=Path(__file__).resolve().parents[1]
+from historical_release_fixture import published129
+ROOT=published129()
 class Release128Source(unittest.TestCase):
  def gate(self):
-  spec=importlib.util.spec_from_file_location('release128_gate',ROOT/'tools/verify_release128.py');g=importlib.util.module_from_spec(spec);spec.loader.exec_module(g);return g
+  spec=importlib.util.spec_from_file_location('release128_gate',ROOT/'tools/verify_release128.py');g=importlib.util.module_from_spec(spec);spec.loader.exec_module(g);g.ROOT=ROOT;return g
  def test_exact_reviewed_source_and_unchanged_method_scopes(self):
   g=self.gate();original=g.inventory;baseline=__import__('tools.verify_release129',fromlist=['baseline_installer']).baseline_installer()
   with patch.object(g,'inventory',side_effect=lambda p:baseline if p==ROOT/'installer-source/plugin.program.blacklanturninstaller' else original(p)):

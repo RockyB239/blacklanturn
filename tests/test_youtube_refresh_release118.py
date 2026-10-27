@@ -1,6 +1,7 @@
 import copy,importlib.util,json,unittest
 from pathlib import Path
-ROOT=Path(__file__).resolve().parents[1]
+from historical_release_fixture import published129
+ROOT=published129()
 s=importlib.util.spec_from_file_location('refresh_release_gate',ROOT/'tools/verify_release.py');V=importlib.util.module_from_spec(s);s.loader.exec_module(V)
 class Release118(unittest.TestCase):
  def inputs(self):return json.loads((ROOT/'controller-source/youtube-refresh-native-verification.json').read_text()),json.loads((ROOT/'controller-source/manifest87.json').read_text())

@@ -32,7 +32,7 @@ class ResponsePublication(unittest.TestCase):
         obj=SimpleNamespace(alive=True,generation=1,paths=['old',''],path_tokens={},result_cache=RowResultCache(),
             list_lock=threading.RLock(),cached_row_items=lambda *a,**kw:[{'file':'old/title'}],
             rows=[[],[]],failed_paths={},row_states={},setProperty=lambda k,v:props.__setitem__(k,v))
-        method=extract(ROOT/'live_review.py','request_row_loads',{'threading':SimpleNamespace(Thread=Thread),'event':lambda *a,**k:None},'LiveReview')
+        method=extract(ROOT/'live_review.py','request_row_loads',{'submit_latest':lambda owner,work:queue.append(work),'threading':SimpleNamespace(Thread=Thread),'event':lambda *a,**k:None},'LiveReview')
         method(obj,[(0,{'path':'old','label':'Old'})])
         self.run_waiting(obj,queue.pop(),applied,lambda:(setattr(obj,'generation',2),obj.paths.__setitem__(0,'new')))
         self.assertEqual(applied,[]);self.assertEqual(props,{})

@@ -14,6 +14,7 @@ NAMES=('step_search_rows','request_row_loads','restart_pending_rows','cached_row
 def bind(state,namespace):
     if not hasattr(state,"preview_dispatch_lock"):state.preview_dispatch_lock=threading.RLock()
     ns=dict(namespace,hydrate_watch_metadata=hydrate_watch_metadata,item_key=item_key,restored_position=restored_position,public_path=public_path,TMDB='plugin://plugin.video.themoviedb.helper/',parse_qs=parse_qs,urlsplit=urlsplit,provider_path=provider_path,upstream_path=upstream_path,logical_files=logical_files,needs_fill=needs_fill,first_page_minimum=first_page_minimum,first_page_keep=first_page_keep,fill_page=fill_page,PageCancelled=PageCancelled,should_exclude_anime=should_exclude_anime)
+    ns['submit_latest']=lambda owner,work:namespace['threading'].Thread(target=work,name='BlackLanturnLiveLists',daemon=True).start()
     tree=ast.parse((Path(__file__).parents[1]/'addon/live_review.py').read_text())
     cls=next(n for n in tree.body if isinstance(n,ast.ClassDef) and n.name=='LiveReview')
     nodes=[n for n in cls.body if isinstance(n,ast.FunctionDef) and n.name in NAMES]

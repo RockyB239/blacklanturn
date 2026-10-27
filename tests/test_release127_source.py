@@ -2,7 +2,8 @@
 import copy,importlib.util,json,unittest
 from pathlib import Path
 from unittest.mock import patch
-ROOT=Path(__file__).resolve().parents[1]
+from historical_release_fixture import published129
+ROOT=published129()
 class Release127Source(unittest.TestCase):
  def gate(self):
   spec=importlib.util.spec_from_file_location('release127_gate',ROOT/'tools/verify_release127.py');self.assertTrue(Path(spec.origin).is_file(),'Missing127 scoped source gate')

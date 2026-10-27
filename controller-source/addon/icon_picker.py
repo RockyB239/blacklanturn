@@ -2,6 +2,7 @@
 from pathlib import Path
 import xbmcgui
 from navigation_core import ICON_CHOICES
+from icon_packs import icon_path,DEFAULT_PACK
 ROOT=Path(__file__).resolve().parent
 
 class IconPicker(xbmcgui.WindowXMLDialog):
@@ -11,7 +12,7 @@ class IconPicker(xbmcgui.WindowXMLDialog):
         items=[]
         for icon_id,label in self.choices:
             item=xbmcgui.ListItem(label=label)
-            artwork=str(ROOT/'resources/media'/(icon_id+'.png'))
+            artwork=icon_path(ROOT,icon_id,self.pack)
             item.setArt({'icon':artwork,'thumb':artwork})
             items.append(item)
         panel=self.getControl(5000)
@@ -29,9 +30,9 @@ class IconPicker(xbmcgui.WindowXMLDialog):
     def onAction(self,action):
         if action.getId() in (9,10,92,216,247):self.close()
 
-def choose_icon(current_icon):
+def choose_icon(current_icon,pack=DEFAULT_PACK):
     dialog=IconPicker('IconPicker.xml',str(ROOT),'Default','1080i')
-    dialog.current_icon=current_icon;dialog.result=None
+    dialog.current_icon=current_icon;dialog.pack=pack;dialog.result=None
     dialog.doModal()
     result=dialog.result
     del dialog

@@ -18,6 +18,7 @@ class SimilarNavigation(unittest.TestCase):
         untouched=copy.deepcopy(provider);requests=[]
         with tempfile.TemporaryDirectory() as folder:
             window,queue,effects=lifecycle_fixture.ExperimentLifecycle().state(folder)
+            window.configure_icon_resources=lambda:None
             window.onInit()
             ns=window.details.__func__.__globals__
             def get_list(path):
@@ -41,6 +42,7 @@ class SimilarPaging(unittest.TestCase):
     def state(self,provider):
         folder=tempfile.TemporaryDirectory();self.addCleanup(folder.cleanup)
         window,queue,effects=lifecycle_fixture.ExperimentLifecycle().state(folder.name)
+        window.configure_icon_resources=lambda:None
         window.onInit()
         ns=window.details.__func__.__globals__
         tmdb=extract(ROOT/'live_review.py','tmdb',{'TMDB':'plugin://plugin.video.themoviedb.helper/','urlencode':urlencode})

@@ -5,6 +5,7 @@ from pathlib import Path
 from urllib.parse import urlencode,urlsplit,parse_qs
 import xbmc,xbmcgui,xbmcvfs,xbmcaddon
 import autoplay_session
+from provider_work import submit_latest
 from update_notes_ui import HomeUpdates
 from live_runtime import read_controller_config
 from live_core import directory_items,rating_line,PageHistory,valid_source,person_identity,mdblist_line,rating_badges,select_rating_badges,update_rating_sources,preview_candidates,PreviewAttempts,watch_state,clear_stale_preview,episode_identity,show_identity,title_details_params,merge_title_details,episode_heading,is_browse_folder
@@ -25,6 +26,8 @@ from row_feedback import trim_row_cache,row_message,provider_page_label,RowResul
 from public_rows import PublicRowSnapshots,snapshot_scope,public_path,helper_settings_identity
 from backend_ui import BackendSettings,LoadingPreview
 from icon_picker import choose_icon
+from icon_packs import icon_path,selected_pack,with_pack,PACK_CHOICES
+from extensions import inline_request
 from genre_picker import choose_genre
 from browse_controls import AnimeMetadata,can_choose_genre,should_exclude_anime,page_cards
 from filtered_pages import first_page_keep,first_page_minimum, provider_path,upstream_path,logical_files,needs_fill,fill_page,PageCancelled
@@ -105,29 +108,30 @@ def initialize_addons():
     if clear_stale_preview(rpc):event('stale_trailer_released')
     event('existing_integrations_ready')
 
-def media_item(data):
+def media_item(data,immutable=False):
     headline,episode_line=episode_heading(data)
-    li=xbmcgui.ListItem(label=episode_line or data.get('title') or data.get('label',''),path=data.get('file',''))
+    # Only the YouTube browser opts in: it replaces whole cards on refresh.
+    # TMDb and personal extensions mutate displayed cards and retain GUI locks.
+    li=xbmcgui.ListItem(label=episode_line or data.get('title') or data.get('label',''),path=data.get('file',''),offscreen=immutable)
     art=dict(data.get('art',{}))
     selected_art=card_artwork(data)
     art['landscape']=selected_art['image'] if selected_art['kind']=='landscape' else ''
     art['poster']=selected_art['image'] if selected_art['kind']=='portrait' else art.get('poster','')
     if selected_art['kind']=='square':art['square']=selected_art['image']
     if data.get('_page_control') and selected_art['kind']=='text':selected_art['kind']='paging'
-    li.setProperty('pageControl',data.get('_page_control',''))
+    properties={'pageControl':data.get('_page_control','')}
     youtube_folder=(is_youtube(data) and data.get('filetype')=='directory' and not data.get('_page_control')
                     and not selected_art['image'].startswith(('http://','https://')))
-    li.setProperty('youtubeFolder','true' if youtube_folder else 'false')
+    properties['youtubeFolder']='true' if youtube_folder else 'false'
     if youtube_folder:art['youtubefolder']=selected_art['image'] or 'video-addons.png'
-    li.setProperty('cardArtKind',selected_art['kind'])
+    properties['cardArtKind']=selected_art['kind']
     li.setArt(art)
     info={k:data[k] for k in ['title','plot','year','rating','genre','mpaa','director','studio','season','episode','tvshowtitle','playcount'] if k in data}
     if data.get('runtime'):info['duration']=data['runtime']
     if data.get('showtitle'):info['tvshowtitle']=data['showtitle']
-    if info:li.setInfo('video',info)
-    hydrate_watch_metadata(li,data)
     caption={'caption':data.get('title') or data.get('label',''),'meta':youtube_caption(data)} if is_youtube(data) else episode_card(data)
-    li.setProperty('episodeCaption',caption['caption']);li.setProperty('episodeMeta',search_caption(data) if data.get('_search_kind') else caption['meta'])
+    properties.update(episodeCaption=caption['caption'],episodeMeta=search_caption(data) if data.get('_search_kind') else caption['meta'])
+    hydrate_watch_metadata(li,data,info=info,properties=properties,initial=True)
     return li
 
 class PreviewPlayer(xbmc.Player):
@@ -174,12 +178,13 @@ class LiveReview(YouTubeBrowser,xbmcgui.WindowXML):
         self.core_settings_request=None;self.playback_request=None;self.playback_return=None;self.actions_open=False;self.settings_open=False;self.backend_position=(resume['category'],resume['row']) if resume else (0,0);self.backend_focus=200 if resume else 100;self.loading_started=time.monotonic()
         self.navigation_id=resume.get('navigation_id','home') if resume else 'home';self.navigation_items=[];self.pending_sidebar_return=False
         self.active_page=None;self.page_definitions=[];self.row_offset=0;self.row_cache={};self.window_ready=[False,False];self.list_lock=threading.Lock()
-        self.result_cache=RowResultCache()
+        self.result_cache=RowResultCache(retain_stale=300)
         self.adaptive_browsing=True;self.fixed_hero=True
         self.setProperty('heroCompact','true');self.setProperty('addonBrowser','false');self.setProperty('genreChooser','false')
         self.setProperty('loading','true');self.setProperty('loadingStatus','Starting BlackLanturn…')
         self.setProperty('input','remote');self.setProperty('previewMode','manual');self.setProperty('genreLabel','Genres: All');self.setProperty('page','home');self.setProperty('notice','Loading live add-on lists…')
         STORE.mkdir(parents=True,exist_ok=True)
+        self.configure_icon_resources()
         self.config_loaded=True
         try:self.config=read_controller_config(STORE/'rows.json')
         except (OSError,ValueError) as exc:
@@ -390,13 +395,25 @@ class LiveReview(YouTubeBrowser,xbmcgui.WindowXML):
                 if self.nav_revision==revision:
                     self.nav=opened;self.nav_width_requested=350 if opened else 82;self.nav_revision+=1
         self.apply_nav_width()
+    def configure_icon_resources(self):
+        # Discover enabled owner resources once per window, before validating
+        # stored sidebar icon IDs. No provider work is performed here.
+        import icon_packs
+        resources=rpc('Addons.GetAddons',{'properties':['enabled','path']}).get('result',{}).get('addons',[])
+        icon_packs.configure([a['path'] for a in resources if a.get('enabled') and a.get('addonid','').startswith('resource.images.') and a.get('path')])
+        from navigation_core import ICON_CHOICES
+        ICON_CHOICES[:]=[(key,label) for key,label in ICON_CHOICES if key not in getattr(icon_packs,'registered_ids',set())]
+        extras=[(key,label) for key,label in icon_packs.EXTRA_ICON_CHOICES if key not in dict(ICON_CHOICES)]
+        ICON_CHOICES.extend(extras)
+        icon_packs.registered_ids={key for key,label in extras}
+
     def refresh_navigation(self):
         connected=getattr(getattr(self,'youtube_connection',None),'connected',False)
         visible=visible_navigation(self.config,connected);self.navigation_items=sidebar_items(self.config,connected);control=self.getControl(50);control.reset();items=[]
         layout=sidebar_layout(len(visible));control.setHeight(layout['height'])
         self.setProperty('sidebarCompact','true' if layout['row_height']==80 else 'false')
         for entry in self.navigation_items:
-            li=xbmcgui.ListItem(label=entry['label']);li.setArt({'icon':str(ROOT/'resources/media'/(entry['icon']+'.png'))})
+            li=xbmcgui.ListItem(label=entry['label']);li.setArt({'icon':icon_path(ROOT,entry['icon'],selected_pack(self.config))})
             li.setProperty('active','true' if entry['id']==self.navigation_id else 'false');items.append(li)
         control.addItems(items);control.setVisible(bool(items))
         if items:control.selectItem(next((i for i,e in enumerate(self.navigation_items) if e['id']==self.navigation_id),0))
@@ -437,7 +454,7 @@ class LiveReview(YouTubeBrowser,xbmcgui.WindowXML):
                     value=picked['destination']
                 elif action==1:value=xbmcgui.Dialog().input('Sidebar name',defaultt=entry['label'])
                 elif action==2:
-                    value=choose_icon(entry.get('icon'))
+                    value=choose_icon(entry.get('icon'),selected_pack(self.config))
                     if value is None:continue
                 self.config['Sidebar']=edit_navigation(self.config,entry['id'],['destination','rename','icon','up','down','toggle','remove'][action],value)['Sidebar']
             self.save();self.refresh_navigation()
@@ -490,6 +507,10 @@ class LiveReview(YouTubeBrowser,xbmcgui.WindowXML):
         if not route:xbmcgui.Dialog().ok('Destination unavailable','This page was removed or its destination is unsupported. Change it in Sidebar settings.');return
         if route['kind']=='addon' and not xbmc.getCondVisibility('System.HasAddon('+route['addon']+')'):
             xbmcgui.Dialog().ok('Add-on unavailable','Enable this add-on in Kodi settings. Your sidebar item has been retained.');return
+        if route['kind']=='addon':
+            extension=inline_request(route['path'],lambda aid:xbmcaddon.Addon(aid).getAddonInfo('path') if xbmc.getCondVisibility('System.HasAddon('+aid+')') else None)
+            if extension:
+                self.stop_preview();self.core_settings_request={'inline_extension':extension};self.finish();return
         if route['kind']=='kodi':
             window=route['window'];required='PVR.HasTVChannels' if window in ('tvchannels','tvguide') else 'PVR.HasRadioChannels' if window=='radiochannels' else None
             if required and not xbmc.getCondVisibility(required):xbmcgui.Dialog().ok('Live TV setup','Configure a PVR client and channels in Kodi settings first. Your sidebar item has been retained.');return
@@ -537,9 +558,10 @@ class LiveReview(YouTubeBrowser,xbmcgui.WindowXML):
             return False
         scope=snapshot_scope(self.config,identity);previous=self.snapshot_cache
         if previous is not None and previous.scope==scope:return False
-        if previous is not None:self.invalidate_row_results()
+        # Even None→proven scope must discard results fetched without proof.
+        self.invalidate_row_results()
         self.snapshot_cache=PublicRowSnapshots(STORE/'public-row-snapshots.json',scope)
-        return previous is not None
+        return True
     def invalidate_row_results(self):
         cache=getattr(self,'result_cache',None)
         if cache is not None:cache.clear();self.publish_cache_stats()
@@ -558,6 +580,15 @@ class LiveReview(YouTubeBrowser,xbmcgui.WindowXML):
         if files is not None:
             return (None,False) if filtered and needs_fill(path,files,first_page_keep(self,path,metadata.without_anime),size=first_page_minimum(definition)) else (files,False)
         snapshots=getattr(self,'snapshot_cache',None)
+        # Freshness is still 30 seconds for Trakt. Only current-account session data
+        # may paint while the normal owned worker refreshes it; never persist it.
+        if snapshots is not None and parse_qs(urlsplit(path).query).get('info',[''])[0].startswith('trakt'):
+            key='filtered-v1:'+path if filtered else path
+            files=self.result_cache.get_stale(key)
+            if files is not None and (not filtered or not needs_fill(path,files,first_page_keep(self,path,metadata.without_anime),positioned=True,size=first_page_minimum(definition))):
+                for item in files:
+                    for field in ('playcount','resume','lastplayed','watched','watchedepisodes','resume_point','resumetime'):item.pop(field,None)
+                return files,True
         files=snapshots.get(path) if snapshots is not None else None
         if files is not None and filtered and needs_fill(path,files,first_page_keep(self,path,metadata.without_anime),size=first_page_minimum(definition)):return None,False
         return files,files is not None
@@ -626,7 +657,7 @@ class LiveReview(YouTubeBrowser,xbmcgui.WindowXML):
                 if not current():raise PageCancelled('Row configuration changed')
                 # Personal rows stay session-only; late work cannot repopulate either cache.
                 info=parse_qs(urlsplit(path).query).get('info',[''])[0]
-                cache.put(path,files,revision=revision,ttl=30 if info.startswith('trakt') else 120)
+                cache.put(path,files,revision=revision,ttl=30 if info.startswith('trakt') else 120,allow_empty=info.startswith('trakt'))
                 if revision==cache.revision and snapshots is not None and snapshots is getattr(self,'snapshot_cache',None):snapshots.put(path,files,revision=snapshot_revision)
         self.publish_cache_stats()
         return self.fill_discovery_page(path,files,current,refresh=definition.get('_snapshot_refresh',False),minimum=first_page_minimum(definition))
@@ -754,6 +785,9 @@ class LiveReview(YouTubeBrowser,xbmcgui.WindowXML):
         self.request_row_loads(pending,focus_slot)
         event('row_window',offset=offset,total=len(self.page_definitions),page=self.active_page,focus_slot=focus_slot)
     def request_row_loads(self,pending,focus_slot=None):
+        # Empty visible rows take precedence over revalidating already painted
+        # snapshots. Within that group, load the user's focused row first.
+        pending=sorted(pending,key=lambda pair:(bool(pair[1].get('_snapshot_refresh')),pair[0]!=(focus_slot if focus_slot is not None else 0)))
         generation=self.generation;revision=self.result_cache.revision
         serial=getattr(self,'row_request_serial',0)+1;self.row_request_serial=serial
         tokens={n:getattr(self,'path_tokens',{}).get(n,0) for n,definition in pending}
@@ -789,7 +823,7 @@ class LiveReview(YouTubeBrowser,xbmcgui.WindowXML):
                 if self.alive and generation==self.generation and serial==self.row_request_serial and revision==self.result_cache.revision and getattr(self,'pending_sidebar_return',False):self.restore_sidebar_focus()
             finally:
                 if generation==self.generation and serial==self.row_request_serial:self.row_window_busy=False
-        threading.Thread(target=work,name='BlackLanturnLiveLists',daemon=True).start()
+        submit_latest(self,work)
     def restart_pending_rows(self):
         if not hasattr(self,'window_ready') or not hasattr(self,'paths'):return
         if getattr(self,'watch_refresh_generation',None)==self.generation:return
@@ -998,8 +1032,10 @@ class LiveReview(YouTubeBrowser,xbmcgui.WindowXML):
             if n==0:self.finish_loading('home_ready' if files else 'home_empty_or_unavailable')
             if not hasattr(self,'row_states'):self.row_states={}
             state='ready' if files else 'empty' if label else ''
+            immutable=getattr(self,'section','')=='YouTube' and self.paths[n].startswith('plugin://plugin.video.youtube/')
+            built=[media_item(d,immutable=True) if immutable else media_item(d) for d in files]
+            self.rows[n]=files;c=self.getControl(900+n);c.reset();c.addItems(built);c.setVisible(bool(files));self.window_ready[n]=True
             self.row_states[n]=state;self.setProperty('rowState'+str(n),state);self.setProperty('rowMessage'+str(n),row_message(label,state,search=bool(getattr(self,'search_state',None))))
-            self.window_ready[n]=True;self.rows[n]=files;c=self.getControl(900+n);c.reset();c.addItems([media_item(d) for d in files]);c.setVisible(bool(files))
             self.setProperty('row'+str(n),label if files else label+'  ·  No titles' if label else '')
             if files:
                 c.selectItem(min(position,len(files)-1));self.setProperty('notice','Live add-on content  ·  Select a title for details')
@@ -1317,6 +1353,8 @@ class LiveReview(YouTubeBrowser,xbmcgui.WindowXML):
         item=self.chosen(focus) if focus in (101,102,103,105,106,900,901,3100) else None
         if focus in (900,901) and not self.rows[focus-900]:item=None
         if item and item.get('_page_control'):item=None
+        paths=getattr(self,'paths',[])
+        genre_available=can_choose_genre(self,item,paths[n] if 0<=n<len(paths) else '')
         options=[]
         if not item:
             if getattr(self,'youtube_home_visible',lambda:False)():options.append(('youtube_refresh','Refresh recommendations'))
@@ -1330,11 +1368,11 @@ class LiveReview(YouTubeBrowser,xbmcgui.WindowXML):
             options.append(('play','Open' if item.get('filetype')=='directory' or item.get('type')=='addon' else 'Resume' if resume_options(item) else 'Play'))
             if player_path:options.append(('player','Play using…'))
             options.append(('details','Details'))
-            if can_choose_genre(self):options.append(('genre','Choose genre…'))
+            if genre_available:options.append(('genre','Choose genre…'))
             options.append(('local','Remove from My Stuff on this device' if saved else 'Save to My Stuff on this device'))
             if command:options.append(('trakt','Trakt: Watched, progress & lists'))
             if self.rating_identity(item):options.append(('discover','Discover collections & creator credits'))
-        if (not item or discovery) and can_choose_genre(self):options.append(('genre','Choose genre…'))
+        if (not item or discovery) and genre_available:options.append(('genre','Choose genre…'))
         if item and not discovery:
             if getattr(self,'youtube_home_visible',lambda:False)():options.append(('youtube_refresh','Refresh recommendations'))
             if getattr(self,'source_session_label',lambda *a,**k: '')(item,refresh=True):options.append(('normal_autoplay','Return to normal autoplay'))
@@ -1854,6 +1892,11 @@ class LiveReview(YouTubeBrowser,xbmcgui.WindowXML):
                 self.refresh_preview_setup();self.refresh_youtube_connection(force=True);self.row_navigation()
         elif action=='sidebar':self.sidebar_settings()
         elif action=='status_display':self.status_options()
+        elif action=='icon_pack':
+            current=selected_pack(self.config);ids=[p[0] for p in PACK_CHOICES]
+            chosen=xbmcgui.Dialog().select('Sidebar icon style',[p[1] for p in PACK_CHOICES],preselect=ids.index(current))
+            if chosen>=0 and ids[chosen]!=current:
+                self.config=with_pack(self.config,ids[chosen]);self.save();self.refresh_navigation()
         elif action=='title_logos':
             self.config['TitleLogos']=not self.config.get('TitleLogos',True);self.save()
             if self.selected:self.update(self.selected)
