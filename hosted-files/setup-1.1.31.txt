@@ -1,0 +1,7 @@
+BlackLanturn Build1.1.31 / Installer1.0.35
+
+Both public editions now include the complete approved Sculpted Silver and Smoked Glass packs,90 icons each, directly in BlackLanturn's managed assets. New installations default to Sculpted Silver; the selector offers Smoked Glass and Original. Updates retain the current selection. No separate image addon needs to be installed or enabled.
+
+Use Update BlackLanturn to update in place, then close and reopen Kodi. Settings, authorizations, sidebar layout, sources, favourites, watched/resume progress and unrelated addons remain saved. Personal Fight Zone remains private. Installer1.0.35 and media playback/row loading code are unchanged; Controller0.1.97 loads the built-in packs before optional external artwork.
+
+Clean, Standard and in-place/component installation checks use isolated native Kodi APIs with synthetic saved data. General uses simulated Android identity within macOS; physical Android/tvOS clean-install behavior is not claimed.

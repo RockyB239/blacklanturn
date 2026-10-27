@@ -1,12 +1,12 @@
 # Current validation state —27 October2026
 
-Public release: Build 1.1.30 / Installer 1.0.35 / Controller 0.1.96. Both editions, Installer and exact-base component downloads were rebuilt identically, passed source CI40559803243, and anonymously downloaded with exact SHA256 and ZIP CRC verification. Repository1.0.6 remains the current repository addon; its catalog and Installer metadata advance to this release.
+Public release: **Build1.1.31 / Installer1.0.35 / Controller0.1.97**. Both editions include the approved Sculpted Silver and Smoked Glass packs (90 icons each) as managed builtin assets. A clean installation defaults to Silver; explicit Original/Silver/Glass choices stay saved on updates. No separate image addon installation or enabling step is required. Existing legacy personal icon resources are left intact.
 
-Both clean editions and component packages derive from pinned1.1.29. Source/default/patch/private-data checks,933 controller/898 installer/126 personal tests, independent review and8 isolated native install cases passed. Live exact-source parity, native settings/auth preservation and100-visit sustained-use checks passed on all three personal devices before publication. Final matched comparisons pass; corrected timing checks and limitations are disclosed in docs/OPTIMIZATION_1_1_30_VALIDATION.md. No displayed-object retention remains.
+Both full editions and exact-base30-to31 component packages derive from pinned published1.1.30. All five ZIPs reproduce byte-for-byte and were anonymously downloaded after publication with matching SHA256 and CRC. Source b094ac7e585dec9533f0efd5ff62f5997772b1ee passed independent CI40584938786. Repository1.0.6 and Installer1.0.35 remain unchanged. General and Apple TV/Mac platform workarounds, provider patches and saved-data behavior are retained. Personal Fight Zone remains excluded.
 
-Canonical package versions come from tools/release_report.py. Source-bound sanitized performance receipts are under validation/optimization130-performance.json. The public catalog advertises verified component URLs only for an exact supported base, with complete-package fallback. Personal Fight Zone0.3.4 and external icons1.0.0 register outside managed controller code and remain excluded from all public assets.
+901 Installer,933 Controller,36 playback,16 probe and7 YouTube context tests passed. Eight isolated native clean/Standard/full in-place/component cases passed using synthetic saved data, denied personal-profile access and blocked network. General Android identity is simulated inside native macOS Kodi; physical Android/tvOS clean installs are not claimed. There is no new performance benchmark for this artwork-only release; prior optimization130 timing evidence remains historical and source-bound. See [icon validation](ICON_PACKS_1_1_31_VALIDATION.md) and validation/icon-packs131.json.
 
-Historical records below retain their original version claims; this current-state block supersedes them.
+Live personal-device updates and account preservation are recorded separately in the private execution evidence. No accounts or personal playback records enter public assets. Earlier historical records retain their original scope and version claims.
 
 ---
 
