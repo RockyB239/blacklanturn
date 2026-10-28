@@ -1,0 +1,9 @@
+BlackLanturn1.1.33 / Installer1.0.37 / Controller0.1.99
+
+Landscape title, season and episode cards now keep a consistent wide frame, including poster-only fallbacks and Next-page browsing. Season and episode names stay readable.
+
+Exact-title Hide, Show less and Undo give you local discovery control without suppressing an entire genre. Manage choices under Settings → Recommendations. Direct search, saved titles and watched progress stay accessible. The Installer also preserves title choices during Standard reinstall; normal Update BlackLanturn retains your complete setup in place.
+
+Both Sculpted Silver and Smoked Glass icon packs remain bundled. Both editions retain their tested platform workarounds and managed addon patches. Personal Fight Zone remains private and is not included in downloads.
+
+Update through BlackLanturn Installer → Updates → Update BlackLanturn, then close and reopen Kodi. Accounts, settings, authorizations, sources, progress and unrelated addons stay saved.
