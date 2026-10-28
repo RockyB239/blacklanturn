@@ -43,7 +43,7 @@ def build(baselines,output):
   prefix='addons/script.blacklanturn.preview/'
   data={n:raw for n,raw in before.items() if not n.startswith((prefix,installer_prefix))};data.update({prefix+n:raw for n,raw in controller.items()});data.update({installer_prefix+n:raw for n,raw in installer.items()})
   apply_current(data)
-  marker=json.loads(data['userdata/blacklanturn-build.json']);marker['umbrella_version']='6.7.98';marker.update(build_version='1.1.35',controller_version='0.1.99',release_id='blacklanturn-'+marker['edition']+'-1.1.35-r0',release_revision=0)
+  marker=json.loads(data['userdata/blacklanturn-build.json']);marker['umbrella_version']='6.7.98';marker['bundle_registration_policy']='new-bundles-1';marker['installer_min_version']='1.0.39';marker.update(build_version='1.1.35',controller_version='0.1.99',release_id='blacklanturn-'+marker['edition']+'-1.1.35-r0',release_revision=0)
   data['userdata/blacklanturn-build.json']=json.dumps(marker,indent=2).encode()
   proof=set(json.loads(before['userdata/blacklanturn-releases.json'])['releases'][0]['files'])
   proof.update('addons/script.blacklanturn.preview/'+PACKS+n for n in ('blacklanturn-icons.json','packs/sculpted-silver/home.png','packs/smoked-glass/home.png'))

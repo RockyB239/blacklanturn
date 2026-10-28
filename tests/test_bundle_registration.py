@@ -60,4 +60,18 @@ class Registration(unittest.TestCase):
   with self.assertRaises(module.RegistrationError):module.restore(state,self.registration_kodi)
   self.assertEqual(self.calls,[]);self.assertFalse(self.flags['plugin.video.user']);state['registration']={};self.m.cancel(plan)
 
+ def version_gate(self,old=False):
+  p=LIB/'managed_versions.py' if not old else LIB.parents[3]/'tests/fixtures/managed_versions_1_0_38.py'
+  spec=importlib.util.spec_from_file_location('gate_registration',p);m=importlib.util.module_from_spec(spec);spec.loader.exec_module(m);m.__file__=str(LIB/'managed_versions.py');return m
+ def test_registration_payload_requires_installer39_protocol(self):
+  m=self.version_gate();marker={'managed_update_policy':'kodi-version-epoch-1','inplace_update_policy':'bundled-code-1','installer_min_version':'1.0.39','youtube_refresh_patch':'youtube-freshness-2','bundle_registration_policy':'new-bundles-1'}
+  with patch.object(m,'verify_archive_metadata'):
+   self.assertEqual(m.prepare_policy(marker,None),'1.0.39')
+   for change in ({'installer_min_version':'1.0.30'},{'bundle_registration_policy':'unknown'}):
+    with self.assertRaises(ValueError):m.prepare_policy(dict(marker,**change),None)
+ def test_installer38_rejects_new_registration_payload_before_changes(self):
+  m=self.version_gate(old=True);marker={'managed_update_policy':'kodi-version-epoch-1','inplace_update_policy':'bundled-code-1','installer_min_version':'1.0.39','youtube_refresh_patch':'youtube-freshness-2','bundle_registration_policy':'new-bundles-1'}
+  with patch.object(m,'verify_archive_metadata') as verify,self.assertRaises(ValueError):m.prepare_policy(marker,None)
+  verify.assert_not_called()
+
 del Fixture

@@ -50,7 +50,7 @@ class UmbrellaBuildContract(unittest.TestCase):
      self.assertEqual(E.fromstring(target['addon.xml']).get('version'),'1:6.7.98+blacklanturn.1')
      self.assertEqual(target,current)
      marker=json.loads(z.read('userdata/blacklanturn-build.json'))
-     self.assertEqual(marker['preferences_policy'],'playback-trakt-youtube-umbrella-network-autoplay-1');self.assertEqual(marker['installer_min_version'],'1.0.30')
+     self.assertEqual(marker['preferences_policy'],'playback-trakt-youtube-umbrella-network-autoplay-1');self.assertEqual(marker['installer_min_version'],'1.0.39')
      self.assertEqual(marker['build_version'],'1.1.35');self.assertEqual(marker['umbrella_patch'],'event-progress-3');self.assertEqual(marker['controller_version'],'0.1.99')
      controller=json.loads((ROOT/'controller-source/manifest99.json').read_text())['files']
      actual={n[len('addons/script.blacklanturn.preview/'):]:hashlib.sha256(z.read(n)).hexdigest()for n in z.namelist()if n.startswith('addons/script.blacklanturn.preview/')}

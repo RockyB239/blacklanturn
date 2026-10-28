@@ -26,6 +26,7 @@ def verify(artifacts,baselines):
    if any(n not in metadata and not n.startswith((prefix,installer_prefix)+changed_prefixes) for n in set(z.namelist())-set(old.namelist())):raise ValueError('Unexpected added paths')
    if any(n.startswith('addons/plugin.video.blacklanturn.fights/') for n in z.namelist()):raise ValueError('Private Fight Zone included')
    marker=json.loads(z.read('userdata/blacklanturn-build.json'));entry=json.loads(z.read('userdata/blacklanturn-releases.json'))['releases'][0]
+   if marker.get('bundle_registration_policy')!='new-bundles-1' or marker.get('installer_min_version')!='1.0.39':raise ValueError('Registration protocol floor missing')
    if marker['build_version']!='1.1.35' or entry['id']!=marker['release_id'] or any(sha(z.read(n))!=h for n,h in entry['files'].items()):raise ValueError('Release proof differs')
   component=artifacts/('BlackLanturn-'+edition+'-Update-1.1.34-to-1.1.35.zip')
   with zipfile.ZipFile(component) as z:
