@@ -6,4 +6,4 @@ class CurrentPatchContracts(unittest.TestCase):
   root=Path(__file__).resolve().parents[1]
   result=subprocess.run([sys.executable,str(root/'tools/run_current_addons134_contracts.py')],capture_output=True,text=True,timeout=30)
   self.assertEqual(result.returncode,0,result.stdout+result.stderr)
-  self.assertIn('50 progress/search/shared-request and 12 real SQLite-cache',result.stdout)
+  self.assertIn('51 progress/search/shared-request and 12 real SQLite-cache',result.stdout)

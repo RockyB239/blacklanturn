@@ -1,0 +1,11 @@
+--- release34/resources/tmdbhelper/lib/sync/providers/selection.py
++++ release35/resources/tmdbhelper/lib/sync/providers/selection.py
+@@ -41,7 +41,7 @@
+         return '' if value == self.never_value else value
+ 
+     def save(self, provider_id):
+-        if provider_id == self.value:
++        if provider_id == get_setting(self.setting, 'str'):
+             return
+         if self.capability != 'scrobbling':
+             from tmdbhelper.lib.sync.invalidator import SyncInvalidatorAll

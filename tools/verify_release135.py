@@ -16,6 +16,7 @@ def verify(artifacts,baselines):
    if {n[len(installer_prefix):]:sha(z.read(n)) for n in z.namelist() if n.startswith(installer_prefix)}!=wanted:raise ValueError('Installer source differs')
    if {n[len(prefix):]:sha(z.read(n)) for n in z.namelist() if n.startswith(prefix)}!=expected:raise ValueError('Build missing or changed branded icons')
    current_manifest=json.loads((ROOT/'compatibility/addons134/manifest.json').read_bytes())['addons']
+   current_manifest.update(json.loads((ROOT/'compatibility/addons135/manifest.json').read_bytes())['addons'])
    changed_prefixes=tuple('addons/'+aid+'/' for aid in current_manifest)
    for aid,record in current_manifest.items():
     ap='addons/'+aid+'/'

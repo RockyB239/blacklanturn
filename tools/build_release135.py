@@ -14,7 +14,8 @@ def apply_current(data):
  root=ROOT/'compatibility/addons134';manifest=json.loads((root/'manifest.json').read_bytes())['addons']
  staged={}
  for aid in CURRENT:
-  record=manifest[aid];archive=root/record['archive']
+  source=ROOT/'compatibility/addons135' if aid=='plugin.video.themoviedb.helper' else root
+  record=json.loads((source/'manifest.json').read_bytes())['addons'][aid];archive=source/record['archive']
   if legacy.sha(archive.read_bytes())!=record['archive_sha256']:raise ValueError('Changed current-source archive: '+aid)
   with zipfile.ZipFile(archive) as z:
    if z.testzip() is not None:raise ValueError('Current-source CRC failed')
