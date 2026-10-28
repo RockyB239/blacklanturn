@@ -29,6 +29,7 @@ def build(baselines,output):
  output.mkdir(parents=True,exist_ok=True);controller=inventory(ROOT/'controller-source/addon');manifest=json.loads((ROOT/'controller-source/manifest99.json').read_bytes())
  if {n:legacy.sha(raw) for n,raw in controller.items()}!=manifest['files'] or manifest['controller']!='0.1.99':raise ValueError('Controller99 source differs')
  installer=inventory(ROOT/'installer-source/plugin.program.blacklanturninstaller')
+ if E.fromstring(installer['addon.xml']).get('version')!='1.0.38':raise ValueError('Historical34 requires its exact Installer38 source')
  legacy.zipwrite(output/'plugin.program.blacklanturninstaller-1.0.38.zip',{'plugin.program.blacklanturninstaller/'+n:raw for n,raw in installer.items()})
  components=load('icons_release_component',ROOT/'installer-source/plugin.program.blacklanturninstaller/resources/libs/component_update.py')
  for edition,pin in PINS.items():

@@ -1,0 +1,27 @@
+{
+  "title": "BlackLanturn 1.1.35",
+  "summary": "Tracking providers are enabled as part of the update before completion is confirmed.",
+  "sections": [
+    {
+      "heading": "Tracking setup completes automatically",
+      "bullets": [
+        "New bundled modules are registered and enabled before the update reports success.",
+        "Corrects the disabled Helper Trakt/MDbList modules introduced in1.1.34. Saved tracking choices and authorizations stay in place."
+      ]
+    },
+    {
+      "heading": "Preservation and recovery",
+      "bullets": [
+        "Existing disabled user add-ons remain untouched. Later explicit provider disables remain saved.",
+        "Registration failures restore the previous code, release details and prior module enabled states; interrupted registration is recoverable."
+      ]
+    },
+    {
+      "heading": "Current add-ons and your complete setup",
+      "bullets": [
+        "Retains Umbrella6.7.98, TMDb Helper6.19.2, UpNext1.3.0 and the reviewed BlackLanturn compatibility patches.",
+        "Use Update BlackLanturn to retain settings, accounts, sources, progress, unrelated add-ons and personal extensions."
+      ]
+    }
+  ]
+}

@@ -62,3 +62,9 @@ Files: project work/release134-addons-2026-10-28 native/device harness and evide
 - [ ] Actual provider-row/episode browsing, resume/earlyStop/progress/source-selection and branded UpNext contracts/native UI; matched cached/deep-row speed check without clearing caches. Label any untested full-stream scenario.
 - [ ] Final currentness report separates platform-specific intentional variants from missed updates.
 - [ ] Remove only owned staging, leave populated idle Home with usable focus; retain restricted host recoveries. Update root current-state/results/completion with limitations.
+
+## Corrective release35 checkpoint
+
+The physical post-restart audit found the two newly copied Helper sync modules disabled. The initial native fixture explicitly enabled them and therefore did not prove automatic registration. Release34 is not accepted as the completed device result.
+
+Installer39 adds a journaled registration phase before metadata/completion commit: enable only newly introduced bundled add-ons, verify exact version/enabled state, restore prior flags on rollback/cold recovery, preserve existing disabled unrelated add-ons. A narrow upgrade from Build34 repairs only its two introduced1.1.0 sync modules; later deliberate disables remain saved. Build35 carries the corrected Installer in both editions. Native fixtures must assert enabled providers without manually enabling them, with33-to35 new-module and34-to35 disabled-provider cases. Original recoveries remain retained alongside fresh34 recoveries.

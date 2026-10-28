@@ -90,7 +90,7 @@ class Wizard:
 
     def update(self, name):
         """Update bundled code in place; saved-data switches never apply here."""
-        from resources.libs import inplace_update, managed_addons, update_activity
+        from resources.libs import inplace_update, managed_addons, update_activity, addon_registration
         if xbmc.Player().isPlaying():
             self.dialog.ok(CONFIG.ADDONTITLE, 'Stop playback before updating BlackLanturn. Nothing has been changed.')
             return
@@ -146,7 +146,7 @@ class Wizard:
             managed_addons.protect(os.path.join(CONFIG.DATABASE, db.latest_db('Addons')), umbrella=True, network=True, youtube=True)
             self.dialogProgress.update(50, 'Updating BlackLanturn add-ons and patches. Saved data stays in place…')
             applying, plan = plan, None
-            result = inplace_update.apply(applying)
+            result = inplace_update.apply(applying, registrar=addon_registration.Registrar(xbmc))
             # Only the Installer's own build bookkeeping changes. Do not run
             # account/settings restoration, skin switching or registry resets.
             for key, value in (('buildname', name), ('buildversion', result['version']),

@@ -129,6 +129,8 @@ def _recover_locked(plan):
         raise UpdateError('Update recovery targets are invalid. Keep the recovery folder.')
     if set(state['metadata']) != set(META): raise UpdateError('Update recovery metadata is invalid.')
     if state['status'] != 'committed':
+        if state.get('registration'):
+            _module('addon_registration').restore(state,plan.get('_registration_kodi'))
         discard = work/'discard'; discard.mkdir(exist_ok=True)
         # Restore the Installer first so a second interrupted recovery still has
         # its normal entry point. JSON key order is not transaction order.
@@ -274,7 +276,7 @@ def prepare(archive_path, home, kodi):
                 _write(work/'metadata-new'/name, raw)
             state = {'schema': 1, 'status': 'prepared', 'addons': entries, 'metadata': metadata}
             _journal(plan, state)
-        plan.update(state=state, version=target['build_version'], retained=retained, chosen={aid:node.get('version') for aid,node in chosen.items()})
+        plan.update(state=state, base_version=installed['build_version'], new_addons=[aid for aid,entry in entries.items() if entry['before'] is None], version=target['build_version'], retained=retained, chosen={aid:node.get('version') for aid,node in chosen.items()})
         return plan
     except Exception as exc:
         try:
@@ -287,9 +289,10 @@ def prepare(archive_path, home, kodi):
             try: expanded.unlink()
             except OSError: pass
 
-def apply(plan):
+def apply(plan, registrar=None):
     home = Path(plan['home']); work = Path(plan['work']); state = plan['state']
     try:
+        if registrar is not None:registrar.snapshot(plan)
         for aid, entry in state['addons'].items():
             if _tree(home/'addons'/aid) != entry['before']: raise UpdateError('An add-on changed while preparing the update. Please retry.')
         state['status'] = 'applying'; _journal(plan, state)
@@ -301,6 +304,7 @@ def apply(plan):
             if target.exists(): os.replace(target, work/'old'/aid); _sync(home/'addons'); _sync(work/'old')
             os.replace(work/'new'/aid, target); _sync(home/'addons')
             if _tree(target) != entry['after']: raise UpdateError('Updated source readback failed: '+aid)
+        if registrar is not None:registrar.apply(plan,_journal)
         for name, entry in state['metadata'].items():
             entry['started'] = True; _journal(plan, state)
             _write(home/'userdata'/name, (work/'metadata-new'/name).read_bytes())
