@@ -1,0 +1,90 @@
+--- upstream/resources/tmdbhelper/lib/monitor/scrobbler.py
++++ blacklanturn/resources/tmdbhelper/lib/monitor/scrobbler.py
+@@ -2,14 +2,14 @@
+ from jurialmunkey.ftools import cached_property
+ from tmdbhelper.lib.addon.plugin import get_setting
+ from tmdbhelper.lib.addon.logger import kodi_log
+-from tmdbhelper.lib.addon.tmdate import set_timestamp
++from math import isfinite
+ 
+ 
+ class PlayerScrobbler():
+     def __init__(self, total_time, provider, syncdata):
+         self.provider = provider
+         self.syncdata = syncdata
+-        self.start_time = 0
++        self._current_time = 0
+         self.total_time = total_time
+         self.tvdb_id = self.playerstring.get('tvdb_id')
+         self.imdb_id = self.playerstring.get('imdb_id')
+@@ -67,11 +67,16 @@
+ 
+     @property
+     def current_time(self):
+-        return set_timestamp(-self.start_time)
++        return self._current_time
+ 
+     @current_time.setter
+     def current_time(self, value):
+-        self.start_time = set_timestamp(-value)
++        # Kodi's last valid sample remains authoritative after pause or stop.
++        if isinstance(value, bool) or not isinstance(value, (int, float)):
++            return
++        if not isfinite(value) or not 0 <= value <= self.total_time:
++            return
++        self._current_time = value
+ 
+     @property
+     def progress(self):
+@@ -167,8 +172,50 @@
+         )
+ 
+ 
++class LegacyScrobblerGroup:
++    """Retain pre-provider dual-service tracking until a new selection is made."""
++    def __init__(self, scrobblers):
++        self.scrobblers = tuple(scrobblers)
++
++    @property
++    def stopped(self):
++        return all(scrobbler.stopped for scrobbler in self.scrobblers)
++
++    def update_time(self, *args):
++        for scrobbler in self.scrobblers:
++            scrobbler.update_time(*args)
++
++    def start(self, *args):
++        for scrobbler in self.scrobblers:
++            scrobbler.start(*args)
++
++    def pause(self, *args):
++        for scrobbler in self.scrobblers:
++            scrobbler.pause(*args)
++
++    def stop(self, *args):
++        for scrobbler in self.scrobblers:
++            scrobbler.stop(*args)
++
++    def sync(self, *args):
++        for scrobbler in self.scrobblers:
++            scrobbler.sync(*args)
++
++
+ def PlayerScrobblerFactory(total_time):
+     from tmdbhelper.lib.sync.datasync import SyncDataFactory
+     syncdata = SyncDataFactory()
+     provider = syncdata.registry.get_selected_provider('scrobbling')
+-    return PlayerScrobbler(total_time, provider, syncdata)
++    primary = PlayerScrobbler(total_time, provider, syncdata)
++    if get_setting('sync_provider_scrobbling', 'str'):
++        return primary
++    legacy_ids = tuple(name for name, enabled, token in (
++        ('trakt', 'trakt_scrobbling', 'trakt_token'),
++        ('mdblist', 'mdblist_scrobbling', 'mdblist_apikey'))
++        if get_setting(enabled) and get_setting(token, 'str'))
++    if len(legacy_ids) < 2:
++        return primary
++    providers = tuple(syncdata.registry.providers.get(name) for name in legacy_ids)
++    scrobblers = tuple(PlayerScrobbler(total_time, item, syncdata) for item in providers
++                       if item is not None and 'scrobbling' in item.capabilities)
++    return LegacyScrobblerGroup(scrobblers) if len(scrobblers) > 1 else primary

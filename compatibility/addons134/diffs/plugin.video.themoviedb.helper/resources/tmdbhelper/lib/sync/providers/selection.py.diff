@@ -1,0 +1,22 @@
+--- upstream/resources/tmdbhelper/lib/sync/providers/selection.py
++++ blacklanturn/resources/tmdbhelper/lib/sync/providers/selection.py
+@@ -14,7 +14,18 @@
+ 
+     @property
+     def value(self):
+-        return get_setting(self.setting, 'str')
++        value = get_setting(self.setting, 'str')
++        if value:
++            return value
++        # Preserve saved pre-provider choices without rewriting account/settings data.
++        if self.capability == 'scrobbling':
++            if get_setting('trakt_scrobbling') and get_setting('trakt_token', 'str'):
++                return 'trakt'
++            if get_setting('mdblist_scrobbling') and get_setting('mdblist_apikey', 'str'):
++                return 'mdblist'
++            return self.never_value
++        previous = get_setting('sync_source_' + self.capability, 'str')
++        return {'Trakt': 'trakt', 'MDbList': 'mdblist'}.get(previous, '')
+ 
+     @property
+     def is_unconfigured(self):

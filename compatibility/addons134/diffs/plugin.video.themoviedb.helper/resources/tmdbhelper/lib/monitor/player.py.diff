@@ -1,0 +1,86 @@
+--- upstream/resources/tmdbhelper/lib/monitor/player.py
++++ blacklanturn/resources/tmdbhelper/lib/monitor/player.py
+@@ -220,9 +220,18 @@
+     def onPlayBackResumed(self):
+         self.scrobbler_start()
+ 
+-    def onPlayBackSeek(self, *args, **kwargs):
++    def onPlayBackSeek(self, time, seekOffset):
++        scrobbler = self.scrobbler
++        # Kodi supplies the new absolute position in milliseconds. Retain it
++        # before waiting: Stop can arrive before a later native timing sample.
++        if scrobbler and isinstance(time, (int, float)) and not isinstance(time, bool):
++            try:
++                scrobbler.update_time(self.tmdb_type, self.tmdb_id, time / 1000)
++            except RuntimeError:
++                pass
+         self.wait_for_seek()
+-        self.scrobbler_start()
++        if scrobbler and self.scrobbler is scrobbler and not scrobbler.stopped:
++            self.scrobbler_start()
+ 
+     def onPlayBackSeekChapter(self, *args, **kwargs):
+         self.wait_for_seek()
+@@ -250,38 +259,50 @@
+         self.scrobbler = None
+ 
+     def scrobbler_start(self):
+-        if not self.scrobbler:
++        scrobbler = self.scrobbler
++        if not scrobbler:
+             return
+         self.scrobbler_update()
+-        self.scrobbler.start(self.tmdb_type, self.tmdb_id)
++        scrobbler.start(self.tmdb_type, self.tmdb_id)
+ 
+     def scrobbler_pause(self):
+-        if not self.scrobbler:
++        scrobbler = self.scrobbler
++        if not scrobbler:
+             return
+         self.scrobbler_update()
+-        self.scrobbler.pause(self.tmdb_type, self.tmdb_id)
++        scrobbler.pause(self.tmdb_type, self.tmdb_id)
+ 
+     def scrobbler_stop(self):
+-        if not self.scrobbler:
++        scrobbler = self.scrobbler
++        if not scrobbler:
+             return
+         self.scrobbler_update()
+-        self.scrobbler.stop(self.tmdb_type, self.tmdb_id)
++        scrobbler.stop(self.tmdb_type, self.tmdb_id)
+ 
+     def scrobbler_sync(self):
+-        if not self.scrobbler or not self.isPlayingVideo():
++        scrobbler = self.scrobbler
++        if not scrobbler or not self.isPlayingVideo():
+             return
+         try:
+             if (self.getTime() / self.getTotalTime()) < 0.8:
+                 return
+-        except ZeroDivisionError:
++        except (ZeroDivisionError, RuntimeError):
+             return
+         self.scrobbler_update()
+-        self.scrobbler.sync(self.tmdb_type, self.tmdb_id)
++        scrobbler.sync(self.tmdb_type, self.tmdb_id)
+ 
+     def scrobbler_update(self):
+-        if not self.scrobbler or not self.isPlayingVideo():
+-            return
+-        self.scrobbler.update_time(self.tmdb_type, self.tmdb_id, self.getTime())
++        scrobbler = self.scrobbler
++        if not scrobbler:
++            return
++        try:
++            if not self.isPlayingVideo():
++                return
++            scrobbler.update_time(self.tmdb_type, self.tmdb_id, self.getTime())
++        except RuntimeError:
++            # Stop/seek can discard native timing between the playing check and read.
++            # Keep the last successful sample rather than losing the service loop.
++            return
+ 
+     @cached_property
+     def player_item(self):

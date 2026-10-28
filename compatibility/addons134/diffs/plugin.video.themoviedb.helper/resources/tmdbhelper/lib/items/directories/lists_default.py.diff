@@ -1,0 +1,25 @@
+--- upstream/resources/tmdbhelper/lib/items/directories/lists_default.py
++++ blacklanturn/resources/tmdbhelper/lib/items/directories/lists_default.py
+@@ -47,7 +47,12 @@
+         return self.get_results()
+ 
+     def get_results(self):
+-        if not self.response_results:
++        results = self.response_results
++        # A failed request is not a successful empty list. Raising here keeps
++        # ItemCache from retaining a transient failure for its normal list TTL.
++        if not isinstance(results, list):
++            raise ValueError('Invalid list response; result will not be cached')
++        if not results:
+             return []
+         try:
+             self.outer_class.total_pages = self.response_total_pages
+@@ -55,7 +60,7 @@
+         except (TypeError, KeyError):
+             self.outer_class.total_pages = 0
+             self.outer_class.total_items = 0
+-        return self.response_results
++        return results
+ 
+     @cached_property
+     def items(self):

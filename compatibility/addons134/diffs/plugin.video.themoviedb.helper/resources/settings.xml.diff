@@ -1,0 +1,70 @@
+--- upstream/resources/settings.xml
++++ blacklanturn/resources/settings.xml
+@@ -623,6 +623,58 @@
+                 </setting>
+             </group>
+ 
++            <!-- Retain pre-provider preferences on in-place upgrades. New choices override these. -->
++            <group id="2">
++<setting id="sync_source_watched" type="string" label="32408" help="32417">
++                    <visible>false</visible><level>0</level>
++                    <default>Trakt</default>
++                    <constraints>
++                        <options>
++                            <option>Trakt</option>
++                            <option>MDbList</option>
++                        </options>
++                    </constraints>
++                    <control type="spinner" format="string" />
++                </setting>
++                <setting id="sync_source_watchlist" type="string" label="32193" help="32417">
++                    <visible>false</visible><level>0</level>
++                    <default>Trakt</default>
++                    <constraints>
++                        <options>
++                            <option>Trakt</option>
++                            <option>MDbList</option>
++                        </options>
++                    </constraints>
++                    <control type="spinner" format="string" />
++                </setting>
++                <setting id="sync_source_collection" type="string" label="32192" help="32417">
++                    <visible>false</visible><level>0</level>
++                    <default>Trakt</default>
++                    <constraints>
++                        <options>
++                            <option>Trakt</option>
++                            <option>MDbList</option>
++                        </options>
++                    </constraints>
++                    <control type="spinner" format="string" />
++                </setting>
++            <setting id="trakt_scrobbling" type="boolean" label="32529" help="">
++                    <visible>false</visible><level>0</level>
++                    <default>true</default>
++                    <control type="toggle" />
++                    <dependencies>
++                        <dependency type="visible" operator="!is" setting="trakt_token" />
++                    </dependencies>
++                </setting>
++                <setting id="mdblist_scrobbling" type="boolean" label="32402" help="">
++                    <visible>false</visible><level>0</level>
++                    <default>true</default>
++                    <control type="toggle" />
++                    <dependencies>
++                        <dependency type="visible" operator="!is" setting="mdblist_apikey" />
++                    </dependencies>
++                </setting>
++                        </group>
+             <group id="1" label="39031">
+                 <setting id="sync_provider_watched" type="string" label="32408" help="32548">
+                     <level>0</level>
+@@ -819,7 +871,7 @@
+                     <default>true</default>
+                     <control type="toggle"/>
+                 </setting>
+-                <setting id="contextmenu_sync_options" type="boolean" label="32549" help="">
++                <setting id="contextmenu_sync_trakt" type="boolean" label="32549" help="">
+                     <level>0</level>
+                     <default>true</default>
+                     <control type="toggle"/>

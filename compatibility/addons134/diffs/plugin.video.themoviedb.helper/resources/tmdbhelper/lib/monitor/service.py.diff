@@ -1,0 +1,42 @@
+--- upstream/resources/tmdbhelper/lib/monitor/service.py
++++ blacklanturn/resources/tmdbhelper/lib/monitor/service.py
+@@ -8,12 +8,39 @@
+ from tmdbhelper.lib.monitor.poller import Poller, POLL_MIN_INCREMENT, POLL_MAX_INCREMENT
+ from tmdbhelper.lib.addon.thread import SafeThread
+ from threading import Lock
++from time import monotonic
+ 
+ 
+ class ServiceMonitor(Poller):
+     def __init__(self):
+         self.exit = False
+         self.listitem = None
++
++    def _on_idle(self, wait_time=30):
++        scrobbler = self.player_monitor.scrobbler
++        if not scrobbler or scrobbler.stopped:
++            return super()._on_idle(wait_time)
++
++        # Sample locally in the existing loop, including windowed playback.
++        # The deadline persists across short UI waits to cap sampling at 1 Hz.
++        end_time = monotonic() + wait_time
++        while not self.exit:
++            now = monotonic()
++            next_sample = getattr(self, '_playback_sample_at', 0)
++            if now >= next_sample:
++                self._playback_sample_at = next_sample = now + 1
++                self.player_monitor.scrobbler_update()
++            remaining = end_time - monotonic()
++            if remaining <= 0:
++                return
++            if self.update_monitor.waitForAbort(min(remaining, max(0, next_sample - monotonic()))):
++                return
++            scrobbler = self.player_monitor.scrobbler
++            if not scrobbler or scrobbler.stopped:
++                remaining = end_time - monotonic()
++                if remaining > 0:
++                    self.update_monitor.waitForAbort(remaining)
++                return
+ 
+     def run(self):
+         self.mutex_lock = Lock()

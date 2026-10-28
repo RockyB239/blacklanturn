@@ -5,6 +5,12 @@
   "addons": {
     "plugin.video.themoviedb.helper": [
       {
+        "upstream_version": "6.19.2",
+        "managed_version": "1:6.19.2+blacklanturn.1",
+        "upstream_sha256": "b0b6c5e02e135f37097b6d5a264f6cf4a3938dc24390a75d2465c6faf83f30dd",
+        "managed_sha256": "ada648ae0aaf6dd0554d6667214edee5cd7f29b6e50ae1be32032cc99ed79eaa"
+      },
+      {
         "upstream_version": "6.18.2",
         "managed_version": "1:6.18.2+blacklanturn.1",
         "upstream_sha256": "17a58c42c4516ca504c8be65981c4fa048266fdf39b6178e6277197256b8c4f5",
@@ -24,6 +30,12 @@
       }
     ],
     "plugin.video.umbrella": [
+      {
+        "upstream_version": "6.7.98",
+        "managed_version": "1:6.7.98+blacklanturn.1",
+        "upstream_sha256": "06f3b9f582bd56dde735133f6531d5d30528a5a811a61ee78c57834cf8411792",
+        "managed_sha256": "34a74a22441f13f3186fa382ba8f8299bc8c5e44ce3b92e87515e0e9d2691706"
+      },
       {
         "upstream_version": "6.7.97",
         "managed_version": "1:6.7.97+blacklanturn.1",
@@ -62,10 +74,15 @@
   },
   "source_adapters": {
     "plugin.video.umbrella/resources/lib/modules/control.py": {
-      "upstream_version": "6.7.97",
+      "upstream_version": "6.7.98",
       "upstream_sha256": "3b742abd6915ddd9f6b66bebf29b6aceecd0b78e68e43e273b8937a76cb07dcd",
       "managed_sha256": "b580a0a0a2edd8e88bab6a82f5f7d1cd32f7afe124e8ab5cd230ba99c5b00ca6",
       "legacy_variants": [
+        {
+          "upstream_version": "6.7.97",
+          "upstream_sha256": "3b742abd6915ddd9f6b66bebf29b6aceecd0b78e68e43e273b8937a76cb07dcd",
+          "managed_sha256": "b580a0a0a2edd8e88bab6a82f5f7d1cd32f7afe124e8ab5cd230ba99c5b00ca6"
+        },
         {
           "upstream_sha256": "3b742abd6915ddd9f6b66bebf29b6aceecd0b78e68e43e273b8937a76cb07dcd",
           "managed_sha256": "b580a0a0a2edd8e88bab6a82f5f7d1cd32f7afe124e8ab5cd230ba99c5b00ca6",
@@ -74,10 +91,15 @@
       ]
     },
     "plugin.video.umbrella/resources/lib/database/cache.py": {
-      "upstream_version": "6.7.97",
+      "upstream_version": "6.7.98",
       "upstream_sha256": "8c636d1fd6ec3a21ca8e39aa9fd24b2c7009a13898ef5c5bc09d08785de4b2ce",
       "managed_sha256": "dc88ab7ce38e02681d04d0e566be323ea58d8fbaabc7408ca397ecd446fcbb22",
       "legacy_variants": [
+        {
+          "upstream_version": "6.7.97",
+          "upstream_sha256": "8c636d1fd6ec3a21ca8e39aa9fd24b2c7009a13898ef5c5bc09d08785de4b2ce",
+          "managed_sha256": "dc88ab7ce38e02681d04d0e566be323ea58d8fbaabc7408ca397ecd446fcbb22"
+        },
         {
           "upstream_sha256": "59b49b4238cda135a3381f9e1c996f031fc4659ab071e263bfc90af915f07c44",
           "managed_sha256": "fdf624f0fec89756f1b4a437eebac0a8386c45bf01af746d599206e8bd6f6385",

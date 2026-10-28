@@ -1,0 +1,1 @@
+from tmdbhelper_sync_trakt.provider import Provider

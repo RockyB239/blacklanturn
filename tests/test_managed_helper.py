@@ -10,6 +10,8 @@ ID='plugin.video.themoviedb.helper'
 def current_data(addon_id, normalize=True):
  """Complete pinned current tree; no fixture silently reuses a legacy target."""
  directory=ROOT/'compatibility/current-addons'
+ latest=ROOT/'compatibility/addons134'
+ if (latest/'manifest.json').exists() and addon_id in json.loads((latest/'manifest.json').read_text())['addons']:directory=latest
  manifest=json.loads((directory/'manifest.json').read_text())['addons'][addon_id]
  archive=directory/manifest['archive']
  if hashlib.sha256(archive.read_bytes()).hexdigest()!=manifest['archive_sha256']:

@@ -1,0 +1,11 @@
+--- upstream/resources/tmdbhelper/lib/items/directories/trakt/lists_standard.py
++++ blacklanturn/resources/tmdbhelper/lib/items/directories/trakt/lists_standard.py
+@@ -9,6 +9,8 @@
+ class UncachedTraktItemsPage(UncachedItemsPage):
+     @cached_property
+     def response_results(self):
++        if self.response is None or not 200 <= self.response.status_code < 300:
++            raise ValueError('Trakt list request failed; result will not be cached')
+         try:
+             return self.response.json()
+         except (TypeError, KeyError, AttributeError):

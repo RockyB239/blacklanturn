@@ -1,0 +1,14 @@
+[
+  {
+    "addon": "script.module.tmdbhelper.sync.trakt",
+    "version": "1.1.0",
+    "url": "https://raw.githubusercontent.com/jurialmunkey/repository.jurialmunkey/master/omega/zips/script.module.tmdbhelper.sync.trakt/script.module.tmdbhelper.sync.trakt-1.1.0.zip",
+    "sha256": "ed8871a7f9cffc58b015b65195b270c036c949c435ccc16cdddc44b2b547f436"
+  },
+  {
+    "addon": "script.module.tmdbhelper.sync.mdblist",
+    "version": "1.1.0",
+    "url": "https://raw.githubusercontent.com/jurialmunkey/repository.jurialmunkey/master/omega/zips/script.module.tmdbhelper.sync.mdblist/script.module.tmdbhelper.sync.mdblist-1.1.0.zip",
+    "sha256": "43580a3fbfd01325fc4ea503d110d4e0e901179363f0003bd547568f3fc9f9af"
+  }
+]

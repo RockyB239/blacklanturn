@@ -1,0 +1,55 @@
+--- upstream/settings.xml
++++ blacklanturn/settings.xml
+@@ -0,0 +1,52 @@
++<?xml version='1.0' encoding='utf-8'?>
++<settings version="2">
++    <setting id="language" default="true">18</setting>
++    <setting id="ignore_regionreleasefilter" default="true">false</setting>
++    <setting id="artwork_quality">1</setting>
++    <setting id="force_english_plot_fallback" default="true">false</setting>
++    <setting id="use_kodi_local_db" default="true">0</setting>
++    <setting id="flatten_seasons" default="true">false</setting>
++    <setting id="seasons_specials" default="true">true</setting>
++    <setting id="seasons_anticipated" default="true">true</setting>
++    <setting id="seasons_upnext" default="true">true</setting>
++    <setting id="widgets_nextpage">true</setting>
++    <setting id="calendar_flatten" default="true">true</setting>
++    <setting id="nextaired_linklibrary" default="true">true</setting>
++    <setting id="calendar_art" default="true">0</setting>
++    <setting id="trakt_nextepisodesort" default="true">airdate</setting>
++    <setting id="nextepisodes_usecalendar" default="true">false</setting>
++    <setting id="fanarttv_lookup" default="true">false</setting>
++    <setting id="fanarttv_prefer" default="true">false</setting>
++    <setting id="language_lookup" default="true">false</setting>
++    <setting id="trakt_becausewatchedseed" default="true">5</setting>
++    <setting id="trakt_cacheownlists" default="true">true</setting>
++    <setting id="default_player_movies">umbrella.autoplay.json play_movie</setting>
++    <setting id="default_player_episodes">umbrella.autoplay.json play_episode</setting>
++    <setting id="default_player_provider" default="true">true</setting>
++    <setting id="default_player_kodi" default="true">1</setting>
++    <setting id="combined_players" default="true">true</setting>
++    <setting id="bundled_players" default="true">true</setting>
++    <setting id="players_url" default="true" />
++    <setting id="provider_allowlist" default="true" />
++    <setting id="use_online_artwork" default="true">true</setting>
++    <setting id="use_online_ratings" default="true">true</setting>
++    <setting id="service_container_content_fallback" default="true">false</setting>
++    <setting id="service_prefers_online_clearlogo" default="true">false</setting>
++    <setting id="pagemulti_tmdb" default="true">1</setting>
++    <setting id="pagemulti_trakt" default="true">1</setting>
++    <setting id="pagemulti_sync" default="true">1</setting>
++    <setting id="contextmenu_related_lists" default="true">true</setting>
++    <setting id="contextmenu_sync_trakt" default="true">true</setting>
++    <setting id="contextmenu_sync_tmdb" default="true">true</setting>
++    <setting id="contextmenu_refresh_details" default="true">true</setting>
++    <setting id="contextmenu_modify_artwork" default="true">true</setting>
++    <setting id="contextmenu_add_to_library" default="true">true</setting>
++    <setting id="contextmenu_make_node" default="true">true</setting>
++    <setting id="startup_notifications" default="true">true</setting>
++    <setting id="sync_notifications" default="true">true</setting>
++    <setting id="connection_notifications" default="true">true</setting>
++    <setting id="dummy_duration" default="true">1.0</setting>
++    <setting id="dummy_delay" default="true">1.0</setting>
++    <setting id="only_resolve_strm" default="true">false</setting>
++    <setting id="max_threads">10</setting>
++    <setting id="trakt_watchedindicators">true</setting><setting id="sync_source_watched">Trakt</setting><setting id="sync_source_playback">Trakt</setting><setting id="trakt_scrobbling">true</setting></settings>

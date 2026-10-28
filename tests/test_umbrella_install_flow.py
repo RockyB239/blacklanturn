@@ -1,4 +1,4 @@
-"""Real Standard/account-only cleanup/extraction with current Umbrella97 with legacy preference marker18; fullrelease29 gate tested separately."""
+"""Real Standard/account-only cleanup/extraction with current Umbrella98 with legacy preference marker18; fullrelease29 gate tested separately."""
 import importlib.util,json,shutil,sqlite3,sys,types,unittest,xml.etree.ElementTree as E,zipfile
 from pathlib import Path
 from unittest.mock import patch
@@ -10,7 +10,7 @@ ROOT=LIB.parents[3];PROGRESS=ROOT/'compatibility/umbrella-progress'
 ID='plugin.video.umbrella';PLAYER='resources/lib/modules/player.py'
 POLICY={'schema':3,'edition':'apple','kodi_major':21,'helper_patch':'empty-cache-1',
  'preferences_policy':'playback-trakt-youtube-umbrella-1','installer_min_version':'1.0.18',
- 'umbrella_patch':'event-progress-3','umbrella_version':'6.7.97'}
+ 'umbrella_patch':'event-progress-3','umbrella_version':'6.7.98'}
 
 class UmbrellaInstallFlow(unittest.TestCase):
  setUp=compatibility.CompatibilityTests.setUp;tearDown=compatibility.CompatibilityTests.tearDown
@@ -18,15 +18,13 @@ class UmbrellaInstallFlow(unittest.TestCase):
  def provider(self,patched=True):
   with zipfile.ZipFile(PROGRESS/'upstream-6.7.92.zip')as z:data={n.split('/',1)[1]:z.read(n)for n in z.namelist()if not n.endswith('/')}
   if patched:
-   spec=importlib.util.spec_from_file_location('current_install_builder',ROOT/'tools/build_release.py');build=importlib.util.module_from_spec(spec);spec.loader.exec_module(build)
-   record=build.current_addon_manifest()[ID]
-   data=build.current_addon_files(ID,record)
+   data=helper_fixture.current_data(ID)
   return data
  def packaged(self,change=None,policy=None):
   h=helper_fixture.ManagedTests();h.root=self.root
   with zipfile.ZipFile(h.archive())as z:data={n:z.read(n)for n in z.namelist()}
-  spec=importlib.util.spec_from_file_location('current_helper_install_builder',ROOT/'tools/build_release.py');build=importlib.util.module_from_spec(spec);spec.loader.exec_module(build)
-  build.apply_current_addons(data,('plugin.video.themoviedb.helper','script.module.infotagger'))
+  for aid in ('plugin.video.themoviedb.helper','script.module.infotagger'):
+   data.update({'addons/'+aid+'/'+n:raw for n,raw in helper_fixture.current_data(aid).items()})
   data.update({'addons/'+ID+'/'+n:b for n,b in self.provider().items()})
   data['addons/plugin.video.youtube/addon.xml']=b'<addon id="plugin.video.youtube" version="7.3.0"/>'
   for name,fields in EXPECTED.items():data['userdata/'+name]=('<settings>'+''.join('<setting id="'+k+'">'+v+'</setting>'for k,v in fields.items())+'</settings>').encode()

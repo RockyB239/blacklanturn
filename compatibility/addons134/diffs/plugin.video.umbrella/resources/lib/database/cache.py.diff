@@ -1,0 +1,19 @@
+--- upstream/resources/lib/database/cache.py
++++ blacklanturn/resources/lib/database/cache.py
+@@ -486,11 +486,12 @@
+ 		with open(versionFile, 'r') as fh: oldVersion = fh.read()
+ 	except: oldVersion = '0'
+ 	try:
+-		curVersion = control.addon('plugin.video.umbrella').getAddonInfo('version')
+-		if oldVersion != curVersion:
++		curVersion = control.getUmbrellaVersion()
++		previous = oldVersion
++		oldVersion = control.getUmbrellaVersion(oldVersion) or '0'
++		if previous != curVersion:
+ 			with open(versionFile, 'w') as fh: fh.write(curVersion)
+-			return oldVersion, True
+-		else: return oldVersion, False
++		return oldVersion, oldVersion != curVersion
+ 	except:
+ 		from resources.lib.modules import log_utils
+ 		log_utils.error()

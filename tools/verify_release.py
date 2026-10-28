@@ -5,7 +5,7 @@ from statistics import median
 from pathlib import Path
 ROOT=Path(__file__).resolve().parents[1]
 SOURCE=ROOT/'installer-source/plugin.program.blacklanturninstaller'
-sys.path.insert(0,str(SOURCE))
+if __name__ == "__main__":sys.path.insert(0,str(SOURCE))
 
 def verify_shared_network_acceptance(receipt, manifest):
  """Actual isolated Kodi RequestAPI evidence, not three-device playback proof."""

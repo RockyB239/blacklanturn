@@ -1,0 +1,16 @@
+--- upstream/resources/lib/modules/control.py
++++ blacklanturn/resources/lib/modules/control.py
+@@ -232,8 +232,11 @@
+ 	win = xbmcgui.Window(xbmcgui.getCurrentWindowId())
+ 	return str(win.getFocusId())
+ 
+-def getUmbrellaVersion():
+-	return xbmcaddon.Addon('plugin.video.umbrella').getAddonInfo('version')
++def getUmbrellaVersion(version=None):
++	# Keep upstream migrations numeric while Kodi tracks the managed package epoch.
++	if version is None:
++		version = xbmcaddon.Addon('plugin.video.umbrella').getAddonInfo('version')
++	return re_sub(r'^1:([0-9]+\.[0-9]+\.[0-9]+)\+blacklanturn\.[0-9]+$', r'\1', version)
+ 
+ def addonVersion(addon):
+ 	return xbmcaddon.Addon(addon).getAddonInfo('version')

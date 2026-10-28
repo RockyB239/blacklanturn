@@ -1,0 +1,20 @@
+--- upstream/resources/tmdbhelper/lib/items/context.py
++++ blacklanturn/resources/tmdbhelper/lib/items/context.py
+@@ -15,7 +15,7 @@
+     # Sync Options
+     '$ADDON[plugin.video.themoviedb.helper 32549]': {
+         'command': 'RunScript(plugin.video.themoviedb.helper,sync_options,{})',
+-        'setting': 'contextmenu_sync_options',
++        'setting': 'contextmenu_sync_trakt',
+         'season': {'tmdb_type': 'tv', 'tmdb_id': '{tmdb_id}', 'season': '{season}'},
+         'episode': {'tmdb_type': 'tv', 'tmdb_id': '{tmdb_id}', 'season': '{season}', 'episode': '{episode}'},
+         'other': {'tmdb_type': '{tmdb_type}', 'tmdb_id': '{tmdb_id}'}
+@@ -93,7 +93,7 @@
+ 
+         if not get_setting(mediatypes['setting']):
+             return
+-        if mediatypes['setting'] == 'contextmenu_sync_options' and not self.has_sync_actions:
++        if mediatypes['setting'] == 'contextmenu_sync_trakt' and not self.has_sync_actions:
+             return
+ 
+         item = {}

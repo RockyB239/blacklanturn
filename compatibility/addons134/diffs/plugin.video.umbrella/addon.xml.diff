@@ -1,0 +1,8 @@
+--- upstream/addon.xml
++++ blacklanturn/addon.xml
+@@ -1,4 +1,4 @@
+-<addon id="plugin.video.umbrella" name="Umbrella" provider-name="Umbrella" version="6.7.98">
++<addon id="plugin.video.umbrella" name="Umbrella" provider-name="Umbrella" version="1:6.7.98+blacklanturn.1">
+ 	<requires>
+ 		<import addon="xbmc.python" version="3.0.0" />
+ 		<import addon="script.module.requests" />

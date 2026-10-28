@@ -1,0 +1,20 @@
+{
+  "title": "BlackLanturn 1.1.34",
+  "summary": "Current bundled add-ons with tested BlackLanturn compatibility patches.",
+  "sections": [
+    {
+      "heading": "Add-ons and patches together",
+      "bullets": [
+        "Updates Umbrella to6.7.98, TMDb Helper to6.19.2 and Up Next to1.3.0.",
+        "Retains BlackLanturn source selection, sampled playback progress, privacy, search and cache fixes on the updated source."
+      ]
+    },
+    {
+      "heading": "Your complete setup stays saved",
+      "bullets": [
+        "Update BlackLanturn keeps accounts, settings, authorizations, sources, watched progress and unrelated add-ons.",
+        "Existing platform-specific YouTube playback, branded icons and personal extensions remain in place."
+      ]
+    }
+  ]
+}
