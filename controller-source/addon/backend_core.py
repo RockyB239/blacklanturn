@@ -46,6 +46,10 @@ SETTINGS_GROUPS=[
   ('title_logos','Title logos','Use movie and show logos when available; otherwise show the full title.'),
 ('icon_pack','Sidebar icon style','Choose an installed icon pack. Sidebar choices and order stay saved.')])]
 
+SETTINGS_GROUPS.append(('Recommendations','Exact-title choices on this device. Your genre preferences stay unchanged.',[
+  ('hidden_titles','Hidden titles','Unhide a movie or show. Search, saved titles and watch progress remain available.'),
+  ('reduced_titles','Reduced titles','Restore normal frequency for titles you chose to see less often.')]))
+
 class CoreSettingsReturn:
  """Wait for actual core activation, then Home; avoid an early-return race."""
  def __init__(self,started):self.started=started;self.entered=False

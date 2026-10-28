@@ -62,7 +62,7 @@ def is_browse_folder(item):
     return query.get('info',[''])[0] in ('seasons','episodes','flatseasons') or not (item.get('year') or item.get('plot'))
 
 def card_artwork(item):
-    """Choose provider art without pretending a poster is a landscape."""
+    """Use one landscape media-card shape; preserve source poster art as a framed fallback."""
     art=item.get('art') or {}
     if item.get('_page_control') and art.get('navigation'):return {'image':art['navigation'],'kind':'paging'}
     if item.get('type')=='addon':return {'image':art.get('square') or art.get('icon',''),'kind':'square'}
@@ -74,25 +74,25 @@ def card_artwork(item):
     if source.netloc=='plugin.video.youtube':
         image=art.get('thumb') or item.get('thumbnail')
         if image:return {'image':image,'kind':'square' if source.path.startswith('/channel/') else 'landscape'}
-    # Season directories expose episode counts; they are not episode thumbnails.
-    season_folder=(item.get('filetype')=='directory' and
-                   query.get('info',[''])[0]=='episodes' and
-                   query.get('tmdb_type',query.get('type',['']))[0]=='tv' and
-                   query.get('season',[''])[0].isdigit())
-    if season_folder:
-        for key in ('season.poster','poster'):
-            value=art.get(key)
-            if value and value!=art.get('tvshow.poster'):
-                return {'image':value,'kind':'portrait'}
+    # Cast/person portraits are a distinct presentation, outside title shelves.
+    if item.get('type')=='person' or query.get('tmdb_type')==['person']:
+        image=art.get('poster') or art.get('thumb') or item.get('thumbnail','')
+        return {'image':image,'kind':'portrait'} if image else {'image':'','kind':'text'}
     posters={art.get(k) for k in ('poster','season.poster','tvshow.poster') if art.get(k)}
-    episode=episode_identity(item) or item.get('episode',-1)>=0
-    if episode:
+    season_folder=(item.get('filetype')=='directory' and query.get('info')==['episodes']
+                   and query.get('tmdb_type',query.get('type',['']))[0]=='tv')
+    # Season directories carry episode counts, so only actual episodes get
+    # still-image priority. Season-specific wide artwork leads shared show art.
+    episode=episode_identity(item) or item.get('type')=='episode' or (item.get('filetype')!='directory' and isinstance(item.get('episode'),int) and item['episode']>=0 and isinstance(item.get('season'),int) and item['season']>=0)
+    if episode and not season_folder:
         for value in (art.get('thumb'),item.get('thumbnail')):
             if value and value not in posters:return {'image':value,'kind':'landscape'}
-    for key in ('landscape','season.landscape','tvshow.landscape','fanart','tvshow.fanart'):
+    wide=('season.landscape','landscape','tvshow.landscape','fanart','tvshow.fanart') if season_folder else ('landscape','season.landscape','tvshow.landscape','fanart','tvshow.fanart')
+    for key in wide:
+        if art.get(key) and art[key] not in posters:return {'image':art[key],'kind':'landscape'}
+    fallback=('season.poster','poster','tvshow.poster') if season_folder else ('poster','season.poster','tvshow.poster')
+    for key in fallback:
         if art.get(key):return {'image':art[key],'kind':'landscape'}
-    for key in ('poster','season.poster','tvshow.poster'):
-        if art.get(key):return {'image':art[key],'kind':'portrait'}
     thumb=art.get('thumb') or item.get('thumbnail','')
     return {'image':thumb,'kind':'landscape'} if thumb else {'image':'','kind':'text'}
 

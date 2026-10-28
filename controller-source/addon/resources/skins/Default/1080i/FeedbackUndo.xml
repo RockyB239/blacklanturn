@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<window><defaultcontrol always="true">901</defaultcontrol><coordinates><system>1</system></coordinates><controls>
+<control type="image"><left>0</left><top>0</top><width>1920</width><height>1080</height><texture colordiffuse="A0080B0E">white.png</texture></control>
+<control type="image"><left>460</left><top>350</top><width>1000</width><height>380</height><texture colordiffuse="FF101820">white.png</texture></control>
+<control type="image"><left>460</left><top>350</top><width>5</width><height>380</height><texture colordiffuse="FF29D9EE">white.png</texture></control>
+<control type="image"><left>510</left><top>380</top><width>54</width><height>64</height><texture>blacklanturn-lantern.png</texture><aspectratio>keep</aspectratio></control>
+<control type="label"><left>588</left><top>382</top><width>800</width><height>58</height><font>font32_title</font><textcolor>FF29D9EE</textcolor><label>$INFO[Window.Property(heading)]</label></control>
+<control type="textbox"><left>514</left><top>462</top><width>892</width><height>112</height><font>font27</font><textcolor>FFF5F5F5</textcolor><label>$INFO[Window.Property(message)]</label></control>
+<control type="label"><left>514</left><top>650</top><width>490</width><height>42</height><font>font20_title</font><textcolor>FFB4BCC5</textcolor><label>Settings → Recommendations to manage titles</label></control>
+<control type="button" id="900"><left>1010</left><top>628</top><width>180</width><height>62</height><font>font27</font><label>Undo</label><texturefocus>focus-teal.png</texturefocus><texturenofocus>button-dark.png</texturenofocus><onleft>901</onleft><onright>901</onright><onup>900</onup><ondown>900</ondown></control>
+<control type="button" id="901"><left>1210</left><top>628</top><width>190</width><height>62</height><font>font27</font><label>Done</label><texturefocus>focus-teal.png</texturefocus><texturenofocus>button-dark.png</texturenofocus><onleft>900</onleft><onright>900</onright><onup>901</onup><ondown>901</ondown></control>
+</controls></window>

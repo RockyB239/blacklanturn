@@ -31,10 +31,10 @@ jobs:
           for edition in General Apple-TV-Mac; do
             curl --fail --location --retry 3 "https://github.com/RockyB239/blacklanturn/releases/download/v1.1.30/BlackLanturn-${edition}-Kodi21-1.1.30.zip" -o "baselines/BlackLanturn-${edition}-Kodi21-1.1.30.zip"
           done
-      - name: Download pinned low-memory release baselines
+      - name: Download pinned landscape release baselines
         run: |
           for edition in General Apple-TV-Mac; do
-            curl --fail --location --retry 3 "https://github.com/RockyB239/blacklanturn/releases/download/v1.1.31/BlackLanturn-${edition}-Kodi21-1.1.31.zip" -o "baselines/BlackLanturn-${edition}-Kodi21-1.1.31.zip"
+            curl --fail --location --retry 3 "https://github.com/RockyB239/blacklanturn/releases/download/v1.1.32/BlackLanturn-${edition}-Kodi21-1.1.32.zip" -o "baselines/BlackLanturn-${edition}-Kodi21-1.1.32.zip"
           done
       - name: Installer and update protection tests
         run: python -m unittest discover -s tests -v
@@ -50,7 +50,7 @@ jobs:
         run: python tools/device_validation/verify_performance_evidence.py validation/optimization130-performance.json --manifest controller-source/manifest96.json
       - name: Verify branded icons in both full and component editions
         run: |
-          python tools/build_release132.py --baselines baselines --output artifacts132
-          python tools/verify_release132.py artifacts132 --baselines baselines
-          python tools/release_report.py artifacts132/BlackLanturn-General-Kodi21-1.1.32.zip --output artifacts132/current-general.json
-          python tools/release_report.py artifacts132/BlackLanturn-Apple-TV-Mac-Kodi21-1.1.32.zip --output artifacts132/current-apple.json
+          python tools/build_release133.py --baselines baselines --output artifacts133
+          python tools/verify_release133.py artifacts133 --baselines baselines
+          python tools/release_report.py artifacts133/BlackLanturn-General-Kodi21-1.1.33.zip --output artifacts133/current-general.json
+          python tools/release_report.py artifacts133/BlackLanturn-Apple-TV-Mac-Kodi21-1.1.33.zip --output artifacts133/current-apple.json

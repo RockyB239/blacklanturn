@@ -25,7 +25,7 @@ class WatchRefresh(unittest.TestCase):
         self.assertEqual(snapshot['rows'][0][0]['resume']['position'],20)
         self.assertEqual(snapshot['histories'][0].pages,[('previous-list',4)])
         self.assertEqual(snapshot['focus'],900);self.assertEqual(snapshot['row_offset'],2)
-    def refresh(self,loader,failed=None,browse_state=None):
+    def refresh(self,loader,failed=None,browse_state=None,display_rows=None):
         path='plugin://plugin.video.themoviedb.helper/?info=play&tmdb_type=tv&tmdb_id=12&season=1&episode=2'
         selected={'file':path,'resume':{'position':20,'total':100},'title':'Episode 2'}
         obj=SimpleNamespace(actions_open=False,stop_preview=lambda:None,generation=2,alive=True,
@@ -42,6 +42,7 @@ class WatchRefresh(unittest.TestCase):
             'event':lambda *args,**kwargs:None}
         kwargs={'browse_state':browse_state} if browse_state else {}
         if browse_state:obj.rows[0].insert(0,{'file':'neighbor'})
+        if display_rows is not None:obj.rows[0]=display_rows
         extract(ROOT/'live_review.py','refresh_watch_status',namespace,'LiveReview')(obj,**kwargs)
         return obj,props,applied
     def test_playback_return_passes_saved_selection_to_refresh_before_native_frame(self):
@@ -56,6 +57,15 @@ class WatchRefresh(unittest.TestCase):
             browse_state={'positions':[1,0],'focus':101})
         self.assertEqual(applied[0][2],1)
         self.assertEqual(props['restored_focus'],101)
+    def test_raw_saved_position_keeps_selected_title_after_hidden_title_is_filtered(self):
+        path='plugin://plugin.video.themoviedb.helper/?info=play&tmdb_type=tv&tmdb_id=12&season=1&episode=2'
+        hidden={'file':'hidden'};selected={'file':path};neighbor={'file':'neighbor'}
+        state={'rows':[[hidden,selected,neighbor],[{'file':'second'}]],'positions':[1,0],'focus':900}
+        obj,props,applied=self.refresh(lambda source:[selected,neighbor] if source=='list-0' else [{'file':'second'}],browse_state=state,display_rows=[selected,neighbor])
+        self.assertEqual(applied[0][2],0,'Saved raw position must anchor Selected, not its visible neighbor')
+        self.assertEqual(obj.selected['file'],path)
+        self.assertEqual(props['restored_focus'],900)
+
     def test_provider_reordering_keeps_exact_episode_and_updates_its_real_progress(self):
         path='plugin://plugin.video.themoviedb.helper/?info=play&tmdb_type=tv&tmdb_id=12&season=1&episode=2'
         def loader(source):

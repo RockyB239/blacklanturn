@@ -1,0 +1,27 @@
+{
+  "title": "BlackLanturn 1.1.33",
+  "summary": "Consistent landscape browsing cards and reversible title recommendations.",
+  "sections": [
+    {
+      "heading": "Consistent landscape cards",
+      "bullets": [
+        "Title, season and episode cards keep a landscape frame as you browse and move to the next page.",
+        "Available wide artwork is preferred. Poster-only fallbacks stay centered without stretching; season and episode labels stay readable."
+      ]
+    },
+    {
+      "heading": "Control titles in discovery",
+      "bullets": [
+        "Hide an exact movie or show, or choose Show less without reducing an entire genre.",
+        "Undo immediately, or restore titles from Settings → Recommendations. Search, My Stuff and watched progress remain accessible."
+      ]
+    },
+    {
+      "heading": "Your setup stays saved",
+      "bullets": [
+        "Use Update BlackLanturn to retain settings, accounts, sources, authorizations, progress and other installed add-ons.",
+        "Both branded icon packs remain included. Personal Fight Zone stays outside public packages."
+      ]
+    }
+  ]
+}

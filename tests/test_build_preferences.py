@@ -124,3 +124,22 @@ class BuildPreferences(unittest.TestCase):
   from resources.libs.update_notes_state import empty_state
   ids=IDS+['script.blacklanturn.preview'];p=self.home/'userdata/addon_data/script.blacklanturn.preview/update-notes.json';p.parent.mkdir(parents=True,exist_ok=True);p.write_text(json.dumps(empty_state()))
   a=self.m.prepare(self.home,self.accounts(),ids,True);p.unlink();self.m.restore(self.home,a,ids);self.assertFalse(p.exists())
+
+class TitleChoicePreservation(unittest.TestCase):
+ setUp=BuildPreferences.setUp
+ accounts=BuildPreferences.accounts
+ def choices(self,raw=None):
+  p=self.home/'userdata/addon_data/script.blacklanturn.preview/title-preferences.json';p.parent.mkdir(parents=True,exist_ok=True);p.write_text(raw if raw is not None else '{ "schema": 1, "records": {"movie:12": {"action": "hide", "title": "Synthetic"}} }');return p
+ def test_standard_reinstall_preserves_exact_title_choice_bytes(self):
+  p=self.choices();raw=p.read_bytes();ids=IDS+['script.blacklanturn.preview'];a=self.m.prepare(self.home,self.accounts(),ids,False);p.unlink();self.m.restore(self.home,a,ids);self.assertTrue(p.is_file(),'Standard must retain local hidden/reduced choices');self.assertEqual(p.read_bytes(),raw)
+ def test_clean_does_not_restore_old_title_choices(self):
+  p=self.choices();ids=IDS+['script.blacklanturn.preview'];a=self.m.prepare(self.home,self.accounts(),ids,True);p.unlink();self.m.restore(self.home,a,ids);self.assertFalse(p.exists())
+ def test_invalid_or_oversized_title_choice_backup_stops_before_cleanup(self):
+  ids=IDS+['script.blacklanturn.preview']
+  for value in ('{broken','{"data":"'+'x'*(256*1024)+'"}'):
+   with self.subTest(kind=len(value)):
+    p=self.choices(value)
+    with self.assertRaises(self.m.PreferenceError):self.m.prepare(self.home,self.accounts(),ids,False)
+    self.assertEqual(p.read_text(),value)
+ def test_old_schema4_pending_snapshot_remains_recoverable(self):
+  ids=IDS+['script.blacklanturn.preview'];p=self.choices();a=self.m.prepare(self.home,self.accounts(),ids,False);snap=a['build_preferences'];snap['schema']=4;snap.pop('title_preferences',None);p.unlink();self.m.restore(self.home,a,ids);self.assertFalse(p.exists())

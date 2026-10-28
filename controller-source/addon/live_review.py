@@ -25,6 +25,8 @@ from page_ahead import PageAhead,eligible as page_ahead_eligible
 from row_feedback import trim_row_cache,row_message,provider_page_label,RowResultCache
 from public_rows import PublicRowSnapshots,snapshot_scope,public_path,helper_settings_identity
 from backend_ui import BackendSettings,LoadingPreview
+from title_preferences import TitlePreferences
+from title_feedback_ui import TitleFeedback
 from icon_picker import choose_icon
 from icon_packs import icon_path,selected_pack,with_pack,PACK_CHOICES
 from extensions import inline_request
@@ -127,6 +129,8 @@ def media_item(data,immutable=False):
     properties['youtubeFolder']='true' if youtube_folder else 'false'
     if youtube_folder:art['youtubefolder']=selected_art['image'] or 'video-addons.png'
     properties['cardArtKind']=selected_art['kind']
+    properties['cardEpisodeLabel']='true' if episode_line and not data.get('_page_control') else 'false'
+    properties['cardPosterFallback']='true' if selected_art['kind']=='landscape' and selected_art['image'] and selected_art['image'] in {art.get(k) for k in ('poster','season.poster','tvshow.poster') if art.get(k)} else 'false'
     li.setArt(art)
     info={k:data[k] for k in ['title','plot','year','rating','genre','mpaa','director','studio','season','episode','tvshowtitle','playcount'] if k in data}
     if data.get('runtime'):info['duration']=data['runtime']
@@ -140,7 +144,7 @@ class PreviewPlayer(xbmc.Player):
     def __init__(self):super().__init__();self.failed=False
     def onPlayBackError(self):self.failed=True
 
-class LiveReview(YouTubeBrowser,xbmcgui.WindowXML):
+class LiveReview(TitleFeedback,YouTubeBrowser,xbmcgui.WindowXML):
     def onInit(self):
         # Kodi may initialize this object again with recreated native controls.
         # Retire its old setup/monitor before any native initialization can wait.
@@ -186,6 +190,8 @@ class LiveReview(YouTubeBrowser,xbmcgui.WindowXML):
         self.setProperty('loading','true');self.setProperty('loadingStatus','Starting BlackLanturn…')
         self.setProperty('input','remote');self.setProperty('previewMode','manual');self.setProperty('genreLabel','Genres: All');self.setProperty('page','home');self.setProperty('notice','Loading live add-on lists…')
         STORE.mkdir(parents=True,exist_ok=True)
+        from title_preferences import TitlePreferences
+        self.title_preferences=TitlePreferences(STORE/'title-preferences.json');self.title_raw_rows={};self.title_empty_rows={}
         self.configure_icon_resources()
         self.config_loaded=True
         try:self.config=read_controller_config(STORE/'rows.json')
@@ -697,6 +703,7 @@ class LiveReview(YouTubeBrowser,xbmcgui.WindowXML):
         self.row_cache[self.row_offset+n]=deferred
         trim_row_cache(self.row_cache,self.row_offset)
         if not current():return
+        if hasattr(self,'hydrate_title_row'):self.hydrate_title_row(n,files)
         snapshots[n]=False
         event('row_snapshot_hydrated',row=n,matched=matched,visible=len(displayed),deferred_order=[item_key(item) for item in displayed]!=[item_key(item) for item in files])
         focus=self.getFocusId();position=control.getSelectedPosition()
@@ -715,9 +722,11 @@ class LiveReview(YouTubeBrowser,xbmcgui.WindowXML):
             for n in range(2):
                 if self.window_ready[n]:
                     index=self.row_offset+n;previous=self.row_cache.get(index);position=self.getControl(900+n).getSelectedPosition()
-                    entry={'files':self.rows[n],'path':self.paths[n],'history':self.histories[n],'label':getattr(self,'row_labels',{}).get(n,self.getProperty('row'+str(n))),'position':position,'state':self.row_states.get(n),'failed':copy.deepcopy(self.failed_paths.get(n)),'message':self.getProperty('rowMessage'+str(n)),'snapshot':getattr(self,'snapshot_rows',{}).get(n,False)}
+                    raw=getattr(self,'raw_title_row',lambda slot:self.rows[slot])(n)
+                    anchor=self.rows[n][position] if 0<=position<len(self.rows[n]) else None
+                    position=restored_position(raw,anchor,position)
+                    entry={'files':raw,'path':self.paths[n],'history':self.histories[n],'label':getattr(self,'row_labels',{}).get(n,self.getProperty('row'+str(n))),'position':position,'state':self.row_states.get(n),'failed':copy.deepcopy(self.failed_paths.get(n)),'message':self.getProperty('rowMessage'+str(n)),'snapshot':getattr(self,'snapshot_rows',{}).get(n,False)}
                     if previous and previous.get('deferred') and previous.get('revision')==revision and previous['path']==self.paths[n] and previous.get('files') is not None:
-                        anchor=self.rows[n][position] if 0<=position<len(self.rows[n]) else None
                         entry=dict(previous,history=self.histories[n],position=restored_position(previous['files'],anchor,position))
                     self.row_cache[index]=entry
         trim_row_cache(self.row_cache,offset)
@@ -1025,6 +1034,7 @@ class LiveReview(YouTubeBrowser,xbmcgui.WindowXML):
                 # selections, Back and watched refresh retain their title.
                 if ordered is not files and ranked_start and position==0 and not display_position:original=None
                 files=ordered
+            if hasattr(self,'prepare_title_row'):files=self.prepare_title_row(n,files)
             files,position=page_cards(files,self.histories[n],self.paths[n],position,display_position=display_position)
             if original and not display_position:position=restored_position(files,original,position)
             if hasattr(self,'snapshot_rows'):self.snapshot_rows[n]=False
@@ -1049,7 +1059,7 @@ class LiveReview(YouTubeBrowser,xbmcgui.WindowXML):
                 return
             if update_selected and all(self.window_ready) and not getattr(self,'startup_idle',False):
                 if not self.rows[0] and not self.rows[1]:
-                    if getattr(self,'section','')!='My Stuff' and self.row_offset+2<len(self.page_definitions):
+                    if getattr(self,'section','')!='My Stuff' and not any(getattr(self,'title_empty_rows',{}).values()) and self.row_offset+2<len(self.page_definitions):
                         self.show_row_window(min(self.row_offset+2,len(self.page_definitions)-2),0);return
                     if getattr(self,'search_state',None) or self.episode_browser_context:self.setFocusId(600)
                     else:self.getControl(50).selectItem(len(self.navigation_items)-1);self.set_nav(True,pending_focus=True);self.setFocusId(50)
@@ -1193,9 +1203,14 @@ class LiveReview(YouTubeBrowser,xbmcgui.WindowXML):
         fields=('section','mode','navigation_id','active_page','page_definitions','row_offset','row_cache','rows','paths','histories','last_row','return_focus','selected','person_context','episode_browser_context','season_sources','season_title','season_position')
         state={key:getattr(self,key) for key in fields}
         state.update(youtube_identity=getattr(getattr(self,'youtube_connection',None),'identity',''),youtube_tab=getattr(self,'youtube_tab','home'),youtube_query=getattr(self,'youtube_query',''),youtube_pages=copy.deepcopy(getattr(self,'youtube_pages',{})),snapshot_rows=copy.deepcopy(getattr(self,'snapshot_rows',{})),window_ready=list(getattr(self,'window_ready',[True,True])),search_state=copy.deepcopy(getattr(self,'search_state',None)),search_origin=copy.deepcopy(getattr(self,'search_origin',None)),row_states=copy.deepcopy(getattr(self,'row_states',{})),failed_paths=copy.deepcopy(getattr(self,'failed_paths',{})),row_labels=copy.deepcopy(getattr(self,'row_labels',{})))
+        if hasattr(self,'raw_title_row'):
+            state['rows']=[self.raw_title_row(n) for n in range(2)]
         if include_stack:state['discovery_stack']=copy.deepcopy(getattr(self,'discovery_stack',[]))
         if self.mode=='details':state['cast_position']=self.getControl(3000).getSelectedPosition()
-        state['positions']=[self.getControl(900+n).getSelectedPosition() for n in range(2)]
+        state['positions']=[]
+        for n in range(2):
+            pos=self.getControl(900+n).getSelectedPosition();anchor=self.rows[n][pos] if 0<=pos<len(self.rows[n]) else None
+            state['positions'].append(restored_position(state['rows'][n],anchor,pos) if hasattr(self,'raw_title_row') else pos)
         state['focus']=self.getFocusId()
         state['properties']={key:self.getProperty(key) for key in ('eyebrow','captionRows','scroll','browseFilters','row0','row1','episodeBrowser','searchBrowser','page','rowState0','rowState1','rowMessage0','rowMessage1','heroCompact','addonBrowser','genreChooser','filmographyBrowser','youtubeBrowser','previewMode','previewsReady')}
         return copy.deepcopy(state)
@@ -1255,6 +1270,8 @@ class LiveReview(YouTubeBrowser,xbmcgui.WindowXML):
         focus=browse_state['focus'] if browse_state is not None else self.getFocusId()
         selected=dict(self.selected or {});paths=list(self.paths);rows=[list(r) for r in self.rows]
         positions=list(browse_state['positions']) if browse_state is not None else [self.getControl(900+n).getSelectedPosition() for n in range(2)]
+        anchor_rows=browse_state.get('rows',rows) if browse_state is not None else rows
+        anchors=[row[pos] if 0<=pos<len(row) else None for row,pos in zip(anchor_rows,positions)]
         labels=[getattr(self,'failed_paths',{}).get(n,{}).get('label') or getattr(self,'row_labels',{}).get(n,self.getProperty('row'+str(n))) for n in range(2)]
         youtube_current=self.youtube_request_guard(generation) if self.section=='YouTube' else None
         self.row_cache={};self.setProperty('notice','Refreshing watched status…')
@@ -1278,7 +1295,7 @@ class LiveReview(YouTubeBrowser,xbmcgui.WindowXML):
                                 files=[] if filtered and upstream_path(provider_path(path))!=provider_path(path) else get_list(provider_path(path))
                                 files=self.fill_discovery_page(path,files,lambda:self.alive and generation==self.generation,refresh=True)
                     except Exception:unavailable=True;continue
-                    anchor=rows[n][positions[n]] if 0<=positions[n]<len(rows[n]) else None
+                    anchor=anchors[n]
                     position=restored_position(files,anchor,positions[n])
                     if self.alive and generation==self.generation:
                         if self.section=='YouTube':self.remember_youtube_watch_items(files)
@@ -1376,6 +1393,7 @@ class LiveReview(YouTubeBrowser,xbmcgui.WindowXML):
             if self.rating_identity(item):options.append(('discover','Discover collections & creator credits'))
         if (not item or discovery) and genre_available:options.append(('genre','Choose genre…'))
         if item and not discovery:
+            options.extend(getattr(self,'title_feedback_actions',lambda _:[])(item))
             if getattr(self,'youtube_home_visible',lambda:False)():options.append(('youtube_refresh','Refresh recommendations'))
             if getattr(self,'source_session_label',lambda *a,**k: '')(item,refresh=True):options.append(('normal_autoplay','Return to normal autoplay'))
             if player_path:options.append(('default_player','Set default player…'))
@@ -1390,7 +1408,8 @@ class LiveReview(YouTubeBrowser,xbmcgui.WindowXML):
         event('title_action_selected',choice=chosen)
         if chosen<0:return
         action=options[chosen][0]
-        if action=='youtube_refresh':self.refresh_youtube_recommendations()
+        if action.startswith('title_'):self.change_title_feedback(item,action)
+        elif action=='youtube_refresh':self.refresh_youtube_recommendations()
         elif action=='genre':
             generation=getattr(self,'generation',0)
             self.browse_source()
@@ -1441,7 +1460,7 @@ class LiveReview(YouTubeBrowser,xbmcgui.WindowXML):
             self.getControl(103).controlLeft(self.getControl(105 if preview_available else 101));self.getControl(103).controlRight(self.getControl(106 if show_identity(item) and not self.episode_browser_context else 103))
             self.getControl(106).controlDown(self.getControl(3000));self.getControl(106).controlLeft(self.getControl(103))
             self.related_history=PageHistory();self.related_path='';self.related_owner=object();owner=self.related_owner;self.related_request=None
-            self.related=[];self.cast_people=[]
+            self.related=[];self.title_related_raw=None;self.cast_people=[]
             self.getControl(3000).reset();self.getControl(3100).reset();self.setFocusId(101)
             if youtube:
                 for cid in (101,103,105,106):self.getControl(cid).controlDown(self.getControl(cid))
@@ -1479,6 +1498,9 @@ class LiveReview(YouTubeBrowser,xbmcgui.WindowXML):
                         related_path,related=load_related(tmdb,get_list,kind,identity,valid=current)
                         with self.preview_dispatch_lock:
                             if not current():return
+                            self.title_related_raw=related
+                            store=getattr(self,'title_preferences',None)
+                            if store is not None:related=store.apply(related)
                             related,_=page_cards(related,self.related_history,related_path)
                             items=[media_item(d) for d in related]
                             if not current():return
@@ -1509,12 +1531,15 @@ class LiveReview(YouTubeBrowser,xbmcgui.WindowXML):
                 history=PageHistory();history.pages=list(self.related_history.pages)
                 if back:history.pop()
                 else:history.push(previous,previous_position)
-                files,selected=page_cards(files,history,path,position,display_position=back)
-                items=[media_item(d) for d in files]
+                raw_related=files
                 # Serialize with Details ownership changes. Native calls may
                 # reenter on this thread, so check again before publishing state.
                 with self.preview_dispatch_lock:
                     if not current():return
+                    store=getattr(self,'title_preferences',None)
+                    files=store.apply(raw_related) if store is not None else raw_related
+                    files,selected=page_cards(files,history,path,position,display_position=back)
+                    items=[media_item(d) for d in files]
                     control=self.getControl(3100);control.reset()
                     if not current():
                         if self.alive and lifetime is getattr(self,'window_lifetime',None) and self.mode=='details':
@@ -1527,7 +1552,7 @@ class LiveReview(YouTubeBrowser,xbmcgui.WindowXML):
                         return
                     if files:control.selectItem(selected)
                     if not current():return
-                    self.related_history=history;self.related_path=path;self.related=files
+                    self.related_history=history;self.related_path=path;self.related=files;self.title_related_raw=raw_related
                     if focus_before==3100 and self.getFocusId()==3100:
                         self.setProperty('scroll','related');self.setFocusId(3100)
                     if current():self.setProperty('notice','More like this · Back returns to browsing')
@@ -1902,6 +1927,7 @@ class LiveReview(YouTubeBrowser,xbmcgui.WindowXML):
         elif action=='title_logos':
             self.config['TitleLogos']=not self.config.get('TitleLogos',True);self.save()
             if self.selected:self.update(self.selected)
+        elif action in ('hidden_titles','reduced_titles'):self.manage_title_feedback('hide' if action=='hidden_titles' else 'less')
         elif action=='rows':self.manage_rows()
         elif action in ('genres','categories'):self.categories(edit=True,collection='Genres' if action=='genres' else 'Categories')
         elif action=='rating_order':self.rating_order()
