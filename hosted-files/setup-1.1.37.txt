@@ -1,0 +1,7 @@
+BlackLanturn Build 1.1.37 / Installer 1.0.41
+
+Rating sources and Rating order are now under Appearance, removing a separate Options category. Title tracking settings appear only on relevant media. Existing reliability fixes, current bundled add-on patches, both branded icon packs and platform-specific workarounds remain included.
+
+Use Updates → Update BlackLanturn. This is an in-place update: accounts, authorizations, playback settings, sources, watched progress, row arrangements and unrelated add-ons remain saved. General and Apple TV & Mac remain separate editions. Personal Fight Zone is excluded from public downloads.
+
+The Fire Stick native audio/shutdown issue remains under investigation; this release does not claim a permanent fix or change audio settings.
