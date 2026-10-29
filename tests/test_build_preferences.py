@@ -142,4 +142,21 @@ class TitleChoicePreservation(unittest.TestCase):
     with self.assertRaises(self.m.PreferenceError):self.m.prepare(self.home,self.accounts(),ids,False)
     self.assertEqual(p.read_text(),value)
  def test_old_schema4_pending_snapshot_remains_recoverable(self):
-  ids=IDS+['script.blacklanturn.preview'];p=self.choices();a=self.m.prepare(self.home,self.accounts(),ids,False);snap=a['build_preferences'];snap['schema']=4;snap.pop('title_preferences',None);p.unlink();self.m.restore(self.home,a,ids);self.assertFalse(p.exists())
+  ids=IDS+['script.blacklanturn.preview'];p=self.choices();a=self.m.prepare(self.home,self.accounts(),ids,False);snap=a['build_preferences'];snap['schema']=4;snap.pop('title_preferences',None);snap.pop('row_layouts',None);p.unlink();self.m.restore(self.home,a,ids);self.assertFalse(p.exists())
+
+class RowArrangementPreservation(unittest.TestCase):
+ setUp=BuildPreferences.setUp
+ accounts=BuildPreferences.accounts
+ def layout(self,raw='{ "version": 1, "sections": {"Movies": {"hidden": ["row"]}} }'):
+  p=self.home/'userdata/addon_data/script.blacklanturn.preview/row-layouts.json';p.parent.mkdir(parents=True,exist_ok=True);p.write_text(raw);return p
+ def test_standard_preserves_exact_arrangement_bytes(self):
+  p=self.layout();raw=p.read_bytes();ids=IDS+['script.blacklanturn.preview'];a=self.m.prepare(self.home,self.accounts(),ids,False);p.unlink();self.m.restore(self.home,a,ids);self.assertTrue(p.exists());self.assertEqual(p.read_bytes(),raw)
+ def test_clean_does_not_restore_arrangements(self):
+  p=self.layout();ids=IDS+['script.blacklanturn.preview'];a=self.m.prepare(self.home,self.accounts(),ids,True);p.unlink();self.m.restore(self.home,a,ids);self.assertFalse(p.exists())
+ def test_older_schema5_snapshot_still_recovers(self):
+  ids=IDS+['script.blacklanturn.preview'];p=self.layout();a=self.m.prepare(self.home,self.accounts(),ids,False);a['build_preferences']['schema']=5;a['build_preferences'].pop('row_layouts',None);p.unlink();self.m.restore(self.home,a,ids);self.assertFalse(p.exists())
+ def test_invalid_or_oversized_layout_stops_before_cleanup(self):
+  for raw in ('{broken','{"data":"'+'x'*(256*1024)+'"}'):
+   p=self.layout(raw)
+   with self.assertRaises(self.m.PreferenceError):self.m.prepare(self.home,self.accounts(),IDS+['script.blacklanturn.preview'],False)
+   self.assertEqual(p.read_text(),raw)

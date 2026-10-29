@@ -10,7 +10,7 @@ from browse_controls import can_choose_genre
 
 
 class EpisodeOptions(unittest.TestCase):
-    def run_menu(self, resume=None, cancel=False, session_active=False):
+    def run_menu(self, resume=None, cancel=False, session_active=False, on_stop=None, on_focus=None):
         item = {
             'file': 'plugin://plugin.video.themoviedb.helper/?info=play&tmdb_type=tv&tmdb_id=712&season=1&episode=4',
             'title': 'Selected episode', 'filetype': 'file',
@@ -24,11 +24,12 @@ class EpisodeOptions(unittest.TestCase):
         state = SimpleNamespace(
             section='Shows', mode='home', nav=False, search_state=None,
             episode_browser_context=None, discovery_stack=[],
-            getFocusId=lambda: 900, last_row=0, rows=[[item], []],
+            getFocusId=lambda: on_focus(state) if on_focus else 900, last_row=0, rows=[[item], []],
+            input_generation=0, dwell=-30,
             histories=[SimpleNamespace(pages=[('original-row', 2)])],
             chosen=lambda cid: item, selected={'file': 'stale-hero'},
             row_states={}, config={'Saved': []}, rating_identity=lambda _: None,
-            stop_preview=lambda: events.append('stop-preview'), actions_open=False,
+            stop_preview=lambda: (events.append('stop-preview'),on_stop(state) if on_stop else None), actions_open=False,
             capture_browse=lambda: {'focus': 900, 'position': 2},
             finish=lambda: events.append('finish'),
             source_session_label=lambda *a,**kw:'Following selection' if session_active else '',

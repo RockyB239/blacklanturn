@@ -1,5 +1,6 @@
 """Local, reversible title feedback with the existing BlackLanturn controls."""
 from pathlib import Path
+import time
 import xbmcgui
 from title_preferences import title_key,discovery_scope,record_item
 ROOT=Path(__file__).resolve().parent
@@ -81,8 +82,10 @@ class TitleFeedback:
                     focus=50;self.set_nav(True,pending_focus=True)
             self.setFocusId(focus);self.focus_key=None
     def change_title_feedback(self,item,action):
-        self.stop_preview();self.actions_open=True
+        self.actions_open=True
+        self.input_generation=getattr(self,'input_generation',0)+1;self.dwell=time.monotonic()
         try:
+            self.stop_preview()
             state=self.title_preferences.state(item)
             prior=next((dict((k,v) for k,v in r.items() if k!='key') for r in self.title_preferences.entries(state) if r['key']==title_key(item)),None)
             with self.preview_dispatch_lock:
@@ -98,7 +101,7 @@ class TitleFeedback:
                     self.title_preferences.restore(item,prior);self.refresh_title_feedback()
         except (OSError,ValueError):
             xbmcgui.Dialog().ok('BlackLanturn','This choice could not be saved. Existing title preferences and your accounts are unchanged.')
-        finally:self.actions_open=False
+        finally:self.dwell=time.monotonic();self.actions_open=False
     def manage_title_feedback(self,mode):
         title='Hidden titles' if mode=='hide' else 'Reduced titles'
         while self.alive:

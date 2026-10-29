@@ -27,6 +27,9 @@ from public_rows import PublicRowSnapshots,snapshot_scope,public_path,helper_set
 from backend_ui import BackendSettings,LoadingPreview
 from title_preferences import TitlePreferences
 from title_feedback_ui import TitleFeedback
+from row_layout import RowLayouts
+from row_layout_ui import RowCustomization
+from series_status import SeriesStatus
 from icon_picker import choose_icon
 from icon_packs import icon_path,selected_pack,with_pack,PACK_CHOICES
 from extensions import inline_request
@@ -50,6 +53,7 @@ STORE=Path(xbmcvfs.translatePath(xbmcaddon.Addon('script.blacklanturn.preview').
 EVIDENCE=STORE/'logs'
 EVIDENCE.mkdir(parents=True,exist_ok=True)
 TMDB='plugin://plugin.video.themoviedb.helper/'
+SERIES_STATUS=SeriesStatus(PROFILE/'addon_data/plugin.video.themoviedb.helper')
 RATING_OPTIONS=[('rottentomatoes','Rotten Tomatoes critics'),('metacritic','Metacritic'),('imdb','IMDb audience'),('popcorn','Rotten Tomatoes audience'),('themoviedatabase','TMDb audience')]
 DEFAULT_RATINGS=[x[0] for x in RATING_OPTIONS[:4]]
 
@@ -97,6 +101,8 @@ def get_list(path):
         for item in files:item['_search_kind']=entity_kind(item)
     for item in files:item['_rating_source']='TMDb' if urlsplit(path).netloc=='plugin.video.themoviedb.helper' else 'Rating'
     event('provider_list',addon=urlsplit(path).netloc,count=len(files),seconds=round(time.monotonic()-start,2),last_label=files[-1].get('label') if files else None,folder_count=sum(x.get('filetype')=='directory' for x in files))
+    reader=globals().get('SERIES_STATUS')
+    if reader is not None and urlsplit(path).netloc=='plugin.video.themoviedb.helper':files=reader.enrich(files)
     return files
 
 def initialize_addons():
@@ -144,7 +150,7 @@ class PreviewPlayer(xbmc.Player):
     def __init__(self):super().__init__();self.failed=False
     def onPlayBackError(self):self.failed=True
 
-class LiveReview(TitleFeedback,YouTubeBrowser,xbmcgui.WindowXML):
+class LiveReview(RowCustomization,TitleFeedback,YouTubeBrowser,xbmcgui.WindowXML):
     def onInit(self):
         # Kodi may initialize this object again with recreated native controls.
         # Retire its old setup/monitor before any native initialization can wait.
@@ -190,6 +196,8 @@ class LiveReview(TitleFeedback,YouTubeBrowser,xbmcgui.WindowXML):
         self.setProperty('loading','true');self.setProperty('loadingStatus','Starting BlackLanturn…')
         self.setProperty('input','remote');self.setProperty('previewMode','manual');self.setProperty('genreLabel','Genres: All');self.setProperty('page','home');self.setProperty('notice','Loading live add-on lists…')
         STORE.mkdir(parents=True,exist_ok=True)
+        from row_layout import RowLayouts
+        self.row_layouts=RowLayouts(STORE/'row-layouts.json')
         from title_preferences import TitlePreferences
         self.title_preferences=TitlePreferences(STORE/'title-preferences.json');self.title_raw_rows={};self.title_empty_rows={}
         self.configure_icon_resources()
@@ -549,6 +557,7 @@ class LiveReview(TitleFeedback,YouTubeBrowser,xbmcgui.WindowXML):
             self.set_rows(my_stuff_rows(self.config['Saved'],tmdb));return
         self.set_rows(page_rows(self.config,self.section))
     def set_rows(self,definitions):
+        if hasattr(self,'arrange_rows'):definitions=self.arrange_rows(definitions)
         self.page_definitions=list(definitions);self.row_offset=0;self.row_cache={};self.window_ready=[False,False]
         self.show_row_window(0,0)
     def publish_cache_stats(self):
@@ -1202,6 +1211,7 @@ class LiveReview(TitleFeedback,YouTubeBrowser,xbmcgui.WindowXML):
     def capture_browse(self,include_stack=True):
         fields=('section','mode','navigation_id','active_page','page_definitions','row_offset','row_cache','rows','paths','histories','last_row','return_focus','selected','person_context','episode_browser_context','season_sources','season_title','season_position')
         state={key:getattr(self,key) for key in fields}
+        state.update(layout_raw_rows=copy.deepcopy(getattr(self,'layout_raw_rows',self.page_definitions)),layout_active_scope=getattr(self,'layout_active_scope',None))
         state.update(youtube_identity=getattr(getattr(self,'youtube_connection',None),'identity',''),youtube_tab=getattr(self,'youtube_tab','home'),youtube_query=getattr(self,'youtube_query',''),youtube_pages=copy.deepcopy(getattr(self,'youtube_pages',{})),snapshot_rows=copy.deepcopy(getattr(self,'snapshot_rows',{})),window_ready=list(getattr(self,'window_ready',[True,True])),search_state=copy.deepcopy(getattr(self,'search_state',None)),search_origin=copy.deepcopy(getattr(self,'search_origin',None)),row_states=copy.deepcopy(getattr(self,'row_states',{})),failed_paths=copy.deepcopy(getattr(self,'failed_paths',{})),row_labels=copy.deepcopy(getattr(self,'row_labels',{})))
         if hasattr(self,'raw_title_row'):
             state['rows']=[self.raw_title_row(n) for n in range(2)]
@@ -1321,8 +1331,10 @@ class LiveReview(TitleFeedback,YouTubeBrowser,xbmcgui.WindowXML):
                 if self.alive and generation==self.generation and focus in (101,102,103,105,106,600,900,901,3000,3100):self.setFocusId(focus)
         threading.Thread(target=work,name='BlackLanturnWatchRefresh',daemon=True).start()
     def choose_playback_player(self,item,save_default=False):
-        self.stop_preview();self.actions_open=True
+        self.actions_open=True
+        self.input_generation=getattr(self,'input_generation',0)+1;self.dwell=time.monotonic()
         try:
+            self.stop_preview()
             kind='episode' if episode_identity(item) else 'movie'
             addon=rpc('Addons.GetAddonDetails',{'addonid':'plugin.video.umbrella','properties':['enabled']}).get('result',{}).get('addon',{})
             definitions={}
@@ -1350,7 +1362,7 @@ class LiveReview(TitleFeedback,YouTubeBrowser,xbmcgui.WindowXML):
                 request=player_path(item,choice['file'])
                 if request:
                     self.update(item);self.playback_return=self.capture_browse();self.playback_options=resume_options(item);self.playback_request=request;self.finish()
-        finally:self.actions_open=False
+        finally:self.dwell=time.monotonic();self.actions_open=False
     def source_session_label(self,item,refresh=False):
         now=time.monotonic();cached=getattr(self,'source_session_snapshot',None)
         if refresh or cached is None or now-cached[0]>=2:
@@ -1363,48 +1375,57 @@ class LiveReview(TitleFeedback,YouTubeBrowser,xbmcgui.WindowXML):
         self.setProperty('sourceSession','')
         xbmcgui.Dialog().notification('Playback','Normal autoplay restored',time=3000)
     def title_actions(self):
-        focus=self.getFocusId()
-        failed=any(value=='error' for value in getattr(self,'row_states',{}).values())
-        n=focus-900 if focus in (900,901) else getattr(self,'last_row',0)
-        related_focus=focus==3100 and self.mode=='details'
-        histories=[self.related_history] if related_focus else getattr(self,'histories',[])
-        if related_focus:n=0
-        item=self.chosen(focus) if focus in (101,102,103,105,106,900,901,3100) else None
-        if focus in (900,901) and not self.rows[focus-900]:item=None
-        if item and item.get('_page_control'):item=None
-        paths=getattr(self,'paths',[])
-        genre_available=can_choose_genre(self,item,paths[n] if 0<=n<len(paths) else '')
-        options=[]
-        if not item:
-            if getattr(self,'youtube_home_visible',lambda:False)():options.append(('youtube_refresh','Refresh recommendations'))
-            if n<len(histories) and histories[n].pages:options.append(('previous','Previous page'))
-        discovery=discovery_result(item) if item else None
-        command=trakt_command(item) if item and not discovery else None
-        player_path=choose_player_path(item) if item and not discovery else None
-        if discovery:options.append(('open_discovery',discovery['button']))
-        elif item:
-            saved=any(x.get('file')==item.get('file') for x in self.config['Saved'])
-            options.append(('play','Open' if item.get('filetype')=='directory' or item.get('type')=='addon' else 'Resume' if resume_options(item) else 'Play'))
-            if player_path:options.append(('player','Play using…'))
-            options.append(('details','Details'))
-            if genre_available:options.append(('genre','Choose genre…'))
-            options.append(('local','Remove from My Stuff on this device' if saved else 'Save to My Stuff on this device'))
-            if command:options.append(('trakt','Trakt: Watched, progress & lists'))
-            if self.rating_identity(item):options.append(('discover','Discover collections & creator credits'))
-        if (not item or discovery) and genre_available:options.append(('genre','Choose genre…'))
-        if item and not discovery:
-            options.extend(getattr(self,'title_feedback_actions',lambda _:[])(item))
-            if getattr(self,'youtube_home_visible',lambda:False)():options.append(('youtube_refresh','Refresh recommendations'))
-            if getattr(self,'source_session_label',lambda *a,**k: '')(item,refresh=True):options.append(('normal_autoplay','Return to normal autoplay'))
-            if player_path:options.append(('default_player','Set default player…'))
-            options.append(('refresh','Refresh watched status'))
-        if failed:
-            options.append(('retry','Retry unavailable lists'))
-            if not item:options.append(('settings','Open integration settings'))
-        if not options:return
-        self.stop_preview();self.actions_open=True
-        try:chosen=xbmcgui.Dialog().contextmenu([label for _,label in options])
-        finally:self.actions_open=False
+        if getattr(self,'actions_open',False):return
+        # Claim the modal before native lookups or Stop can yield to the monitor.
+        self.actions_open=True
+        self.input_generation=getattr(self,'input_generation',0)+1;self.dwell=time.monotonic()
+        try:
+            self.stop_preview()
+            focus=self.getFocusId()
+            failed=any(value=='error' for value in getattr(self,'row_states',{}).values())
+            n=focus-900 if focus in (900,901) else getattr(self,'last_row',0)
+            related_focus=focus==3100 and self.mode=='details'
+            histories=[self.related_history] if related_focus else getattr(self,'histories',[])
+            if related_focus:n=0
+            item=self.chosen(focus) if focus in (101,102,103,105,106,900,901,3100) else None
+            if focus in (900,901) and not self.rows[focus-900]:item=None
+            if item and item.get('_page_control'):item=None
+            paths=getattr(self,'paths',[])
+            genre_available=can_choose_genre(self,item,paths[n] if 0<=n<len(paths) else '')
+            options=[]
+            if not item:
+                if getattr(self,'youtube_home_visible',lambda:False)():options.append(('youtube_refresh','Refresh recommendations'))
+                if n<len(histories) and histories[n].pages:options.append(('previous','Previous page'))
+            discovery=discovery_result(item) if item else None
+            command=trakt_command(item) if item and not discovery else None
+            player_path=choose_player_path(item) if item and not discovery else None
+            if discovery:options.append(('open_discovery',discovery['button']))
+            elif item:
+                saved=any(x.get('file')==item.get('file') for x in self.config['Saved'])
+                options.append(('play','Open' if item.get('filetype')=='directory' or item.get('type')=='addon' else 'Resume' if resume_options(item) else 'Play'))
+                if player_path:options.append(('player','Play using…'))
+                options.append(('details','Details'))
+                if genre_available:options.append(('genre','Choose genre…'))
+                options.append(('local','Remove from My Stuff on this device' if saved else 'Save to My Stuff on this device'))
+                if command:options.append(('trakt','Trakt: Watched, progress & lists'))
+                if self.rating_identity(item):options.append(('discover','Discover collections & creator credits'))
+            if (not item or discovery) and genre_available:options.append(('genre','Choose genre…'))
+            if item and not discovery:
+                options.extend(getattr(self,'title_feedback_actions',lambda _:[])(item))
+                if getattr(self,'youtube_home_visible',lambda:False)():options.append(('youtube_refresh','Refresh recommendations'))
+                if getattr(self,'source_session_label',lambda *a,**k: '')(item,refresh=True):options.append(('normal_autoplay','Return to normal autoplay'))
+                if getattr(self,'row_layout_scope',lambda:None)() and getattr(self,'page_definitions',[]):options.append(('customize_rows','Customize rows…'))
+                if not is_youtube(item):options.append(('sync_settings','Watch tracking & sync settings…'))
+                if player_path:options.append(('default_player','Set default player…'))
+                options.append(('refresh','Refresh watched status'))
+            if (not item or discovery) and getattr(self,'row_layout_scope',lambda:None)() and getattr(self,'page_definitions',[]):options.append(('customize_rows','Customize rows…'))
+            if failed:
+                options.append(('retry','Retry unavailable lists'))
+                if not item:options.append(('settings','Open integration settings'))
+            if not options:return
+            chosen=xbmcgui.Dialog().contextmenu([label for _,label in options])
+        finally:
+            self.dwell=time.monotonic();self.actions_open=False
         event('title_action_selected',choice=chosen)
         if chosen<0:return
         action=options[chosen][0]
@@ -1424,6 +1445,8 @@ class LiveReview(TitleFeedback,YouTubeBrowser,xbmcgui.WindowXML):
         elif action=='settings':self.settings()
         elif action=='open_discovery':self.open_discovery(discovery)
         elif action=='play':self.update(item);self.onClick(101)
+        elif action=='sync_settings':self.run_setting('sync_settings')
+        elif action=='customize_rows':self.customize_rows(current_only=True)
         elif action=='details':self.details(item)
         elif action=='discover':self.discover_more(item)
         elif action=='local':self.update(item);self.onClick(103)
@@ -1435,11 +1458,12 @@ class LiveReview(TitleFeedback,YouTubeBrowser,xbmcgui.WindowXML):
         elif action=='trakt':
             self.actions_open=True;self.set_browse_enabled(False);xbmc.executebuiltin(command)
             def after():
-                complete=wait_for_helper(lambda:self.alive)
-                self.actions_open=False
-                if self.alive:
-                    self.set_browse_enabled(True);self.setFocusId(focus)
-                    if complete:self.refresh_watch_status()
+                complete=False
+                try:
+                    complete=wait_for_helper(lambda:self.alive)
+                    if self.alive:self.set_browse_enabled(True);self.setFocusId(focus)
+                finally:self.dwell=time.monotonic();self.actions_open=False
+                if self.alive and complete:self.refresh_watch_status()
             threading.Thread(target=after,name='BlackLanturnTraktActions',daemon=True).start()
     def set_browse_enabled(self,enabled):
         for cid in (10,50,15,101,102,103,105,106,600,900,901,3000,3100,700,701,710,711,712,713,720,721):
@@ -1638,6 +1662,7 @@ class LiveReview(TitleFeedback,YouTubeBrowser,xbmcgui.WindowXML):
         except Exception:pass
         self.previews_ready=ready;self.setProperty('previewsReady','true' if getattr(self,'section','')=='YouTube' or ready else 'false')
     def preview(self,automatic=False):
+        if getattr(self,'actions_open',False) or getattr(self,'settings_open',False):return
         input_generation=getattr(self,'input_generation',0)
         if automatic and time.monotonic()-self.dwell<self.config.get('PreviewDelay',5):return
         if not getattr(self,'previews_ready',True) and not youtube_video_id(self.selected or {}):return
@@ -1654,7 +1679,7 @@ class LiveReview(TitleFeedback,YouTubeBrowser,xbmcgui.WindowXML):
         event('preview_lookup_started',dwell_seconds=round(time.monotonic()-self.dwell,2),configured_delay=self.config.get('PreviewDelay',5))
         self.stop_preview()
         with self.preview_dispatch_lock:
-            if not self.alive or self.nav or getattr(self,'input_generation',0)!=input_generation or automatic and time.monotonic()-self.dwell<self.config.get('PreviewDelay',5) or self.preview_generation!=selection_generation+1 or (self.selected or {}).get('file')!=item.get('file'):return
+            if not self.alive or self.nav or getattr(self,'actions_open',False) or getattr(self,'settings_open',False) or getattr(self,'input_generation',0)!=input_generation or automatic and time.monotonic()-self.dwell<self.config.get('PreviewDelay',5) or self.preview_generation!=selection_generation+1 or (self.selected or {}).get('file')!=item.get('file'):return
             self.owned_preview=True;self.preview_input_generation=input_generation;self.preview_key=item.get('file');token=self.preview_generation
         self.preview_requested_at=time.monotonic();self.preview_playing=False
         self.setProperty('preview','loading');self.setProperty('notice','Finding previews…')
@@ -1662,7 +1687,7 @@ class LiveReview(TitleFeedback,YouTubeBrowser,xbmcgui.WindowXML):
             direct=youtube_preview_path(item)
             if direct:
                 with self.preview_dispatch_lock:
-                    if not self.alive or self.nav or token!=self.preview_generation or getattr(self,'input_generation',0)!=input_generation or (self.selected or {}).get('file')!=item.get('file'):return
+                    if not self.alive or self.nav or getattr(self,'actions_open',False) or getattr(self,'settings_open',False) or token!=self.preview_generation or getattr(self,'input_generation',0)!=input_generation or (self.selected or {}).get('file')!=item.get('file'):return
                     attempts=PreviewAttempts([direct]);url=attempts.start(time.monotonic());self.preview_attempts=attempts
                 self.play_preview_candidate(url,token,attempts);return
             identity=self.rating_identity(item);key=item.get('file')
@@ -1671,7 +1696,7 @@ class LiveReview(TitleFeedback,YouTubeBrowser,xbmcgui.WindowXML):
             helper_profile=Path(xbmcvfs.translatePath('special://profile/'))/'addon_data/plugin.video.themoviedb.helper'
             if identity:aliases=tuple(dict.fromkeys(aliases+tuple(cached_title_aliases(helper_profile,identity))))
             language=self.config.get('PreviewLanguage','en');cache_key=(key,identity,language,aliases,'verified-title-2')
-            def current():return self.alive and not self.nav and token==self.preview_generation and self.owned_preview and getattr(self,'input_generation',0)==input_generation and (self.selected or {}).get('file')==key
+            def current():return self.alive and not self.nav and not getattr(self,'actions_open',False) and not getattr(self,'settings_open',False) and token==self.preview_generation and self.owned_preview and getattr(self,'input_generation',0)==input_generation and (self.selected or {}).get('file')==key
             if not current():return
             cached=self.preview_cache.get(cache_key)
             candidates=cached[1] if cached and time.monotonic()-cached[0]<300 else None
@@ -1704,7 +1729,7 @@ class LiveReview(TitleFeedback,YouTubeBrowser,xbmcgui.WindowXML):
         attempts=self.preview_attempts if attempts is None else attempts
         request=None
         def current():
-            return self.alive and self.owned_preview and token==self.preview_generation and getattr(self,'input_generation',0)==getattr(self,'preview_input_generation',0) and attempts is self.preview_attempts and attempts is not None and (request is None or getattr(self,'preview_resolution',None) is request)
+            return self.alive and not getattr(self,'actions_open',False) and not getattr(self,'settings_open',False) and self.owned_preview and token==self.preview_generation and getattr(self,'input_generation',0)==getattr(self,'preview_input_generation',0) and attempts is self.preview_attempts and attempts is not None and (request is None or getattr(self,'preview_resolution',None) is request)
         with self.preview_dispatch_lock:
             if not current():return
             request=object();self.preview_resolution=request
@@ -1743,6 +1768,7 @@ class LiveReview(TitleFeedback,YouTubeBrowser,xbmcgui.WindowXML):
                     if not acquired:
                         self.player.failed=True;event('preview_renderer_unavailable');return
                     if not prepared.publish():return
+                    if not current():return
                     # Only a resolved stream enters Kodi's playback queue. A
                     # cancelled network lookup cannot open a late plug-in job.
                     self.preview_dispatched=True;self.player.play(prepared.path,listitem=prepared.listitem,windowed=True)
@@ -1849,7 +1875,7 @@ class LiveReview(TitleFeedback,YouTubeBrowser,xbmcgui.WindowXML):
         if self.section in ('Movies','Shows'):
             self.actions_open=True;self.stop_preview()
             try:selected=choose_genre(self.section,self.browse_sources,self.active_page)
-            finally:self.actions_open=False
+            finally:self.dwell=time.monotonic();self.actions_open=False
             if selected is None:return
             index=0 if selected=='' else next((n for n,p in enumerate(self.browse_sources,1) if p['id']==selected),-1)
         else:index=self.getControl(600).getSelectedPosition()
@@ -1917,6 +1943,12 @@ class LiveReview(TitleFeedback,YouTubeBrowser,xbmcgui.WindowXML):
             xbmcaddon.Addon(action[6:]).openSettings()
             if action=='addon:plugin.video.youtube':
                 self.refresh_preview_setup();self.refresh_youtube_connection(force=True);self.row_navigation()
+        elif action=='sync_settings':
+            previous=getattr(self,'actions_open',False);self.actions_open=True
+            self.input_generation=getattr(self,'input_generation',0)+1;self.dwell=time.monotonic()
+            try:
+                self.stop_preview();xbmcaddon.Addon('plugin.video.themoviedb.helper').openSettings()
+            finally:self.dwell=time.monotonic();self.actions_open=previous
         elif action=='sidebar':self.sidebar_settings()
         elif action=='status_display':self.status_options()
         elif action=='icon_pack':
@@ -1928,7 +1960,8 @@ class LiveReview(TitleFeedback,YouTubeBrowser,xbmcgui.WindowXML):
             self.config['TitleLogos']=not self.config.get('TitleLogos',True);self.save()
             if self.selected:self.update(self.selected)
         elif action in ('hidden_titles','reduced_titles'):self.manage_title_feedback('hide' if action=='hidden_titles' else 'less')
-        elif action=='rows':self.manage_rows()
+        elif action=='rows':self.customize_rows()
+        elif action=='row_sources':self.manage_rows()
         elif action in ('genres','categories'):self.categories(edit=True,collection='Genres' if action=='genres' else 'Categories')
         elif action=='rating_order':self.rating_order()
         elif action=='ratings':
@@ -2140,7 +2173,7 @@ class LiveReview(TitleFeedback,YouTubeBrowser,xbmcgui.WindowXML):
                 if discovery:self.open_discovery(discovery)
         except Exception as exc:
             event('creator_credits_unavailable',error_type=type(exc).__name__);self.setProperty('notice','Creator credits could not load. Available title information is retained.')
-        finally:self.actions_open=False
+        finally:self.dwell=time.monotonic();self.actions_open=False
     def integration_status(self):
         lines=[]
         for addon,label in [('plugin.video.themoviedb.helper','Discovery / Trakt'),('plugin.video.umbrella','Playback'),('plugin.video.youtube','Previews')]:

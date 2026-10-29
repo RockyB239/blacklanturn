@@ -53,7 +53,7 @@ class YouTubeBrowser(YouTubeRows,SavedYouTube):
     def load_youtube_section(self,tab='home',query=None):
         if not getattr(getattr(self,'youtube_connection',None),'connected',False):
             self.section='Home';self.navigation_id='home';self.load_section();return
-        self.youtube_home_request=object()
+        self.youtube_home_request=object();self.youtube_home_catalog_applied=False
         self.youtube_pages={};self.youtube_content_revision=object();self.youtube_job=None;self.youtube_update=None;self.youtube_refreshing=False
         self.setProperty('youtubeRowEnd','false')
         self.stop_preview();self.section='YouTube';self.mode='home';self.active_page=tab
@@ -67,7 +67,9 @@ class YouTubeBrowser(YouTubeRows,SavedYouTube):
             try:options=account_options(read_account_store())
             except (OSError,ValueError,TypeError):pass
         self.set_rows(self.saved_youtube_home() if tab=='home' and hasattr(self,'saved_youtube_home') else tab_rows(tab,self.youtube_query,account=options))
-        if tab=='home':self.start_youtube_home()
+        if tab=='home':
+            self.youtube_home_catalog_applied=any(r.get('youtube_category') for r in getattr(self,'layout_raw_rows',getattr(self,'page_definitions',[])))
+            self.start_youtube_home()
 
     def apply_youtube_home_rows(self):
         cache=getattr(self,'youtube_home_cache',None);connection=getattr(self,'youtube_connection',None)
@@ -79,7 +81,7 @@ class YouTubeBrowser(YouTubeRows,SavedYouTube):
                     and request is getattr(self,'youtube_home_request',None) and cache is getattr(self,'youtube_home_cache',None)
                     and cache and getattr(active,'connected',False) and cache['identity']==active.identity
                     and time.monotonic()-cache['time']<=300 and self.section=='YouTube' and getattr(self,'youtube_tab','')=='home'
-                    and not getattr(self,'discovery_stack',[]) and definitions is getattr(self,'page_definitions',None) and len(definitions)==2)
+                    and not getattr(self,'discovery_stack',[]) and definitions is getattr(self,'page_definitions',None) and not getattr(self,'youtube_home_catalog_applied',False))
         if not current():return
         try:
             if connected_account(read_account_store())[1]!=connection.identity:return
@@ -89,7 +91,11 @@ class YouTubeBrowser(YouTubeRows,SavedYouTube):
         rows=copy.deepcopy(cache['rows'][1:])
         with getattr(self,'preview_dispatch_lock',nullcontext()):
             if current():
-                definitions.extend(rows)
+                self.youtube_home_catalog_applied=True
+                if hasattr(self,'append_layout_rows'):rows=self.append_layout_rows(rows)
+                if not definitions and rows:
+                    self.set_rows(getattr(self,'layout_raw_rows',rows))
+                else:definitions.extend(rows)
                 if hasattr(self,'youtube_refresh_navigation'):self.youtube_refresh_navigation()
 
     def start_youtube_home(self):

@@ -211,7 +211,7 @@ class ControllerConfigInstallFlow(unittest.TestCase):
                 backup = home / 'userdata/addon_data/plugin.program.blacklanturninstaller/authorizations.json'
                 snapshot = json.loads(backup.read_text())['build_preferences']
                 self.assertEqual(snapshot['controller'].encode('utf-8'), ORIGINAL)
-                self.assertEqual(snapshot['schema'], 5)
+                self.assertEqual(snapshot['schema'], 6)
                 self.assertIsNone(snapshot['title_preferences'])
                 self.assertIn('update_notes', snapshot)
                 self.assertFalse(backup.with_name('authorizations.pending.json').exists())

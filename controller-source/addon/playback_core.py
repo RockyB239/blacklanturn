@@ -12,8 +12,9 @@ def resume_options(item):
     return {}
 
 def watch_sync_command():
+    # Current Helper routes watched progress under 'watched'; unknown routes open a chooser.
     # Helper Script parameters are strings: 'false' is truthy; an empty value becomes None.
-    return 'RunScript(plugin.video.themoviedb.helper,invalidate_sync=watchedprogress,notification=,sync=)'
+    return 'RunScript(plugin.video.themoviedb.helper,invalidate_sync=watched,notification=,sync=)'
 
 class ResumeHandoff:
     """One initial resume fallback when an integration loses Kodi's resume flag."""

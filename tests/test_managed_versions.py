@@ -224,3 +224,12 @@ class ManagedVersions(unittest.TestCase):
 
 if __name__ == '__main__':
     unittest.main()
+
+class RowLayoutProtocol(unittest.TestCase):
+    setUp=ManagedVersions.setUp
+    def test_registration_protocol_accepts_exact_new_floor_and_old_recovery_floor(self):
+        marker={'managed_update_policy':self.policy['policy'],'inplace_update_policy':'bundled-code-1','bundle_registration_policy':'new-bundles-1','youtube_refresh_patch':'youtube-freshness-2'}
+        with patch.object(self.m,'verify_archive_metadata'):
+            for floor in ('1.0.39','1.0.40'):
+                self.assertEqual(self.m.prepare_policy(dict(marker,installer_min_version=floor),None),floor)
+            with self.assertRaises(ValueError):self.m.prepare_policy(dict(marker,installer_min_version='1.0.41'),None)

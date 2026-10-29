@@ -24,6 +24,7 @@ MAX_BYTES=4*1024*1024
 CONTROLLER='script.blacklanturn.preview'
 CONTROLLER_CONFIG='addon_data/script.blacklanturn.preview/rows.json'
 TITLE_PREFERENCES='addon_data/script.blacklanturn.preview/title-preferences.json'
+ROW_LAYOUTS='addon_data/script.blacklanturn.preview/row-layouts.json'
 MAX_TITLE_BYTES=256*1024
 PROVIDERS={'0':'Local','1':'Trakt','2':'Simkl','3':'MDBList','4':'Custom','5':'Floppy','6':'Scrob','7':'PunchPlay'}
 class PreferenceError(Exception):pass
@@ -87,8 +88,8 @@ def _title_preferences_text(raw):
  return _controller_text(raw)
 
 def _validate(snapshot,addon_ids,auth_only=None):
- if not isinstance(snapshot,dict) or type(snapshot.get('schema')) is not int or snapshot.get('schema') not in (1,2,3,4,5) or type(snapshot.get('auth_only')) is not bool or not isinstance(snapshot.get('values'),dict):raise PreferenceError('Invalid preference recovery. Installation stopped.')
- expected={'schema','auth_only','values'}|({'controller'} if snapshot['schema']>=2 else set())|({'update_notes'} if snapshot['schema']>=3 else set())|({'release_notices'} if snapshot['schema']>=4 else set())|({'title_preferences'} if snapshot['schema']>=5 else set())
+ if not isinstance(snapshot,dict) or type(snapshot.get('schema')) is not int or snapshot.get('schema') not in (1,2,3,4,5,6) or type(snapshot.get('auth_only')) is not bool or not isinstance(snapshot.get('values'),dict):raise PreferenceError('Invalid preference recovery. Installation stopped.')
+ expected={'schema','auth_only','values'}|({'controller'} if snapshot['schema']>=2 else set())|({'update_notes'} if snapshot['schema']>=3 else set())|({'release_notices'} if snapshot['schema']>=4 else set())|({'title_preferences'} if snapshot['schema']>=5 else set())|({'row_layouts'} if snapshot['schema']>=6 else set())
  if set(snapshot)!=expected:raise PreferenceError('Invalid preference recovery. Installation stopped.')
  if auth_only is not None and snapshot['auth_only']!=auth_only:raise PreferenceError('Finish the pending installation using its original clean/update mode.')
  if snapshot['schema']==1 and not snapshot['auth_only'] and CONTROLLER in addon_ids:
@@ -114,6 +115,10 @@ def _validate(snapshot,addon_ids,auth_only=None):
  if choices is not None:
   if snapshot['auth_only'] or CONTROLLER not in addon_ids:raise PreferenceError('Unexpected title choice recovery. Installation stopped.')
   _title_preferences_text(choices)
+ layout=snapshot.get('row_layouts')
+ if layout is not None:
+  if snapshot['auth_only'] or CONTROLLER not in addon_ids:raise PreferenceError('Unexpected row arrangement recovery. Installation stopped.')
+  _title_preferences_text(layout)
  return snapshot
 
 def prepare(home,accounts,addon_ids,auth_only=False):
@@ -157,7 +162,11 @@ def prepare(home,accounts,addon_ids,auth_only=False):
   if not auth_only and CONTROLLER in addon_ids:
    raw=_read(home,TITLE_PREFERENCES)
    if raw is not None:title_preferences=_title_preferences_text(raw.decode('utf-8'))
-  result['build_preferences']={'schema':5,'auth_only':auth_only,'values':values,'controller':controller,'update_notes':notes,'release_notices':release_state,'title_preferences':title_preferences}
+  row_layouts=None
+  if not auth_only and CONTROLLER in addon_ids:
+   raw=_read(home,ROW_LAYOUTS)
+   if raw is not None:row_layouts=_title_preferences_text(raw.decode('utf-8'))
+  result['build_preferences']={'schema':6,'auth_only':auth_only,'values':values,'controller':controller,'update_notes':notes,'release_notices':release_state,'title_preferences':title_preferences,'row_layouts':row_layouts}
   return result
  except (OSError,ValueError,TypeError,E.ParseError) as exc:raise PreferenceError('Playback preferences could not be saved. Your current build has been kept.') from exc
 
@@ -193,6 +202,8 @@ def restore(home,accounts,addon_ids):
    prepared.append(('addon_data/script.blacklanturn.preview/release-notices.json',json.dumps(snapshot['release_notices'],ensure_ascii=False).encode('utf-8')))
   if snapshot.get('title_preferences') is not None:
    prepared.append((TITLE_PREFERENCES,snapshot['title_preferences'].encode('utf-8')))
+  if snapshot.get('row_layouts') is not None:
+   prepared.append((ROW_LAYOUTS,snapshot['row_layouts'].encode('utf-8')))
   for name,raw in prepared:_write(home,name,raw)
  except (OSError,ValueError,TypeError,E.ParseError) as exc:raise PreferenceError('Playback preference restoration needs attention. Keep the pending backup and reinstall.') from exc
 

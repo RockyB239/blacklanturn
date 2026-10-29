@@ -48,7 +48,7 @@ class PlaybackContracts(unittest.TestCase):
         command=self.core().watch_sync_command()
         args=command[len('RunScript('):-1].split(',')[1:]
         params=dict(arg.split('=',1) for arg in args)
-        self.assertEqual(params['invalidate_sync'],'watchedprogress')
+        self.assertEqual(params['invalidate_sync'],'watched')
         self.assertFalse(params['notification'])
         self.assertFalse(params['sync'])
     def test_resume_fallback_only_targets_the_original_episode_once_ready(self):

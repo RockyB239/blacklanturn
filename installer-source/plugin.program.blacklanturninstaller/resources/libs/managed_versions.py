@@ -216,7 +216,7 @@ def prepare_policy(marker, archive):
     registration_policy=marker.get('bundle_registration_policy')
     if registration_policy not in (None,'new-bundles-1') or (registration_policy and not update_policy):
         raise ValueError('Update BlackLanturn Installer before installing this build.')
-    minimum = '1.0.39' if registration_policy else '1.0.30' if update_policy else policy()['installer_min_version']
+    minimum = ('1.0.40' if marker.get('installer_min_version')=='1.0.40' else '1.0.39') if registration_policy else '1.0.30' if update_policy else policy()['installer_min_version']
     if (revision != policy()['policy'] or marker.get('installer_min_version') != minimum
             or marker.get('youtube_refresh_patch') != 'youtube-freshness-2'):
         raise ValueError('Update BlackLanturn Installer before installing this build.')

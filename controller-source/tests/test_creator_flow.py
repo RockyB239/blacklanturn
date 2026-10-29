@@ -1,4 +1,4 @@
-import sys,unittest
+import sys,unittest,time
 from pathlib import Path
 from types import SimpleNamespace
 sys.path.insert(0,str(Path(__file__).parent))
@@ -10,7 +10,7 @@ class CreatorFlow(unittest.TestCase):
   def select(*args):
    self.assertTrue(state.actions_open,'Creator selector must hold the same preview/input guard as title actions')
    return -1
-  ns=methods(['discover_more'],{'xbmcgui':SimpleNamespace(Dialog=lambda:SimpleNamespace(select=select)),'event':lambda *a,**k:None})
+  ns=methods(['discover_more'],{'time':time,'xbmcgui':SimpleNamespace(Dialog=lambda:SimpleNamespace(select=select)),'event':lambda *a,**k:None})
   ns['discover_more'](state,{'title':'Title'})
   self.assertFalse(state.actions_open)
 

@@ -1,0 +1,11 @@
+# BlackLanturn1.1.36 / Installer1.0.40
+
+Shared additions: per-section row Move/Pin/Hide/Show/Restore, known series status, episode air dates from existing premiere metadata, preview/Options focus protection, Kodi-first settings and explicit tracking settings. Playback return now requests Helper's supported `watched` invalidator instead of the unknown `watchedprogress` value that opens Sync Options. Existing provider-owned scrobbling stays configured as before; no full-library sync is added.
+
+Installer schema6 preserves exact bounded row-layout JSON during Standard/recovery, retains schemas1–5 recovery support, and keeps clean installation semantics. The true in-place update leaves saved data untouched. Version40 accepts the supported39/40 registration floors; unknown future floors stop preparation.
+
+Validation:1,016Controller tests,935Installer tests,36playback,16probe and7YouTube checks pass. Native isolated clean/Standard/full in-place tests pass in both editions (six cases); both35-to36 component updates pass (two cases), with exact package-source comparisons and synthetic saved preferences, authorizations, history, unrelated add-ons and row arrangements. Network and personal-profile access are denied. General uses simulated Android identity within native macOS APIs; physical clean Android/tvOS installation is not claimed. An initial reused-fixture byte-preservation check failed without a file list; an instrumented rerun passed with zero changed paths, as did component tests. No personal profile was accessed by these fixtures.
+
+The actual old RunScript reproduces the native Sync Options menu on Mac; the corrected command completes without it and requests no history writes. Full natural streamed-episode finish and external service-history writes are not acceptance claims for these checks. Earlier focus and row-layout native checks retain their recorded Mac/Apple scope. Physical update/UI acceptance is recorded separately after publication.
+
+All five ZIPs reproduce exactly; package verification preserves unrelated runtime/default bytes, both180approved icon PNGs, complete pinned provider trees and private Fight Zone exclusion. A fresh whole-release review found no new actionable issue. Deferred minor: the explicit tracking-settings shortcut also appears on generic non-YouTube add-on items; it performs no background work.

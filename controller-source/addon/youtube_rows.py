@@ -145,7 +145,7 @@ class YouTubeRows:
         path=row['path'];index=next((i for i,d in enumerate(self.page_definitions) if d.get('path')==path),None)
         if index is None:return
         fresh=copy.deepcopy(row)
-        if index==0:fresh['local_items']=recommendation_order(fresh['local_items']);fresh['_youtube_ordered']=True
+        if path==tab_rows('home')[0]['path']:fresh['local_items']=recommendation_order(fresh['local_items']);fresh['_youtube_ordered']=True
         previous=self.page_definitions[index];prior_page=self.youtube_pages.pop(path,None);cached=self.row_cache.pop(index,None)
         self.page_definitions[index]=fresh
         for n,visible in enumerate(self.paths):
@@ -170,11 +170,23 @@ class YouTubeRows:
                 try:
                     if self.alive and focus==900+n and _focus_id()==0:self.setFocusId(focus)
                 except RuntimeError:pass # A closed window cannot receive focus repair.
+        raw=getattr(self,'layout_raw_rows',None)
+        if raw is not None:
+            self.layout_raw_rows=[fresh if d.get('path')==path else d for d in raw]
         self.focus_key=None
 
     def _apply_youtube_refresh_shelves(self,shelves,identity):
         # Keep the active category pair intact. The new catalog is available
         # below it; the next Home entry gets the fresh catalog without pins.
+        if hasattr(self,'refreshed_layout_catalog'):
+            raw=getattr(self,'layout_raw_rows',self.page_definitions)
+            base=[d for d in raw if not d.get('youtube_category')]
+            definitions,offset=self.refreshed_layout_catalog(base+copy.deepcopy(shelves[1:]))
+            self.page_definitions=definitions;self.row_offset=offset;self.row_cache={}
+            visible={d['path'] for d in definitions}
+            self.youtube_pages={path:page for path,page in self.youtube_pages.items() if path in self.paths or path in visible}
+            self.youtube_home_cache={'identity':identity,'time':time.monotonic(),'rows':copy.deepcopy(shelves)}
+            self.youtube_refresh_navigation();return
         pinned=[]
         for path in self.paths:
             found=next((d for i,d in enumerate(self.page_definitions) if i>=2 and d.get('path')==path),None)

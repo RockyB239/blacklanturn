@@ -1,5 +1,5 @@
 """Native genre choice preserves configured page IDs, cancellation and return state."""
-import ast,sys,unittest
+import ast,sys,unittest,time
 from pathlib import Path
 from types import SimpleNamespace,MethodType
 from test_discovery_controller import methods,Control
@@ -33,7 +33,7 @@ class GenreControllerTests(unittest.TestCase):
  def state(self,result='h'):
   controls={600:Control(),900:Control()};props={};calls=[]
   cfg={'Movies':[{'label':'All','path':'plugin://plugin.video.test/all'}],'Genres':[{'id':'h','label':'Horror','section':'Movies','rows':[{'label':'Slashers','path':'plugin://plugin.video.test/slashers'}]}],'Categories':[]}
-  ns=methods(['load_browse_sources','browse_source'],{'collection_pages':collection_pages,'page_rows':page_rows,'xbmcgui':SimpleNamespace(ListItem=Item),'choose_genre':lambda *a:result,'event':lambda *a,**k:None})
+  ns=methods(['load_browse_sources','browse_source'],{'time':time,'collection_pages':collection_pages,'page_rows':page_rows,'xbmcgui':SimpleNamespace(ListItem=Item),'choose_genre':lambda *a:result,'event':lambda *a,**k:None})
   s=SimpleNamespace(section='Movies',config=cfg,active_page='h',browse_sources=[],search_state=None,actions_open=False,getControl=lambda i:controls[i],setProperty=lambda k,v:props.__setitem__(k,v),getProperty=lambda k:props.get(k,''),setFocusId=lambda i:calls.append(('focus',i)),set_rows=lambda r:calls.append(('rows',r)),stop_preview=lambda:calls.append(('stop',)),load_section=lambda:calls.append(('all',)),page_definitions=[])
   for name in ('load_browse_sources','browse_source'):setattr(s,name,MethodType(ns[name],s))
   s.load_browse_sources();return s,controls,calls

@@ -1,0 +1,24 @@
+{
+  "title": "BlackLanturn Build 1.1.36",
+  "summary": "Smoother playback return, clearer episode information and personalized rows.",
+  "sections": [
+    {
+      "heading": "Playback and navigation",
+      "bullets": [
+        "Watched progress refreshes without the Sync Options chooser. Options retain focus while previews are pending. Kodi settings appear first, with tracking settings available manually."
+      ]
+    },
+    {
+      "heading": "Make each section yours",
+      "bullets": [
+        "Move, pin, hide and restore rows independently in each section. Known series status and episode air dates use existing metadata without additional online lookups."
+      ]
+    },
+    {
+      "heading": "Keep your complete setup",
+      "bullets": [
+        "Use Update BlackLanturn. Your saved accounts, playback settings, sources, watched progress, row arrangements and unrelated add-ons remain in place. Both branded icon packs remain included."
+      ]
+    }
+  ]
+}

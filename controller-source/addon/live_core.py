@@ -1,6 +1,8 @@
 """Source and paging contracts for the temporary live-integration probe."""
 from urllib.parse import urlsplit,parse_qs
 import math,re
+from datetime import date
+from series_status import status_label,series_id
 from copy import deepcopy
 
 def my_stuff_rows(saved,make_path):
@@ -41,7 +43,7 @@ def title_details_params(item):
 def merge_title_details(item,details):
     merged={**item,**details,'file':item.get('file',''),'filetype':item.get('filetype','file')}
     keep=['resume','playcount']
-    if episode_identity(item):keep+=['title','label','showtitle','season','episode','plot','runtime']
+    if episode_identity(item):keep+=['title','label','showtitle','season','episode','plot','runtime','premiered']
     for key in keep:
         if key in item:merged[key]=item[key]
     return merged
@@ -103,7 +105,13 @@ def title_presentation(item,logos=True):
     runtime=item.get('runtime') or 0
     try:duration=str(round(float(runtime)/60))+' min' if math.isfinite(float(runtime)) and float(runtime)>0 else ''
     except (TypeError,ValueError):duration=''
-    technical='  ·  '.join(x for x in (duration,item.get('mpaa') or '') if x)
+    aired=''
+    if episode_identity(item) or item.get('type')=='episode':
+        try:
+            day=date.fromisoformat(str(item.get('premiered') or ''))
+            aired='Aired '+day.strftime('%b')+' '+str(day.day)+', '+str(day.year)
+        except ValueError:pass
+    technical='  ·  '.join(x for x in (duration,item.get('mpaa') or '',aired,status_label(item.get('_series_status')) if series_id(item) else '') if x)
     state=watch_state(item);art=item.get('art') or {}
     return {'meta':meta,'technical':technical,'watch':state['label'],'watch_state':state['state'],
             'logo':(art.get('clearlogo') or art.get('tvshow.clearlogo') or '') if logos else ''}
