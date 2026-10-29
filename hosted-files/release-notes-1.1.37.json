@@ -1,0 +1,24 @@
+{
+  "title": "BlackLanturn Build 1.1.37",
+  "summary": "A simpler Options sidebar and clearer title menus.",
+  "sections": [
+    {
+      "heading": "Ratings in Appearance",
+      "bullets": [
+        "Find Rating sources and Rating order together under Appearance. Your existing rating choices stay saved."
+      ]
+    },
+    {
+      "heading": "Relevant tracking controls",
+      "bullets": [
+        "Watch tracking settings appear for movies, shows, seasons and episodes. The global control remains under Playback & sync."
+      ]
+    },
+    {
+      "heading": "Keep your complete setup",
+      "bullets": [
+        "Update BlackLanturn keeps accounts, playback settings, sources, watched progress, row arrangements and unrelated add-ons. Both branded icon packs and current compatibility patches remain included."
+      ]
+    }
+  ]
+}

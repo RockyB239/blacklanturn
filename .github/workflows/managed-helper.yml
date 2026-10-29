@@ -51,6 +51,11 @@ jobs:
           for edition in General Apple-TV-Mac; do
             curl --fail --location --retry 3 "https://github.com/RockyB239/blacklanturn/releases/download/v1.1.35/BlackLanturn-${edition}-Kodi21-1.1.35.zip" -o "baselines/BlackLanturn-${edition}-Kodi21-1.1.35.zip"
           done
+      - name: Download pinned Options release baseline
+        run: |
+          for edition in General Apple-TV-Mac; do
+            curl --fail --location --retry 3 "https://github.com/RockyB239/blacklanturn/releases/download/v1.1.36/BlackLanturn-${edition}-Kodi21-1.1.36.zip" -o "baselines/BlackLanturn-${edition}-Kodi21-1.1.36.zip"
+          done
       - name: Installer and update protection tests
         run: python -m unittest discover -s tests -v
       - name: Controller regression checks
@@ -65,7 +70,7 @@ jobs:
         run: python tools/device_validation/verify_performance_evidence.py validation/optimization130-performance.json --manifest controller-source/manifest96.json
       - name: Verify branded icons in both full and component editions
         run: |
-          python tools/build_release136.py --baselines baselines --output artifacts136
-          python tools/verify_release136.py artifacts136 --baselines baselines
-          python tools/release_report.py artifacts136/BlackLanturn-General-Kodi21-1.1.36.zip --output artifacts136/current-general.json
-          python tools/release_report.py artifacts136/BlackLanturn-Apple-TV-Mac-Kodi21-1.1.36.zip --output artifacts136/current-apple.json
+          python tools/build_release137.py --baselines baselines --output artifacts137
+          python tools/verify_release137.py artifacts137 --baselines baselines
+          python tools/release_report.py artifacts137/BlackLanturn-General-Kodi21-1.1.37.zip --output artifacts137/current-general.json
+          python tools/release_report.py artifacts137/BlackLanturn-Apple-TV-Mac-Kodi21-1.1.37.zip --output artifacts137/current-apple.json

@@ -12,7 +12,10 @@ class BackendNavigation(unittest.TestCase):
   s=SimpleNamespace(category=category,result=None,getControl=lambda cid:SimpleNamespace(getSelectedPosition=lambda:category) if cid==100 else ctrl,close=lambda:calls.append('close'),handler=lambda a:calls.append(('handler',a)),populate=lambda n:calls.append(('populate',n)),setFocusId=lambda cid:calls.append(('focus',cid)))
   return s,calls
  def test_editor_keeps_branded_hub_open_and_restores_focus(self):
-  s,calls=self.state(next(i for i,g in enumerate(SETTINGS_GROUPS) if g[0]=='Ratings'));namespace['onClick'](s,200)
+  category=next(i for i,g in enumerate(SETTINGS_GROUPS) if g[0]=='Appearance');s,calls=self.state(category)
+  row=next((i for i,r in enumerate(SETTINGS_GROUPS[category][2]) if r[0]=='ratings'),-1)
+  self.assertGreaterEqual(row,0)
+  s.getControl=lambda cid:SimpleNamespace(getSelectedPosition=lambda:category if cid==100 else row,selectItem=lambda p:calls.append(('position',p)));namespace['onClick'](s,200)
   self.assertIn(('handler','ratings'),calls);self.assertNotIn('close',calls);self.assertIn(('focus',200),calls)
  def test_core_kodi_route_closes_hub_without_calling_editor(self):
   s,calls=self.state(0);namespace['onClick'](s,200)
