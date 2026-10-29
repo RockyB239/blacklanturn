@@ -1,0 +1,3 @@
+BlackLanturn 1.1.36 adds per-section row customization, known series status, episode air dates, silent watched-progress refresh and Kodi-first settings. It also prevents automatic previews taking focus from Options.
+
+Installer 1.0.40 preserves saved row arrangements during Standard installs and recovery. Use Update BlackLanturn for an in-place update that keeps accounts, settings, sources, progress, other add-ons and personal extensions. Both branded icon packs remain included. Personal Fight Zone is not distributed.
