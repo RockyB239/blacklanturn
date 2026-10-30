@@ -193,7 +193,7 @@ class ControllerReview(unittest.TestCase):
 class MalformedSnapshotReview(unittest.TestCase):
  def load(self,folder,item=ITEM,stamp=1000):
   from public_rows import PublicRowSnapshots
-  path=Path(folder)/'bad.json';path.write_text(json.dumps({'version':1,'scope':'a','rows':[{'path':P,'time':stamp,'items':[item]}]}))
+  path=Path(folder)/'bad.json';path.write_text(json.dumps({'version':PublicRowSnapshots.format_version,'scope':'a','rows':[{'path':P,'time':stamp,'items':[item]}]}))
   return PublicRowSnapshots(path,'a',clock=lambda:1000).get(P)
  def test_malformed_rendering_fields_are_rejected_before_real_card_helpers(self):
   for field,value in [('episode','broken'),('season',{}),('title',99),('year','broken'),('runtime',10**1000),('rating',float('nan')),('art',[]),('uniqueid',[]),('plot',{'private':'object'})]:

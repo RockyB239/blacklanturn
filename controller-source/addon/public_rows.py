@@ -4,7 +4,7 @@ from contextlib import contextmanager
 from copy import deepcopy
 from hashlib import sha256
 from pathlib import Path
-from urllib.parse import urlsplit,parse_qs,urlencode
+from urllib.parse import urlsplit,parse_qs,urlencode,unquote
 import json,math,os,re,tempfile,threading,time
 from datetime import date
 from xml.etree import ElementTree
@@ -86,11 +86,18 @@ def snapshot_scope(config,identity=b''):
     return digest.hexdigest()
 
 def _art(value):
-    if not isinstance(value,str):return ''
+    if not isinstance(value,str) or len(value)>4096 or any(ord(ch)<=32 for ch in value):return ''
     try:
         u=urlsplit(value)
+        if u.scheme=='image':
+            # Kodi wraps native artwork keys. Validate its single decoded origin,
+            # retaining the original key so existing image-cache entries still match.
+            if u.path!='/' or not u.netloc or u.query or u.fragment:return ''
+            inner=unquote(u.netloc,errors='strict')
+            if any(ord(ch)<=32 for ch in inner):return ''
+            u=urlsplit(inner)
         return value if u.scheme=='https' and u.netloc=='image.tmdb.org' and not u.query and not u.fragment else ''
-    except ValueError:return ''
+    except (ValueError,UnicodeError):return ''
 
 def _finite_number(value,minimum=0,maximum=32503680000):
     if type(value) not in (int,float):return False
@@ -128,6 +135,7 @@ def _items(files,path_filter=_item_path,max_items=MAX_ITEMS):
     return result
 
 class PublicRowSnapshots:
+    format_version=2
     max_bytes=MAX_BYTES
     max_rows=MAX_ROWS
     max_age=MAX_AGE
@@ -142,7 +150,7 @@ class PublicRowSnapshots:
             with self.path.open('rb') as stream:raw=stream.read(self.max_bytes+1)
             if len(raw)>self.max_bytes:return
             document=json.loads(raw)
-            if not isinstance(document,dict) or document.get('version')!=1 or document.get('scope')!=self.scope:return
+            if not isinstance(document,dict) or document.get('version')!=self.format_version or document.get('scope')!=self.scope:return
             rows=document.get('rows')
             if not isinstance(rows,list) or len(rows)>self.max_rows:return
             for row in rows:
@@ -163,7 +171,7 @@ class PublicRowSnapshots:
             return deepcopy(row['items']) if row else None
 
     def _encode(self,rows):
-        return json.dumps({'version':1,'scope':self.scope,'rows':list(rows.values())},ensure_ascii=False,separators=(',',':'),allow_nan=False).encode('utf-8')
+        return json.dumps({'version':self.format_version,'scope':self.scope,'rows':list(rows.values())},ensure_ascii=False,separators=(',',':'),allow_nan=False).encode('utf-8')
 
     def _write(self,raw):
         temporary=None
