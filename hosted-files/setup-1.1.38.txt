@@ -1,0 +1,9 @@
+BlackLanturn Build 1.1.38 / Installer 1.0.42
+
+Create local personal collections in My Stuff and save named searches with their original category. Open a movie series in release order and see its next released unwatched title. When a series has no more currently available episodes, optional branded suggestions let you inspect, save or open another show. A different series never starts automatically.
+
+The playback checks found and fixed two reliability issues: Kodi may omit episode fields from its control response, so the active player’s own episode tag supplies validated missing metadata; suggestions are retired if playback changes to an unidentifiable stream. Preparing populated local shelves also avoids a duplicate metadata copy, while watched and resume state stay current.
+
+To update, open BlackLanturn Installer → Updates → Update BlackLanturn. This is an in-place update: accounts, playback settings, sources, progress, saved titles, personal collections, saved searches, row arrangements and unrelated add-ons stay in place. Existing compatibility patches and both branded icon packs are included. Fresh and Standard remain separate installation modes.
+
+Native tests used an isolated macOS Kodi profile for controlled video EOF and install/update cases. General’s Android identity is simulated in that native Mac test. Apple TV’s normal remote/phone text entry is not claimed verified; Mac text-entry flows pass. The user’s private Fight Zone remains excluded from public packages. No permanent native audio/shutdown or external network repair is claimed.
