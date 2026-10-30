@@ -1,0 +1,5 @@
+BlackLanturn Build1.1.40 / Installer1.0.44
+
+Fixes a release-notification size limit reached after many upgrades. Only the oldest archived release-note entries retire as needed; current notices, seen/dismissed choices and notification preferences stay saved. Includes all1.1.39 selected-title actions, Settings-only row customization and reviewed playback fixes. Trakt recommendation routes remain unchanged.
+
+Use Update BlackLanturn for an in-place update. Existing accounts, playback settings, sources, watched progress, saved rows, collections and unrelated add-ons stay in place. Personal Fight Zone remains private.
