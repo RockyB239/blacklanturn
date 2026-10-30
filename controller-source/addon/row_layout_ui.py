@@ -38,7 +38,7 @@ class RowCustomization:
         if section=='My Stuff':
             from live_core import my_stuff_rows
             from live_review import tmdb
-            return my_stuff_rows(self.config['Saved'],tmdb)
+            return my_stuff_rows(self.config['Saved'],tmdb)+getattr(self,'personal_rows',lambda:[])()
         if section=='YouTube':
             from youtube_core import tab_rows,account_options
             from youtube_browser import read_account_store

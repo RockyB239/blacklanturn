@@ -16,7 +16,8 @@ class BackendSettings(xbmcgui.WindowXMLDialog):
   control=self.getControl(200);control.reset()
   items=[]
   for action,title,help in rows:
-   if action=='youtube_previews':help='Current mode: '+('Automatic' if self.config.get('YouTubePreviews',True) else 'Manual')
+   if action=='series_end_suggestions':help='Next-series suggestions: '+('On' if self.config.get('SeriesEndSuggestions',True) else 'Off')+'  ·  Different shows never autoplay'
+   elif action=='youtube_previews':help='Current mode: '+('Automatic' if self.config.get('YouTubePreviews',True) else 'Manual')
    if action=='youtube_end_suggestions':help='Next-video suggestions: '+('On' if self.config.get('YouTubeEndSuggestions',True) else 'Off')
    elif action=='youtube_end_autoplay':help='Next-video autoplay: '+('On' if self.config.get('YouTubeEndAutoplay',False) else 'Off')+'  ·  Requires suggestions to be enabled'
    elif action=='preview_mode':help='Current mode: '+('Automatic' if self.config.get('PreviewMode',self.preview_mode)=='auto' else 'Manual')

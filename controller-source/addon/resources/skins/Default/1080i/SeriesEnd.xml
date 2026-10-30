@@ -1,0 +1,409 @@
+<?xml version='1.0' encoding='utf-8'?>
+<window>
+  <defaultcontrol always="true">7000</defaultcontrol>
+  <coordinates>
+    <system>1</system>
+  </coordinates>
+  <controls>
+    <control type="image">
+      <left>0</left>
+      <top>0</top>
+      <width>1920</width>
+      <height>1080</height>
+      <texture>white.png</texture>
+      <aspectratio>scale</aspectratio>
+      <colordiffuse>FF080B0E</colordiffuse>
+    </control>
+    <control type="image">
+      <left>0</left>
+      <top>0</top>
+      <width>1920</width>
+      <height>1080</height>
+      <texture>$INFO[Window.Property(backdrop)]</texture>
+      <aspectratio>scale</aspectratio>
+    </control>
+    <control type="image">
+      <left>0</left>
+      <top>0</top>
+      <width>1920</width>
+      <height>1080</height>
+      <texture>white.png</texture>
+      <aspectratio>scale</aspectratio>
+      <colordiffuse>E6080B0E</colordiffuse>
+    </control>
+    <control type="group">
+      <visible>String.IsEqual(Window.Property(suggestions),true)</visible>
+      <control type="image">
+        <left>126</left>
+        <top>70</top>
+        <width>58</width>
+        <height>76</height>
+        <texture>blacklanturn-lantern.png</texture>
+        <aspectratio>scale</aspectratio>
+      </control>
+      <control type="label">
+        <left>212</left>
+        <top>82</top>
+        <width>1300</width>
+        <height>44</height>
+        <font>font25_title</font>
+        <textcolor>FF29D9EE</textcolor>
+        <label>BLACKLANTURN / YOUR NEXT SERIES</label>
+        <aligny>center</aligny>
+      </control>
+      <control type="label">
+        <left>126</left>
+        <top>164</top>
+        <width>1500</width>
+        <height>68</height>
+        <font>font45_title</font>
+        <textcolor>FFF5F5F5</textcolor>
+        <label>Find your next series</label>
+        <aligny>center</aligny>
+      </control>
+      <control type="textbox">
+        <left>126</left>
+        <top>242</top>
+        <width>1656</width>
+        <height>70</height>
+        <font>font27</font>
+        <textcolor>FFB4BCC5</textcolor>
+        <label>$INFO[Window.Property(endedTitle)]</label>
+      </control>
+      <control type="image" id="7100">
+        <left>134</left>
+        <top>348</top>
+        <width>532</width>
+        <height>299</height>
+        <texture>$INFO[Window.Property(cardThumb0)]</texture>
+        <aspectratio>keep</aspectratio>
+      </control>
+      <control type="image" id="7200">
+        <left>129</left>
+        <top>343</top>
+        <width>542</width>
+        <height>309</height>
+        <texture border="12">artwork-focus-frame.png</texture>
+        <aspectratio>stretch</aspectratio>
+        <visible>Control.HasFocus(7000)</visible>
+      </control>
+      <control type="textbox" id="7300">
+        <left>134</left>
+        <top>664</top>
+        <width>532</width>
+        <height>96</height>
+        <font>font25_title</font>
+        <textcolor>FFF5F5F5</textcolor>
+        <label>$INFO[Window.Property(cardTitle0)]</label>
+      </control>
+      <control type="label" id="7400">
+        <left>134</left>
+        <top>745</top>
+        <width>532</width>
+        <height>34</height>
+        <font>font20_title</font>
+        <textcolor>FFB4BCC5</textcolor>
+        <label>$INFO[Window.Property(cardCaption0)]</label>
+        <aligny>center</aligny>
+      </control>
+      <control type="button" id="7000">
+        <left>126</left>
+        <top>340</top>
+        <width>548</width>
+        <height>448</height>
+        <label />
+        <texturefocus />
+        <texturenofocus />
+        <onleft>7000</onleft>
+        <onright>7001</onright>
+        <onup>7000</onup>
+        <ondown>7010</ondown>
+      </control>
+      <control type="image" id="7101">
+        <left>690</left>
+        <top>348</top>
+        <width>532</width>
+        <height>299</height>
+        <texture>$INFO[Window.Property(cardThumb1)]</texture>
+        <aspectratio>keep</aspectratio>
+      </control>
+      <control type="image" id="7201">
+        <left>685</left>
+        <top>343</top>
+        <width>542</width>
+        <height>309</height>
+        <texture border="12">artwork-focus-frame.png</texture>
+        <aspectratio>stretch</aspectratio>
+        <visible>Control.HasFocus(7001)</visible>
+      </control>
+      <control type="textbox" id="7301">
+        <left>690</left>
+        <top>664</top>
+        <width>532</width>
+        <height>96</height>
+        <font>font25_title</font>
+        <textcolor>FFF5F5F5</textcolor>
+        <label>$INFO[Window.Property(cardTitle1)]</label>
+      </control>
+      <control type="label" id="7401">
+        <left>690</left>
+        <top>745</top>
+        <width>532</width>
+        <height>34</height>
+        <font>font20_title</font>
+        <textcolor>FFB4BCC5</textcolor>
+        <label>$INFO[Window.Property(cardCaption1)]</label>
+        <aligny>center</aligny>
+      </control>
+      <control type="button" id="7001">
+        <left>682</left>
+        <top>340</top>
+        <width>548</width>
+        <height>448</height>
+        <label />
+        <texturefocus />
+        <texturenofocus />
+        <onleft>7000</onleft>
+        <onright>7002</onright>
+        <onup>7001</onup>
+        <ondown>7011</ondown>
+      </control>
+      <control type="image" id="7102">
+        <left>1246</left>
+        <top>348</top>
+        <width>532</width>
+        <height>299</height>
+        <texture>$INFO[Window.Property(cardThumb2)]</texture>
+        <aspectratio>keep</aspectratio>
+      </control>
+      <control type="image" id="7202">
+        <left>1241</left>
+        <top>343</top>
+        <width>542</width>
+        <height>309</height>
+        <texture border="12">artwork-focus-frame.png</texture>
+        <aspectratio>stretch</aspectratio>
+        <visible>Control.HasFocus(7002)</visible>
+      </control>
+      <control type="textbox" id="7302">
+        <left>1246</left>
+        <top>664</top>
+        <width>532</width>
+        <height>96</height>
+        <font>font25_title</font>
+        <textcolor>FFF5F5F5</textcolor>
+        <label>$INFO[Window.Property(cardTitle2)]</label>
+      </control>
+      <control type="label" id="7402">
+        <left>1246</left>
+        <top>745</top>
+        <width>532</width>
+        <height>34</height>
+        <font>font20_title</font>
+        <textcolor>FFB4BCC5</textcolor>
+        <label>$INFO[Window.Property(cardCaption2)]</label>
+        <aligny>center</aligny>
+      </control>
+      <control type="button" id="7002">
+        <left>1238</left>
+        <top>340</top>
+        <width>548</width>
+        <height>448</height>
+        <label />
+        <texturefocus />
+        <texturenofocus />
+        <onleft>7001</onleft>
+        <onright>7002</onright>
+        <onup>7002</onup>
+        <ondown>7012</ondown>
+      </control>
+      <control type="label">
+        <left>126</left>
+        <top>308</top>
+        <width>1668</width>
+        <height>30</height>
+        <font>font20_title</font>
+        <textcolor>FFB4BCC5</textcolor>
+        <label>$INFO[Window.Property(suggestionSource)]</label>
+        <aligny>center</aligny>
+      </control>
+      <control type="label">
+        <left>126</left>
+        <top>814</top>
+        <width>1668</width>
+        <height>38</height>
+        <font>font20_title</font>
+        <textcolor>FF29D9EE</textcolor>
+        <label>$INFO[Window.Property(status)]</label>
+        <aligny>center</aligny>
+      </control>
+      <control type="button" id="7010">
+        <left>126</left>
+        <top>866</top>
+        <width>310</width>
+        <height>66</height>
+        <label>Open show</label>
+        <font>font25_narrow</font>
+        <textoffsetx>22</textoffsetx>
+        <textcolor>FFE1E6EA</textcolor>
+        <focusedcolor>FF29D9EE</focusedcolor>
+        <texturefocus border="12">action-rounded-focus.png</texturefocus>
+        <texturenofocus border="12">action-rounded-rest.png</texturenofocus>
+        <onleft>7014</onleft>
+        <onright>7011</onright>
+        <onup>7000</onup>
+        <ondown>7010</ondown>
+      </control>
+      <control type="button" id="7011">
+        <left>456</left>
+        <top>866</top>
+        <width>310</width>
+        <height>66</height>
+        <label>Save show</label>
+        <font>font25_narrow</font>
+        <textoffsetx>22</textoffsetx>
+        <textcolor>FFE1E6EA</textcolor>
+        <focusedcolor>FF29D9EE</focusedcolor>
+        <texturefocus border="12">action-rounded-focus.png</texturefocus>
+        <texturenofocus border="12">action-rounded-rest.png</texturenofocus>
+        <onleft>7010</onleft>
+        <onright>7012</onright>
+        <onup>7000</onup>
+        <ondown>7011</ondown>
+      </control>
+      <control type="button" id="7012">
+        <left>786</left>
+        <top>866</top>
+        <width>310</width>
+        <height>66</height>
+        <label>Back to browsing</label>
+        <font>font25_narrow</font>
+        <textoffsetx>22</textoffsetx>
+        <textcolor>FFE1E6EA</textcolor>
+        <focusedcolor>FF29D9EE</focusedcolor>
+        <texturefocus border="12">action-rounded-focus.png</texturefocus>
+        <texturenofocus border="12">action-rounded-rest.png</texturenofocus>
+        <onleft>7011</onleft>
+        <onright>7013</onright>
+        <onup>7000</onup>
+        <ondown>7012</ondown>
+      </control>
+      <control type="button" id="7013">
+        <left>1116</left>
+        <top>866</top>
+        <width>310</width>
+        <height>66</height>
+        <label>Turn suggestions off</label>
+        <font>font25_narrow</font>
+        <textoffsetx>22</textoffsetx>
+        <textcolor>FFE1E6EA</textcolor>
+        <focusedcolor>FF29D9EE</focusedcolor>
+        <texturefocus border="12">action-rounded-focus.png</texturefocus>
+        <texturenofocus border="12">action-rounded-rest.png</texturenofocus>
+        <onleft>7012</onleft>
+        <onright>7014</onright>
+        <onup>7000</onup>
+        <ondown>7013</ondown>
+      </control>
+      <control type="button" id="7014">
+        <left>1446</left>
+        <top>866</top>
+        <width>310</width>
+        <height>66</height>
+        <label>Details</label>
+        <font>font25_narrow</font>
+        <textoffsetx>22</textoffsetx>
+        <textcolor>FFE1E6EA</textcolor>
+        <focusedcolor>FF29D9EE</focusedcolor>
+        <texturefocus border="12">action-rounded-focus.png</texturefocus>
+        <texturenofocus border="12">action-rounded-rest.png</texturenofocus>
+        <onleft>7013</onleft>
+        <onright>7010</onright>
+        <onup>7000</onup>
+        <ondown>7014</ondown>
+      </control>
+      <control type="label">
+        <left>126</left>
+        <top>960</top>
+        <width>1668</width>
+        <height>42</height>
+        <font>font20_title</font>
+        <textcolor>FFB4BCC5</textcolor>
+        <label>Back: return to browsing</label>
+        <aligny>center</aligny>
+      </control>
+    </control>
+    <control type="label">
+      <left>126</left>
+      <top>970</top>
+      <width>1668</width>
+      <height>45</height>
+      <font>font20_title</font>
+      <textcolor>FFB4BCC5</textcolor>
+      <label>Back to browsing</label>
+      <aligny>center</aligny>
+      <visible>!String.IsEqual(Window.Property(suggestions),true)</visible>
+    </control>
+    <control type="button" id="7999">
+      <left>0</left>
+      <top>0</top>
+      <width>1</width>
+      <height>1</height>
+      <label />
+      <texturefocus />
+      <texturenofocus />
+      <onup>7999</onup>
+      <ondown>7999</ondown>
+      <onleft>7999</onleft>
+      <onright>7999</onright>
+      <visible>!String.IsEqual(Window.Property(suggestions),true)</visible>
+    </control>
+    <control type="group">
+      <visible>String.IsEqual(Window.Property(details),true)</visible>
+      <control type="image">
+        <left>84</left>
+        <top>78</top>
+        <width>1752</width>
+        <height>920</height>
+        <texture>white.png</texture>
+        <aspectratio>scale</aspectratio>
+        <colordiffuse>FF101820</colordiffuse>
+      </control>
+      <control type="textbox">
+        <left>140</left>
+        <top>122</top>
+        <width>1610</width>
+        <height>108</height>
+        <font>font32_title</font>
+        <textcolor>FFF5F5F5</textcolor>
+        <label>$INFO[Window.Property(detailTitle)]</label>
+      </control>
+      <control type="textbox">
+        <left>140</left>
+        <top>270</top>
+        <width>1610</width>
+        <height>520</height>
+        <font>font27</font>
+        <textcolor>FFDCE1E5</textcolor>
+        <label>$INFO[Window.Property(detailBody)]</label>
+      </control>
+      <control type="button" id="7020">
+        <left>1430</left>
+        <top>870</top>
+        <width>350</width>
+        <height>66</height>
+        <label>Back to suggestions</label>
+        <font>font25_title</font>
+        <textoffsetx>22</textoffsetx>
+        <textcolor>FFE1E6EA</textcolor>
+        <focusedcolor>FF29D9EE</focusedcolor>
+        <texturefocus border="12">action-rounded-focus.png</texturefocus>
+        <texturenofocus border="12">action-rounded-rest.png</texturenofocus>
+        <onleft>7020</onleft>
+        <onright>7020</onright>
+        <onup>7020</onup>
+        <ondown>7020</ondown>
+      </control>
+    </control>
+  </controls>
+</window>

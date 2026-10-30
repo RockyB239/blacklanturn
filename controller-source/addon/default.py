@@ -22,17 +22,27 @@ def run_live_review():
             from youtube_core import video_id
             target=(state or {}).get('selected') or {}
             while True:
-                session=None
+                session=None;series_session=None
                 if video_id({'file':playback}):
                     from youtube_end import YouTubeEndSession
                     session=YouTubeEndSession(target,owner_skin)
+                else:
+                    from live_core import episode_identity
+                    if episode_identity(target):
+                        from series_end import SeriesEndSession
+                        series_session=SeriesEndSession(target,owner_skin)
                 try:
-                    returned=play_and_wait(playback,owner_skin,options,target,youtube_end=session) if session is not None else play_and_wait(playback,owner_skin,options,target)
+                    if series_session is not None:
+                        returned=play_and_wait(playback,owner_skin,options,target,series_end=series_session)
+                    else:returned=play_and_wait(playback,owner_skin,options,target,youtube_end=session) if session is not None else play_and_wait(playback,owner_skin,options,target)
                     if not returned:return
-                    choice=session.prompt() if session is not None else None
+                    choice=session.prompt() if session is not None else series_session.prompt() if series_session is not None else None
                 finally:
                     if session is not None:session.close()
+                    if series_session is not None:series_session.close()
                 if not choice:break
+                if choice['action']=='series':
+                    state=dict(state or {},_series_end_open=choice['item']);break
                 if choice['action']=='channel':
                     state=dict(state or {},_youtube_end_channel=choice['item']);break
                 target=choice['item'];playback=target['file'];options={}

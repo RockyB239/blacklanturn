@@ -1,0 +1,31 @@
+{
+  "title": "BlackLanturn Build 1.1.38",
+  "summary": "Your own collections, saved searches, movie-series order and something new when you’re caught up.",
+  "sections": [
+    {
+      "heading": "Make it your own",
+      "bullets": [
+        "Create and arrange personal collections in My Stuff. Save named searches with their search category and reopen current results."
+      ]
+    },
+    {
+      "heading": "Keep your place",
+      "bullets": [
+        "View a movie series in release order with its next released unwatched title. Local shelves keep watched and resume status current."
+      ]
+    },
+    {
+      "heading": "Find your next series",
+      "bullets": [
+        "When the last available episode finishes, optional suggestions let you inspect, save or open another show. Another series never starts automatically. Returning shows are supported when you’re caught up."
+      ]
+    },
+    {
+      "heading": "Keep your complete setup",
+      "bullets": [
+        "Local shelves prepare metadata with fewer copies. Watched and resume status remain current.",
+        "Update BlackLanturn keeps accounts, playback settings, sources, progress, collections, saved searches, row arrangements and unrelated add-ons. Current compatibility patches and both icon packs remain included."
+      ]
+    }
+  ]
+}

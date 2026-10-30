@@ -160,3 +160,12 @@ class RowArrangementPreservation(unittest.TestCase):
    p=self.layout(raw)
    with self.assertRaises(self.m.PreferenceError):self.m.prepare(self.home,self.accounts(),IDS+['script.blacklanturn.preview'],False)
    self.assertEqual(p.read_text(),raw)
+
+class PersonalLibraryPreservation(unittest.TestCase):
+ setUp=BuildPreferences.setUp
+ accounts=BuildPreferences.accounts
+ def test_new_library_fields_survive_real_standard_snapshot_and_restore(self):
+  ids=IDS+['script.blacklanturn.preview'];p=self.home/'userdata/addon_data/script.blacklanturn.preview/rows.json';p.parent.mkdir(parents=True,exist_ok=True)
+  config={'Saved':[{'file':'unchanged'}],'PersonalCollections':[{'id':'one','name':'Family','items':[{'file':'plugin://plugin.video.themoviedb.helper/?info=play&tmdb_type=movie&tmdb_id=1','playcount':1}]}],'SavedSearches':[{'id':'two','name':'Space','query':'space','kind':'movie'}],'SeriesEndSuggestions':False,'PrivateExample':{'preserve':True}}
+  p.write_text(json.dumps(config));saved=self.m.prepare(self.home,self.accounts(),ids,False);p.unlink();self.m.restore(self.home,saved,ids)
+  self.assertEqual(json.loads(p.read_text()),config)

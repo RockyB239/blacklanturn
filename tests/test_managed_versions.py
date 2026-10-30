@@ -232,4 +232,4 @@ class RowLayoutProtocol(unittest.TestCase):
         with patch.object(self.m,'verify_archive_metadata'):
             for floor in ('1.0.39','1.0.40'):
                 self.assertEqual(self.m.prepare_policy(dict(marker,installer_min_version=floor),None),floor)
-            with self.assertRaises(ValueError):self.m.prepare_policy(dict(marker,installer_min_version='1.0.41'),None)
+            with self.assertRaises(ValueError):self.m.prepare_policy(dict(marker,installer_min_version='1.0.42'),None)

@@ -55,12 +55,13 @@ class PlaybackInfoSession:
 
 class HandoffPlayer(xbmc.Player):
     def __init__(self):super().__init__();self.reason=''
+    def onPlayBackStarted(self):self.reason=''
     def onPlayBackEnded(self):self.reason='ended'
     def onPlayBackStopped(self):self.reason='stopped'
     def onPlayBackError(self):self.reason='error'
 
-def play_and_wait(path,owner_skin,options=None,target=None,youtube_end=None):
-    monitor=xbmc.Monitor();player=HandoffPlayer() if youtube_end is not None else xbmc.Player();gate=PlaybackReturnGate(time.monotonic())
+def play_and_wait(path,owner_skin,options=None,target=None,youtube_end=None,series_end=None):
+    monitor=xbmc.Monitor();player=HandoffPlayer() if youtube_end is not None or series_end is not None else xbmc.Player();gate=PlaybackReturnGate(time.monotonic())
     resume=ResumeHandoff(target if options else None);info=PlaybackInfoSession(target)
     from youtube_core import video_id
     youtube_exit=YouTubeExitGuard(video_id({'file':path}) is not None)
@@ -101,6 +102,7 @@ def play_and_wait(path,owner_skin,options=None,target=None,youtube_end=None):
                         pid=active['playerid']
                         current=rpc('Player.GetItem',{'playerid':pid,'properties':['title','showtitle','season','episode','year','plot','cast']}).get('item',{})
                         info.tick(current,now)
+                        if series_end is not None:series_end.observe_current(player,current)
                         if not resume.done:
                             progress=rpc('Player.GetProperties',{'playerid':pid,'properties':['percentage']})
                             if current and 'percentage' in progress:
@@ -115,6 +117,7 @@ def play_and_wait(path,owner_skin,options=None,target=None,youtube_end=None):
                              now,owner=xbmc.getSkinDir()==owner_skin)
             if result!='wait':
                 if youtube_end is not None:youtube_end.reason=player.reason
+                if series_end is not None:series_end.reason=player.reason
                 return result=='return'
             if monitor.waitForAbort(.2):return False
         return False

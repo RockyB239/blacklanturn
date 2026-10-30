@@ -29,6 +29,7 @@ from title_preferences import TitlePreferences
 from title_feedback_ui import TitleFeedback
 from row_layout import RowLayouts
 from row_layout_ui import RowCustomization
+from library_ui import LibraryActions
 from series_status import SeriesStatus
 from icon_picker import choose_icon
 from icon_packs import icon_path,selected_pack,with_pack,PACK_CHOICES
@@ -150,7 +151,7 @@ class PreviewPlayer(xbmc.Player):
     def __init__(self):super().__init__();self.failed=False
     def onPlayBackError(self):self.failed=True
 
-class LiveReview(RowCustomization,TitleFeedback,YouTubeBrowser,xbmcgui.WindowXML):
+class LiveReview(LibraryActions,RowCustomization,TitleFeedback,YouTubeBrowser,xbmcgui.WindowXML):
     def onInit(self):
         # Kodi may initialize this object again with recreated native controls.
         # Retire its old setup/monitor before any native initialization can wait.
@@ -261,7 +262,9 @@ class LiveReview(RowCustomization,TitleFeedback,YouTubeBrowser,xbmcgui.WindowXML
                 restored=self.restore_browse(playback_resume)
                 if restored is not False and current():
                     channel=playback_resume.get('_youtube_end_channel')
-                    if channel:self.load_path(0,channel['file'],'More from this channel')
+                    series=playback_resume.get('_series_end_open')
+                    if series:self.details(series)
+                    elif channel:self.load_path(0,channel['file'],'More from this channel')
                     else:self.refresh_watch_status(sync=getattr(self,'section','')!='YouTube',browse_state=playback_resume)
                 return
             self.setProperty('loadingStatus','Preparing your integrations…')
@@ -554,7 +557,7 @@ class LiveReview(RowCustomization,TitleFeedback,YouTubeBrowser,xbmcgui.WindowXML
         self.histories=[PageHistory(),PageHistory()]
         self.setProperty('eyebrow',self.section.upper());self.setProperty('genreLabel','Genres: All');self.load_browse_sources()
         if self.section=='My Stuff':
-            self.set_rows(my_stuff_rows(self.config['Saved'],tmdb));return
+            self.set_rows(my_stuff_rows(self.config['Saved'],tmdb)+getattr(self,'personal_rows',lambda:[])());return
         self.set_rows(page_rows(self.config,self.section))
     def set_rows(self,definitions):
         if hasattr(self,'arrange_rows'):definitions=self.arrange_rows(definitions)
@@ -651,7 +654,12 @@ class LiveReview(RowCustomization,TitleFeedback,YouTubeBrowser,xbmcgui.WindowXML
             if not owner_current():raise PageCancelled('YouTube row account or settings changed')
             if 'local_items' not in definition and hasattr(self,'remember_fetched_youtube_row'):self.remember_fetched_youtube_row(definition,files,owner_current)
             return files
-        if 'local_items' in definition or not path.startswith(TMDB):return row_items(definition,get_list)
+        if 'local_items' in definition:
+            # Hydration already isolates the saved snapshots before updating status.
+            if hasattr(self,'hydrate_library_items'):
+                return self.hydrate_library_items(definition['local_items'])
+            return row_items(definition,get_list)
+        if not path.startswith(TMDB):return row_items(definition,get_list)
         cache=self.result_cache;revision=cache.revision if expected_revision is None else expected_revision
         if revision!=cache.revision:return []
         generation=self.generation
@@ -1293,7 +1301,11 @@ class LiveReview(RowCustomization,TitleFeedback,YouTubeBrowser,xbmcgui.WindowXML
                     if not wait_for_helper(lambda:self.alive):unavailable=True
                 for n,path in enumerate(paths):
                     if not self.alive or generation!=self.generation:return
-                    if not path:continue
+                    if not path:
+                        if hasattr(self,'hydrate_library_items'):
+                            files=self.hydrate_library_items(rows[n]);position=restored_position(files,anchors[n],positions[n])
+                            if self.alive and generation==self.generation:self.apply_row(n,files,labels[n],position,update_selected=False)
+                        continue
                     try:
                         with self.list_lock:
                             if self.section=='YouTube':
@@ -1320,6 +1332,7 @@ class LiveReview(RowCustomization,TitleFeedback,YouTubeBrowser,xbmcgui.WindowXML
                         if found:fresh_selected=refreshed_watch_item(selected,found[0])
                     except Exception:unavailable=True
                 if not self.alive or generation!=self.generation:return
+                if fresh_selected:getattr(self,'refresh_library_watch',lambda _:None)(fresh_selected)
                 self.update(fresh_selected or selected)
                 self.setProperty('notice','Some status data could not refresh; previous information retained' if unavailable else 'Watched status refreshed')
                 event('watch_status_refreshed',available=not unavailable,matched=bool(fresh_selected),section=self.section)
@@ -1407,6 +1420,7 @@ class LiveReview(RowCustomization,TitleFeedback,YouTubeBrowser,xbmcgui.WindowXML
                 options.append(('details','Details'))
                 if genre_available:options.append(('genre','Choose genre…'))
                 options.append(('local','Remove from My Stuff on this device' if saved else 'Save to My Stuff on this device'))
+                options.extend(getattr(self,'library_title_actions',lambda _:[])(item))
                 if command:options.append(('trakt','Trakt: Watched, progress & lists'))
                 if self.rating_identity(item):options.append(('discover','Discover collections & creator credits'))
             if (not item or discovery) and genre_available:options.append(('genre','Choose genre…'))
@@ -1423,6 +1437,7 @@ class LiveReview(RowCustomization,TitleFeedback,YouTubeBrowser,xbmcgui.WindowXML
             if failed:
                 options.append(('retry','Retry unavailable lists'))
                 if not item:options.append(('settings','Open integration settings'))
+            options.extend(getattr(self,'library_context_actions',lambda:[])())
             if not options:return
             chosen=xbmcgui.Dialog().contextmenu([label for _,label in options])
         finally:
@@ -1431,6 +1446,11 @@ class LiveReview(RowCustomization,TitleFeedback,YouTubeBrowser,xbmcgui.WindowXML
         if chosen<0:return
         action=options[chosen][0]
         if action.startswith('title_'):self.change_title_feedback(item,action)
+        elif action=='library_add':self.add_to_collection(item)
+        elif action=='movie_series':self.open_movie_series(item)
+        elif action=='collections':self.manage_collections()
+        elif action=='saved_searches':self.manage_searches()
+        elif action=='save_search':self.save_current_search()
         elif action=='youtube_refresh':self.refresh_youtube_recommendations()
         elif action=='genre':
             generation=getattr(self,'generation',0)
@@ -1996,6 +2016,10 @@ class LiveReview(RowCustomization,TitleFeedback,YouTubeBrowser,xbmcgui.WindowXML
             show_notes()
         elif action=='help':
             xbmcgui.Dialog().textviewer('BlackLanturn · Help',(ROOT/'HELP.txt').read_text(encoding='utf-8'))
+        elif action=='collections':self.manage_collections()
+        elif action=='saved_searches':self.manage_searches()
+        elif action=='series_end_suggestions':
+            self.config['SeriesEndSuggestions']=not self.config.get('SeriesEndSuggestions',True);self.save(invalidate=False)
         elif action=='clear_search':
             self.config.pop('SearchQuery',None);self.save()
             self.setProperty('notice','Saved search cleared on this device')
@@ -2187,6 +2211,10 @@ class LiveReview(RowCustomization,TitleFeedback,YouTubeBrowser,xbmcgui.WindowXML
             if state=='error':lines.append('List unavailable: '+self.getProperty('row'+str(n)))
         xbmcgui.Dialog().textviewer('BlackLanturn · Integration status','\n\n'.join(lines))
     def open_search(self,query=None,position=0):
+        if query is None and hasattr(self,'choose_saved_search'):
+            chosen=self.choose_saved_search()
+            if chosen is False:return
+            if chosen is not None:query,position=chosen
         if query is None:query=xbmcgui.Dialog().input('Search BlackLanturn',defaultt=(self.search_state or {}).get('query',self.config.get('SearchQuery','')))
         query=query.strip()
         if not query:return
