@@ -94,11 +94,19 @@ try:
         home.clearProperty('BlackLanturn.Recovery.Visible');home.setProperty('BlackLanturn.Handoff.Status','Loading BlackLanturn…')
         owns_session=True
         gate=SkinStartupGate(time.monotonic())
+        # Preparation uses the existing settling interval; native windows still
+        # wait for skin confirmation. Report an import failure only after that.
+        preload_error=None
+        try:
+            from live_review import LiveReview
+        except Exception as exc:
+            preload_error=exc
         while not xbmc.Monitor().abortRequested():
             outcome=gate.tick(xbmc.getSkinDir(),xbmc.getCondVisibility('Window.IsVisible(yesnodialog)'),time.monotonic())
             if outcome!='wait':break
             xbmc.sleep(100)
         if not xbmc.Monitor().abortRequested() and outcome=='ready':
+            if preload_error is not None:raise preload_error
             record('installed_profile',profile=str(PROFILE),addon=str(ROOT),skin=xbmc.getSkinDir())
             run_live_review()
 except Exception:

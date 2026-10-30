@@ -9,6 +9,7 @@ import json,math,os,re,tempfile,threading,time
 from datetime import date
 from xml.etree import ElementTree
 
+_ART_CONTROLS=re.compile(r'[\x00-\x20]')
 MAX_BYTES=2*1024*1024
 MAX_ROWS=48
 MAX_ITEMS=80
@@ -86,7 +87,7 @@ def snapshot_scope(config,identity=b''):
     return digest.hexdigest()
 
 def _art(value):
-    if not isinstance(value,str) or len(value)>4096 or any(ord(ch)<=32 for ch in value):return ''
+    if not isinstance(value,str) or len(value)>4096 or _ART_CONTROLS.search(value):return ''
     try:
         u=urlsplit(value)
         if u.scheme=='image':
@@ -94,7 +95,7 @@ def _art(value):
             # retaining the original key so existing image-cache entries still match.
             if u.path!='/' or not u.netloc or u.query or u.fragment:return ''
             inner=unquote(u.netloc,errors='strict')
-            if any(ord(ch)<=32 for ch in inner):return ''
+            if _ART_CONTROLS.search(inner):return ''
             u=urlsplit(inner)
         return value if u.scheme=='https' and u.netloc=='image.tmdb.org' and not u.query and not u.fragment else ''
     except (ValueError,UnicodeError):return ''
