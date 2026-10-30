@@ -687,6 +687,7 @@ class LiveReview(LibraryActions,RowCustomization,TitleFeedback,YouTubeBrowser,xb
         self.publish_cache_stats()
         return self.fill_discovery_page(path,files,current,refresh=definition.get('_snapshot_refresh',False),minimum=first_page_minimum(definition))
     def apply_refreshed_row(self,n,files,label):
+        from watch_metadata import refreshed_display_metadata
         # ControlList reset/add/select enqueue separate native GUI messages. A
         # background result must never replace that vector while input uses it.
         displayed=self.rows[n];path=self.paths[n];snapshots=self.snapshot_rows
@@ -704,8 +705,11 @@ class LiveReview(LibraryActions,RowCustomization,TitleFeedback,YouTubeBrowser,xb
             # After capture this reference owns the old item, so later resets
             # cannot redirect our property writes to a different card.
             if native.getPath()!=item.get('file','') or not current():return
-            hydrated={key:value for key,value in item.items() if key not in ('playcount','resume')}
-            hydrated.update({key:replacement[key] for key in ('playcount','resume') if key in replacement})
+            # Paint the saved artwork first, then enrich the same title when
+            # its owned provider response arrives. Keep native art, labels and
+            # membership stable; optional metadata belongs to the selected
+            # title's hero/details, not a second card bind.
+            hydrated=refreshed_display_metadata(item,replacement)
             hydrate_watch_metadata(native,hydrated)
             if not current():return
             displayed[position]=hydrated;matched+=1

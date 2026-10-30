@@ -6,6 +6,7 @@ from hashlib import sha256
 from pathlib import Path
 from urllib.parse import urlsplit,parse_qs,urlencode
 import json,math,os,re,tempfile,threading,time
+from datetime import date
 from xml.etree import ElementTree
 
 MAX_BYTES=2*1024*1024
@@ -26,13 +27,27 @@ def public_path(path,item=False):
         if info not in (PUBLIC_LISTS|PUBLIC_ITEMS if item else PUBLIC_LISTS):return False
         if query.get('tmdb_type',['movie'])[0] not in ('movie','tv'):return False
         if info in PUBLIC_ITEMS and not query.get('tmdb_id',[''])[0].isdigit():return False
-        fixed={'info','tmdb_type','nextpage','widget','cacheonly','update_listing','reload'}
-        numeric={'page','tmdb_id','season','episode','with_genres','without_genres','year','primary_release_year','first_air_date_year','with_networks','with_companies'}
-        if set(query)-fixed-numeric-{'sort_by','with_original_language','region'}:return False
+        fixed={'info','tmdb_type','nextpage','widget','cacheonly','update_listing','reload','with_id','include_adult'}
+        numeric={'page','tmdb_id','season','episode','with_genres','without_genres','year','primary_release_year','first_air_date_year','with_networks','with_companies','with_keywords','without_keywords'}
+        dates={field+'.'+bound for field in ('primary_release_date','first_air_date') for bound in ('gte','lte')}
+        thresholds={field+'.'+bound for field in ('vote_average','vote_count') for bound in ('gte','lte')}
+        if set(query)-fixed-numeric-dates-thresholds-{'sort_by','with_original_language','with_origin_country','region','with_separator','bl_start'}:return False
         for k in numeric & query.keys():
             if not re.fullmatch(r'\d+(?:[,|]\d+)*',query[k][0]):return False
-        for k in {'nextpage','widget','cacheonly','update_listing'} & query.keys():
+        for k in {'nextpage','widget','cacheonly','update_listing','with_id','include_adult'} & query.keys():
             if query[k][0] not in ('true','false'):return False
+        for k in dates & query.keys():
+            value=query[k][0]
+            if re.fullmatch(r't[+-]\d{1,5}',value):continue
+            if not re.fullmatch(r'\d{4}-\d{2}-\d{2}',value):return False
+            date.fromisoformat(value)
+        for k in thresholds & query.keys():
+            value=query[k][0]
+            if not re.fullmatch(r'\d{1,9}(?:\.\d{1,3})?',value):return False
+            if float(value)>(10 if k.startswith('vote_average.') else 100000000):return False
+        if 'bl_start' in query and (not re.fullmatch(r'\d{1,5}',query['bl_start'][0]) or int(query['bl_start'][0])>10000):return False
+        if 'with_separator' in query and query['with_separator'][0] not in ('OR','AND'):return False
+        if 'with_origin_country' in query and not re.fullmatch('[A-Z]{2}',query['with_origin_country'][0]):return False
         if 'reload' in query and query['reload'][0] not in ('true','false','','$INFO[Window(Home).Property(TMDbHelper.Widgets.Reload)]','$INFO[System.Time(hh:mm:ss)]') and not re.fullmatch(r'\d+(?:[.:]\d+)*',query['reload'][0]):return False
         if 'sort_by' in query and query['sort_by'][0] not in ('popularity.desc','vote_average.desc','primary_release_date.desc','first_air_date.desc','revenue.desc','vote_count.desc'):return False
         if 'with_original_language' in query and not re.fullmatch('[a-z]{2}',query['with_original_language'][0]):return False
@@ -99,11 +114,12 @@ def _items(files):
             if key in data and not _finite_number(data[key],maximum=100 if key=='rating' else 1000000000):return None
         for key in ('art','uniqueid'):
             if key in data and not isinstance(data[key],dict):return None
-        for key in ('genre','director','studio','writer'):
+        for key in ('genre','country','director','studio','writer'):
             if key in data and not isinstance(data[key],(str,list)):return None
-        item={k:deepcopy(v) for k,v in data.items() if k in text|{'year','season','episode','rating','runtime','genre','director','studio','writer'} and not isinstance(v,list)}
+        if 'votes' in data and not ((type(data['votes']) is int and 0<=data['votes']<=10**12) or (isinstance(data['votes'],str) and len(data['votes'])<=32 and (data['votes']=='' or re.fullmatch(r'\d+(?:,\d{3})*',data['votes'])))):return None
+        item={k:deepcopy(v) for k,v in data.items() if k in text|{'year','season','episode','rating','runtime','votes','genre','country','director','studio','writer'} and not isinstance(v,list)}
         item['file']=path
-        for key in ('genre','director','studio','writer'):
+        for key in ('genre','country','director','studio','writer'):
             if isinstance(data.get(key),list):item[key]=[value for value in data[key] if isinstance(value,str)]
         if isinstance(data.get('art'),dict):item['art']={k:safe for k,v in data['art'].items() if isinstance(k,str) and (safe:=_art(v))}
         if _art(data.get('thumbnail')):item['thumbnail']=data['thumbnail']

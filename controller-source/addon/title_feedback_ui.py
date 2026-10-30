@@ -34,14 +34,14 @@ class TitleFeedback:
         return raw[1] if raw and raw[0]==self.paths[n] else self.rows[n]
     def hydrate_title_row(self,n,files):
         from playback_core import item_key
+        from watch_metadata import refreshed_display_metadata
         raw=getattr(self,'title_raw_rows',{}).get(n)
         if not raw or raw[0]!=self.paths[n]:return
         fresh={item_key(item):item for item in files};updated=[]
         for item in raw[1]:
             replacement=fresh.get(item_key(item))
             if replacement is None:updated.append(item);continue
-            value={k:v for k,v in item.items() if k not in ('playcount','resume')}
-            value.update({k:replacement[k] for k in ('playcount','resume') if k in replacement});updated.append(value)
+            updated.append(refreshed_display_metadata(item,replacement))
         self.title_raw_rows[n]=(raw[0],updated)
     def prepare_title_row(self,n,files):
         if not hasattr(self,'title_raw_rows'):self.title_raw_rows={}

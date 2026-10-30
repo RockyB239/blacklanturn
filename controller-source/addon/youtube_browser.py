@@ -42,7 +42,10 @@ class YouTubeBrowser(YouTubeRows,SavedYouTube):
         self.youtube_saved_store=None;self.youtube_saved_active=False;self.youtube_saved_due=float('inf')
         self.youtube_home_cache=None;self.youtube_home_request=object()
         self.youtube_pages={};self.youtube_content_revision=object();self.youtube_job=None;self.youtube_update=None;self.youtube_refreshing=False
-        self.invalidate_row_results()
+        # A new browser has no previous YouTube-owned rows. Its independently
+        # scoped TMDb artwork cache was just loaded and must survive startup.
+        # Actual account transitions still invalidate the previous session.
+        if previous is not None:self.invalidate_row_results()
         if not current():return
         self.youtube_query='';self.refresh_navigation()
         if not current():return
