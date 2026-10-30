@@ -1,3 +1,11 @@
+# Follow-up release — 30 October 2026
+
+Build **1.1.40**, Installer **1.0.44**, Controller **0.1.104** retains the1.1.39 refinements and fixes release-notice history growth discovered by the live Mac acceptance check. Archived entries now retire by byte size, preserving current available/completed notes, enabled/dismissed choices and personal data. The previous139 assets remain immutable.
+
+Two regressions reproduce the previous failure and pass with the correction. A clone of the actual233,111-byte Mac notice state successfully advanced to139 with a258,209-byte result, without writing live state or changing notification preferences. Current-source clean/Standard/in-place/component and final device acceptance are tracked in the private follow-up task. See [notification-history validation](RELEASE_NOTICE_HISTORY_1.1.40.md).
+
+---
+
 # Current release — 30 October 2026
 
 Build **1.1.39**, Installer **1.0.43**, Controller **0.1.103**. Both editions include explicit selected-title next-series actions, row customization retained in Settings, unreachable-credit-marker fallback, and integer episode ID support for end-of-playback rating callbacks. Personalized Home/Shows/Movies recommendation rows retain their Trakt routes; end-of-series related suggestions are labeled TMDb.

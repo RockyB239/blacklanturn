@@ -46,6 +46,15 @@ def validate_state(s):
  for e in entries:validate_catalog({'schema':1,'releases':[e]})
  return s
 
+def bounded_state(state):
+ # Release proofs grow independently of the history count. Retire only the
+ # oldest archived notices; current notices and the user's preferences survive.
+ s=copy.deepcopy(validate_state(state))
+ while len(json.dumps(s,ensure_ascii=False,indent=2).encode())>MAX_BYTES:
+  if not s['history']:raise ValueError('Oversized current release notices')
+  s['history'].pop(0)
+ return s
+
 def verified(home,entry):
  base=Path(home).resolve();total=0
  try:
@@ -74,7 +83,7 @@ def refresh(state,marker,catalog,now,home):
   s['history']=([e for e in s['history'] if e['id']!=delivered['id']]+[copy.deepcopy(delivered)])[-20:]
  candidates=[e for e in matches if order(e)>order(s['installed'])]
  s['available']=copy.deepcopy(max(candidates,key=order)) if candidates else None
- return s
+ return bounded_state(s)
 
 def pending(state):
  if not state or not state['enabled']:return None
@@ -102,7 +111,7 @@ def read_state(path,legacy=None):
  if p.stat().st_size>MAX_BYTES:raise ValueError('Oversized release notice state')
  return validate_state(json.loads(p.read_text(encoding='utf-8')))
 def write_state(path,state):
- validate_state(state);p=Path(path);p.parent.mkdir(parents=True,exist_ok=True)
+ state=bounded_state(state);p=Path(path);p.parent.mkdir(parents=True,exist_ok=True)
  raw=json.dumps(state,ensure_ascii=False,indent=2)
  if len(raw.encode())>MAX_BYTES:raise ValueError('Oversized release notice state')
  fd,name=tempfile.mkstemp(prefix=p.name+'.',dir=str(p.parent))

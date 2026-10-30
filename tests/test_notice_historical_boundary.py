@@ -3,9 +3,12 @@ import copy,hashlib,json,tempfile,unittest
 from pathlib import Path
 from unittest.mock import patch
 from tools import verify_release_notices as gate
-ROOT=Path(__file__).resolve().parents[1]
+CURRENT=Path(__file__).resolve().parents[1]
+from historical_release_fixture import published129
+ROOT=published129()
 class HistoricalNoticeBoundary(unittest.TestCase):
  def setUp(self):
+  scoped=patch.object(gate,'ROOT',ROOT);scoped.start();self.addCleanup(scoped.stop)
   self.receipt=json.loads((ROOT/'controller-source/release-notices-native-verification.json').read_text());self.manifest=json.loads((ROOT/'controller-source/manifest90.json').read_text())
  def test_reminder_ui_requires_new_proof_while_unchanged_engine_uses_history(self):
   with self.assertRaises(AssertionError):gate.verify(self.receipt,self.manifest,historical=True)
@@ -17,3 +20,7 @@ class HistoricalNoticeBoundary(unittest.TestCase):
  def test_notice_state_change_still_requires_fresh_native_notice_acceptance(self):
   receipt=copy.deepcopy(self.receipt);receipt['installer_files']['resources/libs/release_notice_state.py']='0'*64
   with self.assertRaises(AssertionError):gate.verify(receipt,self.manifest,historical=True)
+
+ def test_current_changed_history_engine_cannot_inherit_the_old_notice_acceptance(self):
+  with patch.object(gate,'ROOT',CURRENT),self.assertRaisesRegex(AssertionError,'Notice state/notes changed'):
+   gate.verify(self.receipt,self.manifest,historical=True)

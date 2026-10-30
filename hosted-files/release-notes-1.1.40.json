@@ -1,0 +1,24 @@
+{
+  "title": "BlackLanturn Build 1.1.40",
+  "summary": "Reliable update notices after many releases, with all recent browsing and next-series improvements.",
+  "sections": [
+    {
+      "heading": "Keep future update notices working",
+      "bullets": [
+        "Old archived release notes retire automatically when their file reaches its size limit. Current update notices and your notification preferences stay saved."
+      ]
+    },
+    {
+      "heading": "Clearer next-series actions",
+      "bullets": [
+        "The selected show stays outlined and named while you browse it, read its synopsis or save it to My Stuff. Row customization remains in Settings."
+      ]
+    },
+    {
+      "heading": "Keep your setup",
+      "bullets": [
+        "Trakt recommendation rows, both icon packs, playback preferences, authorizations, saved data and unrelated add-ons remain in place."
+      ]
+    }
+  ]
+}

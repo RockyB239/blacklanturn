@@ -66,6 +66,10 @@ jobs:
           for edition in General Apple-TV-Mac; do
             curl --fail --location --retry 3 "https://github.com/RockyB239/blacklanturn/releases/download/v1.1.38/BlackLanturn-${edition}-Kodi21-1.1.38.zip" -o "baselines/BlackLanturn-${edition}-Kodi21-1.1.38.zip"
           done
+      - name: Download pinned notice-history baseline
+        run: |
+          curl --fail --location --retry 2 -o baselines/BlackLanturn-General-Kodi21-1.1.39.zip https://github.com/RockyB239/blacklanturn/releases/download/v1.1.39/BlackLanturn-General-Kodi21-1.1.39.zip
+          curl --fail --location --retry 2 -o baselines/BlackLanturn-Apple-TV-Mac-Kodi21-1.1.39.zip https://github.com/RockyB239/blacklanturn/releases/download/v1.1.39/BlackLanturn-Apple-TV-Mac-Kodi21-1.1.39.zip
       - name: Installer and update protection tests
         run: python -m unittest discover -s tests -v
       - name: Controller regression checks
@@ -80,7 +84,7 @@ jobs:
         run: python tools/device_validation/verify_performance_evidence.py validation/optimization130-performance.json --manifest controller-source/manifest96.json
       - name: Verify branded icons in both full and component editions
         run: |
-          python tools/build_release139.py --baselines baselines --output artifacts139
-          python tools/verify_release139.py artifacts139 --baselines baselines
-          python tools/release_report.py artifacts139/BlackLanturn-General-Kodi21-1.1.39.zip --output artifacts139/current-general.json
-          python tools/release_report.py artifacts139/BlackLanturn-Apple-TV-Mac-Kodi21-1.1.39.zip --output artifacts139/current-apple.json
+          python tools/build_release140.py --baselines baselines --output artifacts139
+          python tools/verify_release140.py artifacts139 --baselines baselines
+          python tools/release_report.py artifacts139/BlackLanturn-General-Kodi21-1.1.40.zip --output artifacts139/current-general.json
+          python tools/release_report.py artifacts139/BlackLanturn-Apple-TV-Mac-Kodi21-1.1.40.zip --output artifacts139/current-apple.json

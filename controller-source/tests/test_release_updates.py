@@ -89,3 +89,21 @@ class ReleaseTests(unittest.TestCase):
    with self.assertRaises(OSError):self.u.fetch_catalog()
   self.assertLessEqual(clock[0],5,'Slow drip held a read beyond the total deadline')
   self.assertTrue(timeouts);self.assertLessEqual(timeouts[-1],1)
+
+ def test_accumulated_history_is_byte_bounded_without_losing_preferences_or_current_notes(self):
+  state=self.baseline();state['enabled']=False;state['seen']=['available:remember-me']
+  template=copy.deepcopy(self.entry);template['files']={'addons/example/source_'+str(i)+'.py':'a'*64 for i in range(199)}
+  state['history']=[dict(copy.deepcopy(template),id='history-'+str(i),version='1.0.'+str(i)) for i in range(20)]
+  state['completed']=copy.deepcopy(template);saved=copy.deepcopy(state)
+  p=self.home/'bounded.json';self.u.write_state(p,state);after=self.u.read_state(p)
+  self.assertLessEqual(p.stat().st_size,self.u.MAX_BYTES)
+  self.assertFalse(after['enabled']);self.assertEqual(after['seen'],state['seen'])
+  self.assertEqual(after['completed'],state['completed']);self.assertEqual(after['available'],state['available'])
+  self.assertEqual(after['history'][-1],state['history'][-1]);self.assertLess(len(after['history']),20)
+  self.assertEqual(state,saved)
+ def test_refresh_bounds_existing_history_before_returning(self):
+  state=self.baseline();template=copy.deepcopy(self.entry);template['files']={'addons/example/source_'+str(i)+'.py':'a'*64 for i in range(199)}
+  state['history']=[dict(copy.deepcopy(template),id='history-'+str(i),version='1.0.'+str(i)) for i in range(20)]
+  refreshed=self.u.refresh(state,self.marker,self.catalog,2,self.home)
+  self.assertLessEqual(len(json.dumps(refreshed,ensure_ascii=False,indent=2).encode()),self.u.MAX_BYTES)
+  self.assertEqual(refreshed['available'],self.entry)
