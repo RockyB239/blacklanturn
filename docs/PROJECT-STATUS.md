@@ -1,3 +1,17 @@
+# Current release — 30 October 2026
+
+Build **1.1.39**, Installer **1.0.43**, Controller **0.1.103**. Both editions include explicit selected-title next-series actions, row customization retained in Settings, unreachable-credit-marker fallback, and integer episode ID support for end-of-playback rating callbacks. Personalized Home/Shows/Movies recommendation rows retain their Trakt routes; end-of-series related suggestions are labeled TMDb.
+
+The release uses complete reviewed Umbrella 6.7.98 and Helper 6.19.2 trees with BlackLanturn revision `.2`; update protection accepts those exact new manifests while retaining recognized prior versions. Both icon packs and platform-specific components remain included. Personal Fight Zone, accounts and playback preferences stay outside public defaults. See [release scope and validation](NEXT_SERIES_REFINEMENT_1.1.39.md).
+
+Local gates passed 1,061 Controller and 943 Installer tests, current-source provider/cache/playback contracts, eight isolated native clean/Standard/in-place/component cases, privacy and reproducibility verification. Source CI 40998203531 passed on b8f6c2887979fde29289ea3bb9aad37c2ade8bf3. General native installation identity is simulated on macOS; no physical-device clean install or full natural binge test is claimed. Live Mac/Fire rollout receipts and after-update timings are tracked in the private task directory; Apple TV is deliberately unchanged in this task.
+
+The original Fire Stick missed-prompt cause remains unconfirmed because detailed playback logging was off. A real Below S1E5 TorBox source displayed the branded S1E6 popup after one seek near EOF on the verified public 1.1.38 baseline. The unreachable-marker fix is separately supported by deterministic tests and does not establish that the original miss had that cause.
+
+---
+
+## Retained historical records
+
 # Current validation state —27 October2026
 
 Public release: **Build1.1.32 / Installer1.0.36 / Controller0.1.98**, repository1.0.6. Both full editions and31-to32 component packages preserve all existing provider patches, platform workarounds, playback defaults and both90-icon builtin packs. Personal Fight Zone stays excluded.

@@ -1,0 +1,9 @@
+BlackLanturn Build 1.1.39 / Installer 1.0.43
+
+Next-series suggestions keep the selected show outlined and named above the actions. Browse show, Read synopsis and Save to My Stuff always address that title. Row customization is available in Settings → Skin & discovery → Rows.
+
+Play Next retains the configured fallback when a credits marker cannot be reached. Episode-end rating controls accept integer episode identifiers. Existing Trakt recommendations, compatibility patches and both icon packs remain included. Personal Fight Zone stays private.
+
+Update BlackLanturn updates bundled code and reviewed patches in place, preserving accounts, settings, sources, progress, collections, searches, row arrangements and unrelated add-ons. Update BlackLanturn Installer through its repository before applying this release so its latest compatibility manifest is available.
+
+Verification includes full regression suites, isolated native clean/Standard/in-place/component cases for both editions, Mac remote-selection/synopsis/save/browse checks with a separate test store, reproducible anonymous assets, and an actual Fire Stick Below S1E5 manual-source popup check after one seek near EOF. This does not claim a full natural binge handoff or a confirmed cause of the earlier missed prompt.
