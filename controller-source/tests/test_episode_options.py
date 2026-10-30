@@ -35,6 +35,8 @@ class EpisodeOptions(unittest.TestCase):
             source_session_label=lambda *a,**kw:'Following selection' if session_active else '',
             browse_source=lambda: events.append('genre'), setFocusId=lambda cid: None,
         )
+        state.row_layout_scope=lambda:'Shows'
+        state.page_definitions=[{'label':'Season 1','path':'plugin://fixture'}]
         state.update = lambda chosen: setattr(state, 'selected', chosen)
         ns = {'resume_options': resume_options, 'discovery_result': discovery_result,
               'trakt_command': trakt_command, 'choose_player_path': choose_player_path,
@@ -81,3 +83,9 @@ class EpisodeOptions(unittest.TestCase):
         _, _, menus = self.run_menu(cancel=True, session_active=True)
         self.assertIn('Return to normal autoplay', menus[0])
         self.assertEqual(menus[0][-2:], ['Set default player…', 'Refresh watched status'])
+
+    def test_row_customization_is_only_in_settings_not_episode_browsing_options(self):
+        _, _, menus=self.run_menu(cancel=True)
+        self.assertNotIn('Customize rows…',menus[0])
+        from backend_core import SETTINGS_GROUPS
+        self.assertTrue(any(action=='rows' for _,_,rows in SETTINGS_GROUPS for action,_,_ in rows))

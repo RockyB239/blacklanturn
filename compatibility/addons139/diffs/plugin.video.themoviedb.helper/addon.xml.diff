@@ -1,0 +1,10 @@
+--- addons135/addon.xml
++++ addons139/addon.xml
+@@ -1,6 +1,6 @@
+ <?xml version="1.0" encoding="UTF-8"?>
+ <addon id="plugin.video.themoviedb.helper"
+-version="1:6.19.2+blacklanturn.1"
++version="1:6.19.2+blacklanturn.2"
+ name="TMDb Helper"
+ provider-name="jurialmunkey">
+ <requires>

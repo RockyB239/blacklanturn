@@ -127,7 +127,7 @@
     "resources/tmdbhelper/lib/script/sync/provider_setup.py": "016e183d18e02b74ec99c799d683719662cbff2951899318d52bd184e9c3fa3a",
     "resources/tmdbhelper/lib/script/sync/progress.py": "5878d6b1defa40b7c0fb44d04e25069ccfc12cb2cf0937faf72fad801c9f4657",
     "resources/tmdbhelper/lib/script/sync/provider_features.py": "32259a2d7bfb00ba57a135d7ea99e65049867bc57112644ac771da36c192250c",
-    "resources/tmdbhelper/lib/script/sync/item.py": "5b6fb33885ca14b7b854954cba3d55b905fc6ba01587076f8497532e9a3396af",
+    "resources/tmdbhelper/lib/script/sync/item.py": "0abc6f1706bddc3ee20e670a6de7f74f40d8072300709d9f70f1d375dd4c4ad8",
     "resources/tmdbhelper/lib/script/sync/provider_catalog.py": "4c7f413dcfc215f79ba53c48b6d11d04c3dd0e73c8c9058ac28faf8e6f67b23b",
     "resources/tmdbhelper/lib/script/sync/tmdb/rating.py": "10d0cfe9ce6cdf4d692db83d369d7a5c6f2e436ed6c39ee600808f0f5056d178",
     "resources/tmdbhelper/lib/script/sync/tmdb/userlist.py": "02d4bd82f67cd7874585cf1f65f3391ec437a29767fb4d6a7126bcdbafc80bc9",
@@ -2935,7 +2935,8 @@
     "6.19.2": [
       "52a46d6c6e0639bdf5d7fcfdc871c8823854c8d37239b676b599319b86891343",
       "aa672d9d3fafd1bd2353db924425a8a39f3e3410ad297096775098f84d1d5c57",
-      "83e126f9f6a760204ebccb334aac3d69b7f3ee4d54778aef8a2a035248b9934c"
+      "83e126f9f6a760204ebccb334aac3d69b7f3ee4d54778aef8a2a035248b9934c",
+      "e39cdf120514547b4460622b87e591c0b76cff812f3be2579a21eab15d16063d"
     ]
   },
   "installed_stock_provenance": {

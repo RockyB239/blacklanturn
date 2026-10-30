@@ -13,7 +13,7 @@ class SeriesEndDialog(xbmcgui.WindowXMLDialog):
         self.setProperty('suggestions','true');self.setProperty('details','false')
         self.setProperty('endedTitle','You’re caught up with '+str(self.target.get('showtitle') or self.target.get('tvshowtitle') or 'this series'))
         art=self.target.get('art') or {};self.setProperty('backdrop',art.get('fanart') or art.get('landscape') or 'blacklanturn-splash.png')
-        self.setProperty('suggestionSource','More shows to explore');self.setProperty('status','Choose a show for Details · Nothing starts automatically')
+        self.setProperty('suggestionSource','Related to '+str(self.target.get('showtitle') or self.target.get('tvshowtitle') or 'this series')+' · TMDb')
         labels=['System.ScreenWidth','System.ScreenHeight']
         screen=json.loads(xbmc.executeJSONRPC(json.dumps({'jsonrpc':'2.0','id':1,'method':'XBMC.GetInfoLabels','params':{'labels':labels}}))).get('result',{})
         height=end_card_height(screen.get(labels[0]),screen.get(labels[1]))
@@ -31,6 +31,7 @@ class SeriesEndDialog(xbmcgui.WindowXMLDialog):
             self.getControl(7400+n).setPosition(134+556*n,348+height+123)
             self.getControl(7000+n).setHeight(height+150)
             self.getControl(7000+n).controlRight(self.getControl(7000+min(n+1,len(self.items)-1)))
+        self.select_suggestion(0)
         self.setFocusId(7000)
         threading.Thread(target=self.monitor,name='BlackLanturnSeriesDialog',daemon=True).start()
     def monitor(self):
@@ -39,6 +40,13 @@ class SeriesEndDialog(xbmcgui.WindowXMLDialog):
             if not self.session.current() or xbmc.Player().isPlaying():self.finish();return
             if monitor.waitForAbort(.2):return
     def finish(self):self.active=False;self.close()
+    def select_suggestion(self,index):
+        self.selection=max(0,min(index,len(self.items)-1))
+        item=self.selected();title=item.get('title') or item.get('label') or 'Show'
+        self.setProperty('selectedCard',str(self.selection))
+        self.setProperty('status','Selected: '+title+' · Actions below apply to this show')
+        card=self.getControl(7000+self.selection)
+        for cid in range(7010,7015):self.getControl(cid).controlUp(card)
     def selected(self):return self.items[max(0,min(self.selection,len(self.items)-1))]
     def details(self):
         item=self.selected();self.setProperty('detailTitle',item.get('title') or item.get('label',''))
@@ -48,10 +56,10 @@ class SeriesEndDialog(xbmcgui.WindowXMLDialog):
             path=self.session.store/'rows.json';config=read_controller_config(path);item=self.selected();saved=config.setdefault('Saved',[])
             if not isinstance(saved,list):raise ValueError('Saved titles could not be read')
             if not any(title_key(x)==title_key(item) for x in saved):saved.append(snapshot(item));write_controller_config(path,config)
-            xbmcgui.Dialog().notification('My Stuff','Saved on this device',time=2000)
+            xbmcgui.Dialog().notification('My Stuff','Saved '+str(item.get('title') or item.get('label') or 'show')+' on this device',time=2500)
         except (OSError,ValueError,TypeError):xbmcgui.Dialog().notification('My Stuff','Could not save; your existing data was kept')
     def onClick(self,cid):
-        if cid in (7000,7001,7002):self.selection=cid-7000;self.details()
+        if cid in (7000,7001,7002):self.select_suggestion(cid-7000);self.details()
         elif cid==7010:self.result={'action':'series','item':self.selected()};self.finish()
         elif cid==7011:self.save_selected()
         elif cid==7012:self.finish()
@@ -62,7 +70,7 @@ class SeriesEndDialog(xbmcgui.WindowXMLDialog):
         elif cid==7014:self.details()
         elif cid==7020:self.setProperty('details','false');self.setFocusId(7000+self.selection)
     def onFocus(self,cid):
-        if cid in (7000,7001,7002):self.selection=cid-7000
+        if cid in (7000,7001,7002):self.select_suggestion(cid-7000)
     def onAction(self,action):
         if action.getId() in (9,10,92):
             if self.getProperty('details')=='true':self.onClick(7020)

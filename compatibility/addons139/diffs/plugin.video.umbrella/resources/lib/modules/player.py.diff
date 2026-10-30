@@ -1,0 +1,32 @@
+--- addons134/resources/lib/modules/player.py
++++ addons139/resources/lib/modules/player.py
+@@ -51,6 +51,17 @@
+ 		if value >= 0 and value < float('inf'): return value
+ 	except (TypeError, ValueError, OverflowError): pass
+ 	return None
++
++
++def _credits_prompt_due(position, total, credits, remaining, fallback):
++	"""Keep the configured end-of-file fallback when credits cannot be reached."""
++	try:
++		position, total, remaining, fallback = map(float, (position, total, remaining, fallback))
++		if not (0 < total < float('inf') and 0 < remaining < float('inf') and 0 <= position < float('inf')): return False
++	except (TypeError, ValueError, OverflowError): return False
++	try: usable = not isinstance(credits, bool) and 0 < float(credits) < total - 2
++	except (TypeError, ValueError, OverflowError): usable = False
++	return position >= float(credits) if usable else remaining <= fallback
+ 
+ 
+ def _remote_playback_enabled(scrobble_source, provider_source, markwatched_setting):
+@@ -833,10 +844,7 @@
+ 										log_utils.error()
+ 								elif self.playnext_method == '3':
+ 									fallback = int(getSetting('playnext.segment.fallback')) or 60
+-									at_credits = self.segment_credits is not None and self.current_time >= self.segment_credits
+-									no_data_fallback = (self.segment_lookup_complete and self.segment_credits is None
+-											and remaining_time <= fallback)
+-									if (at_credits or no_data_fallback) and remaining_time > 0:
++									if _credits_prompt_due(self.current_time, self.media_length, self.segment_credits, remaining_time, fallback):
+ 										if self.debuglog:
+ 											log_utils.log('Playnext triggered by online credits timestamp (credits=%s, fallback=%s)' % (self.segment_credits, fallback), level=log_utils.LOGDEBUG)
+ 										xbmc.executebuiltin('RunPlugin(plugin://plugin.video.umbrella/?action=play_nextWindowXML)')

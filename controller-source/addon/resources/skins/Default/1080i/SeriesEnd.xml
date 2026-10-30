@@ -85,7 +85,7 @@
         <height>309</height>
         <texture border="12">artwork-focus-frame.png</texture>
         <aspectratio>stretch</aspectratio>
-        <visible>Control.HasFocus(7000)</visible>
+        <visible>String.IsEqual(Window.Property(selectedCard),0)</visible>
       </control>
       <control type="textbox" id="7300">
         <left>134</left>
@@ -134,7 +134,7 @@
         <height>309</height>
         <texture border="12">artwork-focus-frame.png</texture>
         <aspectratio>stretch</aspectratio>
-        <visible>Control.HasFocus(7001)</visible>
+        <visible>String.IsEqual(Window.Property(selectedCard),1)</visible>
       </control>
       <control type="textbox" id="7301">
         <left>690</left>
@@ -166,7 +166,7 @@
         <onleft>7000</onleft>
         <onright>7002</onright>
         <onup>7001</onup>
-        <ondown>7011</ondown>
+        <ondown>7010</ondown>
       </control>
       <control type="image" id="7102">
         <left>1246</left>
@@ -183,7 +183,7 @@
         <height>309</height>
         <texture border="12">artwork-focus-frame.png</texture>
         <aspectratio>stretch</aspectratio>
-        <visible>Control.HasFocus(7002)</visible>
+        <visible>String.IsEqual(Window.Property(selectedCard),2)</visible>
       </control>
       <control type="textbox" id="7302">
         <left>1246</left>
@@ -215,7 +215,7 @@
         <onleft>7001</onleft>
         <onright>7002</onright>
         <onup>7002</onup>
-        <ondown>7012</ondown>
+        <ondown>7010</ondown>
       </control>
       <control type="label">
         <left>126</left>
@@ -242,7 +242,24 @@
         <top>866</top>
         <width>310</width>
         <height>66</height>
-        <label>Open show</label>
+        <label>Browse show</label>
+        <font>font25_narrow</font>
+        <textoffsetx>22</textoffsetx>
+        <textcolor>FFE1E6EA</textcolor>
+        <focusedcolor>FF29D9EE</focusedcolor>
+        <texturefocus border="12">action-rounded-focus.png</texturefocus>
+        <texturenofocus border="12">action-rounded-rest.png</texturenofocus>
+        <onleft>7013</onleft>
+        <onright>7014</onright>
+        <onup>7000</onup>
+        <ondown>7010</ondown>
+      </control>
+      <control type="button" id="7011">
+        <left>786</left>
+        <top>866</top>
+        <width>310</width>
+        <height>66</height>
+        <label>Save to My Stuff</label>
         <font>font25_narrow</font>
         <textoffsetx>22</textoffsetx>
         <textcolor>FFE1E6EA</textcolor>
@@ -250,29 +267,12 @@
         <texturefocus border="12">action-rounded-focus.png</texturefocus>
         <texturenofocus border="12">action-rounded-rest.png</texturenofocus>
         <onleft>7014</onleft>
-        <onright>7011</onright>
-        <onup>7000</onup>
-        <ondown>7010</ondown>
-      </control>
-      <control type="button" id="7011">
-        <left>456</left>
-        <top>866</top>
-        <width>310</width>
-        <height>66</height>
-        <label>Save show</label>
-        <font>font25_narrow</font>
-        <textoffsetx>22</textoffsetx>
-        <textcolor>FFE1E6EA</textcolor>
-        <focusedcolor>FF29D9EE</focusedcolor>
-        <texturefocus border="12">action-rounded-focus.png</texturefocus>
-        <texturenofocus border="12">action-rounded-rest.png</texturenofocus>
-        <onleft>7010</onleft>
         <onright>7012</onright>
         <onup>7000</onup>
         <ondown>7011</ondown>
       </control>
       <control type="button" id="7012">
-        <left>786</left>
+        <left>1116</left>
         <top>866</top>
         <width>310</width>
         <height>66</height>
@@ -289,7 +289,7 @@
         <ondown>7012</ondown>
       </control>
       <control type="button" id="7013">
-        <left>1116</left>
+        <left>1446</left>
         <top>866</top>
         <width>310</width>
         <height>66</height>
@@ -301,24 +301,24 @@
         <texturefocus border="12">action-rounded-focus.png</texturefocus>
         <texturenofocus border="12">action-rounded-rest.png</texturenofocus>
         <onleft>7012</onleft>
-        <onright>7014</onright>
+        <onright>7010</onright>
         <onup>7000</onup>
         <ondown>7013</ondown>
       </control>
       <control type="button" id="7014">
-        <left>1446</left>
+        <left>456</left>
         <top>866</top>
         <width>310</width>
         <height>66</height>
-        <label>Details</label>
+        <label>Read synopsis</label>
         <font>font25_narrow</font>
         <textoffsetx>22</textoffsetx>
         <textcolor>FFE1E6EA</textcolor>
         <focusedcolor>FF29D9EE</focusedcolor>
         <texturefocus border="12">action-rounded-focus.png</texturefocus>
         <texturenofocus border="12">action-rounded-rest.png</texturenofocus>
-        <onleft>7013</onleft>
-        <onright>7010</onright>
+        <onleft>7010</onleft>
+        <onright>7011</onright>
         <onup>7000</onup>
         <ondown>7014</ondown>
       </control>

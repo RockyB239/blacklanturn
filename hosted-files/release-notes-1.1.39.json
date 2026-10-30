@@ -1,0 +1,30 @@
+{
+  "title": "BlackLanturn Build 1.1.39",
+  "summary": "Clearer next-series actions, simpler browsing options and more reliable episode-end handling.",
+  "sections": [
+    {
+      "heading": "Know which show you are choosing",
+      "bullets": [
+        "The selected recommendation stays outlined and its title remains visible while using Browse show, Read synopsis or Save to My Stuff."
+      ]
+    },
+    {
+      "heading": "Keep browsing options focused",
+      "bullets": [
+        "Customize rows is now in Settings → Skin & discovery → Rows. Existing arrangements and custom rows stay saved. Trakt recommendation rows keep their current source."
+      ]
+    },
+    {
+      "heading": "More reliable episode endings",
+      "bullets": [
+        "Play Next keeps its end-of-file fallback when the online credits marker cannot be reached. Episode-end rating controls accept native integer episode identifiers."
+      ]
+    },
+    {
+      "heading": "Keep your complete setup",
+      "bullets": [
+        "Update BlackLanturn preserves authorizations, playback settings, sources, saved titles, collections, searches, progress and unrelated add-ons. Both icon packs and existing compatibility fixes remain included."
+      ]
+    }
+  ]
+}

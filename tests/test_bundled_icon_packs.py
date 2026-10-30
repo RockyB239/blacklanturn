@@ -20,20 +20,20 @@ class PublicIconPacks(unittest.TestCase):
   finally:icon_packs.configure([])
  def test_bundled_artwork_matches_the_controller_manifest(self):
   self.assertTrue((ICONS/'blacklanturn-icons.json').is_file(),'Builtin branded icons are missing')
-  manifest=json.loads((ROOT/'controller-source/manifest102.json').read_text())['files']
+  manifest=json.loads((ROOT/'controller-source/manifest103.json').read_text())['files']
   for path in ICONS.rglob('*'):
    if path.is_file():self.assertEqual(hashlib.sha256(path.read_bytes()).hexdigest(),manifest[path.relative_to(ROOT/'controller-source/addon').as_posix()])
   for pack in ('sculpted-silver','smoked-glass'):self.assertEqual(len(list((ICONS/'packs'/pack).glob('*.png'))),90)
  def test_both_release_editions_and_components_include_the_resource_without_fight_zone(self):
-  builder=ROOT/'tools/build_release138.py';self.assertTrue(builder.is_file(),'Current release builder does not bundle the approved packs')
+  builder=ROOT/'tools/build_release139.py';self.assertTrue(builder.is_file(),'Current release builder does not bundle the approved packs')
   baselines=ROOT/'baselines'
-  if not (baselines/'BlackLanturn-General-Kodi21-1.1.37.zip').is_file():baselines=ROOT.parent.parent/'release137-options-2026-10-29/public-downloads'
-  if not (baselines/'BlackLanturn-General-Kodi21-1.1.37.zip').is_file():self.skipTest('Pinned public30 artifacts required for build integration')
+  if not (baselines/'BlackLanturn-General-Kodi21-1.1.38.zip').is_file():baselines=ROOT.parent.parent/'release137-options-2026-10-29/public-downloads'
+  if not (baselines/'BlackLanturn-General-Kodi21-1.1.38.zip').is_file():self.skipTest('Pinned public30 artifacts required for build integration')
   spec=importlib.util.spec_from_file_location('test_public_icons_builder',builder);module=importlib.util.module_from_spec(spec);spec.loader.exec_module(module)
   with tempfile.TemporaryDirectory() as t:
    out=Path(t);module.build(baselines,out)
    for edition in ('General','Apple-TV-Mac'):
-    for name in ('BlackLanturn-'+edition+'-Kodi21-1.1.38.zip','BlackLanturn-'+edition+'-Update-1.1.37-to-1.1.38.zip'):
+    for name in ('BlackLanturn-'+edition+'-Kodi21-1.1.39.zip','BlackLanturn-'+edition+'-Update-1.1.38-to-1.1.39.zip'):
      with zipfile.ZipFile(out/name) as z:
       self.assertIn('addons/script.blacklanturn.preview/resources/icon-packs/packs/sculpted-silver/home.png',z.namelist())
       self.assertIn('addons/script.blacklanturn.preview/resources/icon-packs/packs/smoked-glass/home.png',z.namelist())

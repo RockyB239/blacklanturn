@@ -1428,12 +1428,10 @@ class LiveReview(LibraryActions,RowCustomization,TitleFeedback,YouTubeBrowser,xb
                 options.extend(getattr(self,'title_feedback_actions',lambda _:[])(item))
                 if getattr(self,'youtube_home_visible',lambda:False)():options.append(('youtube_refresh','Refresh recommendations'))
                 if getattr(self,'source_session_label',lambda *a,**k: '')(item,refresh=True):options.append(('normal_autoplay','Return to normal autoplay'))
-                if getattr(self,'row_layout_scope',lambda:None)() and getattr(self,'page_definitions',[]):options.append(('customize_rows','Customize rows…'))
                 if not is_youtube(item) and (command or item.get('type') in ('movie','tvshow','season','episode')):
                     options.append(('sync_settings','Watch tracking & sync settings…'))
                 if player_path:options.append(('default_player','Set default player…'))
                 options.append(('refresh','Refresh watched status'))
-            if (not item or discovery) and getattr(self,'row_layout_scope',lambda:None)() and getattr(self,'page_definitions',[]):options.append(('customize_rows','Customize rows…'))
             if failed:
                 options.append(('retry','Retry unavailable lists'))
                 if not item:options.append(('settings','Open integration settings'))
@@ -1467,7 +1465,6 @@ class LiveReview(LibraryActions,RowCustomization,TitleFeedback,YouTubeBrowser,xb
         elif action=='open_discovery':self.open_discovery(discovery)
         elif action=='play':self.update(item);self.onClick(101)
         elif action=='sync_settings':self.run_setting('sync_settings')
-        elif action=='customize_rows':self.customize_rows(current_only=True)
         elif action=='details':self.details(item)
         elif action=='discover':self.discover_more(item)
         elif action=='local':self.update(item);self.onClick(103)

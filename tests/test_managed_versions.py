@@ -61,7 +61,7 @@ class ManagedVersions(unittest.TestCase):
     def test_unknown_managed_metadata_is_never_normalized(self):
         data = self.data(); self.m.apply_metadata(data)
         aid = 'plugin.video.umbrella'; key = 'addons/' + aid + '/addon.xml'
-        bad = data[key].replace(b'blacklanturn.1', b'blacklanturn.2')
+        bad = data[key].replace(b'blacklanturn.2', b'blacklanturn.999')
         self.assertEqual(self.m.normalize_metadata(aid, bad), bad)
         with self.assertRaises(ValueError): self.m.upstream_version(aid, bad)
 
@@ -232,4 +232,4 @@ class RowLayoutProtocol(unittest.TestCase):
         with patch.object(self.m,'verify_archive_metadata'):
             for floor in ('1.0.39','1.0.40'):
                 self.assertEqual(self.m.prepare_policy(dict(marker,installer_min_version=floor),None),floor)
-            with self.assertRaises(ValueError):self.m.prepare_policy(dict(marker,installer_min_version='1.0.42'),None)
+            with self.assertRaises(ValueError):self.m.prepare_policy(dict(marker,installer_min_version='1.0.43'),None)

@@ -1,0 +1,4 @@
+
+When continuous playback is enabled at the end of each episode you will get a popup window asking if you want to play the next episode. There are multiple themes available for the window. The skip intro, skip recap, and playnext windows will all use the theme assigned in continious playback under Settings: Playback.
+
+*NOTE* Turning on continuous playback no longer automatically forces auto-play. It can now be used with source select.
