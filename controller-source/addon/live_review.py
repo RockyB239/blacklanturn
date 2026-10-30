@@ -572,21 +572,30 @@ class LiveReview(LibraryActions,RowCustomization,TitleFeedback,YouTubeBrowser,xb
             schema=xbmcvfs.File(helper.getAddonInfo('path')+'/resources/settings.xml')
             try:identity=helper_settings_identity(schema.read(),helper.getSetting)
             finally:schema.close()
+            from home_rows import HomeRowSnapshots,home_scope
+            private_scope=home_scope(self.config,identity,helper.getSetting('trakt_token'))
         except Exception:
             # No account/config identity proof means no disk reuse on this platform.
-            if self.snapshot_cache is not None:self.invalidate_row_results();self.snapshot_cache=None;return True
+            if self.snapshot_cache is not None or getattr(self,'home_snapshot_cache',None) is not None:
+                self.invalidate_row_results();self.snapshot_cache=None;self.home_snapshot_cache=None;return True
             return False
         scope=snapshot_scope(self.config,identity);previous=self.snapshot_cache
-        if previous is not None and previous.scope==scope:return False
+        home=getattr(self,'home_snapshot_cache',None)
+        if previous is not None and previous.scope==scope and (home.scope if home is not None else None)==private_scope:return False
         # Even None→proven scope must discard results fetched without proof.
-        self.invalidate_row_results()
+        # Native control recreation resets the public reader. It must not erase
+        # the separately owned Home display when its account proof still matches.
+        self.invalidate_row_results(keep_home=home is not None and home.scope==private_scope)
         self.snapshot_cache=PublicRowSnapshots(STORE/'public-row-snapshots.json',scope)
+        self.home_snapshot_cache=HomeRowSnapshots(STORE/'private-home-snapshots.json',private_scope) if private_scope is not None else None
         return True
-    def invalidate_row_results(self):
+    def invalidate_row_results(self,keep_home=False):
         cache=getattr(self,'result_cache',None)
         if cache is not None:cache.clear();self.publish_cache_stats()
         snapshots=getattr(self,'snapshot_cache',None)
         if snapshots is not None:snapshots.clear()
+        home=getattr(self,'home_snapshot_cache',None)
+        if home is not None:home.clear(preserve_disk=keep_home)
         self.row_cache={}
     def retained_row_items(self,definition):
         path=definition.get('path','')
@@ -601,7 +610,8 @@ class LiveReview(LibraryActions,RowCustomization,TitleFeedback,YouTubeBrowser,xb
             return (None,False) if filtered and needs_fill(path,files,first_page_keep(self,path,metadata.without_anime),size=first_page_minimum(definition)) else (files,False)
         snapshots=getattr(self,'snapshot_cache',None)
         # Freshness is still 30 seconds for Trakt. Only current-account session data
-        # may paint while the normal owned worker refreshes it; never persist it.
+        # may paint while the normal owned worker refreshes it. Other private rows
+        # remain session-only; Home recommendations have a separate owned store.
         if snapshots is not None and parse_qs(urlsplit(path).query).get('info',[''])[0].startswith('trakt'):
             key='filtered-v1:'+path if filtered else path
             files=self.result_cache.get_stale(key)
@@ -610,6 +620,8 @@ class LiveReview(LibraryActions,RowCustomization,TitleFeedback,YouTubeBrowser,xb
                     for field in ('playcount','resume','lastplayed','watched','watchedepisodes','resume_point','resumetime'):item.pop(field,None)
                 return files,True
         files=snapshots.get(path) if snapshots is not None else None
+        home=getattr(self,'home_snapshot_cache',None)
+        if files is None and home is not None and self.section=='Home':files=home.get(path)
         if files is not None and filtered and needs_fill(path,files,first_page_keep(self,path,metadata.without_anime),size=first_page_minimum(definition)):return None,False
         return files,files is not None
     def fill_discovery_page(self,path,files,current,refresh=False,publish=True,minimum=None):
@@ -669,7 +681,10 @@ class LiveReview(LibraryActions,RowCustomization,TitleFeedback,YouTubeBrowser,xb
             if filled is not None and not needs_fill(path,filled,first_page_keep(self,path,self.anime_metadata.without_anime),positioned=True,size=first_page_minimum(definition)):self.publish_cache_stats();return filled
         if getattr(self,'anime_metadata',None) is not None and should_exclude_anime(self,path) and upstream_path(provider_path(path))!=provider_path(path):
             return self.fill_discovery_page(path,[],current,refresh=definition.get('_snapshot_refresh',False),minimum=first_page_minimum(definition))
-        snapshots=getattr(self,'snapshot_cache',None);snapshot_revision=snapshots.revision if snapshots is not None else None
+        snapshots=getattr(self,'snapshot_cache',None)
+        home=getattr(self,'home_snapshot_cache',None)
+        if home is not None and self.section=='Home' and home.path_allowed(path):snapshots=home
+        snapshot_revision=snapshots.revision if snapshots is not None else None
         files=None if definition.get('_snapshot_refresh') else cache.get(path)
         if files is None:
             params=parse_qs(urlsplit(path).query)
@@ -680,10 +695,11 @@ class LiveReview(LibraryActions,RowCustomization,TitleFeedback,YouTubeBrowser,xb
                 if not current():raise PageCancelled('Row navigation changed')
                 if self.configure_row_snapshots():self.restart_pending_rows()
                 if not current():raise PageCancelled('Row configuration changed')
-                # Personal rows stay session-only; late work cannot repopulate either cache.
+                # Most personal rows stay session-only. Home may retain only its
+                # account-owned display fields; late work cannot repopulate either store.
                 info=parse_qs(urlsplit(path).query).get('info',[''])[0]
                 cache.put(path,files,revision=revision,ttl=30 if info.startswith('trakt') else 120,allow_empty=info.startswith('trakt'))
-                if revision==cache.revision and snapshots is not None and snapshots is getattr(self,'snapshot_cache',None):snapshots.put(path,files,revision=snapshot_revision)
+                if revision==cache.revision and snapshots is not None and any(snapshots is getattr(self,key,None) for key in ('snapshot_cache','home_snapshot_cache')):snapshots.put(path,files,revision=snapshot_revision)
         self.publish_cache_stats()
         return self.fill_discovery_page(path,files,current,refresh=definition.get('_snapshot_refresh',False),minimum=first_page_minimum(definition))
     def apply_refreshed_row(self,n,files,label):

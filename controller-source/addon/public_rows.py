@@ -97,12 +97,12 @@ def _finite_number(value,minimum=0,maximum=32503680000):
     try:return minimum<=value<=maximum and math.isfinite(float(value))
     except (OverflowError,ValueError):return False
 
-def _items(files):
-    if not isinstance(files,list) or not 0<len(files)<=MAX_ITEMS:return None
+def _items(files,path_filter=_item_path,max_items=MAX_ITEMS):
+    if not isinstance(files,list) or not 0<len(files)<=max_items:return None
     result=[]
     for data in files:
         if not isinstance(data,dict):return None
-        path=_item_path(data.get('file'))
+        path=path_filter(data.get('file'))
         if not path:return None
         # Validate every rendering field before handing a disk row to native controls.
         text={'file','filetype','type','label','title','plot','mpaa','premiered','set','showtitle'}
@@ -128,28 +128,33 @@ def _items(files):
     return result
 
 class PublicRowSnapshots:
+    max_bytes=MAX_BYTES
+    max_rows=MAX_ROWS
+    max_age=MAX_AGE
+    path_allowed=staticmethod(public_path)
+    sanitize_items=staticmethod(_items)
     def __init__(self,path,scope,clock=time.time):
         self.path=Path(path);self.scope=scope;self.clock=clock;self.revision=0
         self.lock=threading.RLock();self.rows=OrderedDict();self.batch_depth=0;self.dirty=False;self._load()
 
     def _load(self):
         try:
-            with self.path.open('rb') as stream:raw=stream.read(MAX_BYTES+1)
-            if len(raw)>MAX_BYTES:return
+            with self.path.open('rb') as stream:raw=stream.read(self.max_bytes+1)
+            if len(raw)>self.max_bytes:return
             document=json.loads(raw)
             if not isinstance(document,dict) or document.get('version')!=1 or document.get('scope')!=self.scope:return
             rows=document.get('rows')
-            if not isinstance(rows,list) or len(rows)>MAX_ROWS:return
+            if not isinstance(rows,list) or len(rows)>self.max_rows:return
             for row in rows:
-                if not isinstance(row,dict) or not public_path(row.get('path')):continue
-                stamp=row.get('time');items=_items(row.get('items'))
-                if _finite_number(stamp) and 0<=self.clock()-stamp<=MAX_AGE and items:
+                if not isinstance(row,dict) or not self.path_allowed(row.get('path')):continue
+                stamp=row.get('time');items=self.sanitize_items(row.get('items'))
+                if _finite_number(stamp) and 0<=self.clock()-stamp<=self.max_age and items:
                     self.rows[row['path']]={'path':row['path'],'time':stamp,'items':items}
         except (OSError,ValueError,TypeError,OverflowError,RecursionError):self.rows.clear()
 
     def _prune(self):
         for path,row in list(self.rows.items()):
-            if not 0<=self.clock()-row['time']<=MAX_AGE:self.rows.pop(path)
+            if not 0<=self.clock()-row['time']<=self.max_age:self.rows.pop(path)
 
     def get(self,path):
         with self.lock:
@@ -185,22 +190,22 @@ class PublicRowSnapshots:
         with self.lock:
             if not self.dirty:return
             self._prune();raw=self._encode(self.rows)
-            while len(raw)>MAX_BYTES and self.rows:
+            while len(raw)>self.max_bytes and self.rows:
                 self.rows.popitem(last=False);raw=self._encode(self.rows)
             self._write(raw);self.dirty=False
 
     def put(self,path,files,revision=None):
-        if not public_path(path):return False
+        if not self.path_allowed(path):return False
         try:
-            items=_items(files)
+            items=self.sanitize_items(files)
             if not items and files!=[]:return False
             with self.lock:
                 if revision is not None and revision!=self.revision:return False
                 self._prune();rows=self.rows.copy();rows.pop(path,None)
                 if items:rows[path]={'path':path,'time':self.clock(),'items':items}
-                while len(rows)>MAX_ROWS:rows.popitem(last=False)
+                while len(rows)>self.max_rows:rows.popitem(last=False)
                 raw=self._encode(rows)
-                while len(raw)>MAX_BYTES:
+                while len(raw)>self.max_bytes:
                     rows.popitem(last=False)
                     if not rows:return False
                     raw=self._encode(rows)
@@ -211,9 +216,10 @@ class PublicRowSnapshots:
                 return path in rows or files==[]
         except (OSError,TypeError,ValueError,RecursionError):return False
 
-    def clear(self):
+    def clear(self,preserve_disk=False):
         with self.lock:
             self.revision+=1;self.rows.clear();self.dirty=False
+            if preserve_disk:return
             try:self.path.unlink()
             except FileNotFoundError:pass
             except OSError:
