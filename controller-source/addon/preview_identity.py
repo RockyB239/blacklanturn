@@ -14,7 +14,6 @@ import threading
 import time
 import unicodedata
 from urllib.parse import parse_qs, urlencode, urlsplit
-from urllib.request import HTTPRedirectHandler, Request, build_opener
 
 
 _VIDEO_ID = re.compile(r'[A-Za-z0-9_-]{11}\Z')
@@ -25,10 +24,14 @@ _QUALITY = re.compile(r'(?:hd|uhd|[248]k|(?:360|480|720|1080|1440|2160|4320)p)\Z
 _TRAILER_LABELS = (('trailer',), ('teaser',), ('final', 'trailer'), ('red', 'band', 'trailer'))
 
 
-class _NoRedirect(HTTPRedirectHandler):
-    def redirect_request(self, req, fp, code, msg, headers, newurl):
-        # A candidate never grants authority to fetch any other URL.
-        return None
+def _public_title_opener():
+    # HTTP/TLS modules are needed only for an actual preview identity request.
+    from urllib.request import HTTPRedirectHandler, build_opener
+    class NoRedirect(HTTPRedirectHandler):
+        def redirect_request(self, req, fp, code, msg, headers, newurl):
+            # A candidate never grants authority to fetch any other URL.
+            return None
+    return build_opener(NoRedirect()).open
 
 
 def fetch_public_title(video_id, opener=None):
@@ -39,13 +42,14 @@ def fetch_public_title(video_id, opener=None):
     """
     if not isinstance(video_id, str) or not _VIDEO_ID.fullmatch(video_id):
         return ''
+    from urllib.request import Request
     endpoint = 'https://www.youtube.com/oembed?' + urlencode({
         'url': 'https://www.youtube.com/watch?v=' + video_id,
         'format': 'json',
     })
     request = Request(endpoint, headers={'Accept': 'application/json'})
     try:
-        open_url = opener or build_opener(_NoRedirect()).open
+        open_url = opener or _public_title_opener()
         with open_url(request, timeout=2) as response:
             raw = response.read(_MAX_RESPONSE + 1)
         if len(raw) > _MAX_RESPONSE:

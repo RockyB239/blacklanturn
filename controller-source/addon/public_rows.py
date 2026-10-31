@@ -5,7 +5,7 @@ from copy import deepcopy
 from hashlib import sha256
 from pathlib import Path
 from urllib.parse import urlsplit,parse_qs,urlencode,unquote
-import json,math,os,re,tempfile,threading,time
+import json,math,os,re,threading,time
 from datetime import date
 from xml.etree import ElementTree
 
@@ -186,6 +186,7 @@ class PublicRowSnapshots:
         temporary=None
         try:
             self.path.parent.mkdir(parents=True,exist_ok=True)
+            import tempfile
             with tempfile.NamedTemporaryFile(dir=str(self.path.parent),prefix=self.path.name+'.',suffix='.tmp',delete=False) as stream:
                 temporary=stream.name;stream.write(raw);stream.flush();os.fsync(stream.fileno())
             os.replace(temporary,self.path)

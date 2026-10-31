@@ -13,6 +13,6 @@ class Metadata(unittest.TestCase):
    def __exit__(self,*a):pass
    def read(self,size):calls.append(('limit',size));return b'{"id":1}'
   mods={'xbmcaddon':types.SimpleNamespace(Addon=lambda _:types.SimpleNamespace(getAddonInfo=lambda _:'/existing/helper')),'tmdbhelper.lib.api.tmdb.api':types.SimpleNamespace(TMDbAPI=API)}
-  with patch.dict(sys.modules,mods),patch.object(series_metadata,'urlopen',lambda request,timeout:(calls.append(('timeout',timeout)) or Response())):
+  with patch.dict(sys.modules,mods),patch('urllib.request.urlopen',lambda request,timeout:(calls.append(('timeout',timeout)) or Response())):
    self.assertEqual(series_metadata.load_show_package('1'),{'id':1})
   self.assertEqual(calls,[(('tv','1'),{'append_to_response':'recommendations,similar','language':'en-US'}),('timeout',4),('limit',1048577)])

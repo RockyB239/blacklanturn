@@ -8,7 +8,6 @@ preservation contract.
 import importlib.util
 import json
 import os
-import tempfile
 from pathlib import Path
 import re
 import xml.etree.ElementTree as ET
@@ -24,6 +23,7 @@ def _plain(path):
             raise RecoveryError('Installer recovery contains a linked path. Keep the recovery folder.')
 
 def _save_registration(path,enabled):
+    import tempfile
     descriptor,temporary=tempfile.mkstemp(prefix='.blacklanturn-registration-',dir=str(path.parent))
     try:
         with os.fdopen(descriptor,'w') as stream:

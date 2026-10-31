@@ -85,7 +85,7 @@ class ReleaseTests(unittest.TestCase):
    def __exit__(self,*a):pass
    def read(self,n):clock[0]+=10;return b'x'
    def read1(self,n):clock[0]+=1;return b'x'
-  with patch.object(self.u,'urlopen',return_value=Stream()),patch.object(self.u.time,'monotonic',side_effect=lambda:clock[0]):
+  with patch('urllib.request.urlopen',return_value=Stream()),patch.object(self.u.time,'monotonic',side_effect=lambda:clock[0]):
    with self.assertRaises(OSError):self.u.fetch_catalog()
   self.assertLessEqual(clock[0],5,'Slow drip held a read beyond the total deadline')
   self.assertTrue(timeouts);self.assertLessEqual(timeouts[-1],1)

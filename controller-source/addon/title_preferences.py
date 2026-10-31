@@ -1,5 +1,5 @@
 """Exact movie/show feedback; read once, filter in memory, write only on choice."""
-import hashlib,json,os,re,tempfile,threading
+import hashlib,json,os,re,threading
 from pathlib import Path
 from urllib.parse import parse_qs,urlsplit
 from uuid import uuid4
@@ -68,6 +68,7 @@ class TitlePreferences:
         raw=json.dumps({'version':1,'titles':updated},ensure_ascii=False,sort_keys=True).encode('utf-8')
         if len(updated)>MAX_TITLES or len(raw)>MAX_BYTES:raise ValueError('Title preference storage is full; restore some titles first')
         self.path.parent.mkdir(parents=True,exist_ok=True)
+        import tempfile
         fd,name=tempfile.mkstemp(prefix=self.path.name+'.',suffix='.pending',dir=str(self.path.parent))
         temporary=Path(name)
         try:

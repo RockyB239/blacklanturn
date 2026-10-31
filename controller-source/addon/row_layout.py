@@ -1,5 +1,5 @@
 """Local arrangement overlay. Provider rows/content remain owned by their source."""
-import copy,hashlib,json,os,tempfile,threading
+import copy,hashlib,json,os,threading
 from pathlib import Path
 from urllib.parse import urlsplit,parse_qsl,urlencode
 MAX_BYTES=256*1024
@@ -73,6 +73,7 @@ class RowLayouts:
         raw=json.dumps({'version':1,'sections':updated},sort_keys=True).encode()
         if len(raw)>MAX_BYTES or len(updated)>128 or any(len(e.get(k,[]))>MAX_ROWS for e in updated.values() for k in ('order','hidden','pinned')):raise ValueError('Row arrangement storage is full')
         self.path.parent.mkdir(parents=True,exist_ok=True)
+        import tempfile
         fd,name=tempfile.mkstemp(prefix=self.path.name+'.',suffix='.pending',dir=str(self.path.parent))
         try:
             with os.fdopen(fd,'wb') as f:f.write(raw);f.flush();os.fsync(f.fileno())

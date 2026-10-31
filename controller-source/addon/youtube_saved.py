@@ -3,7 +3,7 @@ from copy import deepcopy
 from contextlib import closing
 from pathlib import Path
 from urllib.parse import urlsplit,parse_qs
-import io,json,math,os,pickle,re,sqlite3,tempfile,threading,time
+import io,json,math,os,pickle,re,sqlite3,threading,time
 from youtube_core import video_id
 
 MAX_BYTES=2*1024*1024
@@ -125,6 +125,7 @@ class SavedRows:
    pending=None
    try:
     self.path.parent.mkdir(parents=True,exist_ok=True)
+    import tempfile
     with tempfile.NamedTemporaryFile(dir=self.path.parent,prefix=self.path.name+'.',delete=False) as f:
      pending=f.name;os.chmod(pending,0o600);f.write(raw);f.flush();os.fsync(f.fileno())
     if not current():return False

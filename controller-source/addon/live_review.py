@@ -1,6 +1,5 @@
 """Temporary live Kodi integration review. Uses provider directories, not a scraped catalogue."""
-import json,time,threading,traceback,ssl,copy,hashlib
-from urllib.request import urlopen,Request
+import json,time,threading,traceback,copy,hashlib
 from pathlib import Path
 from urllib.parse import urlencode,urlsplit,parse_qs
 import xbmc,xbmcgui,xbmcvfs,xbmcaddon
@@ -1153,6 +1152,8 @@ class LiveReview(LibraryActions,RowCustomization,TitleFeedback,YouTubeBrowser,xb
         self.rating_busy=True
         def work():
             try:
+                import ssl
+                from urllib.request import urlopen,Request
                 kind,media_id=identity;media_type='movie' if kind=='movie' else 'show'
                 context=ssl.create_default_context(cafile=str(PROFILE.parent/'addons/script.module.certifi/lib/certifi/cacert.pem'))
                 endpoint='https://api.mdblist.com/tmdb/'+media_type+'/'+media_id+'?'+urlencode({'apikey':key})

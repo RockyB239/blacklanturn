@@ -1,5 +1,5 @@
 """Local installed-version history. No network, settings or account access."""
-import copy,json,os,re,tempfile,time,uuid
+import copy,json,os,re,time,uuid
 from pathlib import Path
 SCHEMA=1
 MAX_HISTORY=20
@@ -110,6 +110,7 @@ def read_state(path):
 
 def write_state(path,state):
     validate(state);path=Path(path);path.parent.mkdir(parents=True,exist_ok=True)
+    import tempfile
     fd,name=tempfile.mkstemp(prefix=path.name+'.',suffix='.tmp',dir=str(path.parent))
     try:
         with os.fdopen(fd,'w',encoding='utf-8') as out:

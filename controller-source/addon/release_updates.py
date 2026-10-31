@@ -1,8 +1,7 @@
 """Curated BlackLanturn release notices. Never tracks third-party add-on updates."""
-import copy,hashlib,json,os,re,tempfile,time
+import copy,hashlib,json,os,re,time
 from pathlib import Path,PurePosixPath
 from urllib.parse import urlsplit,unquote
-from urllib.request import urlopen,Request
 MAX_BYTES=262144
 FEED='https://rockyb239.github.io/blacklanturn/hosted-files/releases-v1.json'
 def version(value):
@@ -111,6 +110,7 @@ def read_state(path,legacy=None):
  if p.stat().st_size>MAX_BYTES:raise ValueError('Oversized release notice state')
  return validate_state(json.loads(p.read_text(encoding='utf-8')))
 def write_state(path,state):
+ import tempfile
  state=bounded_state(state);p=Path(path);p.parent.mkdir(parents=True,exist_ok=True)
  raw=json.dumps(state,ensure_ascii=False,indent=2)
  if len(raw.encode())>MAX_BYTES:raise ValueError('Oversized release notice state')
@@ -133,6 +133,7 @@ def fetch_catalog(source=FEED):
   if url.netloc or p.stat().st_size>MAX_BYTES:raise ValueError('Invalid local catalog')
   raw=p.read_bytes()
  elif url.scheme=='https' and url.hostname=='rockyb239.github.io' and not url.username and not url.password:
+  from urllib.request import urlopen,Request
   start=time.monotonic()
   with urlopen(Request(source,headers={'User-Agent':'BlackLanturn/1'}),timeout=2) as response:
    if urlsplit(response.url).hostname!=url.hostname:raise ValueError('Unexpected catalog redirect')
