@@ -10,7 +10,20 @@ from pathlib import Path
 from urllib.parse import urlsplit,urlunsplit,parse_qsl,urlencode
 from youtube_core import video_id,tab_rows,recommendation_order
 from youtube_home import split_page,merge_page
-from youtube_provider import load_home_rows,load_shelf_page,load_related_page
+
+# Keep provider construction and its shutdown registration off idle startup.
+# Preserve the existing entry points and cancellation/refresh arguments.
+def load_home_rows(current=lambda:True,refresh=False,resolved_items=()):
+    from youtube_provider import load_home_rows as load
+    return load(current,refresh=refresh,resolved_items=resolved_items)
+
+def load_shelf_page(cursor,current=lambda:True):
+    from youtube_provider import load_shelf_page as load
+    return load(cursor,current)
+
+def load_related_page(cursor,current=lambda:True):
+    from youtube_provider import load_related_page as load
+    return load(cursor,current)
 
 MAX_ROW_ITEMS=150
 
@@ -63,11 +76,12 @@ class YouTubeRows:
         if getattr(self,'section','')!='YouTube':return files
         path=self.paths[n]
         if not path.startswith('plugin://plugin.video.youtube/'):return files
+        from youtube_folder_artwork import display_items
         if not hasattr(self,'youtube_pages'):self.youtube_pages={}
         definition=next((d for d in self.page_definitions if d.get('path')==path),{})
         page=self.youtube_pages.get(path)
         if page is not None and any(x.get('_youtube_more') for x in files):
-            return copy.deepcopy(page['items'])+([_more_card(page.get('error'))] if page['cursor'] else [])
+            return display_items(copy.deepcopy(page['items'])+([_more_card(page.get('error'))] if page['cursor'] else []),getattr(self,'config',{}))
         items,cursor=split_page(files,path)
         if 'youtube_cursor' in definition:cursor=copy.deepcopy(definition['youtube_cursor'])
         if items and YouTubeRows.fresh_recommendation_row(self,n):
@@ -86,7 +100,7 @@ class YouTubeRows:
         for key in list(self.youtube_pages):
             if len(self.youtube_pages)<=8:break
             if key not in self.paths:self.youtube_pages.pop(key)
-        return copy.deepcopy(items)+([_more_card()] if cursor else [])
+        return display_items(copy.deepcopy(items)+([_more_card()] if cursor else []),getattr(self,'config',{}))
 
     def request_youtube_more(self,n,explicit=False):
         if (getattr(self,'section','')!='YouTube' or self.mode!='home' or getattr(self,'youtube_job',None)

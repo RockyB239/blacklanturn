@@ -1,5 +1,5 @@
 """Private BlackLanturn preview entry point for the current Kodi profile."""
-import sys,time,json,traceback
+import sys,time,json
 from pathlib import Path
 import xbmc,xbmcgui,xbmcvfs,xbmcaddon
 ROOT=Path(__file__).resolve().parent
@@ -10,13 +10,26 @@ STORE=Path(xbmcvfs.translatePath(xbmcaddon.Addon('script.blacklanturn.preview').
 EVIDENCE=STORE/'logs';EVIDENCE.mkdir(parents=True,exist_ok=True)
 def record(event,**values):
     with (EVIDENCE/'runtime.jsonl').open('a') as f:f.write(json.dumps(dict(event=event,time=time.time(),**values))+'\n')
-def run_live_review():
-    from live_review import LiveReview
-    from backend_core import CoreSettingsReturn
+def run_live_review(startup=None,early_home=None):
     resume=None;playback_resume=None;owner_skin=xbmc.getSkinDir()
     while not xbmc.Monitor().abortRequested() and xbmc.getSkinDir()==owner_skin:
-        w=LiveReview('LiveReview.xml',str(ROOT),'Default','1080i');w.resume_backend=resume;w.resume_playback=playback_resume
-        w.doModal();request=getattr(w,'core_settings_request',None);playback=getattr(w,'playback_request',None);state=getattr(w,'playback_return',None);options=getattr(w,'playback_options',{});w.alive=False;del w
+        lightweight=bool(early_home and not resume and not playback_resume)
+        if lightweight:
+            from light_home_view import LightweightHome
+            w=LightweightHome('LiveReview.xml',str(ROOT),'Default','1080i');w.early_home=early_home
+        else:
+            from live_review import LiveReview
+            w=LiveReview('LiveReview.xml',str(ROOT),'Default','1080i')
+        w.resume_backend=resume;w.resume_playback=playback_resume;w.startup_home=startup
+        try:
+            w.doModal()
+            if lightweight and getattr(w,'startup_error',None):raise RuntimeError('Home attachment failed: '+w.startup_error)
+            controller=getattr(w,'controller',None) if lightweight else w
+            request=getattr(controller,'core_settings_request',None);playback=getattr(controller,'playback_request',None);state=getattr(controller,'playback_return',None);options=getattr(controller,'playback_options',{})
+        finally:
+            if lightweight:w.dispose()
+            else:w.alive=False
+        del w
         if playback:
             from playback_runtime import play_and_wait
             from youtube_core import video_id
@@ -55,6 +68,7 @@ def run_live_review():
                 xbmcgui.Dialog().notification('BlackLanturn','This personal page is unavailable. Its sidebar entry has been kept.')
                 continue
             return
+        from backend_core import CoreSettingsReturn
         gate=CoreSettingsReturn(time.monotonic())
         if request.get('parameters'):
             xbmc.executeJSONRPC(json.dumps({'jsonrpc':'2.0','id':1,'method':'GUI.ActivateWindow','params':{'window':request['target'],'parameters':request['parameters']}}))
@@ -71,6 +85,7 @@ def run_live_review():
         playback_resume=None
 home=xbmcgui.Window(10000)
 owns_session=False
+startup=None
 try:
     from installer_recovery import recover_installer,RecoveryError
     try:
@@ -93,12 +108,18 @@ try:
         home.setProperty('BlackLanturn.Preview.Running','1');home.setProperty('BlackLanturn.Preview.Launched','1')
         home.clearProperty('BlackLanturn.Recovery.Visible');home.setProperty('BlackLanturn.Handoff.Status','Loading BlackLanturn…')
         owns_session=True
+        from home_startup import HomeStartup
+        startup=HomeStartup(home)
         gate=SkinStartupGate(time.monotonic())
         # Preparation uses the existing settling interval; native windows still
         # wait for skin confirmation. Report an import failure only after that.
         preload_error=None
+        early_home=None
         try:
-            from live_review import LiveReview
+            from light_home_bootstrap import prepare_home
+            early_home=prepare_home(ROOT,STORE)
+            if not early_home:
+                from live_review import LiveReview
         except Exception as exc:
             preload_error=exc
         while not xbmc.Monitor().abortRequested():
@@ -108,10 +129,13 @@ try:
         if not xbmc.Monitor().abortRequested() and outcome=='ready':
             if preload_error is not None:raise preload_error
             record('installed_profile',profile=str(PROFILE),addon=str(ROOT),skin=xbmc.getSkinDir())
-            run_live_review()
+            if early_home:run_live_review(startup,early_home)
+            else:run_live_review(startup)
 except Exception:
+    if startup is not None:startup.release()
     home.setProperty('BlackLanturn.Recovery.Visible','true');home.clearProperty('BlackLanturn.Handoff.Status')
     record('startup_error',error_type=sys.exc_info()[0].__name__)
     xbmcgui.Dialog().ok('BlackLanturn','The preview could not open. Use Kodi Settings to switch to your previous skin.')
 finally:
+    if startup is not None:startup.release()
     if owns_session:home.clearProperty('BlackLanturn.Preview.Running')

@@ -1,7 +1,7 @@
 """Run providers after releasing WindowXML, then return without stealing focus."""
 import json,time,threading
 import xbmc,xbmcgui
-from playback_core import PlaybackReturnGate,ResumeHandoff,action_identity,YouTubeExitGuard
+from playback_core import PlaybackReturnGate,ResumeHandoff,action_identity,YouTubeExitGuard,resume_options
 from playback_info import playback_info_fields,playback_identity,name
 
 def integration_busy():
@@ -61,7 +61,19 @@ class HandoffPlayer(xbmc.Player):
     def onPlayBackError(self):self.reason='error'
 
 def play_and_wait(path,owner_skin,options=None,target=None,youtube_end=None,series_end=None):
-    monitor=xbmc.Monitor();player=HandoffPlayer() if youtube_end is not None or series_end is not None else xbmc.Player();gate=PlaybackReturnGate(time.monotonic())
+    monitor=xbmc.Monitor()
+    if target and '_home_progress_scope' in target:
+        from home_progress import prepare_home_progress,ProgressUnavailable
+        status=xbmcgui.Window(10000);status.setProperty('BlackLanturn.Handoff.Status','Checking current progress…')
+        try:
+            target=prepare_home_progress(target);options=resume_options(target)
+        except ProgressUnavailable as exc:
+            if monitor.abortRequested():return False
+            xbmcgui.Dialog().notification('Playback',str(exc))
+            return xbmc.getSkinDir()==owner_skin
+        finally:status.clearProperty('BlackLanturn.Handoff.Status')
+        if monitor.abortRequested() or xbmc.getSkinDir()!=owner_skin:return False
+    player=HandoffPlayer() if youtube_end is not None or series_end is not None else xbmc.Player();gate=PlaybackReturnGate(time.monotonic())
     resume=ResumeHandoff(target if options else None);info=PlaybackInfoSession(target)
     from youtube_core import video_id
     youtube_exit=YouTubeExitGuard(video_id({'file':path}) is not None)

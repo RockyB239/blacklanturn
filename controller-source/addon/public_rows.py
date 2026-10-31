@@ -13,7 +13,8 @@ _ART_CONTROLS=re.compile(r'[\x00-\x20]')
 MAX_BYTES=2*1024*1024
 MAX_ROWS=48
 MAX_ITEMS=80
-MAX_AGE=15*60
+# Last successful display only; provider/session freshness is independent.
+MAX_AGE=24*3600
 PUBLIC_LISTS=frozenset(('popular','top_rated','upcoming','now_playing','trending_day','trending_week','airing_today','on_the_air','discover','similar','recommendations','trakt_trending','trakt_popular'))
 PUBLIC_ITEMS=frozenset(('details','play','seasons','episodes','flatseasons'))
 
@@ -32,7 +33,17 @@ def public_path(path,item=False):
         numeric={'page','tmdb_id','season','episode','with_genres','without_genres','year','primary_release_year','first_air_date_year','with_networks','with_companies','with_keywords','without_keywords'}
         dates={field+'.'+bound for field in ('primary_release_date','first_air_date') for bound in ('gte','lte')}
         thresholds={field+'.'+bound for field in ('vote_average','vote_count') for bound in ('gte','lte')}
-        if set(query)-fixed-numeric-dates-thresholds-{'sort_by','with_original_language','with_origin_country','region','with_separator','bl_start'}:return False
+        if set(query)-fixed-numeric-dates-thresholds-{'sort_by','with_original_language','with_origin_country','region','with_separator','bl_start','countries','years'}:return False
+        if {'countries','years'} & query.keys():
+            if info!='trakt_popular':return False
+            if 'countries' in query:
+                countries=query['countries'][0].split(',')
+                if not 1<=len(countries)<=32 or any(not re.fullmatch('[a-z]{2}',country) for country in countries):return False
+            if 'years' in query:
+                years=query['years'][0]
+                if not re.fullmatch(r'[12]\d{3}(?:-[12]\d{3})?',years):return False
+                bounds=[int(value) for value in years.split('-')]
+                if bounds[0]>bounds[-1]:return False
         for k in numeric & query.keys():
             if not re.fullmatch(r'\d+(?:[,|]\d+)*',query[k][0]):return False
         for k in {'nextpage','widget','cacheonly','update_listing','with_id','include_adult'} & query.keys():
@@ -149,9 +160,18 @@ class PublicRowSnapshots:
     max_age=MAX_AGE
     path_allowed=staticmethod(public_path)
     sanitize_items=staticmethod(_items)
-    def __init__(self,path,scope,clock=time.time):
+    def __init__(self,path,scope,clock=time.time,archive=False):
         self.path=Path(path);self.scope=scope;self.clock=clock;self.revision=0
-        self.lock=threading.RLock();self.rows=OrderedDict();self.batch_depth=0;self.dirty=False;self._load()
+        self.lock=threading.RLock();self.rows=OrderedDict();self.batch_depth=0;self.dirty=False
+        # Private subclasses cannot opt into public visited history.
+        self.archive_enabled=bool(archive) and type(self) is PublicRowSnapshots;self._archive=None;self._load()
+
+    def _archive_store(self):
+        if not self.archive_enabled:return None
+        if self._archive is None:
+            from public_row_archive import PublicRowArchive
+            self._archive=PublicRowArchive(self.path.with_name(self.path.stem+'.archive.sqlite3'),self.scope,self.clock)
+        return self._archive
 
     def _load(self):
         try:
@@ -177,7 +197,9 @@ class PublicRowSnapshots:
         with self.lock:
             self._prune()
             row=self.rows.get(path)
-            return deepcopy(row['items']) if row else None
+            if row:return deepcopy(row['items'])
+            archive=self._archive_store()
+            return archive.get(path) if archive is not None else None
 
     def _encode(self,rows):
         return json.dumps({'version':self.format_version,'scope':self.scope,'rows':list(rows.values())},ensure_ascii=False,separators=(',',':'),allow_nan=False).encode('utf-8')
@@ -219,18 +241,27 @@ class PublicRowSnapshots:
             if not items and files!=[]:return False
             with self.lock:
                 if revision is not None and revision!=self.revision:return False
-                self._prune();rows=self.rows.copy();rows.pop(path,None)
+                self._prune();rows=self.rows.copy();rows.pop(path,None);evicted=[]
                 if items:rows[path]={'path':path,'time':self.clock(),'items':items}
-                while len(rows)>self.max_rows:rows.popitem(last=False)
+                while len(rows)>self.max_rows:evicted.append(rows.popitem(last=False)[1])
                 raw=self._encode(rows)
                 while len(raw)>self.max_bytes:
-                    rows.popitem(last=False)
-                    if not rows:return False
+                    evicted.append(rows.popitem(last=False)[1])
+                    if not rows:
+                        archive=self._archive_store()
+                        if archive is not None:archive.replace(path,[])
+                        return False
                     raw=self._encode(rows)
                 if self.batch_depth:
                     self.rows=rows;self.dirty=True
                 else:
                     self._write(raw);self.rows=rows;self.dirty=False
+                archive=self._archive_store()
+                if archive is not None:
+                    # Upgrade legacy resident displays only as normal background
+                    # publication evicts them; preserve their original age.
+                    for row in evicted:archive.replace(row['path'],row['items'],stamp=row['time'])
+                    archive.replace(path,items or [])
                 return path in rows or files==[]
         except (OSError,TypeError,ValueError,RecursionError):return False
 
@@ -238,6 +269,8 @@ class PublicRowSnapshots:
         with self.lock:
             self.revision+=1;self.rows.clear();self.dirty=False
             if preserve_disk:return
+            archive=self._archive_store()
+            if archive is not None:archive.clear()
             try:self.path.unlink()
             except FileNotFoundError:pass
             except OSError:

@@ -6,6 +6,10 @@ def refreshed_display_metadata(item,replacement):
     value={key:data for key,data in item.items() if key not in ('playcount','resume')}
     for key in ('plot','year','rating','votes','genre','country','runtime','mpaa','cast','director','studio','trailer','premiered','writer','set','_series_status','_rating_source','playcount','resume'):
         if key in replacement:value[key]=replacement[key]
+    if '_home_progress_scope' in value:
+        from home_progress import PENDING_SCOPE,authoritative_progress
+        from playback_core import action_identity
+        if action_identity(item)==action_identity(replacement) and authoritative_progress(replacement):value.pop(PENDING_SCOPE,None)
     return value
 
 

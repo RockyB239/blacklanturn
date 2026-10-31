@@ -5,7 +5,7 @@ ROOT=Path(__file__).resolve().parents[1]
 class CurrentAddonTargets(unittest.TestCase):
  def test_managed_targets_include_current_reviewed_upstream_versions(self):
   policy=json.loads((ROOT/'installer-source/plugin.program.blacklanturninstaller/resources/managed-versions.json').read_text())
-  for aid,version in [('plugin.video.umbrella','6.7.98'),('plugin.video.themoviedb.helper','6.19.2')]:
+  for aid,version in [('plugin.video.umbrella','6.7.99'),('plugin.video.themoviedb.helper','6.19.6')]:
    with self.subTest(addon=aid):self.assertEqual(policy['addons'][aid][0]['upstream_version'],version)
  def test_release_inputs_include_current_upnext_and_complete_provider_trees(self):
   p=ROOT/'compatibility/addons134/manifest.json';self.assertTrue(p.is_file(),'No reviewed complete current-source release inputs')

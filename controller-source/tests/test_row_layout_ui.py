@@ -17,7 +17,7 @@ class LayoutUI(unittest.TestCase):
   w.youtube_tab='search';self.assertIsNone(RowCustomization.row_layout_scope(w))
  def test_set_rows_routes_through_arrangement_before_first_fetch(self):
   original=[{'label':'A','path':'plugin://a/'},{'label':'B','path':'plugin://b/'}];seen=[]
-  w=SimpleNamespace(arrange_rows=lambda rows:list(reversed(rows)),show_row_window=lambda *a:seen.extend(w.page_definitions))
+  w=SimpleNamespace(setProperty=lambda *a:None,arrange_rows=lambda rows:list(reversed(rows)),show_row_window=lambda *a:seen.extend(w.page_definitions))
   extract(ROOT/'live_review.py','set_rows',{},'LiveReview')(w,original);self.assertEqual([r['label'] for r in seen],['B','A']);self.assertEqual(original[0]['label'],'A')
  def test_menu_claims_modal_before_stop_and_refreshes_delay(self):
   from unittest.mock import Mock

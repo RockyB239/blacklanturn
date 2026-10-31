@@ -4,10 +4,20 @@ ROOT=Path(__file__).resolve().parents[1]
 class UpdateNotesRelease(unittest.TestCase):
  def test_current_versions_and_exact_state_module(self):
   addon=ROOT/'controller-source/addon'
-  self.assertEqual(E.parse(addon/'addon.xml').getroot().get('version'),'0.1.104')
+  self.assertEqual(E.parse(addon/'addon.xml').getroot().get('version'),'0.1.115')
   source=ROOT/'installer-source/plugin.program.blacklanturninstaller'
-  self.assertEqual(E.parse(source/'addon.xml').getroot().get('version'),'1.0.44')
-  self.assertEqual((addon/'update_notes.py').read_bytes(),(source/'resources/libs/update_notes_state.py').read_bytes())
+  self.assertEqual(E.parse(source/'addon.xml').getroot().get('version'),'1.0.47')
+  # Accepted startup code defers only tempfile's import into write_state.
+  # Every remaining statement must stay identical across the two state owners.
+  import ast
+  def state_ast(path):
+   tree=ast.parse(path.read_text())
+   for node in tree.body:
+    if isinstance(node,ast.Import):node.names=[n for n in node.names if n.name!='tempfile']
+    if isinstance(node,ast.FunctionDef) and node.name=='write_state':
+     node.body=[n for n in node.body if not (isinstance(n,ast.Import) and len(n.names)==1 and n.names[0].name=='tempfile' and n.names[0].asname is None)]
+   return ast.dump(tree,include_attributes=False)
+  self.assertEqual(state_ast(addon/'update_notes.py'),state_ast(source/'resources/libs/update_notes_state.py'))
  def test_notes_source_is_bounded_and_nonempty(self):
   notes=json.loads((ROOT/'controller-source/addon/update-releases.json').read_text())
   self.assertIn('0.1.88',notes['script.blacklanturn.preview']) # legacy content is inert; new UI uses curated catalog
@@ -16,7 +26,7 @@ class UpdateNotesRelease(unittest.TestCase):
     self.assertTrue(entry['summary']);self.assertLessEqual(len(entry['summary']),6)
     self.assertTrue(all(len(x)<=240 and 'http' not in x for x in entry['summary']))
  def test_current_manifest_and_history_immutable(self):
-  addon=ROOT/'controller-source/addon';manifest=json.loads((ROOT/'controller-source/manifest104.json').read_text())
+  addon=ROOT/'controller-source/addon';manifest=json.loads((ROOT/'controller-source/manifest115.json').read_text())
   actual={p.relative_to(addon).as_posix():hashlib.sha256(p.read_bytes()).hexdigest() for p in addon.rglob('*') if p.is_file() and '__pycache__' not in p.parts and p.suffix!='.pyc'}
   self.assertEqual(actual,manifest['files'])
   self.assertEqual(json.loads((ROOT/'controller-source/manifest87.json').read_text())['controller'],'0.1.87')

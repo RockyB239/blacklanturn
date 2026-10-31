@@ -144,6 +144,9 @@ class Wizard:
             if xbmc.Player().isPlaying():
                 raise inplace_update.UpdateError('Playback started while preparing the update. Nothing has been replaced; stop playback and retry.')
             managed_addons.protect(os.path.join(CONFIG.DATABASE, db.latest_db('Addons')), umbrella=True, network=True, youtube=True)
+            if plan.get('helper_sync_policy')=='providers-1':
+                from resources.libs import helper_providers
+                helper_providers.protect(os.path.join(CONFIG.DATABASE,db.latest_db('Addons')))
             self.dialogProgress.update(50, 'Updating BlackLanturn add-ons and patches. Saved data stays in place…')
             applying, plan = plan, None
             result = inplace_update.apply(applying, registrar=addon_registration.Registrar(xbmc))
@@ -257,7 +260,10 @@ class Wizard:
                         for dependency in db.depends_list(addon):
                             kept.add(dependency)
                             kept.update(db.depends_list(dependency))
-                    managed_addons.verify_kept(CONFIG.HOME, kept, network=protected_network, youtube=protected_youtube, metadata_protected=bool((prepared.get('policy') or {}).get('managed_update_policy')))
+                    managed_addons.verify_kept(CONFIG.HOME, kept, network=protected_network, youtube=protected_youtube, metadata_protected=bool((prepared.get('policy') or {}).get('managed_update_policy')),archive_path=lib)
+                    if (prepared.get('policy') or {}).get('helper_sync_policy')=='providers-1':
+                        from resources.libs import helper_providers
+                        helper_providers.verify_kept(CONFIG.HOME,kept)
                 except (managed_addons.ProtectionError, OSError, ValueError, TypeError, IndexError) as exc:
                     self.dialogProgress.close()
                     self.dialog.ok(CONFIG.ADDONTITLE, str(exc))
@@ -295,6 +301,9 @@ class Wizard:
                 from resources.libs import managed_addons
                 try:
                     managed_addons.protect(os.path.join(CONFIG.DATABASE, db.latest_db('Addons')), umbrella=protected_umbrella, network=protected_network, youtube=protected_youtube)
+                    if (prepared.get('policy') or {}).get('helper_sync_policy')=='providers-1':
+                        from resources.libs import helper_providers
+                        helper_providers.protect(os.path.join(CONFIG.DATABASE,db.latest_db('Addons')))
                     xbmc.executebuiltin('UpdateLocalAddons', wait=True)
                 except (managed_addons.ProtectionError, RuntimeError) as exc:
                     self.dialogProgress.close()

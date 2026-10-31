@@ -14,10 +14,11 @@ class AuthorizationError(Exception):
     pass
 
 KEYS = {
+ 'script.module.tmdbhelper.sync.mdblist': {'login': 'apikey blacklanturn_legacy_key_migrated'},
  'plugin.video.umbrella': {
   'trakt': 'trakt.isauthed traktuserkey.customenabled trakt.clientid trakt.clientsecret trakt.user.token trakt.authed.clientid trakt.user.name trakt.token.expires trakt.refreshtoken',
   'debrid': 'alldebrid.enable alldebridtoken alldebridusername premiumize.enable premiumizetoken premiumizeusername realdebrid.enable realdebridtoken realdebridusername realdebrid.clientid realdebridrefresh realdebridsecret torboxtoken torbox.username torbox.enable offcloudtoken offcloud.username offcloud.enable',
-  'login': 'simkltoken simklusername mdblist.token mdblist.refresh.token custom.user.token custom.token.expires custom.refreshtoken custom.isauthed custom.clientid custom.clientsecret custom.user.name floppy.token floppy.user.name floppy.isauthed scrob.accesstoken scrob.refreshtoken scrob.tokenexpiry scrob.isauthed scrob.apikey punchplay.username punchplay.accesstoken punchplay.refreshtoken punchplay.tokenexpiry punchplay.isauthed plexsharetoken plex.client_id plexshare.accessToken easynews.user easynews.password filepursuittoken gdrivetoken fanart_tv.api_key tmdb.apikey tmdbusername tmdbpassword tmdb.sessionid tmdb.v4.readtoken tmdb.v4.accesstoken tmdb.v4.accountid opensubsusername opensubspassword opensubstoken'},
+  'login': 'simkltoken simklusername mdblist.token mdblist.refresh.token custom.user.token custom.token.expires custom.refreshtoken custom.isauthed custom.clientid custom.clientsecret custom.user.name floppy.token floppy.user.name floppy.isauthed floppy.oauth floppy.oauth.client floppy.baseurl scrob.accesstoken scrob.refreshtoken scrob.tokenexpiry scrob.isauthed scrob.apikey punchplay.username punchplay.accesstoken punchplay.refreshtoken punchplay.tokenexpiry punchplay.isauthed plexsharetoken plex.client_id plexshare.accessToken easynews.user easynews.password filepursuittoken gdrivetoken fanart_tv.api_key tmdb.apikey tmdbusername tmdbpassword tmdb.sessionid tmdb.v4.readtoken tmdb.v4.accesstoken tmdb.v4.accountid opensubsusername opensubspassword opensubstoken'},
  'plugin.video.themoviedb.helper': {
   'trakt': 'trakt_token trakt_token_access trakt.token trakt.management',
   'login': 'tmdb_user_token tmdb_user_token_access tvdb_token tvdb_token_access omdb_apikey omdb_apikey_access mdblist_apikey mdblist_apikey_access ratingposterdb_apikey gemini_apikey fanarttv_clientkey fanarttv_clientkey_access tmdb_apikey'},

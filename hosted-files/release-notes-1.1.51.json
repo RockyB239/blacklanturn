@@ -1,0 +1,36 @@
+{
+  "title": "BlackLanturn Build 1.1.51",
+  "summary": "Recommended compatibility update: current addons with tested playback, tracking and saved-settings protection.",
+  "sections": [
+    {
+      "heading": "Compatible current addons",
+      "bullets": [
+        "Reviewed Helper6.19.6 and Umbrella6.7.99 retain BlackLanturn playback, progress, search and reliability fixes.",
+        "Current Trakt, MDbList and Kodi sync providers and SkinVariables are included with exact source checks."
+      ]
+    },
+    {
+      "heading": "Keep accounts and preferences",
+      "bullets": [
+        "MDbList migration keeps the original Helper key and any existing provider key. Its completion marker preserves a later intentional logout.",
+        "In-place updates retain accounts, settings, saved data and unrelated addons. Standard retains supported selected preferences; Clean uses build defaults.",
+        "Selected-account reinstalls preserve Floppy OAuth refresh, client and server identity alongside existing provider sign-ins."
+      ]
+    },
+    {
+      "heading": "Faster saved browsing",
+      "bullets": [
+        "Accepted saved Home, Movies, Shows and visited-public-row improvements are included along with branded YouTube folder icons.",
+        "Tracking configuration remains under Settings, Playback & sync. First visits and expired displays still use normal providers."
+      ]
+    },
+    {
+      "heading": "Protected compatibility",
+      "bullets": [
+        "Installer1.0.47 validates the complete current sync group before cleanup and protects reviewed addon versions against ordinary bulk updates.",
+        "Both branded icon packs and accepted platform playback differences remain included.",
+        "Explicitly disabling a Helper sync provider stays disabled instead of falling back to a previously selected legacy provider."
+      ]
+    }
+  ]
+}

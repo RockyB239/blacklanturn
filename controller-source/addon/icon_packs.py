@@ -1,7 +1,7 @@
 """External, installed icon resources; preferences stay in the user's config."""
 from copy import deepcopy
 from pathlib import Path
-import re
+import os,re
 from itertools import islice
 from extensions import contained,descriptor
 
@@ -26,8 +26,11 @@ def configure(owners):
             # The approved directory is canonical; each accepted asset is one
             # filename component. Validate once, outside sidebar redraws.
             canonical=target.resolve();assets={}
-            for asset in islice(canonical.iterdir(),256):
-                if re.fullmatch(r'[a-z0-9-]+\.png',asset.name) and not asset.is_symlink() and asset.is_file():assets[asset.stem]=str(asset)
+            # Directory metadata avoids two Path stat calls per asset. Reject
+            # symlinks without following them and close even at the entry cap.
+            with os.scandir(canonical) as entries:
+                for asset in islice(entries,256):
+                    if re.fullmatch(r'[a-z0-9-]+\.png',asset.name) and asset.is_file(follow_symlinks=False):assets[asset.name[:-4]]=str(canonical/asset.name)
             _roots[key]=canonical;_assets[key]=assets;PACK_CHOICES.append((key,label))
         for pair in icons[:128]:
             if (isinstance(pair,list) and len(pair)==2 and isinstance(pair[0],str) and re.fullmatch(r'[a-z0-9-]{1,64}',pair[0])

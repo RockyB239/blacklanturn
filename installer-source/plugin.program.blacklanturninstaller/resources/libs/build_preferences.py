@@ -17,7 +17,7 @@ YOUTUBE_CHOICES={'kodion.history.remote','kodion.history.local','kodion.video.qu
  'kodion.live_stream.selection.1','kodion.live_stream.selection.2','kodion.support.alternative_player',
  'kodion.alternative_player.web_urls','kodion.alternative_player.mpd','kodion.default_player.web_urls','kodion.default_player.fallback_video'}
 CAPTURE_CHOICES={YOUTUBE:YOUTUBE_CHOICES,
- 'addon_data/plugin.video.themoviedb.helper/settings.xml':{'sync_source_playback'},
+ 'addon_data/plugin.video.themoviedb.helper/settings.xml':{'sync_source_playback','sync_source_watchlist','sync_source_collection','sync_provider_watched','sync_provider_watchlist','sync_provider_collection','sync_provider_scrobbling','sync_provider_stats'},
  'guisettings.xml':{'videoplayer.usemediacodecsurface','videoplayer.usemediacodec'},
  'addon_data/plugin.video.umbrella/settings.xml':{'remove.hdr','remove.dolby.vision','remove.hevc'}}
 MAX_BYTES=4*1024*1024
@@ -51,7 +51,7 @@ def _root(raw):
  return root
 
 def _value(key,value):
- if not isinstance(value,str) or (not value and key not in ('indicators','scrobble','kodion.mpd.stream.features')) or len(value)>(1024 if key=='kodion.mpd.stream.features' else 128) or any(ord(c)<32 for c in value):raise PreferenceError('Invalid playback preference. Installation stopped.')
+ if not isinstance(value,str) or (not value and key not in ('indicators','scrobble','kodion.mpd.stream.features') and not key.startswith('sync_provider_')) or len(value)>(1024 if key=='kodion.mpd.stream.features' or key.startswith('sync_provider_') else 128) or any(ord(c)<32 for c in value):raise PreferenceError('Invalid playback preference. Installation stopped.')
  if key in ('trakt_watchedindicators','trakt_scrobbling','trakt.scrobble') and value not in ('true','false'):raise PreferenceError('Invalid Trakt preference. Installation stopped.')
  if key.startswith('sync_source_') and value not in ('Trakt','MDbList'):raise PreferenceError('Invalid sync preference. Installation stopped.')
  if key in ('indicators.alt','scrobble.source') and value not in PROVIDERS:raise PreferenceError('Unsupported tracking provider. Installation stopped.')

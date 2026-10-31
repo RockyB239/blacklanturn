@@ -29,7 +29,7 @@ def _replace(raw, old, new):
 
 def normalize_metadata(addon_id, raw):
     """Normalize only an exact reviewed metadata hash, never arbitrary XML."""
-    for variant in policy()['addons'].get(addon_id, ()):
+    for variant in (*policy()['addons'].get(addon_id, ()), *policy().get('provider_addons', {}).get(addon_id, ())):
         if _sha(raw) == variant['managed_sha256']:
             original = _replace(raw, variant['managed_version'], variant['upstream_version'])
             if _sha(original) != variant['upstream_sha256']:
@@ -216,7 +216,10 @@ def prepare_policy(marker, archive):
     registration_policy=marker.get('bundle_registration_policy')
     if registration_policy not in (None,'new-bundles-1') or (registration_policy and not update_policy):
         raise ValueError('Update BlackLanturn Installer before installing this build.')
-    minimum = ('1.0.40' if marker.get('installer_min_version')=='1.0.40' else '1.0.39') if registration_policy else '1.0.30' if update_policy else policy()['installer_min_version']
+    providers = marker.get('helper_sync_policy')
+    if providers is not None and (providers != 'providers-1' or not registration_policy):
+        raise ValueError('Update BlackLanturn Installer before installing this build.')
+    minimum = '1.0.47' if providers else ('1.0.40' if marker.get('installer_min_version')=='1.0.40' else '1.0.39') if registration_policy else '1.0.30' if update_policy else policy()['installer_min_version']
     if (revision != policy()['policy'] or marker.get('installer_min_version') != minimum
             or marker.get('youtube_refresh_patch') != 'youtube-freshness-2'):
         raise ValueError('Update BlackLanturn Installer before installing this build.')

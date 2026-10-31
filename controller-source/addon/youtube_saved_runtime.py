@@ -6,7 +6,10 @@ from contextlib import contextmanager
 from youtube_core import tab_rows,connected_account
 from youtube_home import split_page
 from youtube_saved import SavedRows,current_watch,HistoryUnavailable,FRESH_AGE
-from youtube_provider import refresh_watch_items as provider_watch
+def provider_watch(files,current=lambda:True):
+ from youtube_provider import refresh_watch_items
+ return refresh_watch_items(files,current)
+
 
 SCOPE_KEYS=('youtube.language','youtube.region','kodion.content.max_per_page','kodion.safe.search','kodion.history.local',
  'youtube.view.hide_videos','youtube.view.filter.list','youtube.view.shorts.duration','youtube.folder.my_subscriptions.sources',

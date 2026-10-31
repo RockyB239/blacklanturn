@@ -1,5 +1,5 @@
 """Temporary live Kodi integration review. Uses provider directories, not a scraped catalogue."""
-import json,time,threading,traceback,copy,hashlib
+import json,time,threading,copy,hashlib
 from pathlib import Path
 from urllib.parse import urlencode,urlsplit,parse_qs
 import xbmc,xbmcgui,xbmcvfs,xbmcaddon
@@ -11,35 +11,28 @@ from live_core import directory_items,rating_line,PageHistory,valid_source,perso
 from probe_core import HoverScroll
 from live_core import card_artwork,title_presentation
 from playback_core import trakt_command,choose_player_path,restored_position,refreshed_watch_item,item_key,resume_options,watch_sync_command
-from playback_runtime import wait_for_helper
 from episode_ui import season_entries,episode_card,episode_item
 from player_preferences import player_choices,player_path,default_setting
 from search_ui import SEARCH_KINDS,search_sources,discovery_result,best_matches,load_best_matches,clear_search_selection,entity_kind,search_caption
 from preview_setup import configured as preview_configured
 from youtube_core import video_id as youtube_video_id,preview_path as youtube_preview_path,is_youtube,caption as youtube_caption,automatic_preview,resume_allowed as youtube_resume_allowed
 from youtube_browser import YouTubeBrowser
-from youtube_provider import resolve_preview
 from watch_metadata import hydrate_watch_metadata
 from page_ahead import PageAhead,eligible as page_ahead_eligible
 from row_feedback import trim_row_cache,row_message,provider_page_label,RowResultCache
 from public_rows import PublicRowSnapshots,snapshot_scope,public_path,helper_settings_identity
-from backend_ui import BackendSettings,LoadingPreview
 from title_preferences import TitlePreferences
 from title_feedback_ui import TitleFeedback
 from row_layout import RowLayouts
 from row_layout_ui import RowCustomization
 from library_ui import LibraryActions
 from series_status import SeriesStatus
-from icon_picker import choose_icon
-from icon_packs import icon_path,selected_pack,with_pack,PACK_CHOICES
+from icon_packs import icon_path,selected_pack,with_pack,PACK_CHOICES,DEFAULT_PACK
 from extensions import inline_request
-from genre_picker import choose_genre
 from browse_controls import AnimeMetadata,can_choose_genre,should_exclude_anime,page_cards
 from filtered_pages import first_page_keep,first_page_minimum, provider_path,upstream_path,logical_files,needs_fill,fill_page,PageCancelled
-from preview_language import cached_video_metadata,cached_title_aliases
 from preview_identity import TitleVerifier
 from preview_fallback import SecondaryPreviewLookup
-from related_titles import load_related
 from preview_geometry import preview_fill_viewmode,preview_display_aspect,PreviewRendererGuard,preview_uses_compact_hero
 from preview_bars import PreviewBarScan,PreviewFramingCache,top_aligned_viewmode,framing_key
 from live_core import caption_fit_step,my_stuff_rows,row_items
@@ -56,6 +49,45 @@ TMDB='plugin://plugin.video.themoviedb.helper/'
 SERIES_STATUS=SeriesStatus(PROFILE/'addon_data/plugin.video.themoviedb.helper')
 RATING_OPTIONS=[('rottentomatoes','Rotten Tomatoes critics'),('metacritic','Metacritic'),('imdb','IMDb audience'),('popcorn','Rotten Tomatoes audience'),('themoviedatabase','TMDb audience')]
 DEFAULT_RATINGS=[x[0] for x in RATING_OPTIONS[:4]]
+
+# Explicit actions load their original helpers only when requested. Keep these
+# entry points so callers and isolated controller fixtures retain their boundary.
+def wait_for_helper(alive):
+    from playback_runtime import wait_for_helper as wait
+    return wait(alive)
+
+def BackendSettings(*args,**kwargs):
+    from backend_ui import BackendSettings as dialog
+    return dialog(*args,**kwargs)
+
+def LoadingPreview(*args,**kwargs):
+    from backend_ui import LoadingPreview as dialog
+    return dialog(*args,**kwargs)
+
+def choose_icon(current_icon,pack=DEFAULT_PACK):
+    from icon_picker import choose_icon as choose
+    return choose(current_icon,pack)
+
+def choose_genre(section,pages,current_page):
+    from genre_picker import choose_genre as choose
+    return choose(section,pages,current_page)
+
+def load_related(make_path,provider,kind,identity,valid=lambda:True):
+    from related_titles import load_related as load
+    return load(make_path,provider,kind,identity,valid=valid)
+
+def cached_video_metadata(helper_profile,identity):
+    from preview_language import cached_video_metadata as read
+    return read(helper_profile,identity)
+
+def cached_title_aliases(helper_profile,identity):
+    from preview_language import cached_title_aliases as read
+    return read(helper_profile,identity)
+
+def resolve_preview(path,current):
+    # Playback resolution is not needed to construct Home.
+    from youtube_provider import resolve_preview as resolve
+    return resolve(path,current)
 
 def rpc(method,params=None):
     return json.loads(xbmc.executeJSONRPC(json.dumps({'jsonrpc':'2.0','id':1,'method':method,'params':params or {}})))
@@ -164,6 +196,8 @@ class LiveReview(LibraryActions,RowCustomization,TitleFeedback,YouTubeBrowser,xb
             if getattr(self,'owned_preview',False):self.stop_preview()
             self.close();return
         self.owner_skin=skin
+        startup=getattr(self,'startup_home',None)
+        if startup:self.setProperty('startupOwner',startup.owner)
         self.batch_search_enabled=True
         self.page_ahead=PageAhead()
         self.preview_renderer=PreviewRendererGuard(rpc,STORE/'preview-renderer-recovery.json',xbmc.getCondVisibility('System.Platform.Android'))
@@ -217,16 +251,18 @@ class LiveReview(LibraryActions,RowCustomization,TitleFeedback,YouTubeBrowser,xb
             if self.config_loaded:self.save()
         self.snapshot_cache=None;self.configure_row_snapshots()
         # Explicit private A/B trial only; serialized provider calls are not cancellable.
+        self.defer_public_refresh=True;self.deferred_public_refresh=None
         self.prefetch_trial=False;self.prefetch_attempted=set();self.prefetch_busy=False
         self.preview_mode=self.config.get('PreviewMode','manual');self.setProperty('previewMode',self.preview_mode)
         # Initial setup owns the one sidebar build, including connection failures.
         self.refresh_youtube_connection(force=True,redraw=False)
         self.refresh_navigation();self.apply_status()
         self.initialize_startup_focus()
-        threading.Thread(target=lambda:self.start(lifetime),name='BlackLanturnLiveSetup',daemon=True).start()
-        threading.Thread(target=lambda:self.monitor(lifetime),name='BlackLanturnLiveFocus',daemon=True).start()
-        if resume and resume.get('origin')!='sidebar':threading.Thread(target=lambda:self.resume_settings(lifetime),name='BlackLanturnSettingsReturn',daemon=True).start()
         self.home_updates=HomeUpdates(self,rpc)
+        if not getattr(self,'defer_startup_workers',False):
+            threading.Thread(target=lambda:self.start(lifetime),name='BlackLanturnLiveSetup',daemon=True).start()
+            threading.Thread(target=lambda:self.monitor(lifetime),name='BlackLanturnLiveFocus',daemon=True).start()
+            if resume and resume.get('origin')!='sidebar':threading.Thread(target=lambda:self.resume_settings(lifetime),name='BlackLanturnSettingsReturn',daemon=True).start()
         event('live_opened')
     def initialize_startup_focus(self):
         # Only a new browsing session starts neutral. Settings and playback
@@ -281,6 +317,8 @@ class LiveReview(LibraryActions,RowCustomization,TitleFeedback,YouTubeBrowser,xb
         except Exception as exc:
             if not current():return
             self.finish_loading('setup_failed')
+            startup=getattr(self,'startup_home',None)
+            if startup:startup.release()
             self.setProperty('notice','Integration setup failed. Open Home to retry, or check integrations in Settings.')
             event('setup_error',error=str(exc))
     def finish_loading(self,reason):
@@ -560,6 +598,7 @@ class LiveReview(LibraryActions,RowCustomization,TitleFeedback,YouTubeBrowser,xb
             self.set_rows(my_stuff_rows(self.config['Saved'],tmdb)+getattr(self,'personal_rows',lambda:[])());return
         self.set_rows(page_rows(self.config,self.section))
     def set_rows(self,definitions):
+        self.setProperty('youtubeCategoryFolder','false')
         if hasattr(self,'arrange_rows'):definitions=self.arrange_rows(definitions)
         self.page_definitions=list(definitions);self.row_offset=0;self.row_cache={};self.window_ready=[False,False]
         self.show_row_window(0,0)
@@ -586,7 +625,7 @@ class LiveReview(LibraryActions,RowCustomization,TitleFeedback,YouTubeBrowser,xb
         # Native control recreation resets the public reader. It must not erase
         # the separately owned Home display when its account proof still matches.
         self.invalidate_row_results(keep_home=home is not None and home.scope==private_scope)
-        self.snapshot_cache=PublicRowSnapshots(STORE/'public-row-snapshots.json',scope)
+        self.snapshot_cache=PublicRowSnapshots(STORE/'public-row-snapshots.json',scope,archive=True)
         self.home_snapshot_cache=HomeRowSnapshots(STORE/'private-home-snapshots.json',private_scope) if private_scope is not None else None
         return True
     def invalidate_row_results(self,keep_home=False):
@@ -611,7 +650,7 @@ class LiveReview(LibraryActions,RowCustomization,TitleFeedback,YouTubeBrowser,xb
         snapshots=getattr(self,'snapshot_cache',None)
         # Freshness is still 30 seconds for Trakt. Only current-account session data
         # may paint while the normal owned worker refreshes it. Other private rows
-        # remain session-only; Home recommendations have a separate owned store.
+        # remain session-only; shared browse routes have a separate owned store.
         if snapshots is not None and parse_qs(urlsplit(path).query).get('info',[''])[0].startswith('trakt'):
             key='filtered-v1:'+path if filtered else path
             files=self.result_cache.get_stale(key)
@@ -621,8 +660,19 @@ class LiveReview(LibraryActions,RowCustomization,TitleFeedback,YouTubeBrowser,xb
                 return files,True
         files=snapshots.get(path) if snapshots is not None else None
         home=getattr(self,'home_snapshot_cache',None)
-        if files is None and home is not None and self.section=='Home':files=home.get(path)
+        shared_home=home is not None and self.section in ('Home','Movies','Shows')
+        if shared_home and files is not None and filtered and needs_fill(path,files,first_page_keep(self,path,metadata.without_anime),size=first_page_minimum(definition)):files=None
+        if files is None and shared_home:files=home.get(path)
         if files is not None and filtered and needs_fill(path,files,first_page_keep(self,path,metadata.without_anime),size=first_page_minimum(definition)):return None,False
+        if files is not None and home is not None and home.scope:
+            # Disk displays carry no resume. Resolve current exact-title progress
+            # only if this card is explicitly played before normal hydration.
+            from home_progress import PENDING_SCOPE
+            from live_core import episode_identity
+            for item in files:
+                query=parse_qs(urlsplit(item.get('file','')).query)
+                if item.get('filetype')!='directory' and query.get('info',[''])[0] in ('play','details') and (query.get('tmdb_type')==['movie'] or episode_identity(item)):
+                    item[PENDING_SCOPE]=home.scope
         return files,files is not None
     def fill_discovery_page(self,path,files,current,refresh=False,publish=True,minimum=None):
         from filtered_pages import path_minimum
@@ -676,15 +726,29 @@ class LiveReview(LibraryActions,RowCustomization,TitleFeedback,YouTubeBrowser,xb
         if revision!=cache.revision:return []
         generation=self.generation
         def current():return self.alive and self.generation==generation and cache.revision==revision and owner_current()
+        home=getattr(self,'home_snapshot_cache',None)
+        snapshots=getattr(self,'snapshot_cache',None)
+        if home is not None and self.section in ('Home','Movies','Shows') and home.path_allowed(path):snapshots=home
+        snapshot_revision=snapshots.revision if snapshots is not None else None
+        filtered_snapshot=(snapshots is not None and snapshots.path_allowed(path)
+                       and getattr(self,'anime_metadata',None) is not None and should_exclude_anime(self,path))
+        def remember_snapshot_fill(files):
+            # A raw anime-heavy page is not a usable saved shelf. Publish only
+            # the completed fill, before title preferences/ranking alter display.
+            with self.preview_dispatch_lock:
+                if not current():raise PageCancelled('Row navigation changed')
+                if self.configure_row_snapshots():self.restart_pending_rows()
+                if not current():raise PageCancelled('Row configuration changed')
+                if any(snapshots is getattr(self,key,None) for key in ('snapshot_cache','home_snapshot_cache')):snapshots.put(path,files,revision=snapshot_revision)
         if not definition.get('_snapshot_refresh') and getattr(self,'anime_metadata',None) is not None and should_exclude_anime(self,path):
             filled=cache.get('filtered-v1:'+path)
-            if filled is not None and not needs_fill(path,filled,first_page_keep(self,path,self.anime_metadata.without_anime),positioned=True,size=first_page_minimum(definition)):self.publish_cache_stats();return filled
+            if filled is not None and not needs_fill(path,filled,first_page_keep(self,path,self.anime_metadata.without_anime),positioned=True,size=first_page_minimum(definition)):
+                if filtered_snapshot:remember_snapshot_fill(filled)
+                self.publish_cache_stats();return filled
         if getattr(self,'anime_metadata',None) is not None and should_exclude_anime(self,path) and upstream_path(provider_path(path))!=provider_path(path):
-            return self.fill_discovery_page(path,[],current,refresh=definition.get('_snapshot_refresh',False),minimum=first_page_minimum(definition))
-        snapshots=getattr(self,'snapshot_cache',None)
-        home=getattr(self,'home_snapshot_cache',None)
-        if home is not None and self.section=='Home' and home.path_allowed(path):snapshots=home
-        snapshot_revision=snapshots.revision if snapshots is not None else None
+            filled=self.fill_discovery_page(path,[],current,refresh=definition.get('_snapshot_refresh',False),minimum=first_page_minimum(definition))
+            if filtered_snapshot:remember_snapshot_fill(filled)
+            return filled
         files=None if definition.get('_snapshot_refresh') else cache.get(path)
         if files is None:
             params=parse_qs(urlsplit(path).query)
@@ -695,13 +759,16 @@ class LiveReview(LibraryActions,RowCustomization,TitleFeedback,YouTubeBrowser,xb
                 if not current():raise PageCancelled('Row navigation changed')
                 if self.configure_row_snapshots():self.restart_pending_rows()
                 if not current():raise PageCancelled('Row configuration changed')
-                # Most personal rows stay session-only. Home may retain only its
-                # account-owned display fields; late work cannot repopulate either store.
+                # Most personal rows stay session-only. Shared browse routes may
+                # retain only account-owned display fields. A failed/unfinished
+                # filtered fill must not replace the last successful display.
                 info=parse_qs(urlsplit(path).query).get('info',[''])[0]
                 cache.put(path,files,revision=revision,ttl=30 if info.startswith('trakt') else 120,allow_empty=info.startswith('trakt'))
-                if revision==cache.revision and snapshots is not None and any(snapshots is getattr(self,key,None) for key in ('snapshot_cache','home_snapshot_cache')):snapshots.put(path,files,revision=snapshot_revision)
+                if not filtered_snapshot and revision==cache.revision and snapshots is not None and any(snapshots is getattr(self,key,None) for key in ('snapshot_cache','home_snapshot_cache')):snapshots.put(path,files,revision=snapshot_revision)
         self.publish_cache_stats()
-        return self.fill_discovery_page(path,files,current,refresh=definition.get('_snapshot_refresh',False),minimum=first_page_minimum(definition))
+        filled=self.fill_discovery_page(path,files,current,refresh=definition.get('_snapshot_refresh',False),minimum=first_page_minimum(definition))
+        if filtered_snapshot:remember_snapshot_fill(filled)
+        return filled
     def apply_refreshed_row(self,n,files,label):
         from watch_metadata import refreshed_display_metadata
         # ControlList reset/add/select enqueue separate native GUI messages. A
@@ -833,45 +900,53 @@ class LiveReview(LibraryActions,RowCustomization,TitleFeedback,YouTubeBrowser,xb
         self.request_row_loads(pending,focus_slot)
         event('row_window',offset=offset,total=len(self.page_definitions),page=self.active_page,focus_slot=focus_slot)
     def request_row_loads(self,pending,focus_slot=None):
-        # Empty visible rows take precedence over revalidating already painted
-        # snapshots. Within that group, load the user's focused row first.
-        pending=sorted(pending,key=lambda pair:(bool(pair[1].get('_snapshot_refresh')),pair[0]!=(focus_slot if focus_slot is not None else 0)))
-        generation=self.generation;revision=self.result_cache.revision
-        serial=getattr(self,'row_request_serial',0)+1;self.row_request_serial=serial
-        tokens={n:getattr(self,'path_tokens',{}).get(n,0) for n,definition in pending}
-        self.row_window_busy=bool(pending)
-        def current(n,definition):
-            return (self.alive and generation==self.generation and revision==self.result_cache.revision
-                    and serial==self.row_request_serial and self.paths[n]==definition['path']
-                    and getattr(self,'path_tokens',{}).get(n,0)==tokens[n])
-        def work():
-            try:
-                for n,definition in pending:
-                    try:
-                        with self.list_lock:
-                            if not current(n,definition):continue
-                            files=self.cached_row_items(definition,expected_revision=revision,owner_current=lambda n=n,definition=definition:current(n,definition))
-                        with self.preview_dispatch_lock:
-                            if current(n,definition):
-                                if definition.get('_snapshot_refresh'):self.apply_refreshed_row(n,files,definition['label'])
-                                else:self.apply_row(n,files,definition['label'],definition.get('position',0),**({'ranked_start':True} if definition.get('_ranked_start') else {}),**({'display_position':True} if definition.get('_display_position') else {}))
-                                if definition.get('_failed_page'):
-                                    retained=definition['_failed_page'];self.failed_paths[n]=retained['request'];self.row_states[n]='error'
-                                    self.setProperty('rowState'+str(n),'ready' if files else 'error');self.setProperty('rowMessage'+str(n),retained['message'])
-                                if not definition.get('_snapshot_refresh') and focus_slot==n and files and not getattr(self,'startup_idle',False) and int(gui_labels(['System.CurrentControlId'])['System.CurrentControlId'] or '0') in (0,900,901) and current(n,definition):self.setFocusId(900+n)
-                    except Exception as exc:
-                        with self.preview_dispatch_lock:
-                            if current(n,definition):
-                                retained=bool(self.rows[n]) if definition.get('_snapshot_refresh') else False
-                                if not retained:self.apply_row(n,[],definition['label'])
-                                self.failed_paths[n]={'path':definition['path'],'label':definition['label'],'back':True,'position':definition.get('position',0)}
-                                self.row_states[n]='error';self.setProperty('row'+str(n),definition['label']+(' · Search unavailable' if getattr(self,'search_state',None) else ' · Unavailable'));self.setProperty('rowState'+str(n),'ready' if retained else 'error');self.setProperty('rowMessage'+str(n),row_message(definition['label'],'error',search=bool(getattr(self,'search_state',None))))
-                                self.setProperty('notice','List unavailable · Open title actions to retry or check its integration in Settings.')
-                        event('row_error',row=n,error=str(exc))
-                if self.alive and generation==self.generation and serial==self.row_request_serial and revision==self.result_cache.revision and getattr(self,'pending_sidebar_return',False):self.restore_sidebar_focus()
-            finally:
-                if generation==self.generation and serial==self.row_request_serial:self.row_window_busy=False
-        submit_latest(self,work)
+        from settled_row_refresh import schedule_lock
+        with schedule_lock(self):
+            # Empty visible rows take precedence over revalidating already painted
+            # snapshots. Within that group, load the user's focused row first.
+            pending=sorted(pending,key=lambda pair:(bool(pair[1].get('_snapshot_refresh')),pair[0]!=(focus_slot if focus_slot is not None else 0)))
+            generation=self.generation;revision=self.result_cache.revision
+            serial=getattr(self,'row_request_serial',0)+1;self.row_request_serial=serial
+            tokens={n:getattr(self,'path_tokens',{}).get(n,0) for n,definition in pending}
+            from settled_row_refresh import defer_refreshes
+            pending=defer_refreshes(self,pending,focus_slot)
+            self.row_window_busy=bool(pending)
+            def current(n,definition):
+                return (self.alive and generation==self.generation and revision==self.result_cache.revision
+                        and serial==self.row_request_serial and self.paths[n]==definition['path']
+                        and getattr(self,'path_tokens',{}).get(n,0)==tokens[n])
+            def work():
+                try:
+                    for n,definition in pending:
+                        try:
+                            with self.list_lock:
+                                if not current(n,definition):continue
+                                files=self.cached_row_items(definition,expected_revision=revision,owner_current=lambda n=n,definition=definition:current(n,definition))
+                            with self.preview_dispatch_lock:
+                                if current(n,definition):
+                                    if definition.get('_snapshot_refresh'):self.apply_refreshed_row(n,files,definition['label'])
+                                    else:self.apply_row(n,files,definition['label'],definition.get('position',0),**({'ranked_start':True} if definition.get('_ranked_start') else {}),**({'display_position':True} if definition.get('_display_position') else {}))
+                                    if definition.get('_failed_page'):
+                                        retained=definition['_failed_page'];self.failed_paths[n]=retained['request'];self.row_states[n]='error'
+                                        self.setProperty('rowState'+str(n),'ready' if files else 'error');self.setProperty('rowMessage'+str(n),retained['message'])
+                                    if not definition.get('_snapshot_refresh') and focus_slot==n and files and not getattr(self,'startup_idle',False) and int(gui_labels(['System.CurrentControlId'])['System.CurrentControlId'] or '0') in (0,900,901) and current(n,definition):self.setFocusId(900+n)
+                            # A completed public row must survive even if the next
+                            # synchronous provider request stalls or Kodi is closed.
+                            snapshot=getattr(self,'snapshot_cache',None)
+                            if snapshot is not None and current(n,definition):snapshot.flush()
+                        except Exception as exc:
+                            with self.preview_dispatch_lock:
+                                if current(n,definition):
+                                    retained=bool(self.rows[n]) if definition.get('_snapshot_refresh') else False
+                                    if not retained:self.apply_row(n,[],definition['label'])
+                                    self.failed_paths[n]={'path':definition['path'],'label':definition['label'],'back':True,'position':definition.get('position',0)}
+                                    self.row_states[n]='error';self.setProperty('row'+str(n),definition['label']+(' · Search unavailable' if getattr(self,'search_state',None) else ' · Unavailable'));self.setProperty('rowState'+str(n),'ready' if retained else 'error');self.setProperty('rowMessage'+str(n),row_message(definition['label'],'error',search=bool(getattr(self,'search_state',None))))
+                                    self.setProperty('notice','List unavailable · Open title actions to retry or check its integration in Settings.')
+                            event('row_error',row=n,error=str(exc))
+                    if self.alive and generation==self.generation and serial==self.row_request_serial and revision==self.result_cache.revision and getattr(self,'pending_sidebar_return',False):self.restore_sidebar_focus()
+                finally:
+                    if generation==self.generation and serial==self.row_request_serial:self.row_window_busy=False
+            submit_latest(self,work)
     def restart_pending_rows(self):
         if not hasattr(self,'window_ready') or not hasattr(self,'paths'):return
         if getattr(self,'watch_refresh_generation',None)==self.generation:return
@@ -1109,6 +1184,7 @@ class LiveReview(LibraryActions,RowCustomization,TitleFeedback,YouTubeBrowser,xb
             self.selected=item;self.setProperty('hasSelection','true');self.dwell=time.monotonic();art=item.get('art',{})
             self.setProperty('sourceSession',getattr(self,'source_session_label',lambda _: '')(item))
             self.setProperty('hero',art.get('fanart') or art.get('landscape') or art.get('poster',''))
+            self.setProperty('youtubeCategoryFolder','true' if item.get('_youtube_folder_icon') else 'false')
             headline,episode_line=episode_heading(item)
             self.setProperty('title',headline);self.setProperty('episodeLine',episode_line)
             self.setProperty('episodeMeta',episode_card(item)['meta'] if self.episode_browser_context else '')
@@ -1124,7 +1200,7 @@ class LiveReview(LibraryActions,RowCustomization,TitleFeedback,YouTubeBrowser,xb
             self.getControl(105).controlRight(self.getControl(103 if self.mode=='details' else 106 if show_identity(item) and not self.episode_browser_context else 105))
             self.display_ratings([] if discovery or is_youtube(item) else rating_badges(item));self.setProperty('plot',item.get('plot') or ('Browse movies and shows from this studio.' if entity_kind(item)=='company' else 'Browse the titles in this collection.' if entity_kind(item)=='collection' else ''))
             if is_youtube(item):
-                self.setProperty('hero','' if item.get('filetype')=='directory' else art.get('thumb') or item.get('thumbnail') or art.get('fanart',''))
+                self.setProperty('hero',item.get('_youtube_folder_icon','') if item.get('filetype')=='directory' else art.get('thumb') or item.get('thumbnail') or art.get('fanart',''))
                 self.setProperty('meta',youtube_caption(item));self.setProperty('technicalMeta','');self.setProperty('titleLogo','');self.setProperty('browsable','true' if item.get('filetype')=='directory' else 'false')
                 self.getControl(101).setLabel('Open' if item.get('filetype')=='directory' else 'Resume' if watch_state(item)['state']=='progress' else 'Play')
                 self.getControl(1250).reset();self.getControl(1251).reset();self.getControl(1252).reset();self.getControl(1254).reset()
@@ -1179,6 +1255,9 @@ class LiveReview(LibraryActions,RowCustomization,TitleFeedback,YouTubeBrowser,xb
         if not valid_source(path):return
         if getattr(self,'section','')=='YouTube':
             self.youtube_content_revision=object();self.youtube_job=None;self.youtube_update=None;self.youtube_refreshing=False
+        if back and label is None and getattr(self,'section','')=='YouTube':
+            label=next((row['label'] for row in getattr(self,'page_definitions',[]) if row.get('path')==path),None)
+            if label is None:label=parse_qs(urlsplit(path).query).get('category_label',[''])[0][:180] or None
         label=provider_page_label(self.paths[n],path,self.getProperty('row'+str(n)),label)
         generation=self.generation
         if not hasattr(self,'path_tokens'):self.path_tokens={}
@@ -1450,8 +1529,6 @@ class LiveReview(LibraryActions,RowCustomization,TitleFeedback,YouTubeBrowser,xb
                 options.extend(getattr(self,'title_feedback_actions',lambda _:[])(item))
                 if getattr(self,'youtube_home_visible',lambda:False)():options.append(('youtube_refresh','Refresh recommendations'))
                 if getattr(self,'source_session_label',lambda *a,**k: '')(item,refresh=True):options.append(('normal_autoplay','Return to normal autoplay'))
-                if not is_youtube(item) and (command or item.get('type') in ('movie','tvshow','season','episode')):
-                    options.append(('sync_settings','Watch tracking & sync settings…'))
                 if player_path:options.append(('default_player','Set default player…'))
                 options.append(('refresh','Refresh watched status'))
             if failed:
@@ -2064,6 +2141,8 @@ class LiveReview(LibraryActions,RowCustomization,TitleFeedback,YouTubeBrowser,xb
                 if skin!=self.owner_skin:self.alive=False;return
                 if self.update_work_paused():
                     time.sleep(.2);continue
+                startup=getattr(self,'startup_home',None)
+                if startup:startup.observe(self,lifetime,rpc,card_artwork)
                 if self.settings_open or self.actions_open:
                     time.sleep(.08);continue
                 self.refresh_youtube_connection()
@@ -2079,6 +2158,13 @@ class LiveReview(LibraryActions,RowCustomization,TitleFeedback,YouTubeBrowser,xb
                 if getattr(self,'loading_paths',{}) or getattr(self,'search_row_step',None) or self.getProperty('loading')=='true':
                     time.sleep(.08);continue
                 if time.monotonic()-caption_checked>=1:
+                    if not getattr(self,'light_home_saved',False) and self.section=='Home' and self.mode=='home' and getattr(self,'row_offset',-1)==0 and all(getattr(self,'window_ready',[])):
+                        self.light_home_saved=True
+                        def save_display():
+                            from light_home_model import save_home_display
+                            saved=save_home_display(self,STORE,ROOT)
+                            event('light_home_record',saved=bool(saved))
+                        threading.Thread(target=save_display,name='BlackLanturnHomeDisplaySave',daemon=True).start()
                     screen=gui_labels(['System.ScreenWidth','System.ScreenHeight'])
                     width=screen['System.ScreenWidth'];height=screen['System.ScreenHeight']
                     if not current():return
@@ -2112,6 +2198,8 @@ class LiveReview(LibraryActions,RowCustomization,TitleFeedback,YouTubeBrowser,xb
                 arrow=self.hover.tick(time.monotonic(),focus,self.mouse)
                 if arrow is not None:self.arrow(arrow)
                 if not current():return
+                from settled_row_refresh import drain_refreshes
+                drain_refreshes(self,dialog=lambda:xbmcgui.getCurrentWindowDialogId())
                 if (getattr(self,'previews_ready',True) or youtube_video_id(self.selected or {})) and not getattr(self,'startup_idle',False) and automatic_preview(getattr(self,'config',{}),getattr(self,'section',''),self.preview_mode) and self.mode=='home' and not self.episode_browser_context and not self.nav and focus in (900,901) and self.selected and (youtube_video_id(self.selected) or self.rating_identity(self.selected)) and time.monotonic()-self.dwell>=self.config.get('PreviewDelay',5) and self.preview_key!=self.selected.get('file'):self.preview(automatic=True)
                 if getattr(self,'page_ahead',None) is not None:self.prefetch_next_page()
                 if getattr(self,'section','')=='YouTube':self.prefetch_youtube_row()
@@ -2351,7 +2439,7 @@ class LiveReview(LibraryActions,RowCustomization,TitleFeedback,YouTubeBrowser,xb
         elif cid==106:self.browse_all_episodes()
         elif cid==103 and self.selected:
             saved=self.config['Saved'];match=next((i for i,x in enumerate(saved) if x.get('file')==self.selected.get('file')),None)
-            if match is None:saved.append(self.selected)
+            if match is None:saved.append(copy.deepcopy({key:value for key,value in self.selected.items() if key!='_home_progress_scope'}))
             else:saved.pop(match)
             self.save();self.update(self.selected)
             self.setProperty('notice',('Saved on this device' if match is None else 'Removed from this device')+' · Use Trakt for an account watchlist')

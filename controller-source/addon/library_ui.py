@@ -1,7 +1,6 @@
 """Explicit local library actions using existing BlackLanturn native dialogs."""
 import time,threading
 from functools import wraps
-import personal_library as library
 from title_preferences import title_key
 
 def owned(method):
@@ -23,6 +22,7 @@ class LibraryActions:
             if self.save(invalidate=False) is False:raise ValueError('Library could not be saved; original data was kept')
         except Exception:self.config=previous;raise
     def personal_rows(self):
+        import personal_library as library
         return library.collection_rows(self.config)
     def hydrate_library_items(self,items):
         from local_watch import hydrate_local
@@ -30,6 +30,7 @@ class LibraryActions:
         return hydrate_local(PROFILE/'addon_data/plugin.video.themoviedb.helper',items)
     @owned
     def add_to_collection(self,item):
+        import personal_library as library
         import xbmcgui
         if not title_key(item):return
         while self.alive:
@@ -47,6 +48,7 @@ class LibraryActions:
                 self.commit_library(library.membership(self.config,record['id'],item,not present))
     @owned
     def manage_collections(self):
+        import personal_library as library
         import xbmcgui
         changed=False
         while self.alive:
@@ -72,6 +74,7 @@ class LibraryActions:
         if changed and self.section=='My Stuff' and not getattr(self,'search_state',None):self.load_section()
     @owned
     def choose_saved_search(self):
+        import personal_library as library
         import xbmcgui
         records=library.searches(self.config)
         if not records:return None
@@ -82,6 +85,7 @@ class LibraryActions:
         record=records[n-1];return record['query'],library.KINDS.index(record['kind'])
     @owned
     def save_current_search(self):
+        import personal_library as library
         import xbmcgui
         state=getattr(self,'search_state',None)
         if not state:return
@@ -91,6 +95,7 @@ class LibraryActions:
         xbmcgui.Dialog().notification('Saved searches','Saved on this device',time=2000)
     @owned
     def manage_searches(self):
+        import personal_library as library
         import xbmcgui
         while self.alive:
             records=library.searches(self.config)
@@ -141,6 +146,7 @@ class LibraryActions:
         if getattr(self,'section','')=='My Stuff':actions.extend([('collections','Personal collections…'),('saved_searches','Saved searches…')])
         return actions
     def refresh_library_watch(self,fresh):
+        import personal_library as library
         from playback_core import restored_position
         updated=library.refresh_watch(self.config,fresh)
         if updated!=self.config:self.commit_library(updated)

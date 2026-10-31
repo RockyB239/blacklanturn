@@ -26,7 +26,9 @@ def current_data(addon_id, normalize=True):
   data['addon.xml']=versions.normalize_metadata(addon_id,data['addon.xml'])
   for key,adapter in versions.policy()['source_adapters'].items():
    aid,name=key.split('/',1)
-   if aid==addon_id and hashlib.sha256(data[name]).hexdigest()==adapter['managed_sha256']:
+   if aid!=addon_id:continue
+   adapter=versions._adapter_for_metadata({'addons/'+aid+'/addon.xml':data['addon.xml']},key,adapter)
+   if hashlib.sha256(data[name]).hexdigest()==adapter['managed_sha256']:
     raw=(ROOT/'compatibility/managed-updates/umbrella/upstream'/name).read_bytes()
     if hashlib.sha256(raw).hexdigest()!=adapter['upstream_sha256']:raise AssertionError('Fixture adapter source differs')
     data[name]=raw

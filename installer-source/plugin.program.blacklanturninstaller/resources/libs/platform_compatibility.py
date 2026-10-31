@@ -103,7 +103,7 @@ def prepare(path, kodi, home=None, allow_native_changes=True):
                         if managed_network and policy.get('network_patch') != 'request-reliability-privacy-1':
                             raise CompatibilityError('Update BlackLanturn Installer before installing this build.')
                         if managed_umbrella and (policy.get('umbrella_patch') != 'event-progress-3'
-                                                 or policy.get('umbrella_version') != managed_addons._umbrella_manifest()['version']):
+                                                 or policy.get('umbrella_version') != managed_versions.upstream_version(managed_addons.UMBRELLA,archive.read('addons/'+managed_addons.UMBRELLA+'/addon.xml'))):
                             raise CompatibilityError('Update BlackLanturn Installer before installing this build.')
                     try:
                         if managed_umbrella:
@@ -111,6 +111,8 @@ def prepare(path, kodi, home=None, allow_native_changes=True):
                             if home is None:
                                 raise CompatibilityError('Umbrella source verification needs the current profile. Your current build has been kept.')
                             managed_addons.verify_installed(home, network=managed_network, youtube=managed_youtube)
+                            from resources.libs import helper_providers
+                            helper_providers.prepare(policy,archive,home)
                         else:
                             managed_addons.verify_archive(archive)
                     except managed_addons.ProtectionError as exc:

@@ -8,6 +8,7 @@ import hashlib
 import json
 from pathlib import Path
 import sqlite3
+import zipfile
 import xml.etree.ElementTree as E
 
 # These modules are also loaded directly by the offline builder/tests, without
@@ -48,17 +49,19 @@ def verify_archive(archive, umbrella=False, network=False, youtube=False):
         _versions.verify_archive_adapters(archive)
     except (OSError, ValueError) as exc:
         raise ProtectionError(str(exc)) from exc
-    expected = json.loads((Path(__file__).parents[1] / 'managed-helper.json').read_text())['files']
+    helper_manifest = json.loads((Path(__file__).parents[1] / 'managed-helper.json').read_text())
+    expected = helper_manifest['files']
     actual = {n[len(PREFIX):]: _digest(HELPER, n[len(PREFIX):], archive.read(n))
               for n in archive.namelist() if n.startswith(PREFIX) and not n.endswith('/')}
-    if actual != expected:
+    if actual not in [expected, *helper_manifest.get('archive_variants', {}).values()]:
         raise ProtectionError('The Helper package has not passed BlackLanturn compatibility checks. Update BlackLanturn Installer and retry. Your current build has been kept.')
     if umbrella:
         prefix = 'addons/' + UMBRELLA + '/'
-        expected = _umbrella_manifest()['files']
+        umbrella_manifest = _umbrella_manifest()
+        expected = umbrella_manifest['files']
         actual = {n[len(prefix):]: _digest(UMBRELLA, n[len(prefix):], archive.read(n))
                   for n in archive.namelist() if n.startswith(prefix) and not n.endswith('/')}
-        if actual != expected:
+        if actual not in [expected, *umbrella_manifest.get('archive_variants', {}).values()]:
             raise ProtectionError('The Umbrella package has not passed BlackLanturn compatibility checks. Update BlackLanturn Installer and retry. Your current build has been kept.')
     if network:
         prefix = 'addons/' + NETWORK + '/'
@@ -181,7 +184,7 @@ def _verify_installed_network(home):
     except (OSError, ValueError, KeyError) as exc:
         raise ProtectionError(message) from exc
 
-def verify_kept(home, addon_ids, network=False, youtube=False, metadata_protected=False):
+def verify_kept(home, addon_ids, network=False, youtube=False, metadata_protected=False, archive_path=None):
     """Whitelist may retain managed source only when it already matches target."""
     managed = [(HELPER, 'TMDb Helper', 'managed-helper.json'),
                (UMBRELLA, 'Umbrella', 'managed-umbrella.json')]
@@ -189,6 +192,13 @@ def verify_kept(home, addon_ids, network=False, youtube=False, metadata_protecte
         managed.append((NETWORK, 'Shared network dependency', 'managed-network.json'))
     if youtube:
         managed.append((YOUTUBE, 'YouTube', 'managed-youtube.json'))
+    targets = {}
+    if archive_path is not None:
+        with zipfile.ZipFile(archive_path) as archive:
+            verify_archive(archive,umbrella=True,network=network,youtube=youtube)
+            for addon, _, _ in managed:
+                prefix='addons/'+addon+'/'
+                targets[addon]={n[len(prefix):]:_digest(addon,n[len(prefix):],archive.read(n)) for n in archive.namelist() if n.startswith(prefix) and not n.endswith('/')}
     for addon, label, filename in managed:
         if addon not in addon_ids:
             continue
@@ -201,13 +211,13 @@ def verify_kept(home, addon_ids, network=False, youtube=False, metadata_protecte
                 raw = (Path(home) / 'addons' / addon / 'addon.xml').read_bytes()
                 if _versions.normalize_metadata(addon, raw) == raw:
                     raise ProtectionError(message)
-            candidates = ([v['files'] for v in manifest['variants'].values()] if addon == YOUTUBE else [manifest['files']])
+            candidates = [targets[addon]] if addon in targets else ([v['files'] for v in manifest['variants'].values()] if addon == YOUTUBE else [manifest['files']])
             if _source_files(Path(home) / 'addons' / addon, message) not in candidates:
                 raise ProtectionError(message)
         except (OSError, ValueError, KeyError) as exc:
             raise ProtectionError(message) from exc
 
-def protect(db_path, umbrella=False, network=False, youtube=False):
+def protect(db_path, umbrella=False, network=False, youtube=False, providers=False):
     """Use the existing registry, retaining all unrelated and existing rules.
 
 Caller refreshes Kodi's in-memory rules with UpdateLocalAddons before cleanup
@@ -231,6 +241,8 @@ and again after extraction. Never create a replacement addon registry.
                 managed.append(NETWORK)
             if youtube:
                 managed.append(YOUTUBE)
+            if providers:
+                managed.extend(('script.module.tmdbhelper.sync.trakt','script.module.tmdbhelper.sync.mdblist','script.module.tmdbhelper.sync.kodi'))
             for addon in managed:
                 connection.execute('INSERT INTO update_rules (addonID,updateRule) SELECT ?,? WHERE NOT EXISTS (SELECT 1 FROM update_rules WHERE addonID=? AND updateRule=?)',
                                    (addon, USER_DISABLED_AUTO_UPDATE, addon, USER_DISABLED_AUTO_UPDATE))

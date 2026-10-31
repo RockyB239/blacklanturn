@@ -3,7 +3,7 @@ from copy import deepcopy
 from contextlib import closing
 from pathlib import Path
 from urllib.parse import urlsplit,parse_qs
-import io,json,math,os,pickle,re,sqlite3,threading,time
+import json,math,os,re,threading,time
 from youtube_core import video_id
 
 MAX_BYTES=2*1024*1024
@@ -142,11 +142,11 @@ class SavedRows:
    except OSError:pass
 
 class HistoryUnavailable(RuntimeError):pass
-class _HistoryValue(pickle.Unpickler):
- def find_class(self,module,name):raise ValueError('History contains non-data values')
-
 def current_watch(files,path,enabled=True):
  """Read the add-on's current local history, including WAL, without writing it."""
+ import io,pickle,sqlite3
+ class _HistoryValue(pickle.Unpickler):
+  def find_class(self,module,name):raise ValueError('History contains non-data values')
  result=deepcopy(files);ids=list(dict.fromkeys(filter(None,map(video_id,result))));history={};path=Path(path)
  try:
   if enabled and path.exists() and ids:

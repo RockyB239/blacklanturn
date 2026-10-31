@@ -35,7 +35,7 @@ class PublicSnapshots(unittest.TestCase):
  def test_expiry_clock_rollback_corruption_and_oversize_miss_safely(self):
   with tempfile.TemporaryDirectory() as folder:
    s=self.store(folder);s.put(P,[ITEM])
-   self.assertIsNone(self.store(folder,clock=lambda:1901).get(P))
+   self.assertIsNone(self.store(folder,clock=lambda:87401).get(P))
    self.assertIsNone(self.store(folder,clock=lambda:999).get(P))
    for payload in ['bad','[]','{"version":1,"scope":"a","rows":null}', 'x'*(2*1024*1024+1)]:
     s.path.write_text(payload);self.assertIsNone(self.store(folder).get(P))

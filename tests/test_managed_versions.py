@@ -22,14 +22,19 @@ class ManagedVersions(unittest.TestCase):
         spec.loader.exec_module(self.m)
         self.policy = json.loads((LIB.parent / 'managed-versions.json').read_text())
 
+    def adapter_path(self, relative, candidate=False):
+        return ROOT / 'compatibility/addons151/test-fixtures' / ('candidate' if candidate else 'upstream') / relative
+
     def data(self, apple=False):
         data = {'userdata/keep.txt': b'preserve', 'addons/unrelated/code.py': b'ordinary'}
         for key in self.policy['source_adapters']:
-            data['addons/' + key] = (ROOT / 'compatibility/managed-updates/umbrella/upstream' / key.split('/', 1)[1]).read_bytes()
+            data['addons/' + key] = self.adapter_path(key.split('/', 1)[1]).read_bytes()
         for aid, variants in self.policy['addons'].items():
             variant = variants[-1] if apple and aid == 'plugin.video.youtube' else variants[0]
             name = aid + '-' + variant['upstream_version'] + '.xml'
-            data['addons/' + aid + '/addon.xml'] = (ROOT / 'compatibility/managed-updates/metadata' / name).read_bytes()
+            source = ROOT / 'compatibility/addons151/test-fixtures' / name
+            if not source.is_file(): source = ROOT / 'compatibility/managed-updates/metadata' / name
+            data['addons/' + aid + '/addon.xml'] = source.read_bytes()
         return data
 
     def test_both_editions_transform_only_exact_metadata_and_round_trip(self):
@@ -61,7 +66,7 @@ class ManagedVersions(unittest.TestCase):
     def test_unknown_managed_metadata_is_never_normalized(self):
         data = self.data(); self.m.apply_metadata(data)
         aid = 'plugin.video.umbrella'; key = 'addons/' + aid + '/addon.xml'
-        bad = data[key].replace(b'blacklanturn.2', b'blacklanturn.999')
+        bad = data[key].replace(self.policy['addons'][aid][0]['managed_version'].encode(), b'99:unknown-version')
         self.assertEqual(self.m.normalize_metadata(aid, bad), bad)
         with self.assertRaises(ValueError): self.m.upstream_version(aid, bad)
 
@@ -97,7 +102,7 @@ class ManagedVersions(unittest.TestCase):
             p = Path(tmp) / aid; p.mkdir(); (p / 'addon.xml').write_bytes(data[key])
             for adapter in self.policy['source_adapters']:
                 rel = adapter.split('/',1)[1]; dest = p / rel; dest.parent.mkdir(parents=True, exist_ok=True)
-                dest.write_bytes((ROOT / 'compatibility/managed-updates/umbrella/candidate' / rel).read_bytes())
+                dest.write_bytes(self.adapter_path(rel, True).read_bytes())
             actual = self.managed()._source_files(p, 'invalid')
             self.assertEqual(actual['addon.xml'], hashlib.sha256(before[key]).hexdigest())
 
@@ -105,8 +110,8 @@ class ManagedVersions(unittest.TestCase):
         from test_managed_helper import ManagedTests
         fixture = ManagedTests(); fixture.setUp()
         self.addCleanup(fixture.tearDown)
-        with zipfile.ZipFile(fixture.archive()) as z:
-            data = {n:z.read(n) for n in z.namelist()}
+        with zipfile.ZipFile(ROOT / 'compatibility/addons151/plugin.video.themoviedb.helper.zip') as z:
+            data = {'addons/'+n:z.read(n) for n in z.namelist() if not n.endswith('/')}
         metadata = self.data(); self.m.apply_metadata(metadata)
         key = 'addons/plugin.video.themoviedb.helper/addon.xml'; data[key] = metadata[key]
         path = fixture.root / 'versioned-helper.zip'
@@ -127,7 +132,7 @@ class ManagedVersions(unittest.TestCase):
         for chosen in self.policy['source_adapters']:
             data = self.data()
             rel = chosen.split('/',1)[1]
-            data['addons/' + chosen] = (ROOT / 'compatibility/managed-updates/umbrella/candidate' / rel).read_bytes()
+            data['addons/' + chosen] = self.adapter_path(rel, True).read_bytes()
             with tempfile.TemporaryDirectory() as tmp:
                 home = Path(tmp); addon = home / 'addons/plugin.video.umbrella'; addon.mkdir(parents=True)
                 for key, raw in data.items():
@@ -152,8 +157,8 @@ class ManagedVersions(unittest.TestCase):
         data = self.data(); candidates = {}
         for key, variant in self.policy['source_adapters'].items():
             rel = key.split('/', 1)[1]
-            data['addons/' + key] = (ROOT / 'compatibility/managed-updates/umbrella/upstream' / rel).read_bytes()
-            candidates[key] = (ROOT / 'compatibility/managed-updates/umbrella/candidate' / rel).read_bytes()
+            data['addons/' + key] = self.adapter_path(rel).read_bytes()
+            candidates[key] = self.adapter_path(rel, True).read_bytes()
         apply = getattr(self.m, 'apply_source_adapters', None)
         self.assertTrue(callable(apply), 'Managed versions need their reviewed internal version adapter')
         apply(data, candidates)
@@ -166,17 +171,25 @@ class ManagedVersions(unittest.TestCase):
         with self.assertRaises(ValueError): apply(data, dict(candidates, **{next(iter(candidates)):b'foreign'}))
         self.assertEqual(data, before)
 
-    def test_builder_has_metadata_only_stage(self):
-        spec = importlib.util.spec_from_file_location('build_managed_versions', ROOT / 'tools/build_release.py')
-        b = importlib.util.module_from_spec(spec); spec.loader.exec_module(b)
-        stage = getattr(b, 'apply_managed_versions', None)
-        self.assertTrue(callable(stage), 'Both package editions must receive bulk-update protection')
-        data = self.data(); stage(data); self.m.verify_metadata(data)
+    def test_current_builder_rejects_unpinned_installer_metadata_before_outputs(self):
+        import shutil
+        spec = importlib.util.spec_from_file_location('build_current151', ROOT / 'tools/build_release151.py')
+        builder = importlib.util.module_from_spec(spec); spec.loader.exec_module(builder)
+        with tempfile.TemporaryDirectory() as directory:
+            root=Path(directory)
+            for name in ('tools','controller-source','compatibility'):
+                (root/name).symlink_to(ROOT/name,target_is_directory=True)
+            source=root/'installer-source/plugin.program.blacklanturninstaller'
+            shutil.copytree(ROOT/'installer-source/plugin.program.blacklanturninstaller',source,ignore=shutil.ignore_patterns('__pycache__'))
+            path=source/'addon.xml';path.write_bytes(path.read_bytes().replace(b'<addon ',b'<addon foreign="true" ',1))
+            with patch.object(builder,'ROOT',root),self.assertRaisesRegex(ValueError,'Installer47 source differs'):
+                builder.build(root/'baselines',root/'output')
+            self.assertFalse(any((root/'output').glob('*.zip')))
 
     def test_new_policy_requires_current_installer_and_exact_metadata(self):
         import io
         data = self.data(); self.m.apply_metadata(data)
-        self.m.apply_source_adapters(data, {key:(ROOT / 'compatibility/managed-updates/umbrella/candidate' / key.split('/',1)[1]).read_bytes() for key in self.policy['source_adapters']})
+        self.m.apply_source_adapters(data, {key:self.adapter_path(key.split('/',1)[1], True).read_bytes() for key in self.policy['source_adapters']})
         stream = io.BytesIO()
         with zipfile.ZipFile(stream, 'w') as z:
             for n, raw in data.items(): z.writestr(n, raw)

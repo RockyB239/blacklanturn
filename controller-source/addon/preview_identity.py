@@ -7,7 +7,6 @@ Unavailable evidence leaves the preview unapproved. This is a title check, not
 proof of publisher authenticity, spoken language, or season-specific accuracy.
 """
 from collections import OrderedDict
-from concurrent.futures import ThreadPoolExecutor
 import json
 import re
 import threading
@@ -182,6 +181,7 @@ class TitleVerifier:
                 break
         if not candidates:
             return []
+        from concurrent.futures import ThreadPoolExecutor
         with ThreadPoolExecutor(max_workers=2, thread_name_prefix='BlackLanturnTitle') as workers:
             futures = []
             for _, key in candidates:

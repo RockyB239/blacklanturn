@@ -32,7 +32,7 @@ class SilentSync(unittest.TestCase):
   appearance=next(g[2] for g in SETTINGS_GROUPS if g[0]=='Appearance')
   self.assertEqual([r[0] for r in appearance],['icon_pack','title_logos','ratings','rating_order','status_display'])
   self.assertEqual(sum(r[0] in ('ratings','rating_order') for g in SETTINGS_GROUPS for r in g[2]),2)
- def test_tracking_shortcut_only_for_supported_watchable_titles(self):
+ def test_tracking_configuration_stays_out_of_all_browsing_title_menus(self):
   from playback_core import trakt_command,choose_player_path,resume_options
   from search_ui import discovery_result
   from browse_controls import can_choose_genre
@@ -46,4 +46,4 @@ class SilentSync(unittest.TestCase):
     w=SimpleNamespace(section='Home',mode='home',nav=False,search_state=None,episode_browser_context=None,discovery_stack=[],getFocusId=lambda:900,rows=[[item],[]],histories=[],row_states={},config={'Saved':[]},chosen=lambda cid:item,rating_identity=lambda _:None,stop_preview=lambda:None)
     ns={'trakt_command':trakt_command,'choose_player_path':choose_player_path,'resume_options':resume_options,'discovery_result':discovery_result,'can_choose_genre':can_choose_genre,'event':lambda *a,**k:None,'xbmcgui':SimpleNamespace(Dialog=lambda:SimpleNamespace(contextmenu=lambda labels:menus.append(labels) or -1))}
     extract(ROOT/'live_review.py','title_actions',ns,'LiveReview')(w)
-    self.assertEqual('Watch tracking & sync settings…' in menus[0],item in supported)
+    self.assertNotIn('Watch tracking & sync settings…',menus[0]);self.assertIn('Refresh watched status',menus[0])

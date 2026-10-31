@@ -1,16 +1,13 @@
 """Independent entrypoint for an interrupted update of the Installer itself.
 
-Normal startup does one journal existence check. Only a pending self update can
-load the fixed recovery module from the active Installer or its complete backup.
+Normal startup checks recovery paths without loading recovery parsers. Only a
+pending self update can load the fixed recovery module from the active Installer
+or its complete backup.
 Saved settings, databases and unrelated add-ons stay under the existing updater's
 preservation contract.
 """
-import importlib.util
-import json
 import os
 from pathlib import Path
-import re
-import xml.etree.ElementTree as ET
 
 SELF='plugin.program.blacklanturninstaller'
 
@@ -23,6 +20,7 @@ def _plain(path):
             raise RecoveryError('Installer recovery contains a linked path. Keep the recovery folder.')
 
 def _save_registration(path,enabled):
+    import json
     import tempfile
     descriptor,temporary=tempfile.mkstemp(prefix='.blacklanturn-registration-',dir=str(path.parent))
     try:
@@ -37,6 +35,8 @@ def _save_registration(path,enabled):
         if os.path.exists(temporary):os.unlink(temporary)
 
 def _register(path,home,kodi,addon_factory):
+    import json
+    import xml.etree.ElementTree as ET
     _plain(path)
     if path.stat().st_size>1024:raise ValueError('Invalid Installer registration recovery')
     wanted=json.loads(path.read_bytes())
@@ -59,6 +59,9 @@ def _register(path,home,kodi,addon_factory):
     path.unlink()
 
 def _core(root):
+    import importlib.util
+    import re
+    import xml.etree.ElementTree as ET
     _plain(root)
     meta=root/'addon.xml';core=root/'resources/libs/inplace_update.py'
     if not meta.is_file() or not core.is_file():return None
@@ -81,6 +84,7 @@ def recover_installer(home,kodi=None,addon_factory=None):
     _plain(work);_plain(pending)
     if not work.exists() and not pending.exists():
         return False
+    import json
     try:
         if not journal.exists():
             recovered=False
@@ -115,5 +119,6 @@ def recover_installer(home,kodi=None,addon_factory=None):
         raise ValueError('The Installer recovery entrypoint is missing')
     except RecoveryError:
         raise
-    except (OSError,ValueError,KeyError,TypeError,ImportError,AttributeError,RuntimeError,SyntaxError,ET.ParseError) as exc:
+    # ElementTree.ParseError derives from SyntaxError; parsing stays recovery-only.
+    except (OSError,ValueError,KeyError,TypeError,ImportError,AttributeError,RuntimeError,SyntaxError) as exc:
         raise RecoveryError('An interrupted BlackLanturn update needs recovery. Keep the recovery folder and retry. '+str(exc)) from exc

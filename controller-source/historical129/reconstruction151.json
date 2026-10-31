@@ -1,0 +1,10 @@
+{
+  "source_archive_sha256": "be148f6e483a6209a07325d62a1fa1399d6b9b816b01ba3b5d749def31441841",
+  "manifest": "manifest95.json",
+  "restored_paths": [
+    "preview_identity.py",
+    "update_notes.py",
+    "youtube_saved.py"
+  ],
+  "all_historical_hashes_unchanged": true
+}

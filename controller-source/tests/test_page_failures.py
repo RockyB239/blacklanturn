@@ -61,6 +61,16 @@ class PageFailures(unittest.TestCase):
         method(obj,0,'plugin://plugin.video.themoviedb.helper/?info=episodes&tmdb_id=42&season=2&page=2','Season 2')
         self.assertEqual(applied[0][2],'Season 2')
 
+    def test_youtube_back_restores_destination_heading_instead_of_child_heading(self):
+        root='plugin://plugin.video.youtube/special/my_subscriptions'
+        shorts=root+'/shorts/?category_label=Shorts'
+        live=root+'/live/?category_label=Live+broadcast'
+        for origin,target,expected in [(shorts,root,'Subscriptions'),(live,shorts,'Shorts')]:
+            obj,props,applied,method=self.state(lambda p:[{'file':p}])
+            obj.section='YouTube';obj.paths[0]=origin;obj.page_definitions=[{'path':root,'label':'Subscriptions'}]
+            method(obj,0,target,back=True,position=2)
+            self.assertEqual(applied[0][2],expected)
+
     def test_page_loading_guard_survives_an_obsolete_worker_and_clears_on_completion(self):
         queue=[]
         class Thread(InlineThread):

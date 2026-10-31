@@ -2,8 +2,7 @@
 import json,time,threading,copy
 from contextlib import nullcontext
 from youtube_core import ConnectionState,TABS,tab_rows,account_options,connected_account
-from youtube_provider import load_home_rows
-from youtube_rows import YouTubeRows
+from youtube_rows import YouTubeRows,load_home_rows
 from youtube_saved_runtime import SavedYouTube
 
 def read_account_store():
