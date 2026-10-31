@@ -107,7 +107,14 @@ def _finite_number(value,minimum=0,maximum=32503680000):
 
 def _items(files,path_filter=_item_path,max_items=MAX_ITEMS):
     if not isinstance(files,list) or not 0<len(files)<=max_items:return None
-    result=[]
+    result=[];artwork_memo={}
+    def artwork(value):
+        if not isinstance(value,str):return ''
+        if value in artwork_memo:return artwork_memo[value]
+        safe=_art(value)
+        # One sanitization call only. Keep no unsafe addresses or global state.
+        if safe and len(artwork_memo)<256:artwork_memo[value]=safe
+        return safe
     for data in files:
         if not isinstance(data,dict):return None
         path=path_filter(data.get('file'))
@@ -129,8 +136,8 @@ def _items(files,path_filter=_item_path,max_items=MAX_ITEMS):
         item['file']=path
         for key in ('genre','country','director','studio','writer'):
             if isinstance(data.get(key),list):item[key]=[value for value in data[key] if isinstance(value,str)]
-        if isinstance(data.get('art'),dict):item['art']={k:safe for k,v in data['art'].items() if isinstance(k,str) and (safe:=_art(v))}
-        if _art(data.get('thumbnail')):item['thumbnail']=data['thumbnail']
+        if isinstance(data.get('art'),dict):item['art']={k:safe for k,v in data['art'].items() if isinstance(k,str) and (safe:=artwork(v))}
+        if artwork(data.get('thumbnail')):item['thumbnail']=data['thumbnail']
         if isinstance(data.get('uniqueid'),dict):item['uniqueid']={k:v for k,v in data['uniqueid'].items() if k in ('tmdb','tvshow.tmdb','imdb') and isinstance(v,(str,int)) and re.fullmatch(r'(?:tt)?\d+',str(v))}
         result.append(item)
     return result
@@ -156,9 +163,10 @@ class PublicRowSnapshots:
             if not isinstance(rows,list) or len(rows)>self.max_rows:return
             for row in rows:
                 if not isinstance(row,dict) or not self.path_allowed(row.get('path')):continue
-                stamp=row.get('time');items=self.sanitize_items(row.get('items'))
-                if _finite_number(stamp) and 0<=self.clock()-stamp<=self.max_age and items:
-                    self.rows[row['path']]={'path':row['path'],'time':stamp,'items':items}
+                stamp=row.get('time')
+                if not _finite_number(stamp) or not 0<=self.clock()-stamp<=self.max_age:continue
+                items=self.sanitize_items(row.get('items'))
+                if items:self.rows[row['path']]={'path':row['path'],'time':stamp,'items':items}
         except (OSError,ValueError,TypeError,OverflowError,RecursionError):self.rows.clear()
 
     def _prune(self):

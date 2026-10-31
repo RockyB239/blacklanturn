@@ -220,7 +220,8 @@ class LiveReview(LibraryActions,RowCustomization,TitleFeedback,YouTubeBrowser,xb
         # Explicit private A/B trial only; serialized provider calls are not cancellable.
         self.prefetch_trial=False;self.prefetch_attempted=set();self.prefetch_busy=False
         self.preview_mode=self.config.get('PreviewMode','manual');self.setProperty('previewMode',self.preview_mode)
-        self.refresh_youtube_connection(force=True)
+        # Initial setup owns the one sidebar build, including connection failures.
+        self.refresh_youtube_connection(force=True,redraw=False)
         self.refresh_navigation();self.apply_status()
         self.initialize_startup_focus()
         threading.Thread(target=lambda:self.start(lifetime),name='BlackLanturnLiveSetup',daemon=True).start()

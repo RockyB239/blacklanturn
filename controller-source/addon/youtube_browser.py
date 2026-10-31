@@ -19,7 +19,7 @@ def read_account_store():
     return json.loads(raw.decode('utf-8'))
 
 class YouTubeBrowser(YouTubeRows,SavedYouTube):
-    def refresh_youtube_connection(self,force=False):
+    def refresh_youtube_connection(self,force=False,redraw=True):
         import xbmc
         if force:SavedYouTube.invalidate_saved_youtube_settings(self)
         lifetime=getattr(self,'window_lifetime',None)
@@ -47,7 +47,8 @@ class YouTubeBrowser(YouTubeRows,SavedYouTube):
         # Actual account transitions still invalidate the previous session.
         if previous is not None:self.invalidate_row_results()
         if not current():return
-        self.youtube_query='';self.refresh_navigation()
+        self.youtube_query=''
+        if redraw:self.refresh_navigation()
         if not current():return
         if self.section=='YouTube':
             if candidate.connected:self.load_youtube_section()
