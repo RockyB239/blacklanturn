@@ -1,0 +1,26 @@
+{
+  "passed": true,
+  "personal_profile_accessed": false,
+  "scope": "Native Mac in-place updater, provider registration and credential migration; synthetic accounts only",
+  "network_blocked": true,
+  "personal_profile_denied": true,
+  "base": "1.1.50",
+  "edition": "apple",
+  "artifact_sha256": "3dd558a7cb628f729d04aedcadfe907cca78867e03e0196e93af674a321676af",
+  "updated": [
+    "plugin.program.blacklanturninstaller",
+    "plugin.video.themoviedb.helper",
+    "plugin.video.umbrella",
+    "script.blacklanturn.preview",
+    "script.module.tmdbhelper.sync.kodi",
+    "script.module.tmdbhelper.sync.mdblist",
+    "script.module.tmdbhelper.sync.trakt",
+    "script.skinvariables"
+  ],
+  "saved_native_settings_preserved": true,
+  "version": "1.1.51",
+  "provider_group_enabled": true,
+  "additive_migration_preserved": true,
+  "explicit_disable_persisted": true,
+  "release_proof_valid": true
+}
