@@ -1,0 +1,15 @@
+BlackLanturn Build1.1.53 / Controller0.1.117 / Installer1.0.49
+
+Kodi21.3 Omega. General: Android/FireTV. Apple TV & Mac: compatible signed Kodi Apple applications. Platform binaries remain Kodi-managed.
+
+Existing installs: Kodi Settings > Add-ons > My add-ons > Program add-ons > BlackLanturn Installer > Versions: install1.0.49 from BlackLanturn Repository. Restart Kodi, launch BlackLanturn Installer, choose Update BlackLanturn and the matching installed edition. The production updater uses a matching public1.1.40 component when possible and otherwise falls back to the full archive. Full updates also support host-verified1.1.45/49/50/51/52 profiles. Saved userdata and unrelated addons remain in place.
+
+First install: add BlackLanturn source, install repository.blacklanturn.zip, install BlackLanturn Installer1.0.49 from the repository, choose the matching build and install mode.
+
+Standard reinstall preserves selected accounts and supported preferences; account-only Clean deliberately applies build defaults while retaining selected accounts. Clean is a reset mode.
+
+Options and supported native settings menus share the BlackLanturn panel style and active icon material. Existing library, provider, playback and account behavior remain included.
+
+CocoScrapers: Installer1.0.49 validates the complete reviewed source before cleanup and protects the accepted three-file concurrency change from ordinary bulk replacement. Unknown existing source stops before mutation. Existing MDbList migration and login protections remain included.
+
+First visits, expired displays and provider outages still use the ordinary network path. Do not extract full-build files directly over a personal profile. Use the Installer transaction and retain your verified recovery until acceptance.
