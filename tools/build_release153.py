@@ -50,9 +50,9 @@ def build(baselines,output):
  components=load('release153_components',ROOT/'installer-source/plugin.program.blacklanturninstaller/resources/libs/component_update.py')
  managed=load('release153_managed',ROOT/'installer-source/plugin.program.blacklanturninstaller/resources/libs/managed_addons.py')
  releases=load('release153_releases',ROOT/'controller-source/addon/release_updates.py');report={}
- for edition,pin in PINS.items():
+ for edition,baseline_pin in PINS.items():
   baseline=baselines/('BlackLanturn-'+edition+'-Kodi21-1.1.40.zip')
-  if file_sha(baseline)!=pin:raise ValueError('Public40 archive pin differs: '+edition)
+  if file_sha(baseline)!=baseline_pin:raise ValueError('Public40 archive pin differs: '+edition)
   with zipfile.ZipFile(baseline) as z:
    if z.testzip():raise ValueError('Public40 CRC differs')
    before={n:z.read(n) for n in z.namelist() if not n.endswith('/')}
@@ -60,9 +60,9 @@ def build(baselines,output):
   data.update({CP+n:raw for n,raw in controller.items()});data.update({IP+n:raw for n,raw in installer.items()});data.update({YP+n:raw for n,raw in youtube.items()})
   for aid,files in addons.items():data.update({'addons/'+aid+'/'+n:raw for n,raw in files.items()})
   skin=json.loads((ROOT/'compatibility/menus153/skin-manifest.json').read_bytes())
-  for n,pin in skin['files'].items():
+  for n,skin_pin in skin['files'].items():
    raw=(ROOT/'compatibility/menus153/skin'/n).read_bytes()
-   if sha(raw)!=pin:raise ValueError('Skin frozen source differs: '+n)
+   if sha(raw)!=skin_pin:raise ValueError('Skin frozen source differs: '+n)
    data['addons/skin.blacklanturn.preview/'+n]=raw
   for n in skin['forbidden_skin_files']:
    if 'addons/skin.blacklanturn.preview/'+n in data:raise ValueError('Personal popup unexpectedly bundled: '+n)
@@ -89,7 +89,7 @@ def build(baselines,output):
    if managed._versions.prepare_policy(marker,z)!='1.0.48':raise ValueError('Provider group minimum differs')
   component=output/('BlackLanturn-'+edition+'-Update-1.1.40-to-1.1.53.zip');doc=components.build(baseline,full,component)
   changed={n for n in set(before)|set(data) if before.get(n)!=data.get(n)}
-  record={'edition':marker['edition'],'build':'1.1.53','controller':'0.1.117','installer':'1.0.49','baseline_sha256':pin,'full':{'file':full.name,'bytes':full.stat().st_size,'sha256':file_sha(full)},'components':{'file':component.name,'bytes':component.stat().st_size,'sha256':file_sha(component),'base':'blacklanturn-'+marker['edition']+'-1.1.40-r0'},'changed_addons':sorted(set(doc['addons'])-set(doc['retained'])),'changed_files':sorted(changed),'proof_files':len(proof),'userdata_unchanged_except_release_metadata':True}
+  record={'edition':marker['edition'],'build':'1.1.53','controller':'0.1.117','installer':'1.0.49','baseline_sha256':baseline_pin,'full':{'file':full.name,'bytes':full.stat().st_size,'sha256':file_sha(full)},'components':{'file':component.name,'bytes':component.stat().st_size,'sha256':file_sha(component),'base':'blacklanturn-'+marker['edition']+'-1.1.40-r0'},'changed_addons':sorted(set(doc['addons'])-set(doc['retained'])),'changed_files':sorted(changed),'proof_files':len(proof),'userdata_unchanged_except_release_metadata':True}
   report[marker['edition']]=record;(output/(edition+'-package.json')).write_text(json.dumps(record,indent=2)+'\n');print(edition,'full53 ready',full,flush=True)
  report['installer']={'file':'plugin.program.blacklanturninstaller-1.0.49.zip','sha256':file_sha(output/'plugin.program.blacklanturninstaller-1.0.49.zip')};(output/'candidate-packages.json').write_text(json.dumps(report,indent=2)+'\n')
  if sum(len(json.dumps(json.loads(zipfile.ZipFile(output/report[e]['full']['file']).read('userdata/blacklanturn-releases.json'))['releases'][0],indent=2).encode()) for e in ('general','apple'))>250000:raise ValueError('Combined release feed exceeds safe byte budget')

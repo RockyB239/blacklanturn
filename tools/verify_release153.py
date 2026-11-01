@@ -12,6 +12,7 @@ def verify(baselines,artifacts):
  for edition,label in (('General','general'),('Apple-TV-Mac','apple')):
   record=report[label];full=artifacts/record['full']['file'];component=artifacts/record['components']['file'];base=baselines/('BlackLanturn-'+edition+'-Kodi21-1.1.40.zip')
   assert builder.file_sha(base)==builder.PINS[edition]
+  assert record['baseline_sha256']==builder.PINS[edition],'Package receipt baseline pin differs: '+edition
   assert builder.file_sha(full)==record['full']['sha256'];assert builder.file_sha(component)==record['components']['sha256']
   with zipfile.ZipFile(full) as z,zipfile.ZipFile(base) as old:
    assert z.testzip() is None;names=z.namelist();assert len(names)==len(set(names))
