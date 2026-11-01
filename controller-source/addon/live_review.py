@@ -183,6 +183,7 @@ class PreviewPlayer(xbmc.Player):
     def onPlayBackError(self):self.failed=True
 
 class LiveReview(LibraryActions,RowCustomization,TitleFeedback,YouTubeBrowser,xbmcgui.WindowXML):
+    enable_logo_readability=True
     def onInit(self):
         # Kodi may initialize this object again with recreated native controls.
         # Retire its old setup/monitor before any native initialization can wait.
@@ -628,13 +629,13 @@ class LiveReview(LibraryActions,RowCustomization,TitleFeedback,YouTubeBrowser,xb
         self.snapshot_cache=PublicRowSnapshots(STORE/'public-row-snapshots.json',scope,archive=True)
         self.home_snapshot_cache=HomeRowSnapshots(STORE/'private-home-snapshots.json',private_scope) if private_scope is not None else None
         return True
-    def invalidate_row_results(self,keep_home=False):
+    def invalidate_row_results(self,keep_home=False,preserve_display=False):
         cache=getattr(self,'result_cache',None)
         if cache is not None:cache.clear();self.publish_cache_stats()
         snapshots=getattr(self,'snapshot_cache',None)
-        if snapshots is not None:snapshots.clear()
+        if snapshots is not None:snapshots.clear(preserve_display=preserve_display)
         home=getattr(self,'home_snapshot_cache',None)
-        if home is not None:home.clear(preserve_disk=keep_home)
+        if home is not None:home.clear(preserve_disk=keep_home,preserve_display=preserve_display)
         self.row_cache={}
     def retained_row_items(self,definition):
         path=definition.get('path','')
@@ -1191,6 +1192,9 @@ class LiveReview(LibraryActions,RowCustomization,TitleFeedback,YouTubeBrowser,xb
             self.getControl(251).setHeight(105 if episode_line else 155)
             self.setProperty('allEpisodes','true' if show_identity(item) and not self.episode_browser_context else 'false')
             presentation=title_presentation(item,self.config.get('TitleLogos',True))
+            self.logo_source=presentation['logo']
+            decisions=getattr(self,'logo_decisions',None)
+            if decisions is not None:presentation['logo']=decisions.visible(presentation['logo'])
             for key,prop in [('meta','meta'),('technical','technicalMeta'),('watch','watchMeta'),('watch_state','watchState'),('logo','titleLogo')]:
                 self.setProperty(prop,presentation[key])
             discovery=discovery_result(item)
@@ -1381,7 +1385,7 @@ class LiveReview(LibraryActions,RowCustomization,TitleFeedback,YouTubeBrowser,xb
             # permanently, including after watch_refresh_generation is cleared.
             self.youtube_content_revision=object();self.youtube_job=None;self.youtube_update=None;self.youtube_refreshing=False
             self.setProperty('youtubeRefreshLabel','Refresh recommendations')
-        self.invalidate_row_results()
+        self.invalidate_row_results(preserve_display=True)
         self.generation+=1
         self.row_window_busy=False
         self.actions_open=True;self.stop_preview();generation=self.generation;self.watch_refresh_generation=generation
@@ -2158,6 +2162,9 @@ class LiveReview(LibraryActions,RowCustomization,TitleFeedback,YouTubeBrowser,xb
                 if getattr(self,'loading_paths',{}) or getattr(self,'search_row_step',None) or self.getProperty('loading')=='true':
                     time.sleep(.08);continue
                 if time.monotonic()-caption_checked>=1:
+                    if getattr(self,'enable_logo_readability',False):
+                        from logo_readability_runtime import queue_cached_logo
+                        queue_cached_logo(self,rpc,STORE,PROFILE/'Thumbnails')
                     if not getattr(self,'light_home_saved',False) and self.section=='Home' and self.mode=='home' and getattr(self,'row_offset',-1)==0 and all(getattr(self,'window_ready',[])):
                         self.light_home_saved=True
                         def save_display():

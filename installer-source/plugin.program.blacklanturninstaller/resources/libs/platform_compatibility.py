@@ -113,6 +113,8 @@ def prepare(path, kodi, home=None, allow_native_changes=True):
                             managed_addons.verify_installed(home, network=managed_network, youtube=managed_youtube)
                             from resources.libs import helper_providers
                             helper_providers.prepare(policy,archive,home)
+                            from resources.libs import cocoscrapers_policy
+                            cocoscrapers_policy.prepare(policy,archive,home)
                         else:
                             managed_addons.verify_archive(archive)
                     except managed_addons.ProtectionError as exc:

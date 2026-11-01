@@ -217,7 +217,7 @@ def verify_kept(home, addon_ids, network=False, youtube=False, metadata_protecte
         except (OSError, ValueError, KeyError) as exc:
             raise ProtectionError(message) from exc
 
-def protect(db_path, umbrella=False, network=False, youtube=False, providers=False):
+def protect(db_path, umbrella=False, network=False, youtube=False, providers=False, cocoscrapers=False):
     """Use the existing registry, retaining all unrelated and existing rules.
 
 Caller refreshes Kodi's in-memory rules with UpdateLocalAddons before cleanup
@@ -243,6 +243,8 @@ and again after extraction. Never create a replacement addon registry.
                 managed.append(YOUTUBE)
             if providers:
                 managed.extend(('script.module.tmdbhelper.sync.trakt','script.module.tmdbhelper.sync.mdblist','script.module.tmdbhelper.sync.kodi'))
+            if cocoscrapers:
+                managed.append('script.module.cocoscrapers')
             for addon in managed:
                 connection.execute('INSERT INTO update_rules (addonID,updateRule) SELECT ?,? WHERE NOT EXISTS (SELECT 1 FROM update_rules WHERE addonID=? AND updateRule=?)',
                                    (addon, USER_DISABLED_AUTO_UPDATE, addon, USER_DISABLED_AUTO_UPDATE))

@@ -150,6 +150,14 @@
         "upstream_sha256": "5fde6bbfcd8de072a15342982198fa5f94774fd6f8994bbcec72f8b94472590e",
         "managed_sha256": "111d921b349f3de965e00cefb363543405cc0f2dde3bf76d396a5902c3f70a96"
       }
+    ],
+    "script.module.cocoscrapers": [
+      {
+        "upstream_version": "1.0.45",
+        "managed_version": "1:1.0.45+blacklanturn.1",
+        "upstream_sha256": "494e886dda77bcc4a881d09c4422cbcdde6b080a63ed99b62cb5baba3ed78e44",
+        "managed_sha256": "6a71daa3d59c19f7fa32170bb786b0aad28a311988bd55f06dcd1143258de254"
+      }
     ]
   }
 }

@@ -16,7 +16,7 @@ import xml.etree.ElementTree as E
 import zipfile
 
 SELF = 'plugin.program.blacklanturninstaller'
-MANAGED = frozenset(('plugin.video.themoviedb.helper', 'plugin.video.umbrella', 'script.module.jurialmunkey', 'plugin.video.youtube','script.module.tmdbhelper.sync.trakt','script.module.tmdbhelper.sync.mdblist','script.module.tmdbhelper.sync.kodi'))
+MANAGED = frozenset(('plugin.video.themoviedb.helper', 'plugin.video.umbrella', 'script.module.jurialmunkey', 'plugin.video.youtube','script.module.tmdbhelper.sync.trakt','script.module.tmdbhelper.sync.mdblist','script.module.tmdbhelper.sync.kodi','script.module.cocoscrapers'))
 NATIVE = frozenset(('inputstream.adaptive', 'script.module.pil'))
 META = ('blacklanturn-build.json', 'blacklanturn-releases.json', 'blacklanturn-install-complete.json')
 ID = re.compile(r'[a-z0-9][a-z0-9_.-]{0,120}')
@@ -276,7 +276,7 @@ def prepare(archive_path, home, kodi):
                 _write(work/'metadata-new'/name, raw)
             state = {'schema': 1, 'status': 'prepared', 'addons': entries, 'metadata': metadata}
             _journal(plan, state)
-        plan.update(state=state, base_version=installed['build_version'], helper_sync_policy=target.get('helper_sync_policy'), new_addons=[aid for aid,entry in entries.items() if entry['before'] is None], version=target['build_version'], retained=retained, chosen={aid:node.get('version') for aid,node in chosen.items()})
+        plan.update(state=state, base_version=installed['build_version'], helper_sync_policy=target.get('helper_sync_policy'), cocoscrapers_policy=target.get('cocoscrapers_policy'), new_addons=[aid for aid,entry in entries.items() if entry['before'] is None], version=target['build_version'], retained=retained, chosen={aid:node.get('version') for aid,node in chosen.items()})
         return plan
     except Exception as exc:
         try:

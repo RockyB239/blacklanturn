@@ -1,0 +1,34 @@
+{
+  "title": "BlackLanturn Build 1.1.52",
+  "summary": "Clearer episode details, readable title artwork and retained browsing caches after playback.",
+  "sections": [
+    {
+      "heading": "Readable title and episode details",
+      "bullets": [
+        "Very dark cached title logos fall back to the existing readable text title. Bright and colorful logos keep their artwork.",
+        "Episode metadata has room for the full air-date year and a separate watched indicator."
+      ]
+    },
+    {
+      "heading": "Retained browsing after playback",
+      "bullets": [
+        "Neutral Home and public-row snapshots retain their original age after playback while watched and resume metadata refresh. Account and layout changes retain full cache invalidation.",
+        "First visits, expired displays and provider outages continue through the normal provider path."
+      ]
+    },
+    {
+      "heading": "Focused episode source improvement",
+      "bullets": [
+        "Two reviewed stateless CocoScrapers providers overlap numbered and air-date queries, retaining primary-first order, deduplication, filters, ranking and timeouts. Results and timing depend on the provider and episode.",
+        "Installer1.0.48 verifies the complete reviewed CocoScrapers source and protects it from ordinary bulk replacement."
+      ]
+    },
+    {
+      "heading": "Preserved settings and compatibility",
+      "bullets": [
+        "In-place updates retain accounts, preferences, saved data and unrelated addons. Standard and Clean retain their established selected-data and reset behavior.",
+        "Both edition playback differences, prior privacy and reliability fixes, current Helper sync providers and branded icon packs remain included."
+      ]
+    }
+  ]
+}

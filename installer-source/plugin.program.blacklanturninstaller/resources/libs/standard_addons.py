@@ -13,7 +13,7 @@ import xml.etree.ElementTree as E
 import zipfile
 
 MANAGED = frozenset(('plugin.video.themoviedb.helper', 'plugin.video.umbrella',
-                     'script.module.jurialmunkey', 'plugin.video.youtube','script.module.tmdbhelper.sync.trakt','script.module.tmdbhelper.sync.mdblist','script.module.tmdbhelper.sync.kodi'))
+                     'script.module.jurialmunkey', 'plugin.video.youtube','script.module.tmdbhelper.sync.trakt','script.module.tmdbhelper.sync.mdblist','script.module.tmdbhelper.sync.kodi','script.module.cocoscrapers'))
 NATIVE = frozenset(('inputstream.adaptive', 'script.module.pil'))
 RUNTIME = frozenset(('plugin.program.blacklanturninstaller',))
 OWN_REPO = 'repository.blacklanturn'

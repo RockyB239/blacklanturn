@@ -265,9 +265,13 @@ class PublicRowSnapshots:
                 return path in rows or files==[]
         except (OSError,TypeError,ValueError,RecursionError):return False
 
-    def clear(self,preserve_disk=False):
+    def clear(self,preserve_disk=False,preserve_display=False):
         with self.lock:
-            self.revision+=1;self.rows.clear();self.dirty=False
+            self.revision+=1
+            # Watch updates retire queued publications, but these sanitized
+            # displays have no watch state. Keep their original expiry/history.
+            if preserve_display:return
+            self.rows.clear();self.dirty=False
             if preserve_disk:return
             archive=self._archive_store()
             if archive is not None:archive.clear()

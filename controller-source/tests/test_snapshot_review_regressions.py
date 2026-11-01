@@ -140,7 +140,10 @@ class ControllerReview(unittest.TestCase):
    s,calls,controls,queue=self.state(folder,provider)
    s.set_rows([{'label':'Public','path':P},{'label':'Second','path':P+'&page=2'}]);self.drain(queue)
    self.assertEqual(s.rows[0][0]['playcount'],3);self.assertEqual(s.rows[0][0]['title'],'Fresh watched response')
-   self.assertIsNone(s.snapshot_cache.get(P));self.assertIsNone(s.result_cache.get(P));self.assertFalse(s.actions_open);self.assertFalse(s.row_window_busy)
+   retained=s.snapshot_cache.get(P)
+   self.assertEqual(retained[0]['title'],ITEM['title'],'Watch refresh keeps the original neutral display, never the obsolete worker response')
+   self.assertNotIn('playcount',retained[0]);self.assertNotIn('resume',retained[0])
+   self.assertIsNone(s.result_cache.get(P));self.assertFalse(s.actions_open);self.assertFalse(s.row_window_busy)
 
  def test_pending_local_saved_row_restarts_after_capture_restore_without_provider(self):
   for destination in ('settings','search'):

@@ -147,6 +147,9 @@ class Wizard:
             if plan.get('helper_sync_policy')=='providers-1':
                 from resources.libs import helper_providers
                 helper_providers.protect(os.path.join(CONFIG.DATABASE,db.latest_db('Addons')))
+            if plan.get('cocoscrapers_policy')=='parallel-airdate-1':
+                from resources.libs import cocoscrapers_policy
+                cocoscrapers_policy.protect(os.path.join(CONFIG.DATABASE,db.latest_db('Addons')))
             self.dialogProgress.update(50, 'Updating BlackLanturn add-ons and patches. Saved data stays in place…')
             applying, plan = plan, None
             result = inplace_update.apply(applying, registrar=addon_registration.Registrar(xbmc))
@@ -264,6 +267,9 @@ class Wizard:
                     if (prepared.get('policy') or {}).get('helper_sync_policy')=='providers-1':
                         from resources.libs import helper_providers
                         helper_providers.verify_kept(CONFIG.HOME,kept)
+                    if (prepared.get('policy') or {}).get('cocoscrapers_policy')=='parallel-airdate-1':
+                        from resources.libs import cocoscrapers_policy
+                        cocoscrapers_policy.verify_kept(CONFIG.HOME,kept)
                 except (managed_addons.ProtectionError, OSError, ValueError, TypeError, IndexError) as exc:
                     self.dialogProgress.close()
                     self.dialog.ok(CONFIG.ADDONTITLE, str(exc))
@@ -304,6 +310,9 @@ class Wizard:
                     if (prepared.get('policy') or {}).get('helper_sync_policy')=='providers-1':
                         from resources.libs import helper_providers
                         helper_providers.protect(os.path.join(CONFIG.DATABASE,db.latest_db('Addons')))
+                    if (prepared.get('policy') or {}).get('cocoscrapers_policy')=='parallel-airdate-1':
+                        from resources.libs import cocoscrapers_policy
+                        cocoscrapers_policy.protect(os.path.join(CONFIG.DATABASE,db.latest_db('Addons')))
                     xbmc.executebuiltin('UpdateLocalAddons', wait=True)
                 except (managed_addons.ProtectionError, RuntimeError) as exc:
                     self.dialogProgress.close()

@@ -55,6 +55,7 @@ class HeroProjection:
         # subclasses may use super(), which cannot run on a display projection.
         from live_review import LiveReview
         self._home_behavior=LiveReview
+        self.logo_decisions=getattr(owner,'logo_decisions',None)
         self.display_ratings=LiveReview.display_ratings.__get__(self)
         self.rating_identity=LiveReview.rating_identity.__get__(self)
     def setProperty(self,key,value):self.props[key]=value
