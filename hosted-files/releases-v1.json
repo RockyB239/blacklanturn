@@ -2,39 +2,32 @@
   "schema": 1,
   "releases": [
     {
-      "id": "blacklanturn-general-1.1.53-r0",
+      "id": "blacklanturn-general-1.1.54-r0",
       "edition": "general",
-      "version": "1.1.53",
+      "version": "1.1.54",
       "revision": 0,
-      "title": "BlackLanturn Build 1.1.53",
-      "summary": "Clearer Options, consistent menus and artwork styles, and refresh controls that keep your place.",
+      "title": "BlackLanturn Build 1.1.54",
+      "summary": "Player choices for shows and episodes, with opaque settings surfaces and consistent native menus.",
       "sections": [
         {
-          "heading": "Options made for your remote",
+          "heading": "Choose how to play a show",
           "bullets": [
-            "Play, Play using, Details and Choose genre stay easy to reach. Genre stays out of episode navigation.",
-            "Save, Trakt, discovery, recommendations and refresh actions are grouped in one clear panel."
+            "Play using on a show or season opens the episode browser first. Choose an episode to use the existing playback choices.",
+            "Episode cards continue to open the chooser directly. Set default player in a TV context changes the episode default without starting playback."
           ]
         },
         {
-          "heading": "A consistent BlackLanturn style",
+          "heading": "Clearer settings and native menus",
           "bullets": [
-            "Settings, Kodi dialogs and Installer menus use the same charcoal and cyan treatment.",
-            "Silver and Smoked Glass apply across branded menu icons, genre choices and YouTube category artwork."
+            "Settings use an opaque BlackLanturn background across Kodi's content area.",
+            "Deeper settings and selection screens use the shared menu styling. Playback settings and stream controls keep their compact layout."
           ]
         },
         {
-          "heading": "Refresh without losing your place",
+          "heading": "Keep your settings and sign-ins",
           "bullets": [
-            "Reload a list, refresh title information or check for new episodes from Options.",
-            "Current titles and your browsing position stay available if a refresh cannot finish."
-          ]
-        },
-        {
-          "heading": "Your setup stays yours",
-          "bullets": [
-            "Accounts, playback preferences, saved titles, progress and other add-ons stay in place.",
-            "Included add-ons and their tested BlackLanturn fixes continue to update together."
+            "Use Update BlackLanturn for the installed edition to retain saved preferences, accounts, history and unrelated add-ons.",
+            "Installer1.0.49 remains current. No installer upgrade is needed when it is already installed. Both editions retain their existing compatible add-ons and platform playback differences."
           ]
         }
       ],
@@ -115,7 +108,7 @@
         "addons/script.blacklanturn.preview/NOTICES.txt": "f4bd742eeae81e3bec29bbe351189ec0110e9fd9c77ca38d4e6cdada176b87fe",
         "addons/script.blacklanturn.preview/action_panel.py": "7f1b53e1b86facecece41c02198003594d80ed77e0536bbac92dceb1cda38d0c",
         "addons/script.blacklanturn.preview/action_panel_model.py": "1c0b0ea46d5c634e080cfafa8dac7d0fa37a560c029d47e1db5e155806c612b6",
-        "addons/script.blacklanturn.preview/addon.xml": "35765731bf2133c5e0981f86518b3002815d766affece0daaaa804a16ac217bd",
+        "addons/script.blacklanturn.preview/addon.xml": "468bcbf5681160c8f64acb2b8fa22c6f907984a3dc81dba3bd41c9de8844b4f7",
         "addons/script.blacklanturn.preview/addon_catalog.py": "08e70d0a52a5dc1dcbae87c35da414a191c9f989b6242d1ee8a485668ba12962",
         "addons/script.blacklanturn.preview/autoplay_session.py": "e2f12f9ad664312f4ff3fc507bf0b54cab2a0c3375e9b5768515426bede1e5a6",
         "addons/script.blacklanturn.preview/backend_core.py": "f9c361f0fe4a075d2526778b24348790f9b5a8024321622a7f4c9b284c99ac5a",
@@ -145,7 +138,7 @@
         "addons/script.blacklanturn.preview/light_home_view.py": "be4be17b306e0d66da4408db1589253488e46114e7320c2d045172a907d0ba5e",
         "addons/script.blacklanturn.preview/live_core.py": "eec70f5eb1e75733231a82896daf54231728400a9bd945c983ee99fc41c665ff",
         "addons/script.blacklanturn.preview/live_recovery.py": "7cd2f6b729b1978c23b70b99512c3fb68f153deec1ecc24608bc8c20b67954f0",
-        "addons/script.blacklanturn.preview/live_review.py": "aab9a7e1406a92a9e64a222eb20090123cb3b61bd37dbb19490fdd80c9aab873",
+        "addons/script.blacklanturn.preview/live_review.py": "b1f8aa11e07540993d8d4fc51d2334bbd492c8edd40fd8423aa023beaedfe77c",
         "addons/script.blacklanturn.preview/live_runtime.py": "20bac724eb773dd779d3d012f563639a32e516b6c63e630ed6baa75d600cd30a",
         "addons/script.blacklanturn.preview/local_watch.py": "d3d7c7da22ba39deef83e3e5e59f4cb26607f78551d03f07591fb027bab07d39",
         "addons/script.blacklanturn.preview/logo_readability.py": "d53043f168889b2c69354d4cbbfcda590ba53263f8a4b4768bb29b35030628db",
@@ -155,7 +148,7 @@
         "addons/script.blacklanturn.preview/navigation_core.py": "5bdd4897be395ba094486d8064478e51643f28ef26c1ae60b1cf76537cf87169",
         "addons/script.blacklanturn.preview/page_ahead.py": "e5b4a5d0a8c276d8245e6f8cb28ead7872e5c774ff84b44132a13860befe0c0d",
         "addons/script.blacklanturn.preview/personal_library.py": "bb13813da3d3e8c59f941696b00fa880302c0d4365a17d96ef12fded0300bd64",
-        "addons/script.blacklanturn.preview/playback_core.py": "4619fbcb5e6ed8ae52cee6bfe717219ea51687dd584451ff0887bbd605f1f04b",
+        "addons/script.blacklanturn.preview/playback_core.py": "e29394cc9035bac2894d5cada105775f6568a97c0a6fa9c05ddff4d55987afe6",
         "addons/script.blacklanturn.preview/playback_info.py": "a890b0d3efc1c58bd4028f3d697a6d1575239948594ea02addd97688e1be6139",
         "addons/script.blacklanturn.preview/playback_runtime.py": "79a45584a73212eb8d2e736698e216462e79f22de378f838397188c516f42fd7",
         "addons/script.blacklanturn.preview/player_preferences.py": "d759caaef3b1914a5e85fe897515dd3b674cdd8c28afe6b5425e382dad7f7fb0",
@@ -488,7 +481,7 @@
         "addons/script.blacklanturn.preview/resources/media/white.png": "7ac2abfce2be8b46dd9826d597d94edeefc1570b4a992622721b90a1850e3ee9",
         "addons/script.blacklanturn.preview/resources/media/youtube.png": "151995c7ddf79e09351ee94593bbfbc751493dc575eefd9cbbd1fcb3036565e4",
         "addons/script.blacklanturn.preview/resources/skins/Default/1080i/ActionPanel.xml": "89915d2696d7d173bd978fa10f246cbcd999b9617af5f57ae5bc01d2e59e3d20",
-        "addons/script.blacklanturn.preview/resources/skins/Default/1080i/BackendSettings.xml": "54bc90d95b070d3121bbe9499c98db4e462ded3e43e698cea744ac1a1ccc8bcc",
+        "addons/script.blacklanturn.preview/resources/skins/Default/1080i/BackendSettings.xml": "97b4e841effe553bde898810edb88c3fbda45464308a189a6f9c579186673e12",
         "addons/script.blacklanturn.preview/resources/skins/Default/1080i/FeedbackUndo.xml": "d95b3d5e819a16d27ba4f5e8041ac4ee497752fe7773b7aef90dbfcd21697510",
         "addons/script.blacklanturn.preview/resources/skins/Default/1080i/GenrePicker.xml": "753caf30603a077e4521c15d6f24adeec84e873407edcefa97027f4cf2a1b7f8",
         "addons/script.blacklanturn.preview/resources/skins/Default/1080i/IconPicker.xml": "cf5af6174530cedf2c13d08ac6b171f9c3fdf5637cc90fe8c06a655f4f66e4d0",
@@ -775,50 +768,58 @@
         "addons/skin.blacklanturn.preview/media/blacklanturn/action-panel/group.png": "f62f65b98d2bd32b35b9cb706da5a3811cb112ef1f811618f9378287f1e8281e",
         "addons/skin.blacklanturn.preview/media/blacklanturn/action-panel/panel.png": "42fc1e6cbae961fe4f720a3c4bcc11e649d21388ba90b9744e2840664c02be47",
         "addons/skin.blacklanturn.preview/media/blacklanturn/action-panel/rest.png": "228d9170cf2631b0d8b7542fcee583d823352d4524e3b2e0e290ac94b9dd4286",
-        "addons/skin.blacklanturn.preview/xml/DialogAddonSettings.xml": "b26be721e70da004a4d820ef5a276af8aacf41147eda7369cac22222e9ed25f9",
+        "addons/skin.blacklanturn.preview/xml/DialogAddonInfo.xml": "3fa57a2b23e797aee03dbf08117b6c56a681ca653a320b1152337255c2fa1862",
+        "addons/skin.blacklanturn.preview/xml/DialogAddonSettings.xml": "644d2602bcffe9d07e40ebc0af84c0b160555cdeed1005addf10504f68ffefef",
+        "addons/skin.blacklanturn.preview/xml/DialogColorPicker.xml": "8b53b40ecaf9f99e8d9ae5db8aee29c58b106d5f6488966af79841bb4ac8c98c",
         "addons/skin.blacklanturn.preview/xml/DialogContextMenu.xml": "4e42414430fe701e3773e23118b8a2d9ac76aae6d71508ce194dd575080505a5",
+        "addons/skin.blacklanturn.preview/xml/DialogKeyboard.xml": "05a2b35e438ca0b200d6ac8e8925f77975e3767c3598ec3ac884dc3615a3e01a",
+        "addons/skin.blacklanturn.preview/xml/DialogMediaSource.xml": "388a629546adfa444ce73fb7957ef07ab9c37583b14015c77a6494e512bc8b1d",
+        "addons/skin.blacklanturn.preview/xml/DialogNumeric.xml": "969137b8462f8d2caebd1a3b90fe770b40fd1c10ba3490a375bdbbedbf7350ac",
+        "addons/skin.blacklanturn.preview/xml/DialogSelect.xml": "a1f439c093b49d1ae8b1465faae46c2219e161f1ee844403de5ed4223180bfdf",
+        "addons/skin.blacklanturn.preview/xml/DialogSlider.xml": "10ecaf0f34e41c71dcc98d17cbb2e103b560a4a0611ef7e60c360fc79cc38f11",
+        "addons/skin.blacklanturn.preview/xml/DialogTextViewer.xml": "536fe2da30600876c86a37ca4504664b836f714327685fa823ab3a5f62bcb829",
+        "addons/skin.blacklanturn.preview/xml/FileBrowser.xml": "2247146634e54c5d3bd081bd6719fbb41d3683a1d42d9360dd63579aebc96f4b",
         "addons/skin.blacklanturn.preview/xml/Home.xml": "7495994a5f5a1f0a71ad9e7e71d5dd43387433c822fabf179cac20050227586a",
-        "addons/skin.blacklanturn.preview/xml/Includes.xml": "77927ccac86c6e1ba9b29e7db0e6ea0c329eeb56446b094b9b80801e01c8be6b",
-        "addons/skin.blacklanturn.preview/xml/Includes_Buttons.xml": "d05d5fa8f63018547a982388d0bc251194e3e2206bb96d821f8cb983a7847314",
+        "addons/skin.blacklanturn.preview/xml/Includes.xml": "718b7805d2aa1580da851d4afa48d14c9973d04fe1b3863a40d31f100bf89529",
+        "addons/skin.blacklanturn.preview/xml/Includes_BlackLanturnSettings.xml": "1a2f9049d6172846cf4fc32fa7ed9a66f896637be11ae600f434587a97923e81",
+        "addons/skin.blacklanturn.preview/xml/Includes_BlackLanturnStreams.xml": "411532bce289e17efc05929fb24f18954d8ff852be084fd82aa4e26831b99113",
+        "addons/skin.blacklanturn.preview/xml/Includes_Buttons.xml": "ea60fdab9e3ca2ba0bde8262014f7b229f43763d17b0b959999ac64512afda6f",
         "addons/skin.blacklanturn.preview/xml/Includes_DialogSelect.xml": "fe76591059f742a2bcb5455ce0a915fea685008183b1330e1c36f43862150794",
-        "addons/skin.blacklanturn.preview/xml/Settings.xml": "5128968e18554b3fd8165a04c453b5392c392bdc8b0c309e815a16624fb30d28",
-        "addons/skin.blacklanturn.preview/xml/Variables.xml": "5b501575db33f4e4a4e57bc1890204857eebb051ebe9e6c102049f0b60844bdc"
+        "addons/skin.blacklanturn.preview/xml/Settings.xml": "8407aaacafbb95aab59e4464952a3563a38c7993c8cfc12636d3812d234458d3",
+        "addons/skin.blacklanturn.preview/xml/SettingsCategory.xml": "3e9554f6542c2be1ee0dc7c131efa0ec913708bf9b4d65ddf03ed2dc53f19d58",
+        "addons/skin.blacklanturn.preview/xml/SettingsProfile.xml": "7b4750d1b68b1c800ba7620cb6f51eda0f8fdded41405772839fa3bebbce7640",
+        "addons/skin.blacklanturn.preview/xml/SettingsSystemInfo.xml": "4b0bed06fafcf57a91ace257916d52ecc37a587d091e6a281c5ea885f72ff33d",
+        "addons/skin.blacklanturn.preview/xml/SkinSettings.xml": "fc985d455c675fc1654e31f05ed3bb2bed293a42049bb25c8af497913f7f0dc2",
+        "addons/skin.blacklanturn.preview/xml/Variables.xml": "34006a0339bf6757ba165643d012b011583f07f99de4d75f6a318ad4c2e7cbfb"
       }
     },
     {
-      "id": "blacklanturn-apple-1.1.53-r0",
+      "id": "blacklanturn-apple-1.1.54-r0",
       "edition": "apple",
-      "version": "1.1.53",
+      "version": "1.1.54",
       "revision": 0,
-      "title": "BlackLanturn Build 1.1.53",
-      "summary": "Clearer Options, consistent menus and artwork styles, and refresh controls that keep your place.",
+      "title": "BlackLanturn Build 1.1.54",
+      "summary": "Player choices for shows and episodes, with opaque settings surfaces and consistent native menus.",
       "sections": [
         {
-          "heading": "Options made for your remote",
+          "heading": "Choose how to play a show",
           "bullets": [
-            "Play, Play using, Details and Choose genre stay easy to reach. Genre stays out of episode navigation.",
-            "Save, Trakt, discovery, recommendations and refresh actions are grouped in one clear panel."
+            "Play using on a show or season opens the episode browser first. Choose an episode to use the existing playback choices.",
+            "Episode cards continue to open the chooser directly. Set default player in a TV context changes the episode default without starting playback."
           ]
         },
         {
-          "heading": "A consistent BlackLanturn style",
+          "heading": "Clearer settings and native menus",
           "bullets": [
-            "Settings, Kodi dialogs and Installer menus use the same charcoal and cyan treatment.",
-            "Silver and Smoked Glass apply across branded menu icons, genre choices and YouTube category artwork."
+            "Settings use an opaque BlackLanturn background across Kodi's content area.",
+            "Deeper settings and selection screens use the shared menu styling. Playback settings and stream controls keep their compact layout."
           ]
         },
         {
-          "heading": "Refresh without losing your place",
+          "heading": "Keep your settings and sign-ins",
           "bullets": [
-            "Reload a list, refresh title information or check for new episodes from Options.",
-            "Current titles and your browsing position stay available if a refresh cannot finish."
-          ]
-        },
-        {
-          "heading": "Your setup stays yours",
-          "bullets": [
-            "Accounts, playback preferences, saved titles, progress and other add-ons stay in place.",
-            "Included add-ons and their tested BlackLanturn fixes continue to update together."
+            "Use Update BlackLanturn for the installed edition to retain saved preferences, accounts, history and unrelated add-ons.",
+            "Installer1.0.49 remains current. No installer upgrade is needed when it is already installed. Both editions retain their existing compatible add-ons and platform playback differences."
           ]
         }
       ],
@@ -899,7 +900,7 @@
         "addons/script.blacklanturn.preview/NOTICES.txt": "f4bd742eeae81e3bec29bbe351189ec0110e9fd9c77ca38d4e6cdada176b87fe",
         "addons/script.blacklanturn.preview/action_panel.py": "7f1b53e1b86facecece41c02198003594d80ed77e0536bbac92dceb1cda38d0c",
         "addons/script.blacklanturn.preview/action_panel_model.py": "1c0b0ea46d5c634e080cfafa8dac7d0fa37a560c029d47e1db5e155806c612b6",
-        "addons/script.blacklanturn.preview/addon.xml": "35765731bf2133c5e0981f86518b3002815d766affece0daaaa804a16ac217bd",
+        "addons/script.blacklanturn.preview/addon.xml": "468bcbf5681160c8f64acb2b8fa22c6f907984a3dc81dba3bd41c9de8844b4f7",
         "addons/script.blacklanturn.preview/addon_catalog.py": "08e70d0a52a5dc1dcbae87c35da414a191c9f989b6242d1ee8a485668ba12962",
         "addons/script.blacklanturn.preview/autoplay_session.py": "e2f12f9ad664312f4ff3fc507bf0b54cab2a0c3375e9b5768515426bede1e5a6",
         "addons/script.blacklanturn.preview/backend_core.py": "f9c361f0fe4a075d2526778b24348790f9b5a8024321622a7f4c9b284c99ac5a",
@@ -929,7 +930,7 @@
         "addons/script.blacklanturn.preview/light_home_view.py": "be4be17b306e0d66da4408db1589253488e46114e7320c2d045172a907d0ba5e",
         "addons/script.blacklanturn.preview/live_core.py": "eec70f5eb1e75733231a82896daf54231728400a9bd945c983ee99fc41c665ff",
         "addons/script.blacklanturn.preview/live_recovery.py": "7cd2f6b729b1978c23b70b99512c3fb68f153deec1ecc24608bc8c20b67954f0",
-        "addons/script.blacklanturn.preview/live_review.py": "aab9a7e1406a92a9e64a222eb20090123cb3b61bd37dbb19490fdd80c9aab873",
+        "addons/script.blacklanturn.preview/live_review.py": "b1f8aa11e07540993d8d4fc51d2334bbd492c8edd40fd8423aa023beaedfe77c",
         "addons/script.blacklanturn.preview/live_runtime.py": "20bac724eb773dd779d3d012f563639a32e516b6c63e630ed6baa75d600cd30a",
         "addons/script.blacklanturn.preview/local_watch.py": "d3d7c7da22ba39deef83e3e5e59f4cb26607f78551d03f07591fb027bab07d39",
         "addons/script.blacklanturn.preview/logo_readability.py": "d53043f168889b2c69354d4cbbfcda590ba53263f8a4b4768bb29b35030628db",
@@ -939,7 +940,7 @@
         "addons/script.blacklanturn.preview/navigation_core.py": "5bdd4897be395ba094486d8064478e51643f28ef26c1ae60b1cf76537cf87169",
         "addons/script.blacklanturn.preview/page_ahead.py": "e5b4a5d0a8c276d8245e6f8cb28ead7872e5c774ff84b44132a13860befe0c0d",
         "addons/script.blacklanturn.preview/personal_library.py": "bb13813da3d3e8c59f941696b00fa880302c0d4365a17d96ef12fded0300bd64",
-        "addons/script.blacklanturn.preview/playback_core.py": "4619fbcb5e6ed8ae52cee6bfe717219ea51687dd584451ff0887bbd605f1f04b",
+        "addons/script.blacklanturn.preview/playback_core.py": "e29394cc9035bac2894d5cada105775f6568a97c0a6fa9c05ddff4d55987afe6",
         "addons/script.blacklanturn.preview/playback_info.py": "a890b0d3efc1c58bd4028f3d697a6d1575239948594ea02addd97688e1be6139",
         "addons/script.blacklanturn.preview/playback_runtime.py": "79a45584a73212eb8d2e736698e216462e79f22de378f838397188c516f42fd7",
         "addons/script.blacklanturn.preview/player_preferences.py": "d759caaef3b1914a5e85fe897515dd3b674cdd8c28afe6b5425e382dad7f7fb0",
@@ -1272,7 +1273,7 @@
         "addons/script.blacklanturn.preview/resources/media/white.png": "7ac2abfce2be8b46dd9826d597d94edeefc1570b4a992622721b90a1850e3ee9",
         "addons/script.blacklanturn.preview/resources/media/youtube.png": "151995c7ddf79e09351ee94593bbfbc751493dc575eefd9cbbd1fcb3036565e4",
         "addons/script.blacklanturn.preview/resources/skins/Default/1080i/ActionPanel.xml": "89915d2696d7d173bd978fa10f246cbcd999b9617af5f57ae5bc01d2e59e3d20",
-        "addons/script.blacklanturn.preview/resources/skins/Default/1080i/BackendSettings.xml": "54bc90d95b070d3121bbe9499c98db4e462ded3e43e698cea744ac1a1ccc8bcc",
+        "addons/script.blacklanturn.preview/resources/skins/Default/1080i/BackendSettings.xml": "97b4e841effe553bde898810edb88c3fbda45464308a189a6f9c579186673e12",
         "addons/script.blacklanturn.preview/resources/skins/Default/1080i/FeedbackUndo.xml": "d95b3d5e819a16d27ba4f5e8041ac4ee497752fe7773b7aef90dbfcd21697510",
         "addons/script.blacklanturn.preview/resources/skins/Default/1080i/GenrePicker.xml": "753caf30603a077e4521c15d6f24adeec84e873407edcefa97027f4cf2a1b7f8",
         "addons/script.blacklanturn.preview/resources/skins/Default/1080i/IconPicker.xml": "cf5af6174530cedf2c13d08ac6b171f9c3fdf5637cc90fe8c06a655f4f66e4d0",
@@ -1559,14 +1560,29 @@
         "addons/skin.blacklanturn.preview/media/blacklanturn/action-panel/group.png": "f62f65b98d2bd32b35b9cb706da5a3811cb112ef1f811618f9378287f1e8281e",
         "addons/skin.blacklanturn.preview/media/blacklanturn/action-panel/panel.png": "42fc1e6cbae961fe4f720a3c4bcc11e649d21388ba90b9744e2840664c02be47",
         "addons/skin.blacklanturn.preview/media/blacklanturn/action-panel/rest.png": "228d9170cf2631b0d8b7542fcee583d823352d4524e3b2e0e290ac94b9dd4286",
-        "addons/skin.blacklanturn.preview/xml/DialogAddonSettings.xml": "b26be721e70da004a4d820ef5a276af8aacf41147eda7369cac22222e9ed25f9",
+        "addons/skin.blacklanturn.preview/xml/DialogAddonInfo.xml": "3fa57a2b23e797aee03dbf08117b6c56a681ca653a320b1152337255c2fa1862",
+        "addons/skin.blacklanturn.preview/xml/DialogAddonSettings.xml": "644d2602bcffe9d07e40ebc0af84c0b160555cdeed1005addf10504f68ffefef",
+        "addons/skin.blacklanturn.preview/xml/DialogColorPicker.xml": "8b53b40ecaf9f99e8d9ae5db8aee29c58b106d5f6488966af79841bb4ac8c98c",
         "addons/skin.blacklanturn.preview/xml/DialogContextMenu.xml": "4e42414430fe701e3773e23118b8a2d9ac76aae6d71508ce194dd575080505a5",
+        "addons/skin.blacklanturn.preview/xml/DialogKeyboard.xml": "05a2b35e438ca0b200d6ac8e8925f77975e3767c3598ec3ac884dc3615a3e01a",
+        "addons/skin.blacklanturn.preview/xml/DialogMediaSource.xml": "388a629546adfa444ce73fb7957ef07ab9c37583b14015c77a6494e512bc8b1d",
+        "addons/skin.blacklanturn.preview/xml/DialogNumeric.xml": "969137b8462f8d2caebd1a3b90fe770b40fd1c10ba3490a375bdbbedbf7350ac",
+        "addons/skin.blacklanturn.preview/xml/DialogSelect.xml": "a1f439c093b49d1ae8b1465faae46c2219e161f1ee844403de5ed4223180bfdf",
+        "addons/skin.blacklanturn.preview/xml/DialogSlider.xml": "10ecaf0f34e41c71dcc98d17cbb2e103b560a4a0611ef7e60c360fc79cc38f11",
+        "addons/skin.blacklanturn.preview/xml/DialogTextViewer.xml": "536fe2da30600876c86a37ca4504664b836f714327685fa823ab3a5f62bcb829",
+        "addons/skin.blacklanturn.preview/xml/FileBrowser.xml": "2247146634e54c5d3bd081bd6719fbb41d3683a1d42d9360dd63579aebc96f4b",
         "addons/skin.blacklanturn.preview/xml/Home.xml": "7495994a5f5a1f0a71ad9e7e71d5dd43387433c822fabf179cac20050227586a",
-        "addons/skin.blacklanturn.preview/xml/Includes.xml": "77927ccac86c6e1ba9b29e7db0e6ea0c329eeb56446b094b9b80801e01c8be6b",
-        "addons/skin.blacklanturn.preview/xml/Includes_Buttons.xml": "d05d5fa8f63018547a982388d0bc251194e3e2206bb96d821f8cb983a7847314",
+        "addons/skin.blacklanturn.preview/xml/Includes.xml": "718b7805d2aa1580da851d4afa48d14c9973d04fe1b3863a40d31f100bf89529",
+        "addons/skin.blacklanturn.preview/xml/Includes_BlackLanturnSettings.xml": "1a2f9049d6172846cf4fc32fa7ed9a66f896637be11ae600f434587a97923e81",
+        "addons/skin.blacklanturn.preview/xml/Includes_BlackLanturnStreams.xml": "411532bce289e17efc05929fb24f18954d8ff852be084fd82aa4e26831b99113",
+        "addons/skin.blacklanturn.preview/xml/Includes_Buttons.xml": "ea60fdab9e3ca2ba0bde8262014f7b229f43763d17b0b959999ac64512afda6f",
         "addons/skin.blacklanturn.preview/xml/Includes_DialogSelect.xml": "fe76591059f742a2bcb5455ce0a915fea685008183b1330e1c36f43862150794",
-        "addons/skin.blacklanturn.preview/xml/Settings.xml": "5128968e18554b3fd8165a04c453b5392c392bdc8b0c309e815a16624fb30d28",
-        "addons/skin.blacklanturn.preview/xml/Variables.xml": "5b501575db33f4e4a4e57bc1890204857eebb051ebe9e6c102049f0b60844bdc"
+        "addons/skin.blacklanturn.preview/xml/Settings.xml": "8407aaacafbb95aab59e4464952a3563a38c7993c8cfc12636d3812d234458d3",
+        "addons/skin.blacklanturn.preview/xml/SettingsCategory.xml": "3e9554f6542c2be1ee0dc7c131efa0ec913708bf9b4d65ddf03ed2dc53f19d58",
+        "addons/skin.blacklanturn.preview/xml/SettingsProfile.xml": "7b4750d1b68b1c800ba7620cb6f51eda0f8fdded41405772839fa3bebbce7640",
+        "addons/skin.blacklanturn.preview/xml/SettingsSystemInfo.xml": "4b0bed06fafcf57a91ace257916d52ecc37a587d091e6a281c5ea885f72ff33d",
+        "addons/skin.blacklanturn.preview/xml/SkinSettings.xml": "fc985d455c675fc1654e31f05ed3bb2bed293a42049bb25c8af497913f7f0dc2",
+        "addons/skin.blacklanturn.preview/xml/Variables.xml": "34006a0339bf6757ba165643d012b011583f07f99de4d75f6a318ad4c2e7cbfb"
       }
     }
   ]
