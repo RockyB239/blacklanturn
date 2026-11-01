@@ -1,10 +1,25 @@
 """Resolve YouTube category art for display without changing provider records."""
 import re
+from copy import deepcopy
 from pathlib import Path
 from urllib.parse import urlsplit, parse_qs
 from icon_packs import icon_path, selected_pack
 
 ROOT = Path(__file__).resolve().parent
+
+
+def provider_items(items):
+    """Undo only our display artwork before caching/restoring category records."""
+    result=[]
+    for item in items:
+        original=item.get('_youtube_folder_source_art')
+        if isinstance(original,dict) and item.get('_youtube_folder_icon'):
+            item=dict(item)
+            for key in ('art','thumbnail','_youtube_folder_icon','_youtube_folder_source_art'):
+                item.pop(key,None)
+            item.update(deepcopy(original))
+        result.append(item)
+    return result
 
 
 def category_icon(item):
@@ -39,12 +54,14 @@ def display_items(items, config):
     """
     pack = selected_pack(config)
     result = []
-    for item in items:
+    for item in provider_items(items):
         slug = category_icon(item)
         if slug:
             image = icon_path(ROOT, slug, pack)
+            original=deepcopy({key:item[key] for key in ('art','thumbnail') if key in item})
             item = dict(item, art=dict(item.get('art') or {}, thumb=image,
                                       icon=image, fanart=image, landscape=image),
-                        thumbnail=image, _youtube_folder_icon=image)
+                        thumbnail=image, _youtube_folder_icon=image,
+                        _youtube_folder_source_art=original)
         result.append(item)
     return result

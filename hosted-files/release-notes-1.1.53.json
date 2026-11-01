@@ -1,0 +1,34 @@
+{
+  "title": "BlackLanturn Build 1.1.53",
+  "summary": "Clearer Options, consistent menus and artwork styles, and refresh controls that keep your place.",
+  "sections": [
+    {
+      "heading": "Options made for your remote",
+      "bullets": [
+        "Play, Play using, Details and Choose genre stay easy to reach. Genre stays out of episode navigation.",
+        "Save, Trakt, discovery, recommendations and refresh actions are grouped in one clear panel."
+      ]
+    },
+    {
+      "heading": "A consistent BlackLanturn style",
+      "bullets": [
+        "Settings, Kodi dialogs and Installer menus use the same charcoal and cyan treatment.",
+        "Silver and Smoked Glass apply across branded menu icons, genre choices and YouTube category artwork."
+      ]
+    },
+    {
+      "heading": "Refresh without losing your place",
+      "bullets": [
+        "Reload a list, refresh title information or check for new episodes from Options.",
+        "Current titles and your browsing position stay available if a refresh cannot finish."
+      ]
+    },
+    {
+      "heading": "Your setup stays yours",
+      "bullets": [
+        "Accounts, playback preferences, saved titles, progress and other add-ons stay in place.",
+        "Included add-ons and their tested BlackLanturn fixes continue to update together."
+      ]
+    }
+  ]
+}

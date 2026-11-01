@@ -1,11 +1,12 @@
+<?xml version='1.0' encoding='utf-8'?>
 <window>
-	<controls>
-		<control type="image">
-			<posx>0</posx>
-			<posy>0</posy>
-			<width>1920</width>
-			<height>1080</height>
-			<texture>bg_screen.jpg</texture>
-		</control>
-	</controls>
+  <controls>
+    <control type="image">
+      <posx>0</posx>
+      <posy>0</posy>
+      <width>1920</width>
+      <height>1080</height>
+      <texture border="24">blacklanturn/options-panel.png</texture>
+    </control>
+  </controls>
 </window>

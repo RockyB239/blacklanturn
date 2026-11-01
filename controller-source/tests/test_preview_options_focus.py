@@ -4,6 +4,7 @@ import test_episode_options as menu_fixtures
 import test_preview_input_epoch as epoch_fixtures
 import test_preview_navigation_stop as candidate_fixtures
 from test_window_lifecycle import ROOT,extract
+from icon_packs import selected_pack
 
 class PreviewOptionsFocus(unittest.TestCase):
     def test_options_claims_modal_ownership_before_focus_lookup(self):
@@ -27,7 +28,7 @@ class PreviewOptionsFocus(unittest.TestCase):
     def test_long_genre_cancel_restarts_delay_before_focus_returns(self):
         w,calls=epoch_fixtures.PreviewInputEpoch().state();w.section='Shows';w.browse_sources=[];w.active_page=None
         def choose(*args):w.dwell=time.monotonic()-30;return None
-        extract(ROOT/'live_review.py','browse_source',{'choose_genre':choose},'LiveReview')(w)
+        extract(ROOT/'live_review.py','browse_source',{'choose_genre':choose,'selected_pack':selected_pack},'LiveReview')(w)
         w.preview(automatic=True)
         self.assertNotIn('worker',calls)
     def test_long_trakt_dialog_keeps_modal_through_focus_restore(self):

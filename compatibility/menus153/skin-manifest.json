@@ -1,0 +1,22 @@
+{
+  "files": {
+    "xml/Includes.xml": "77927ccac86c6e1ba9b29e7db0e6ea0c329eeb56446b094b9b80801e01c8be6b",
+    "xml/Includes_Buttons.xml": "d05d5fa8f63018547a982388d0bc251194e3e2206bb96d821f8cb983a7847314",
+    "xml/Includes_DialogSelect.xml": "fe76591059f742a2bcb5455ce0a915fea685008183b1330e1c36f43862150794",
+    "xml/DialogAddonSettings.xml": "b26be721e70da004a4d820ef5a276af8aacf41147eda7369cac22222e9ed25f9",
+    "xml/DialogContextMenu.xml": "4e42414430fe701e3773e23118b8a2d9ac76aae6d71508ce194dd575080505a5",
+    "xml/Settings.xml": "5128968e18554b3fd8165a04c453b5392c392bdc8b0c309e815a16624fb30d28",
+    "xml/Variables.xml": "5b501575db33f4e4a4e57bc1890204857eebb051ebe9e6c102049f0b60844bdc",
+    "media/blacklanturn/action-panel/panel.png": "42fc1e6cbae961fe4f720a3c4bcc11e649d21388ba90b9744e2840664c02be47",
+    "media/blacklanturn/action-panel/focus.png": "49cb68379e1cbd1936fbc387ebd158881aaeccd5ecca540f967b99bf249db73c",
+    "media/blacklanturn/action-panel/rest.png": "228d9170cf2631b0d8b7542fcee583d823352d4524e3b2e0e290ac94b9dd4286",
+    "media/blacklanturn/action-panel/action.png": "3a350e398b8bc86da3815da02878bca651aebebeb972e4c97b494c9c4e208cb8",
+    "media/blacklanturn/action-panel/group.png": "f62f65b98d2bd32b35b9cb706da5a3811cb112ef1f811618f9378287f1e8281e"
+  },
+  "forbidden_skin_files": [
+    "xml/script-upnext-upnext.xml",
+    "xml/script-upnext-upnext-simple.xml",
+    "xml/script-upnext-stillwatching.xml",
+    "xml/script-upnext-stillwatching-simple.xml"
+  ]
+}

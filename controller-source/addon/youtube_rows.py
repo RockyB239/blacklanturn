@@ -76,13 +76,13 @@ class YouTubeRows:
         if getattr(self,'section','')!='YouTube':return files
         path=self.paths[n]
         if not path.startswith('plugin://plugin.video.youtube/'):return files
-        from youtube_folder_artwork import display_items
+        from youtube_folder_artwork import display_items,provider_items
         if not hasattr(self,'youtube_pages'):self.youtube_pages={}
         definition=next((d for d in self.page_definitions if d.get('path')==path),{})
         page=self.youtube_pages.get(path)
         if page is not None and any(x.get('_youtube_more') for x in files):
             return display_items(copy.deepcopy(page['items'])+([_more_card(page.get('error'))] if page['cursor'] else []),getattr(self,'config',{}))
-        items,cursor=split_page(files,path)
+        items,cursor=split_page(provider_items(files),path)
         if 'youtube_cursor' in definition:cursor=copy.deepcopy(definition['youtube_cursor'])
         if items and YouTubeRows.fresh_recommendation_row(self,n):
             items=recommendation_order(items)

@@ -11,6 +11,7 @@ from unittest.mock import patch
 ROOT = Path(__file__).parents[1] / 'addon'
 sys.path.insert(0, str(ROOT))
 from backend_core import SETTINGS_GROUPS
+from icon_packs import icon_path, selected_pack
 
 
 def method(filename, class_name, name, namespace):
@@ -39,6 +40,15 @@ class ListControl:
         self.position = position
 
 
+class ListItem:
+    def __init__(self, **values):
+        self.__dict__.update(values)
+        self.art = {}
+
+    def setArt(self, art):
+        self.art.update(art)
+
+
 class BackendPreferences(unittest.TestCase):
     def hub(self, config, handler=lambda action: None):
         category = next(i for i, group in enumerate(SETTINGS_GROUPS) if group[0] == 'Previews')
@@ -48,8 +58,16 @@ class BackendPreferences(unittest.TestCase):
                               category=category, row=2, handler=handler,
                               getControl=lambda cid: category_control if cid == 100 else rows,
                               setProperty=lambda *args: None, setFocusId=lambda cid: None)
-        ns = {'SETTINGS_GROUPS': SETTINGS_GROUPS,
-              'xbmcgui': SimpleNamespace(ListItem=lambda **kwargs: SimpleNamespace(**kwargs))}
+        ns = {'SETTINGS_GROUPS': SETTINGS_GROUPS, 'ROOT': ROOT,
+              'icon_path': icon_path, 'selected_pack': selected_pack,
+              'xbmcgui': SimpleNamespace(ListItem=ListItem)}
+        tree = ast.parse((ROOT / 'backend_ui.py').read_text(encoding='utf-8'))
+        helpers = [node for node in tree.body
+                   if isinstance(node, ast.FunctionDef) and node.name == 'menu_item'
+                   or isinstance(node, ast.Assign) and any(
+                       isinstance(target, ast.Name) and target.id == 'MENU_ICONS'
+                       for target in node.targets)]
+        exec(compile(ast.Module(body=helpers, type_ignores=[]), 'backend_ui.py', 'exec'), ns)
         for name in ('populate', 'onClick'):
             setattr(hub, name, MethodType(method('backend_ui.py', 'BackendSettings', name, ns), hub))
         hub.populate(category)

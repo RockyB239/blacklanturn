@@ -25,6 +25,11 @@ class Item:
     def __init__(self,**kwargs):pass
     def setArt(self,*a):pass
     def setProperty(self,*a):pass
+class Window:
+    def __init__(self,window_id):self.window_id=window_id;self.properties={}
+    def setProperty(self,key,value):self.properties[key]=value
+    def getProperty(self,key):return self.properties.get(key,'')
+sys.modules['xbmcgui'].Window=Window
 sys.modules['xbmcgui'].ListItem=Item
 sys.modules['xbmc'].getSkinDir=lambda:'skin.blacklanturn.preview'
 sys.modules['xbmc'].getCondVisibility=lambda _:False

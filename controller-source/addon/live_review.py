@@ -68,9 +68,13 @@ def choose_icon(current_icon,pack=DEFAULT_PACK):
     from icon_picker import choose_icon as choose
     return choose(current_icon,pack)
 
-def choose_genre(section,pages,current_page):
+def choose_action_panel(*args,**kwargs):
+    from action_panel import choose_action
+    return choose_action(*args,**kwargs)
+
+def choose_genre(section,pages,current_page,pack=DEFAULT_PACK):
     from genre_picker import choose_genre as choose
-    return choose(section,pages,current_page)
+    return choose(section,pages,current_page,pack)
 
 def load_related(make_path,provider,kind,identity,valid=lambda:True):
     from related_titles import load_related as load
@@ -465,7 +469,21 @@ class LiveReview(LibraryActions,RowCustomization,TitleFeedback,YouTubeBrowser,xb
         ICON_CHOICES.extend(extras)
         icon_packs.registered_ids={key for key,label in extras}
 
+    def refresh_icon_artwork(self):
+        # Repaint current display records only: no provider calls or cache purge.
+        focus=self.getFocusId();selected=dict(self.selected or {})
+        if self.section=='YouTube':
+            for n,row in enumerate(list(self.rows)):
+                position=self.getControl(900+n).getSelectedPosition()
+                self.apply_row(n,list(row),self.row_labels.get(n,''),position,update_selected=False,display_position=True)
+            fresh=next((x for row in self.rows for x in row if x.get('file')==selected.get('file')),selected)
+            if fresh:self.update(fresh)
+        self.setFocusId(focus)
+    def refresh_native_icons(self):
+        from menu_style import publish_native_icons
+        publish_native_icons(self.config)
     def refresh_navigation(self):
+        getattr(self,'refresh_native_icons',lambda:None)()
         connected=getattr(getattr(self,'youtube_connection',None),'connected',False)
         visible=visible_navigation(self.config,connected);self.navigation_items=sidebar_items(self.config,connected);control=self.getControl(50);control.reset();items=[]
         layout=sidebar_layout(len(visible));control.setHeight(layout['height'])
@@ -1540,7 +1558,8 @@ class LiveReview(LibraryActions,RowCustomization,TitleFeedback,YouTubeBrowser,xb
                 if not item:options.append(('settings','Open integration settings'))
             options.extend(getattr(self,'library_context_actions',lambda:[])())
             if not options:return
-            chosen=xbmcgui.Dialog().contextmenu([label for _,label in options])
+            chooser=getattr(self,'show_title_actions',None)
+            chosen=chooser(options,item,focus) if chooser is not None else xbmcgui.Dialog().contextmenu([label for _,label in options])
         finally:
             self.dwell=time.monotonic();self.actions_open=False
         event('title_action_selected',choice=chosen)
@@ -1574,6 +1593,8 @@ class LiveReview(LibraryActions,RowCustomization,TitleFeedback,YouTubeBrowser,xb
         elif action=='player':self.choose_playback_player(item)
         elif action=='default_player':self.choose_playback_player(item,save_default=True)
         elif action=='normal_autoplay':self.reset_source_session()
+        elif action=='reload_list':self.refresh_panel_list(focus)
+        elif action=='refresh_metadata':self.refresh_panel_metadata(item)
         elif action=='refresh':self.refresh_watch_status(sync=True)
         elif action=='retry':self.retry_lists()
         elif action=='trakt':
@@ -1586,6 +1607,133 @@ class LiveReview(LibraryActions,RowCustomization,TitleFeedback,YouTubeBrowser,xb
                 finally:self.dwell=time.monotonic();self.actions_open=False
                 if self.alive and complete:self.refresh_watch_status()
             threading.Thread(target=after,name='BlackLanturnTraktActions',daemon=True).start()
+    def show_title_actions(self,options,item,focus):
+        paths=getattr(self,'paths',[]);slot=focus-900 if focus in (900,901) else getattr(self,'last_row',0)
+        reload_path=getattr(self,'related_path','') if focus==3100 and self.mode=='details' else paths[slot] if 0<=slot<len(paths) else ''
+        if self.section!='YouTube' and valid_source(reload_path):options.append(('reload_list','Reload this list'))
+        params=title_details_params(item) if item else {}
+        if str(params.get('tmdb_id','')).isdigit() and params.get('tmdb_type') in ('movie','tv'):
+            options.append(('refresh_metadata','Check for new episodes' if params['tmdb_type']=='tv' else 'Refresh title information'))
+        selected=choose_action_panel(options,item=item,section=self.section,config=self.config,episode=bool(getattr(self,'episode_browser_context',None) or (item and episode_identity(item))))
+        return next((n for n,(key,_) in enumerate(options) if key==selected),-1)
+    def refresh_panel_list(self,focus=None):
+        focus=self.getFocusId() if focus is None else focus
+        related=focus==3100 and self.mode=='details';slot=focus-900 if focus in (900,901) else getattr(self,'last_row',0)
+        path=getattr(self,'related_path','') if related else self.paths[slot] if 0<=slot<len(self.paths) else ''
+        if not valid_source(path):return
+        with self.preview_dispatch_lock:
+            # One physical provider worker, including retired calls which cannot
+            # be interrupted inside Kodi's synchronous directory request.
+            if getattr(self,'panel_refresh_worker',None) is not None:return
+            token=object();self.panel_refresh_worker=token;self.panel_refresh_token=token
+            lifetime=getattr(self,'window_lifetime',None);generation=self.generation
+            control=self.getControl(3100 if related else 900+slot);position=control.getSelectedPosition()
+            records=self.related if related else self.rows[slot];old=list(records);anchor=old[position] if 0<=position<len(old) else None
+            selected=dict(self.selected or {});owner=getattr(self,'related_owner',None);offset=self.row_offset
+            ownership={'records':records}
+            if related:
+                request=object();self.related_request=request
+            else:
+                if not hasattr(self,'path_tokens'):self.path_tokens={}
+                request=self.path_tokens.get(slot,0)+1;self.path_tokens[slot]=request
+                getattr(self,'loading_paths',{}).pop(slot,None)
+            self.input_generation=getattr(self,'input_generation',0)+1;epoch=self.input_generation
+            self.stop_preview();preview=getattr(self,'preview_generation',None)
+            self.setProperty('notice','Refreshing this list…')
+        def current():
+            return (self.alive and lifetime is getattr(self,'window_lifetime',None) and self.generation==generation
+                    and self.panel_refresh_token is token and getattr(self,'input_generation',0)==epoch
+                    and getattr(self,'preview_generation',None)==preview
+                    and not getattr(self,'actions_open',False) and not getattr(self,'settings_open',False)
+                    and (self.mode=='details' and self.related_owner is owner and self.related_path==path
+                         and self.related_request is request and self.related is ownership['records'] if related else
+                         self.row_offset==offset and self.paths[slot]==path and self.path_tokens.get(slot)==request
+                         and self.rows[slot] is ownership['records']))
+        def work():
+            try:
+                if not current():return
+                files=get_list(provider_path(path))
+                if old and not files:raise RuntimeError('List is unavailable')
+                if not current():return
+                if not related:files=getattr(self,'fill_discovery_page',lambda p,f,c,**k:f)(path,files,current,refresh=True)
+                position_new=restored_position(files,anchor,position)
+                with self.preview_dispatch_lock:
+                    if not current():return
+                    if related:
+                        raw=files;store=getattr(self,'title_preferences',None)
+                        if store is not None:files=store.apply(files)
+                        files,_=page_cards(files,self.related_history,path)
+                        position_new=restored_position(files,anchor,position)
+                        rendered=[media_item(x) for x in files]
+                        if not current():return
+                        control.reset();control.addItems(rendered)
+                        if not current():return
+                        if files:control.selectItem(position_new)
+                        self.related=files;ownership['records']=files;self.title_related_raw=raw
+                    else:
+                        self.row_cache.pop(offset+slot,None)
+                        # position_new indexes raw records. apply_row restores its
+                        # anchor after filtering, ordering and page-card insertion.
+                        self.apply_row(slot,files,self.row_labels.get(slot,''),position_new,update_selected=False)
+                        ownership['records']=self.rows[slot]
+                        if not current():return
+                        cache=getattr(self,'result_cache',None)
+                        if cache is not None:cache.put(path,files,revision=cache.revision)
+                        match=next((x for x in self.rows[slot] if item_key(x)==item_key(selected)),None)
+                        if match:self.update(match)
+                    if current():self.setProperty('notice','List refreshed')
+            except Exception:
+                if current():self.setProperty('notice','List refresh is unavailable; current titles and position were kept')
+            finally:
+                with self.preview_dispatch_lock:
+                    if current():
+                        self.dwell=time.monotonic();self.focus_key=None;self.setFocusId(focus)
+                    if getattr(self,'panel_refresh_worker',None) is token:self.panel_refresh_worker=None
+        threading.Thread(target=work,name='BlackLanturnPanelRefresh',daemon=True).start()
+    def refresh_panel_metadata(self,item):
+        params=title_details_params(item)
+        if not params.get('tmdb_id'):return
+        with self.preview_dispatch_lock:
+            if getattr(self,'panel_refresh_worker',None) is not None:return
+            token=object();self.panel_refresh_worker=token;self.panel_refresh_token=token
+            lifetime=getattr(self,'window_lifetime',None);generation=self.generation;key=item.get('file')
+            focus=self.getFocusId();mode=self.mode;slot=focus-900 if focus in (900,901) else getattr(self,'last_row',0)
+            paths=getattr(self,'paths',[]);path=paths[slot] if 0<=slot<len(paths) else '';offset=getattr(self,'row_offset',0)
+            owner=getattr(self,'related_owner',None)
+            self.input_generation=getattr(self,'input_generation',0)+1;epoch=self.input_generation
+            self.stop_preview();preview=getattr(self,'preview_generation',None)
+            self.setProperty('notice','Refreshing title information…')
+        def current():
+            paths=getattr(self,'paths',[])
+            return (self.alive and lifetime is getattr(self,'window_lifetime',None) and self.generation==generation
+                    and self.panel_refresh_token is token and getattr(self,'input_generation',0)==epoch
+                    and getattr(self,'preview_generation',None)==preview and self.mode==mode
+                    and not getattr(self,'actions_open',False) and not getattr(self,'settings_open',False)
+                    and (self.selected or {}).get('file')==key and getattr(self,'row_offset',0)==offset
+                    and (paths[slot] if 0<=slot<len(paths) else '')==path
+                    and (mode!='details' or getattr(self,'related_owner',None) is owner))
+        def work():
+            completed=False
+            try:
+                if not current():return
+                from title_refresh import refresh_title
+                refresh_title(params)
+                if not current():return
+                found=get_list(tmdb('details',params['tmdb_type'],**{k:v for k,v in params.items() if k!='tmdb_type'}))
+                if not found:raise RuntimeError('Title information is unavailable')
+                with self.preview_dispatch_lock:
+                    if not current():return
+                    self.update(merge_title_details(item,found[0]))
+                    completed=True
+                    if current():self.setProperty('notice','Title information refreshed')
+            except Exception:
+                if current():self.setProperty('notice','Title refresh is unavailable; your current list was kept')
+            finally:
+                with self.preview_dispatch_lock:
+                    if current():self.dwell=time.monotonic()
+                    if getattr(self,'panel_refresh_worker',None) is token:self.panel_refresh_worker=None
+            if completed and current() and mode!='details':self.refresh_panel_list(focus)
+        threading.Thread(target=work,name='BlackLanturnTitleRefresh',daemon=True).start()
     def set_browse_enabled(self,enabled):
         for cid in (10,50,15,101,102,103,105,106,600,900,901,3000,3100,700,701,710,711,712,713,720,721):
             self.getControl(cid).setEnabled(enabled)
@@ -1995,7 +2143,7 @@ class LiveReview(LibraryActions,RowCustomization,TitleFeedback,YouTubeBrowser,xb
         if self.section=='YouTube':self.select_youtube_tab();return
         if self.section in ('Movies','Shows'):
             self.actions_open=True;self.stop_preview()
-            try:selected=choose_genre(self.section,self.browse_sources,self.active_page)
+            try:selected=choose_genre(self.section,self.browse_sources,self.active_page,selected_pack(self.config))
             finally:self.dwell=time.monotonic();self.actions_open=False
             if selected is None:return
             index=0 if selected=='' else next((n for n,p in enumerate(self.browse_sources,1) if p['id']==selected),-1)
@@ -2074,9 +2222,10 @@ class LiveReview(LibraryActions,RowCustomization,TitleFeedback,YouTubeBrowser,xb
         elif action=='status_display':self.status_options()
         elif action=='icon_pack':
             current=selected_pack(self.config);ids=[p[0] for p in PACK_CHOICES]
-            chosen=xbmcgui.Dialog().select('Sidebar icon style',[p[1] for p in PACK_CHOICES],preselect=ids.index(current))
+            chosen=xbmcgui.Dialog().select('Icon style',[p[1] for p in PACK_CHOICES],preselect=ids.index(current))
             if chosen>=0 and ids[chosen]!=current:
                 self.config=with_pack(self.config,ids[chosen]);self.save();self.refresh_navigation()
+                getattr(self,'refresh_icon_artwork',lambda:None)()
         elif action=='title_logos':
             self.config['TitleLogos']=not self.config.get('TitleLogos',True);self.save()
             if self.selected:self.update(self.selected)

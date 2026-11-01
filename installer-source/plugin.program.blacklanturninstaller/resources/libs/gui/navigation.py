@@ -92,6 +92,8 @@ class InstallerNavigation(xbmcgui.WindowXMLDialog):
         self.nav=kwargs.pop('navigation');self.rows=kwargs.pop('rows');self.pending=None
         super().__init__(*args,**kwargs)
     def onInit(self):
+        from resources.libs.gui.theme_artwork import MenuArtwork
+        artwork=MenuArtwork(CONFIG)
         mode=self.nav.route.get('mode')
         layout='home' if not mode else 'builds' if mode=='builds' and any(r['params'].get('mode')=='viewbuild' for r in self.rows) else 'list'
         self.setProperty('addon.icon',CONFIG.ADDON_ICON);self.setProperty('layout',layout);self.setProperty('heading',self.nav.title)
@@ -102,7 +104,7 @@ class InstallerNavigation(xbmcgui.WindowXMLDialog):
         sidebar=self.getControl(100);sidebar.reset();active_index=0
         self.sidebar=sidebar_items()
         for index,(title,route,icon) in enumerate(self.sidebar):
-            li=xbmcgui.ListItem(title);li.setArt({'icon':os.path.join(CONFIG.ADDON_PATH,'resources/media',icon)})
+            li=xbmcgui.ListItem(title);li.setArt({'icon':artwork.icon(os.path.join(CONFIG.ADDON_PATH,'resources/media',icon))})
             active=(not mode and not route) or (mode and route.get('mode')==mode) or (mode in ('viewbuild',) and route.get('mode')=='builds') or (mode in ('trakt','realdebrid','login') and route.get('mode')=='savedata')
             li.setProperty('active','true' if active else 'false');sidebar.addItem(li)
             if active:active_index=index
@@ -113,7 +115,7 @@ class InstallerNavigation(xbmcgui.WindowXMLDialog):
         listing=self.getControl(self.control);listing.reset()
         for r in self.rows:
             li=xbmcgui.ListItem(r['label']);li.setProperty('description',r['description'])
-            li.setArt({'icon':CONFIG.ADDON_ICON if layout=='builds' or (mode=='viewbuild' and r['params'].get('mode')!='savedata') else r['icon'] or CONFIG.ADDON_ICON,'fanart':r['fanart'] or CONFIG.ADDON_FANART})
+            li.setArt({'icon':artwork.icon(CONFIG.ADDON_ICON if layout=='builds' or (mode=='viewbuild' and r['params'].get('mode')!='savedata') else r['icon'] or CONFIG.ADDON_ICON),'fanart':r['fanart'] or CONFIG.ADDON_FANART})
             if layout=='builds':
                 name=r['params'].get('name',r['label']);short=name
                 for match,title in [('Apple TV & Mac','Apple TV & Mac'),('BlackLanturn General','General'),('Apple TV','Apple TV'),('Fire TV','Fire TV / Fire Stick'),('Android General','Android General'),('Mac','Mac')]:

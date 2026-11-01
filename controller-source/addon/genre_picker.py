@@ -5,6 +5,7 @@ from navigation_core import default_icon
 ROOT=Path(__file__).resolve().parent
 class GenrePicker(xbmcgui.WindowXMLDialog):
     def onInit(self):
+        from icon_packs import icon_path
         self.result=None
         self.choices=[{'id':'','label':'All'}]+list(self.pages)
         self.setProperty('section','Browse '+self.section)
@@ -13,7 +14,7 @@ class GenrePicker(xbmcgui.WindowXMLDialog):
             item=xbmcgui.ListItem(label=page['label'])
             aliases={'All':'collections','Action & Adventure':'adventure','Sci-Fi & Fantasy':'science-fiction','Westerns':'western'}
             icon=aliases.get(page['label']) or default_icon(page['label'],{'kind':'page'})
-            artwork=str(ROOT/'resources/media'/(icon+'.png'))
+            artwork=icon_path(ROOT,icon,getattr(self,'pack','original'))
             item.setArt({'icon':artwork,'thumb':artwork});items.append(item)
         panel=self.getControl(5000);panel.reset();panel.addItems(items)
         panel.selectItem(next((n for n,p in enumerate(self.choices) if p['id']==self.current_page),0))
@@ -26,8 +27,8 @@ class GenrePicker(xbmcgui.WindowXMLDialog):
         elif cid==5001:self.close()
     def onAction(self,action):
         if action.getId() in (9,10,92,216,247):self.close()
-def choose_genre(section,pages,current_page):
+def choose_genre(section,pages,current_page,pack='original'):
     dialog=GenrePicker('GenrePicker.xml',str(ROOT),'Default','1080i')
-    dialog.section=section;dialog.pages=pages;dialog.current_page=current_page;dialog.result=None
+    dialog.section=section;dialog.pages=pages;dialog.current_page=current_page;dialog.pack=pack;dialog.result=None
     dialog.doModal();result=dialog.result;del dialog
     return result
