@@ -42,7 +42,7 @@
       <top>0</top>
       <width>1000</width>
       <height>70</height>
-      <font>font20_title</font>
+      <font>font13</font>
       <align>center</align>
       <aligny>center</aligny>
       <shadowcolor>FF000000</shadowcolor>
@@ -58,8 +58,8 @@
       <left>360</left>
       <top>85</top>
       <width>630</width>
-      <height>320</height>
-      <font>font12_title</font>
+      <height>205</height>
+      <font>font12</font>
       <align>left</align>
       <aligny>top</aligny>
       <shadowcolor>FF000000</shadowcolor>
@@ -68,8 +68,8 @@
       <left>680</left>
       <top>310</top>
       <width>300</width>
-      <height>90</height>
-      <font>font12_title</font>
+      <height>70</height>
+      <font>font12</font>
       <textcolor>FFF0F0F0</textcolor>
       <textoffsetx>20</textoffsetx>
       <label>15067</label>

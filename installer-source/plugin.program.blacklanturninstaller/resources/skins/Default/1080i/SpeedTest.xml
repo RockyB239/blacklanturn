@@ -25,9 +25,9 @@
     <control type="group" id="9001">
       <control type="button" id="201">
         <left>150</left>
-        <top>290</top>
+        <top>350</top>
         <width>400</width>
-        <height>175</height>
+        <height>64</height>
         <font>font13</font>
         <textcolor>FFF0F0F0</textcolor>
         <label>[B]Close[/B]</label>

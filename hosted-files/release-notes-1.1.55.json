@@ -1,0 +1,28 @@
+{
+  "title": "BlackLanturn Build 1.1.55",
+  "summary": "Complete menu styling and corrected button spacing, with Installer 1.0.50.",
+  "sections": [
+    {
+      "heading": "Consistent BlackLanturn menus",
+      "bullets": [
+        "File Manager, Add-ons, Add-on Information and Event Log now share dark panels, readable text and clear cyan focus.",
+        "Native Add-ons category artwork follows your silver or smoked-glass icon choice."
+      ]
+    },
+    {
+      "heading": "Buttons that fit",
+      "bullets": [
+        "Corrected confirmation, keyboard, add-on category and music playlist button spacing.",
+        "Improved installer result, log-upload and notification layouts, plus full-window text readers.",
+        "Updates included Up Next to 1.3.2 while preserving existing settings and recognizing update completion correctly."
+      ]
+    },
+    {
+      "heading": "Keep your complete setup",
+      "bullets": [
+        "Use Update BlackLanturn to keep accounts, authorizations, playback settings, sources, saved data and other installed add-ons.",
+        "Both build editions and the installer include these fixes so later updates retain them."
+      ]
+    }
+  ]
+}

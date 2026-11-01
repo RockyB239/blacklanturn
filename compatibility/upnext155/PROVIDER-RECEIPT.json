@@ -1,0 +1,22 @@
+{
+  "schema": 1,
+  "frozen": true,
+  "observed_at_utc": "2026-11-01T22:45:08.124068+00:00",
+  "origin_repository": "repository.xbmc.org",
+  "kodi_installed_lastUpdated": "2026-11-01 17:13:33",
+  "cache_zip_sha256": "9761f69a56cd5931fbb85e1a34a8babcc2a39e7d106148164b26fecaacb4de0e",
+  "cache_zip_matches_kodi_package_db": true,
+  "cache_crc_valid": true,
+  "wrapper_root": "service.upnext/",
+  "public_source_files": 91,
+  "current_installed_source_exact_91_file_match": true,
+  "frozen_source_exact_cache_payload": true,
+  "source_manifest_sha256": "a86471825e383ebdc08d512dd249c0d08c8070912d55c95d54524462cad9605b",
+  "source_root": "/Users/ChrisFaulkner/.codex/.chatgpt-projects/g-p-6a0726c39718819199402b5f239428f9/work/backend-release155-2026-11-01/upnext132/source/service.upnext",
+  "archive_path": "/Users/ChrisFaulkner/.codex/.chatgpt-projects/g-p-6a0726c39718819199402b5f239428f9/work/backend-release155-2026-11-01/upnext132/upstream/service.upnext-1.3.2.zip",
+  "no_userdata_or_private_skin_popups_copied": true,
+  "upstream_tests_in_cached_distribution": [],
+  "native_playback_tested": false,
+  "source_modified": false,
+  "old55_freezes_and_artifacts_unchanged": true
+}

@@ -1,0 +1,28 @@
+{
+  "files": {
+    "xml/View_50_List.xml": "58e755c56df104326e50515c00135937dc5e2504b5ad4dd98bc383237d39ac7e",
+    "xml/Includes_MediaMenu.xml": "c21caa266dc497eb4a749e3434ab87a6e00b96e16873a09a02164b21dc696b75",
+    "xml/EventLog.xml": "ece93e9fea466d58d8de09731ee10b2b5bf19ef9ac008c6e15801a72017293ed",
+    "xml/DialogAddonInfo.xml": "789bb4ec59715c52b8c50bcd94aafadf16763c8b4cf8e2ba6259efccf585c66c",
+    "xml/View_55_WideList.xml": "9b41e8f8671fe3ac1ded97dafe7dcb014124e808a6a244dd6790eb7fff2eaa41",
+    "xml/Variables.xml": "cfc64cc3018a696a5e67d647a5a882828bf542424ce10a3d950a4884050fa592",
+    "xml/View_52_IconWall.xml": "31511102b5719a7a857618a629f52d4d8a73e76fb5985f7aeebb87f6a364993a",
+    "xml/AddonBrowser.xml": "4a076a78f888dc8b751650e0910cd662d40ea889af54004c0048b4a5bb668824",
+    "xml/DialogAddonSettings.xml": "49f7faab5613772e13627da33004a185f729b347e033bdd7502ab685dfe6d07e",
+    "xml/MyMusicPlaylistEditor.xml": "df1697d22cb24137ed0be8169327af82b816124d437c7d63d13cb09f417a0fac",
+    "xml/Includes.xml": "c0222602fc1e226d77673e4d2a3261aa2be49e0a8811e35121e6d127b35d7944",
+    "xml/FileManager.xml": "3db0726664d50f951eba637c1c6ec23cde0238f8bee8d9ac71abaef0d1916e20",
+    "xml/DialogNumeric.xml": "a973f4134c0f58c2dae144cc64fde0be8d047eb8e629fdc10230a0fd948c5982",
+    "xml/DialogKeyboard.xml": "1399fc867ecef7d25ac37fd69f57fdc862f3fa7f3190a270271644c6355052c6",
+    "xml/Includes_Buttons.xml": "7ab02475568fd4ef730d6fa8ac590338ebf2a76bdbdce4624415f25307c76124",
+    "media/blacklanturn/native-buttons/focus.png": "eaae0e4960a1e90b85ccb4272c3968fb40fe11141d0d865b69eaec24db564d05",
+    "media/blacklanturn/native-buttons/rest.png": "aab5dde04aae22578cf3b3f37f313cd5708f29fcde55c40a5c2b41a6cb5a5c8d"
+  },
+  "forbidden_skin_files": [
+    "xml/script-upnext-upnext.xml",
+    "xml/script-upnext-upnext-simple.xml",
+    "xml/script-upnext-stillwatching.xml",
+    "xml/script-upnext-stillwatching-simple.xml"
+  ],
+  "prior_skin_manifest": "compatibility/menus154/skin-manifest.json"
+}
