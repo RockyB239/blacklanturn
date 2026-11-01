@@ -10,7 +10,7 @@ from live_runtime import read_controller_config
 from live_core import directory_items,rating_line,PageHistory,valid_source,person_identity,mdblist_line,rating_badges,select_rating_badges,update_rating_sources,preview_candidates,PreviewAttempts,watch_state,clear_stale_preview,episode_identity,show_identity,title_details_params,merge_title_details,episode_heading,is_browse_folder
 from probe_core import HoverScroll
 from live_core import card_artwork,title_presentation
-from playback_core import trakt_command,choose_player_path,restored_position,refreshed_watch_item,item_key,resume_options,watch_sync_command
+from playback_core import trakt_command,choose_player_path,playback_kind,action_identity,restored_position,refreshed_watch_item,item_key,resume_options,watch_sync_command
 from episode_ui import season_entries,episode_card,episode_item
 from player_preferences import player_choices,player_path,default_setting
 from search_ui import SEARCH_KINDS,search_sources,discovery_result,best_matches,load_best_matches,clear_search_selection,entity_kind,search_caption
@@ -1181,7 +1181,7 @@ class LiveReview(LibraryActions,RowCustomization,TitleFeedback,YouTubeBrowser,xb
             self.row_states[n]=state;self.setProperty('rowState'+str(n),state);self.setProperty('rowMessage'+str(n),row_message(label,state,search=bool(getattr(self,'search_state',None))))
             self.setProperty('row'+str(n),label if files else label+'  ·  No titles' if label else '')
             if files:
-                c.selectItem(min(position,len(files)-1));self.setProperty('notice','Live add-on content  ·  Select a title for details')
+                c.selectItem(min(position,len(files)-1));self.setProperty('notice','Select an episode, then choose Source Select, Auto Play or Rescrape' if (getattr(self,'episode_browser_context',None) or {}).get('play_using_show') else 'Live add-on content  ·  Select a title for details')
                 if n==0 and update_selected:self.update(files[min(position,len(files)-1)])
             self.row_navigation()
             if getattr(self,'search_state',None):
@@ -1354,7 +1354,9 @@ class LiveReview(LibraryActions,RowCustomization,TitleFeedback,YouTubeBrowser,xb
             state['positions'].append(restored_position(state['rows'][n],anchor,pos) if hasattr(self,'raw_title_row') else pos)
         state['focus']=self.getFocusId()
         state['properties']={key:self.getProperty(key) for key in ('eyebrow','captionRows','scroll','browseFilters','row0','row1','episodeBrowser','searchBrowser','page','rowState0','rowState1','rowMessage0','rowMessage1','heroCompact','addonBrowser','genreChooser','filmographyBrowser','youtubeBrowser','previewMode','previewsReady')}
-        return copy.deepcopy(state)
+        state=copy.deepcopy(state)
+        if state.get('episode_browser_context'):state['episode_browser_context'].pop('play_using_show',None)
+        return state
     def restore_browse(self,state):
         lifetime=getattr(self,'window_lifetime',None)
         def current():return self.alive and lifetime is getattr(self,'window_lifetime',None)
@@ -1467,11 +1469,20 @@ class LiveReview(LibraryActions,RowCustomization,TitleFeedback,YouTubeBrowser,xb
                 if self.alive and generation==self.generation and focus in (101,102,103,105,106,600,900,901,3000,3100):self.setFocusId(focus)
         threading.Thread(target=work,name='BlackLanturnWatchRefresh',daemon=True).start()
     def choose_playback_player(self,item,save_default=False):
+        kind=playback_kind(item)
+        if kind is None:return
+        if not save_default and not choose_player_path(item):
+            self.actions_open=True
+            self.input_generation=getattr(self,'input_generation',0)+1
+            try:self.update(item);self.browse_all_episodes(choose_player=True)
+            finally:self.dwell=time.monotonic();self.actions_open=False
+            return
+        if (getattr(self,'episode_browser_context',None) or {}).pop('play_using_show',None):
+            self.setProperty('notice','Live add-on content  ·  Select a title for details')
         self.actions_open=True
         self.input_generation=getattr(self,'input_generation',0)+1;self.dwell=time.monotonic()
         try:
             self.stop_preview()
-            kind='episode' if episode_identity(item) else 'movie'
             addon=rpc('Addons.GetAddonDetails',{'addonid':'plugin.video.umbrella','properties':['enabled']}).get('result',{}).get('addon',{})
             definitions={}
             for base in ('special://profile/addon_data/plugin.video.themoviedb.helper/players/',
@@ -1535,11 +1546,12 @@ class LiveReview(LibraryActions,RowCustomization,TitleFeedback,YouTubeBrowser,xb
             discovery=discovery_result(item) if item else None
             command=trakt_command(item) if item and not discovery else None
             player_path=choose_player_path(item) if item and not discovery else None
+            player_available=bool(player_path or (item and not discovery and playback_kind(item)))
             if discovery:options.append(('open_discovery',discovery['button']))
             elif item:
                 saved=any(x.get('file')==item.get('file') for x in self.config['Saved'])
                 options.append(('play','Open' if item.get('filetype')=='directory' or item.get('type')=='addon' else 'Resume' if resume_options(item) else 'Play'))
-                if player_path:options.append(('player','Play using…'))
+                if player_available:options.append(('player','Play using…'))
                 options.append(('details','Details'))
                 if genre_available:options.append(('genre','Choose genre…'))
                 options.append(('local','Remove from My Stuff on this device' if saved else 'Save to My Stuff on this device'))
@@ -1551,7 +1563,7 @@ class LiveReview(LibraryActions,RowCustomization,TitleFeedback,YouTubeBrowser,xb
                 options.extend(getattr(self,'title_feedback_actions',lambda _:[])(item))
                 if getattr(self,'youtube_home_visible',lambda:False)():options.append(('youtube_refresh','Refresh recommendations'))
                 if getattr(self,'source_session_label',lambda *a,**k: '')(item,refresh=True):options.append(('normal_autoplay','Return to normal autoplay'))
-                if player_path:options.append(('default_player','Set default player…'))
+                if player_available:options.append(('default_player','Set default player…'))
                 options.append(('refresh','Refresh watched status'))
             if failed:
                 options.append(('retry','Retry unavailable lists'))
@@ -1563,7 +1575,10 @@ class LiveReview(LibraryActions,RowCustomization,TitleFeedback,YouTubeBrowser,xb
         finally:
             self.dwell=time.monotonic();self.actions_open=False
         event('title_action_selected',choice=chosen)
-        if chosen<0:return
+        if chosen<0:
+            if (getattr(self,'episode_browser_context',None) or {}).pop('play_using_show',None):
+                self.setProperty('notice','Live add-on content  ·  Select a title for details')
+            return
         action=options[chosen][0]
         if action.startswith('title_'):self.change_title_feedback(item,action)
         elif action=='library_add':self.add_to_collection(item)
@@ -1854,11 +1869,12 @@ class LiveReview(LibraryActions,RowCustomization,TitleFeedback,YouTubeBrowser,xb
                     self.setProperty('notice','More like this unavailable; current titles retained. Select the page card to retry.')
                     event('similar_page_error',error_type=type(exc).__name__)
         threading.Thread(target=work,name='BlackLanturnSimilarPage',daemon=True).start()
-    def browse_all_episodes(self):
+    def browse_all_episodes(self,choose_player=False):
         item=self.selected or {};identity=show_identity(item)
         if not identity:return
         self.stop_preview()
         self.episode_browser_context={'item':dict(item),'mode':self.mode,'last_row':self.last_row,'rows':[list(r) for r in self.rows],'paths':list(self.paths),'histories':self.histories,'labels':[self.getProperty('row'+str(n)) for n in range(2)],'positions':[self.getControl(900+n).getSelectedPosition() for n in range(2)],'page_definitions':self.page_definitions,'row_offset':self.row_offset,'row_cache':self.row_cache,'active_page':self.active_page,'eyebrow':self.getProperty('eyebrow'),'captionRows':self.getProperty('captionRows'),'snapshot_rows':dict(getattr(self,'snapshot_rows',{})),'window_ready':list(getattr(self,'window_ready',[True,True]))}
+        if choose_player:self.episode_browser_context['play_using_show']=identity
         self.mode='home';self.setProperty('page','home');self.setProperty('scroll','top');self.setProperty('captionRows','true');self.setProperty('browseFilters','false');self.setProperty('allEpisodes','false');self.setProperty('episodeBrowser','true')
         for cid in (900,901):self.getControl(cid).setHeight(344)
         title=item.get('showtitle') or item.get('tvshowtitle') or item.get('title','Show')
@@ -1874,7 +1890,8 @@ class LiveReview(LibraryActions,RowCustomization,TitleFeedback,YouTubeBrowser,xb
                 if not self.alive or generation!=self.generation:return
                 self.season_sources=season_entries(files)
                 if not self.season_sources:self.setProperty('notice','No seasons available from this integration. Back returns to your title.');self.setFocusId(101);return
-                self.season_position=next((n for n,s in enumerate(self.season_sources) if s['season']==item.get('season')),0)
+                seed=(action_identity(item) or {}).get('season',item.get('season'))
+                self.season_position=next((n for n,s in enumerate(self.season_sources) if s['season']==seed),0)
                 self.populate_seasons();self.select_episode_season(self.season_position)
             except Exception as exc:
                 if self.alive and generation==self.generation:self.setProperty('notice','Seasons could not load. Back returns to your title.')
@@ -2530,6 +2547,7 @@ class LiveReview(LibraryActions,RowCustomization,TitleFeedback,YouTubeBrowser,xb
     def onClick(self,cid):
         if getattr(self,'actions_open',False):return
         self.search_row_step=None
+        if cid in (10,15,50):(getattr(self,'episode_browser_context',None) or {}).pop('play_using_show',None)
         self.input_generation=getattr(self,'input_generation',0)+1;self.dwell=time.monotonic()
         if getattr(self,'owned_preview',False) and not getattr(self,'preview_dispatched',False):self.stop_preview()
         if cid==5:
@@ -2559,6 +2577,8 @@ class LiveReview(LibraryActions,RowCustomization,TitleFeedback,YouTubeBrowser,xb
                     if prior:self.load_path(n,prior[0],back=True,position=prior[1])
                 else:self.load_path(n,item['file'],item.get('label'))
                 return
+            context=getattr(self,'episode_browser_context',None) or {}
+            if context.get('play_using_show') and show_identity(item)!=context['play_using_show']:context.pop('play_using_show',None)
             if item.get('type')=='addon':self.open_installed_addon(item);return
             if getattr(self,'section','')=='YouTube' and is_youtube(item):
                 if item.get('filetype')=='directory':self.load_path(cid-900 if cid in (900,901) else 0,item['file'],item.get('label'))
@@ -2587,6 +2607,11 @@ class LiveReview(LibraryActions,RowCustomization,TitleFeedback,YouTubeBrowser,xb
             if item.get('type')=='addon':self.open_installed_addon(item);return
             discovery=discovery_result(item)
             if discovery:self.open_discovery(discovery);return
+            context=getattr(self,'episode_browser_context',None) or {}
+            pending=context.pop('play_using_show',None)
+            if pending:self.setProperty('notice','Live add-on content  ·  Select a title for details')
+            if pending and episode_identity(item) and show_identity(item)==pending and choose_player_path(item):
+                self.choose_playback_player(item);return
             self.stop_preview()
             if item.get('filetype')=='directory':
                 self.mode='home';self.setProperty('page','home');self.load_path(0,item['file'],item.get('title') or item.get('label'))
@@ -2613,6 +2638,8 @@ class LiveReview(LibraryActions,RowCustomization,TitleFeedback,YouTubeBrowser,xb
     def onAction(self,action):
         if getattr(self,'actions_open',False):return
         cid=action.getId()
+        if cid in (9,10,92) and (getattr(self,'episode_browser_context',None) or {}).pop('play_using_show',None):
+            self.setProperty('notice','Live add-on content  ·  Select a title for details')
         # Invalidate intent before any Kodi call can yield to the monitor.
         if cid in (1,2,3,4,9,10,92,104,105):
             self.input_generation=getattr(self,'input_generation',0)+1;self.dwell=time.monotonic()

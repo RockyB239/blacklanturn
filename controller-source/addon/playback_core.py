@@ -57,6 +57,23 @@ def choose_player_path(item):
     pairs=[(k,v) for k,values in query.items() for v in values if k!='ignore_default']
     return urlunsplit((source.scheme,source.netloc,source.path,urlencode(pairs+[('ignore_default','true')]),source.fragment))
 
+def playback_kind(item):
+    """Pure chooser eligibility; TV folders are not direct playback requests."""
+    item=item or {}
+    if item.get('_page_control'):return None
+    source=urlsplit(item.get('file',''));query=parse_qs(source.query)
+    if source.scheme!='plugin' or source.netloc!='plugin.video.themoviedb.helper':return None
+    kind=query.get('tmdb_type',query.get('type',[]));ident=query.get('tmdb_id',[]);info=query.get('info',[])
+    if len(kind)!=1 or len(ident)!=1 or not ident[0].isdigit() or len(info)!=1:return None
+    if info==['play'] and item.get('filetype')!='directory':
+        return 'movie' if kind==['movie'] else 'episode' if kind==['tv'] and episode_identity(item) else None
+    if kind!=['tv'] or item.get('filetype')!='directory' or 'episode' in query:return None
+    if info not in (['seasons'],['episodes'],['flatseasons']):return None
+    if info==['episodes']:
+        season=query.get('season',[])
+        if len(season)!=1 or not season[0].isdigit():return None
+    return 'episode'
+
 def item_key(item):
     identity=action_identity(item)
     return tuple(identity.items()) if identity else item.get('file','')

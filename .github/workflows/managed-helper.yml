@@ -91,7 +91,7 @@ jobs:
         run: python tools/device_validation/verify_performance_evidence.py validation/optimization130-performance.json --manifest controller-source/manifest96.json
       - name: Verify branded icons in both full and component editions
         run: |
-          python tools/build_release153.py --baselines baselines --output artifacts153
-          python tools/verify_release153.py --artifacts artifacts153 --baselines baselines
-          python tools/release_report.py artifacts153/BlackLanturn-General-Kodi21-1.1.53.zip --output artifacts153/current-general.json
-          python tools/release_report.py artifacts153/BlackLanturn-Apple-TV-Mac-Kodi21-1.1.53.zip --output artifacts153/current-apple.json
+          python tools/build_release154.py --baselines baselines --output artifacts154
+          python tools/verify_release154.py --artifacts artifacts154 --baselines baselines
+          python tools/release_report.py artifacts154/BlackLanturn-General-Kodi21-1.1.54.zip --output artifacts154/current-general.json
+          python tools/release_report.py artifacts154/BlackLanturn-Apple-TV-Mac-Kodi21-1.1.54.zip --output artifacts154/current-apple.json

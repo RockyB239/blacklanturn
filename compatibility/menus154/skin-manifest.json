@@ -1,0 +1,31 @@
+{
+  "files": {
+    "xml/Settings.xml": "8407aaacafbb95aab59e4464952a3563a38c7993c8cfc12636d3812d234458d3",
+    "xml/DialogAddonInfo.xml": "3fa57a2b23e797aee03dbf08117b6c56a681ca653a320b1152337255c2fa1862",
+    "xml/DialogSelect.xml": "a1f439c093b49d1ae8b1465faae46c2219e161f1ee844403de5ed4223180bfdf",
+    "xml/Includes_BlackLanturnSettings.xml": "1a2f9049d6172846cf4fc32fa7ed9a66f896637be11ae600f434587a97923e81",
+    "xml/Variables.xml": "34006a0339bf6757ba165643d012b011583f07f99de4d75f6a318ad4c2e7cbfb",
+    "xml/SettingsCategory.xml": "3e9554f6542c2be1ee0dc7c131efa0ec913708bf9b4d65ddf03ed2dc53f19d58",
+    "xml/DialogSlider.xml": "10ecaf0f34e41c71dcc98d17cbb2e103b560a4a0611ef7e60c360fc79cc38f11",
+    "xml/DialogAddonSettings.xml": "644d2602bcffe9d07e40ebc0af84c0b160555cdeed1005addf10504f68ffefef",
+    "xml/Includes.xml": "718b7805d2aa1580da851d4afa48d14c9973d04fe1b3863a40d31f100bf89529",
+    "xml/DialogTextViewer.xml": "536fe2da30600876c86a37ca4504664b836f714327685fa823ab3a5f62bcb829",
+    "xml/DialogNumeric.xml": "969137b8462f8d2caebd1a3b90fe770b40fd1c10ba3490a375bdbbedbf7350ac",
+    "xml/DialogMediaSource.xml": "388a629546adfa444ce73fb7957ef07ab9c37583b14015c77a6494e512bc8b1d",
+    "xml/DialogKeyboard.xml": "05a2b35e438ca0b200d6ac8e8925f77975e3767c3598ec3ac884dc3615a3e01a",
+    "xml/Includes_BlackLanturnStreams.xml": "411532bce289e17efc05929fb24f18954d8ff852be084fd82aa4e26831b99113",
+    "xml/FileBrowser.xml": "2247146634e54c5d3bd081bd6719fbb41d3683a1d42d9360dd63579aebc96f4b",
+    "xml/Includes_Buttons.xml": "ea60fdab9e3ca2ba0bde8262014f7b229f43763d17b0b959999ac64512afda6f",
+    "xml/SkinSettings.xml": "fc985d455c675fc1654e31f05ed3bb2bed293a42049bb25c8af497913f7f0dc2",
+    "xml/SettingsProfile.xml": "7b4750d1b68b1c800ba7620cb6f51eda0f8fdded41405772839fa3bebbce7640",
+    "xml/SettingsSystemInfo.xml": "4b0bed06fafcf57a91ace257916d52ecc37a587d091e6a281c5ea885f72ff33d",
+    "xml/DialogColorPicker.xml": "8b53b40ecaf9f99e8d9ae5db8aee29c58b106d5f6488966af79841bb4ac8c98c"
+  },
+  "forbidden_skin_files": [
+    "xml/script-upnext-upnext.xml",
+    "xml/script-upnext-upnext-simple.xml",
+    "xml/script-upnext-stillwatching.xml",
+    "xml/script-upnext-stillwatching-simple.xml"
+  ],
+  "prior_skin_manifest": "compatibility/menus153/skin-manifest.json"
+}

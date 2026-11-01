@@ -9,6 +9,8 @@ from playback_core import resume_options
 ROOT=Path(__file__).parents[1]/'addon'
 def extract(path, name, namespace, class_name=None):
     namespace.setdefault("time",time)
+    from playback_core import playback_kind,action_identity,choose_player_path
+    namespace.setdefault('playback_kind',playback_kind);namespace.setdefault('action_identity',action_identity);namespace.setdefault('choose_player_path',choose_player_path)
     from youtube_core import video_id,preview_path,is_youtube,caption,automatic_preview,resume_allowed
     for key,value in {'youtube_video_id':video_id,'youtube_preview_path':preview_path,'is_youtube':is_youtube,'youtube_caption':caption,'automatic_preview':automatic_preview,'youtube_resume_allowed':resume_allowed}.items():namespace.setdefault(key,value)
     nodes=ast.parse(path.read_text()).body

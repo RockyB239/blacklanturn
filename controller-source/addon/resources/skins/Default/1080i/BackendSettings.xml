@@ -6,11 +6,12 @@
   </coordinates>
   <controls>
     <control type="image">
-      <left>18</left>
-      <top>18</top>
-      <width>1884</width>
-      <height>1044</height>
-      <texture border="20">options-panel.png</texture>
+      <left>0</left>
+      <top>0</top>
+      <width>1920</width>
+      <height>1080</height>
+      <texture>white.png</texture>
+      <colordiffuse>FF0B151E</colordiffuse>
       <aspectratio>stretch</aspectratio>
     </control>
     <control type="image">

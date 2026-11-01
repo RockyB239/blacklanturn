@@ -173,7 +173,7 @@ class ManagedVersions(unittest.TestCase):
 
     def test_current_builder_rejects_unpinned_installer_metadata_before_outputs(self):
         import shutil
-        spec = importlib.util.spec_from_file_location('build_current153', ROOT / 'tools/build_release153.py')
+        spec = importlib.util.spec_from_file_location('build_current154', ROOT / 'tools/build_release154.py')
         builder = importlib.util.module_from_spec(spec); spec.loader.exec_module(builder)
         with tempfile.TemporaryDirectory() as directory:
             root=Path(directory)

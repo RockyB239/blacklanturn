@@ -1,0 +1,31 @@
+<?xml version='1.0' encoding='utf-8'?>
+<includes>
+	<include name="BlackLanturnSettingsSurface">
+		<control type="image">
+			<depth>0</depth>
+			<left>0</left>
+			<top>0</top>
+			<width>100%</width>
+			<height>100%</height>
+			<texture colordiffuse="FF080B0E">colors/white.png</texture>
+		</control>
+	</include>
+	<include name="BlackLanturnSettingsSidebar">
+		<param name="width">500</param>
+		<param name="left">-40</param>
+		<param name="right" />
+		<param name="top">-10%</param>
+		<param name="height">120%</param>
+		<param name="flipx">false</param>
+		<definition>
+			<control type="image">
+				<texture border="18" flipx="$PARAM[flipx]">blacklanturn/action-panel/panel.png</texture>
+				<width>$PARAM[width]</width>
+				<left>$PARAM[left]</left>
+				<right>$PARAM[right]</right>
+				<top>$PARAM[top]</top>
+				<height>$PARAM[height]</height>
+			</control>
+		</definition>
+	</include>
+</includes>

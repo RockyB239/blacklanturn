@@ -1,0 +1,27 @@
+{
+  "title": "BlackLanturn Build 1.1.54",
+  "summary": "Player choices for shows and episodes, with opaque settings surfaces and consistent native menus.",
+  "sections": [
+    {
+      "heading": "Choose how to play a show",
+      "bullets": [
+        "Play using on a show or season opens the episode browser first. Choose an episode to use the existing playback choices.",
+        "Episode cards continue to open the chooser directly. Set default player in a TV context changes the episode default without starting playback."
+      ]
+    },
+    {
+      "heading": "Clearer settings and native menus",
+      "bullets": [
+        "Settings use an opaque BlackLanturn background across Kodi's content area.",
+        "Deeper settings and selection screens use the shared menu styling. Playback settings and stream controls keep their compact layout."
+      ]
+    },
+    {
+      "heading": "Keep your settings and sign-ins",
+      "bullets": [
+        "Use Update BlackLanturn for the installed edition to retain saved preferences, accounts, history and unrelated add-ons.",
+        "Installer1.0.49 remains current. No installer upgrade is needed when it is already installed. Both editions retain their existing compatible add-ons and platform playback differences."
+      ]
+    }
+  ]
+}
