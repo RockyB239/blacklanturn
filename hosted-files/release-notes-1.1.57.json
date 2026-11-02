@@ -1,0 +1,21 @@
+{
+  "title": "BlackLanturn Build 1.1.57",
+  "summary": "Quiet Gallery navigation with a gradual shade and fading selection highlight.",
+  "sections": [
+    {
+      "heading": "A softer expanded sidebar",
+      "bullets": [
+        "A continuous shade blends navigation into the artwork with no hard boundary.",
+        "A small cyan accent and fading highlight replace the rectangular selection outline.",
+        "Collapsed browsing, icon choices and remote navigation stay the same."
+      ]
+    },
+    {
+      "heading": "Your setup stays saved",
+      "bullets": [
+        "Use Update BlackLanturn to keep settings, authorizations, saved data and other installed add-ons.",
+        "The visual change adds no background monitoring, blur or extra provider work."
+      ]
+    }
+  ]
+}
