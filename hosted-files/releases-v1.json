@@ -2,33 +2,26 @@
   "schema": 1,
   "releases": [
     {
-      "id": "blacklanturn-general-1.1.56-r0",
+      "id": "blacklanturn-general-1.1.57-r0",
       "edition": "general",
-      "version": "1.1.56",
+      "version": "1.1.57",
       "revision": 0,
-      "title": "BlackLanturn Build 1.1.56",
-      "summary": "Cleaner navigation, matching buttons, roomier menus and more reliable shutdown.",
+      "title": "BlackLanturn Build 1.1.57",
+      "summary": "Quiet Gallery navigation with a gradual shade and fading selection highlight.",
       "sections": [
         {
-          "heading": "Cleaner navigation",
+          "heading": "A softer expanded sidebar",
           "bullets": [
-            "Expanded sidebar uses a soft feathered shade that keeps navigation readable without a solid panel.",
-            "Category and action buttons match your Silver or Smoked Glass icon pack.",
-            "Episodes opens the season list; the duplicate All episodes button is removed."
+            "A continuous shade blends navigation into the artwork with no hard boundary.",
+            "A small cyan accent and fading highlight replace the rectangular selection outline.",
+            "Collapsed browsing, icon choices and remote navigation stay the same."
           ]
         },
         {
-          "heading": "Roomier menus and reliable shutdown",
+          "heading": "Your setup stays saved",
           "bullets": [
-            "Event log and detailed selection lists have more space around their contents.",
-            "Controller and Umbrella retain Kodi\u2019s shutdown signal and stop launching work when Kodi closes."
-          ]
-        },
-        {
-          "heading": "Your complete setup stays saved",
-          "bullets": [
-            "Update BlackLanturn keeps your accounts, authorizations, playback choices, sources, saved data and other installed add-ons.",
-            "Installer 1.0.51 delivers both editions and their reviewed add-on patches together."
+            "Use Update BlackLanturn to keep settings, authorizations, saved data and other installed add-ons.",
+            "The visual change adds no background monitoring, blur or extra provider work."
           ]
         }
       ],
@@ -115,7 +108,7 @@
         "addons/script.blacklanturn.preview/NOTICES.txt": "f4bd742eeae81e3bec29bbe351189ec0110e9fd9c77ca38d4e6cdada176b87fe",
         "addons/script.blacklanturn.preview/action_panel.py": "7f1b53e1b86facecece41c02198003594d80ed77e0536bbac92dceb1cda38d0c",
         "addons/script.blacklanturn.preview/action_panel_model.py": "1c0b0ea46d5c634e080cfafa8dac7d0fa37a560c029d47e1db5e155806c612b6",
-        "addons/script.blacklanturn.preview/addon.xml": "9714b4cfb4c3aa92c432eb66b4089864f8a6ff64e767f43d13d0cfbafab9df50",
+        "addons/script.blacklanturn.preview/addon.xml": "aa0b99d5f90fac0edea6e2cf9306b82b0ab122be551adfb38ba0916956911d37",
         "addons/script.blacklanturn.preview/addon_catalog.py": "08e70d0a52a5dc1dcbae87c35da414a191c9f989b6242d1ee8a485668ba12962",
         "addons/script.blacklanturn.preview/autoplay_session.py": "e2f12f9ad664312f4ff3fc507bf0b54cab2a0c3375e9b5768515426bede1e5a6",
         "addons/script.blacklanturn.preview/backend_core.py": "f9c361f0fe4a075d2526778b24348790f9b5a8024321622a7f4c9b284c99ac5a",
@@ -420,9 +413,10 @@
         "addons/script.blacklanturn.preview/resources/media/my-stuff.png": "ab63bbf2ad5f17e3963595be5ce5265aa75e80175e5bcc7b18d22cbce16e1dbb",
         "addons/script.blacklanturn.preview/resources/media/mystery.png": "7c81975a1b240286400e6aed3f769194477040635df82d8a91abee8706f523d9",
         "addons/script.blacklanturn.preview/resources/media/nav-clear.png": "43739c566e26fd7cb88f69d3864ea34740372f5ee99acac169e090beffbce5c6",
+        "addons/script.blacklanturn.preview/resources/media/nav-focus-gallery.png": "5a8bb20a9b96be5e9f2557474d16bb432711fc31959dfc32924ea6433120ba0e",
         "addons/script.blacklanturn.preview/resources/media/nav-focus-teal.png": "8581a98ab03630c3cf341aa12257e8615ccaab42f207eef15db623723ae9a39c",
         "addons/script.blacklanturn.preview/resources/media/nav-focus.png": "5e9e85c34020d249712f0057a983bdc1175522f10df721924149af3b8a6f7591",
-        "addons/script.blacklanturn.preview/resources/media/nav-overlay.png": "d5cb9fc10a754ec5b1aaeef8180ce1ffeed03755a1d250df309526eef01a277e",
+        "addons/script.blacklanturn.preview/resources/media/nav-overlay.png": "ae902847649bca07ff1755f157f42b62552a0fea7589de23ddd6189e7a9a48b8",
         "addons/script.blacklanturn.preview/resources/media/new-releases.png": "9bfd12bdb119b03acaa3508a8f943751b4ae2f3006b6b3a7fd6b95f155013916",
         "addons/script.blacklanturn.preview/resources/media/news.png": "f6bfe82e772d7d6756ff91d5b2003270cdacb05ff227e00978534ef439c72606",
         "addons/script.blacklanturn.preview/resources/media/next-card-mask.png": "39c68372552455d3beb6b632334d3819d2619daa3278379f883f9afb51ae0288",
@@ -496,7 +490,7 @@
         "addons/script.blacklanturn.preview/resources/skins/Default/1080i/FeedbackUndo.xml": "d95b3d5e819a16d27ba4f5e8041ac4ee497752fe7773b7aef90dbfcd21697510",
         "addons/script.blacklanturn.preview/resources/skins/Default/1080i/GenrePicker.xml": "753caf30603a077e4521c15d6f24adeec84e873407edcefa97027f4cf2a1b7f8",
         "addons/script.blacklanturn.preview/resources/skins/Default/1080i/IconPicker.xml": "cf5af6174530cedf2c13d08ac6b171f9c3fdf5637cc90fe8c06a655f4f66e4d0",
-        "addons/script.blacklanturn.preview/resources/skins/Default/1080i/LiveReview.xml": "924bb14020a631f08a28c8d3f71089e3aa99d291a3712c51e396c43e56b2aa26",
+        "addons/script.blacklanturn.preview/resources/skins/Default/1080i/LiveReview.xml": "0325a5018342e3e6253b8586ad0de871a4bcdd625aba2842e78c402a83d231f7",
         "addons/script.blacklanturn.preview/resources/skins/Default/1080i/LoadingPreview.xml": "903aec7cf76f439d88cf7a66cb96815a403ef0cafffa4b186938c20cd7c8bd79",
         "addons/script.blacklanturn.preview/resources/skins/Default/1080i/SeriesEnd.xml": "395e875612fd60c9d844ea9cfbabc375a223cf530e380322ed32cdf12122dc57",
         "addons/script.blacklanturn.preview/resources/skins/Default/1080i/UpdateNotes.xml": "5c153b5eeb46cef556e6503572c9896a198f791a52a2e0ecf16dfb6f36fe46b7",
@@ -566,9 +560,10 @@
         "addons/script.blacklanturn.preview/resources/skins/Default/media/my-stuff.png": "ab63bbf2ad5f17e3963595be5ce5265aa75e80175e5bcc7b18d22cbce16e1dbb",
         "addons/script.blacklanturn.preview/resources/skins/Default/media/mystery.png": "7c81975a1b240286400e6aed3f769194477040635df82d8a91abee8706f523d9",
         "addons/script.blacklanturn.preview/resources/skins/Default/media/nav-clear.png": "43739c566e26fd7cb88f69d3864ea34740372f5ee99acac169e090beffbce5c6",
+        "addons/script.blacklanturn.preview/resources/skins/Default/media/nav-focus-gallery.png": "5a8bb20a9b96be5e9f2557474d16bb432711fc31959dfc32924ea6433120ba0e",
         "addons/script.blacklanturn.preview/resources/skins/Default/media/nav-focus-teal.png": "8581a98ab03630c3cf341aa12257e8615ccaab42f207eef15db623723ae9a39c",
         "addons/script.blacklanturn.preview/resources/skins/Default/media/nav-focus.png": "5e9e85c34020d249712f0057a983bdc1175522f10df721924149af3b8a6f7591",
-        "addons/script.blacklanturn.preview/resources/skins/Default/media/nav-overlay.png": "d5cb9fc10a754ec5b1aaeef8180ce1ffeed03755a1d250df309526eef01a277e",
+        "addons/script.blacklanturn.preview/resources/skins/Default/media/nav-overlay.png": "ae902847649bca07ff1755f157f42b62552a0fea7589de23ddd6189e7a9a48b8",
         "addons/script.blacklanturn.preview/resources/skins/Default/media/new-releases.png": "9bfd12bdb119b03acaa3508a8f943751b4ae2f3006b6b3a7fd6b95f155013916",
         "addons/script.blacklanturn.preview/resources/skins/Default/media/news.png": "f6bfe82e772d7d6756ff91d5b2003270cdacb05ff227e00978534ef439c72606",
         "addons/script.blacklanturn.preview/resources/skins/Default/media/next-card-mask.png": "39c68372552455d3beb6b632334d3819d2619daa3278379f883f9afb51ae0288",
@@ -816,33 +811,26 @@
       }
     },
     {
-      "id": "blacklanturn-apple-1.1.56-r0",
+      "id": "blacklanturn-apple-1.1.57-r0",
       "edition": "apple",
-      "version": "1.1.56",
+      "version": "1.1.57",
       "revision": 0,
-      "title": "BlackLanturn Build 1.1.56",
-      "summary": "Cleaner navigation, matching buttons, roomier menus and more reliable shutdown.",
+      "title": "BlackLanturn Build 1.1.57",
+      "summary": "Quiet Gallery navigation with a gradual shade and fading selection highlight.",
       "sections": [
         {
-          "heading": "Cleaner navigation",
+          "heading": "A softer expanded sidebar",
           "bullets": [
-            "Expanded sidebar uses a soft feathered shade that keeps navigation readable without a solid panel.",
-            "Category and action buttons match your Silver or Smoked Glass icon pack.",
-            "Episodes opens the season list; the duplicate All episodes button is removed."
+            "A continuous shade blends navigation into the artwork with no hard boundary.",
+            "A small cyan accent and fading highlight replace the rectangular selection outline.",
+            "Collapsed browsing, icon choices and remote navigation stay the same."
           ]
         },
         {
-          "heading": "Roomier menus and reliable shutdown",
+          "heading": "Your setup stays saved",
           "bullets": [
-            "Event log and detailed selection lists have more space around their contents.",
-            "Controller and Umbrella retain Kodi\u2019s shutdown signal and stop launching work when Kodi closes."
-          ]
-        },
-        {
-          "heading": "Your complete setup stays saved",
-          "bullets": [
-            "Update BlackLanturn keeps your accounts, authorizations, playback choices, sources, saved data and other installed add-ons.",
-            "Installer 1.0.51 delivers both editions and their reviewed add-on patches together."
+            "Use Update BlackLanturn to keep settings, authorizations, saved data and other installed add-ons.",
+            "The visual change adds no background monitoring, blur or extra provider work."
           ]
         }
       ],
@@ -929,7 +917,7 @@
         "addons/script.blacklanturn.preview/NOTICES.txt": "f4bd742eeae81e3bec29bbe351189ec0110e9fd9c77ca38d4e6cdada176b87fe",
         "addons/script.blacklanturn.preview/action_panel.py": "7f1b53e1b86facecece41c02198003594d80ed77e0536bbac92dceb1cda38d0c",
         "addons/script.blacklanturn.preview/action_panel_model.py": "1c0b0ea46d5c634e080cfafa8dac7d0fa37a560c029d47e1db5e155806c612b6",
-        "addons/script.blacklanturn.preview/addon.xml": "9714b4cfb4c3aa92c432eb66b4089864f8a6ff64e767f43d13d0cfbafab9df50",
+        "addons/script.blacklanturn.preview/addon.xml": "aa0b99d5f90fac0edea6e2cf9306b82b0ab122be551adfb38ba0916956911d37",
         "addons/script.blacklanturn.preview/addon_catalog.py": "08e70d0a52a5dc1dcbae87c35da414a191c9f989b6242d1ee8a485668ba12962",
         "addons/script.blacklanturn.preview/autoplay_session.py": "e2f12f9ad664312f4ff3fc507bf0b54cab2a0c3375e9b5768515426bede1e5a6",
         "addons/script.blacklanturn.preview/backend_core.py": "f9c361f0fe4a075d2526778b24348790f9b5a8024321622a7f4c9b284c99ac5a",
@@ -1234,9 +1222,10 @@
         "addons/script.blacklanturn.preview/resources/media/my-stuff.png": "ab63bbf2ad5f17e3963595be5ce5265aa75e80175e5bcc7b18d22cbce16e1dbb",
         "addons/script.blacklanturn.preview/resources/media/mystery.png": "7c81975a1b240286400e6aed3f769194477040635df82d8a91abee8706f523d9",
         "addons/script.blacklanturn.preview/resources/media/nav-clear.png": "43739c566e26fd7cb88f69d3864ea34740372f5ee99acac169e090beffbce5c6",
+        "addons/script.blacklanturn.preview/resources/media/nav-focus-gallery.png": "5a8bb20a9b96be5e9f2557474d16bb432711fc31959dfc32924ea6433120ba0e",
         "addons/script.blacklanturn.preview/resources/media/nav-focus-teal.png": "8581a98ab03630c3cf341aa12257e8615ccaab42f207eef15db623723ae9a39c",
         "addons/script.blacklanturn.preview/resources/media/nav-focus.png": "5e9e85c34020d249712f0057a983bdc1175522f10df721924149af3b8a6f7591",
-        "addons/script.blacklanturn.preview/resources/media/nav-overlay.png": "d5cb9fc10a754ec5b1aaeef8180ce1ffeed03755a1d250df309526eef01a277e",
+        "addons/script.blacklanturn.preview/resources/media/nav-overlay.png": "ae902847649bca07ff1755f157f42b62552a0fea7589de23ddd6189e7a9a48b8",
         "addons/script.blacklanturn.preview/resources/media/new-releases.png": "9bfd12bdb119b03acaa3508a8f943751b4ae2f3006b6b3a7fd6b95f155013916",
         "addons/script.blacklanturn.preview/resources/media/news.png": "f6bfe82e772d7d6756ff91d5b2003270cdacb05ff227e00978534ef439c72606",
         "addons/script.blacklanturn.preview/resources/media/next-card-mask.png": "39c68372552455d3beb6b632334d3819d2619daa3278379f883f9afb51ae0288",
@@ -1310,7 +1299,7 @@
         "addons/script.blacklanturn.preview/resources/skins/Default/1080i/FeedbackUndo.xml": "d95b3d5e819a16d27ba4f5e8041ac4ee497752fe7773b7aef90dbfcd21697510",
         "addons/script.blacklanturn.preview/resources/skins/Default/1080i/GenrePicker.xml": "753caf30603a077e4521c15d6f24adeec84e873407edcefa97027f4cf2a1b7f8",
         "addons/script.blacklanturn.preview/resources/skins/Default/1080i/IconPicker.xml": "cf5af6174530cedf2c13d08ac6b171f9c3fdf5637cc90fe8c06a655f4f66e4d0",
-        "addons/script.blacklanturn.preview/resources/skins/Default/1080i/LiveReview.xml": "924bb14020a631f08a28c8d3f71089e3aa99d291a3712c51e396c43e56b2aa26",
+        "addons/script.blacklanturn.preview/resources/skins/Default/1080i/LiveReview.xml": "0325a5018342e3e6253b8586ad0de871a4bcdd625aba2842e78c402a83d231f7",
         "addons/script.blacklanturn.preview/resources/skins/Default/1080i/LoadingPreview.xml": "903aec7cf76f439d88cf7a66cb96815a403ef0cafffa4b186938c20cd7c8bd79",
         "addons/script.blacklanturn.preview/resources/skins/Default/1080i/SeriesEnd.xml": "395e875612fd60c9d844ea9cfbabc375a223cf530e380322ed32cdf12122dc57",
         "addons/script.blacklanturn.preview/resources/skins/Default/1080i/UpdateNotes.xml": "5c153b5eeb46cef556e6503572c9896a198f791a52a2e0ecf16dfb6f36fe46b7",
@@ -1380,9 +1369,10 @@
         "addons/script.blacklanturn.preview/resources/skins/Default/media/my-stuff.png": "ab63bbf2ad5f17e3963595be5ce5265aa75e80175e5bcc7b18d22cbce16e1dbb",
         "addons/script.blacklanturn.preview/resources/skins/Default/media/mystery.png": "7c81975a1b240286400e6aed3f769194477040635df82d8a91abee8706f523d9",
         "addons/script.blacklanturn.preview/resources/skins/Default/media/nav-clear.png": "43739c566e26fd7cb88f69d3864ea34740372f5ee99acac169e090beffbce5c6",
+        "addons/script.blacklanturn.preview/resources/skins/Default/media/nav-focus-gallery.png": "5a8bb20a9b96be5e9f2557474d16bb432711fc31959dfc32924ea6433120ba0e",
         "addons/script.blacklanturn.preview/resources/skins/Default/media/nav-focus-teal.png": "8581a98ab03630c3cf341aa12257e8615ccaab42f207eef15db623723ae9a39c",
         "addons/script.blacklanturn.preview/resources/skins/Default/media/nav-focus.png": "5e9e85c34020d249712f0057a983bdc1175522f10df721924149af3b8a6f7591",
-        "addons/script.blacklanturn.preview/resources/skins/Default/media/nav-overlay.png": "d5cb9fc10a754ec5b1aaeef8180ce1ffeed03755a1d250df309526eef01a277e",
+        "addons/script.blacklanturn.preview/resources/skins/Default/media/nav-overlay.png": "ae902847649bca07ff1755f157f42b62552a0fea7589de23ddd6189e7a9a48b8",
         "addons/script.blacklanturn.preview/resources/skins/Default/media/new-releases.png": "9bfd12bdb119b03acaa3508a8f943751b4ae2f3006b6b3a7fd6b95f155013916",
         "addons/script.blacklanturn.preview/resources/skins/Default/media/news.png": "f6bfe82e772d7d6756ff91d5b2003270cdacb05ff227e00978534ef439c72606",
         "addons/script.blacklanturn.preview/resources/skins/Default/media/next-card-mask.png": "39c68372552455d3beb6b632334d3819d2619daa3278379f883f9afb51ae0288",
