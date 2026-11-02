@@ -41,6 +41,16 @@ class ViewTests(unittest.TestCase):
     def probe(self,extra):
         result=subprocess.run([sys.executable,'-I','-B','-c',PROBE+SETUP+extra,str(ADDON),'light_home_view'],capture_output=True,text=True,timeout=20)
         self.assertEqual(result.returncode,0,result.stdout+result.stderr)
+    def test_old_saved_home_never_focuses_removed_episode_action(self):
+        self.probe(r'''
+record['properties']['previewsReady']='false'
+links=[]
+w.getControl(103).controlRight=links.append
+w.getControl(105).controlRight=links.append
+w.onInit()
+assert w.props['allEpisodes']=='false', 'Old saved hero revived removed action'
+assert links and all(target is not w.getControl(106) for target in links), 'Old saved hero routed focus into removed action'
+''')
     def test_native_cards_and_hero_appear_before_full_controller_import(self):
         self.probe(r'''
 assert 'live_review' not in sys.modules

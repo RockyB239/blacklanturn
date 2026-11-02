@@ -91,8 +91,8 @@ jobs:
         run: python tools/device_validation/verify_performance_evidence.py validation/optimization130-performance.json --manifest controller-source/manifest96.json
       - name: Verify branded icons in both full and component editions
         run: |
-          python tools/build_release155.py --baselines baselines --output artifacts155
-          python tools/verify_release155.py --artifacts artifacts155 --baselines baselines
+          python tools/build_release156.py --baselines baselines --output artifacts155
+          python tools/verify_release156.py --artifacts artifacts155 --baselines baselines
           UPNEXT132_RELEASE_DIR=artifacts155 python -m unittest discover -s compatibility/upnext155/tests -v
-          python tools/release_report.py artifacts155/BlackLanturn-General-Kodi21-1.1.55.zip --output artifacts155/current-general.json
-          python tools/release_report.py artifacts155/BlackLanturn-Apple-TV-Mac-Kodi21-1.1.55.zip --output artifacts155/current-apple.json
+          python tools/release_report.py artifacts155/BlackLanturn-General-Kodi21-1.1.56.zip --output artifacts155/current-general.json
+          python tools/release_report.py artifacts155/BlackLanturn-Apple-TV-Mac-Kodi21-1.1.56.zip --output artifacts155/current-apple.json

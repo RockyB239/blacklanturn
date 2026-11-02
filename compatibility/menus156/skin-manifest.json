@@ -1,0 +1,13 @@
+{
+  "files": {
+    "xml/EventLog.xml": "ba1c8468c4c0767070456ecfaa9c2e87cbbc0c6ea2adb26f55510d04c155d45f",
+    "xml/Includes_DialogSelect.xml": "95822ae861b055e97fb1a946fb88c9b6b04f06cbd9bee4b649c73660aa16b058"
+  },
+  "forbidden_skin_files": [
+    "xml/script-upnext-upnext.xml",
+    "xml/script-upnext-upnext-simple.xml",
+    "xml/script-upnext-stillwatching.xml",
+    "xml/script-upnext-stillwatching-simple.xml"
+  ],
+  "prior_skin_manifest": "compatibility/menus155/skin-manifest.json"
+}

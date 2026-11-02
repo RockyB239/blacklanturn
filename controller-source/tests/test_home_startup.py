@@ -45,7 +45,8 @@ class EntryContractTests(unittest.TestCase):
                          xbmcaddon=SimpleNamespace(Addon=lambda *a: None), xbmcvfs=SimpleNamespace(translatePath=lambda _: '/profile'),
                          SkinStartupGate=lambda _: SimpleNamespace(tick=lambda *a: 'ready'), time=__import__('time'),
                          sys=SimpleNamespace(argv=[], exc_info=sys.exc_info), PROFILE='/profile', ROOT=ROOT, STORE=Path('/profile'),
-                         record=lambda *a, **k: None, run_live_review=run)
+                         record=lambda *a, **k: None, monitor=SimpleNamespace(abortRequested=lambda:False),
+                         run_live_review=lambda startup=None, early_home=None, monitor=None:run(startup))
         recovery = SimpleNamespace(recover_installer=lambda *a: False, RecoveryError=RuntimeError)
         live = None if fail_import else SimpleNamespace(LiveReview=object)
         with patch.dict(sys.modules, installer_recovery=recovery, live_review=live):

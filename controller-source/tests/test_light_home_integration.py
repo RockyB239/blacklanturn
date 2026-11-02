@@ -64,7 +64,7 @@ projection=HeroProjection(owner);got=projection.render(owner,item)
 assert got['play']=='Episodes' and got['saved']=='+ My Stuff'
 assert got['properties']['hero']==item['art']['fanart']
 assert got['properties']['titleLogo']==item['art']['clearlogo']
-assert got['properties']['allEpisodes']=='true' and got['height']==155
+assert got['properties']['allEpisodes']=='false' and got['height']==155
 import ast
 main=ast.parse((Path(sys.argv[1])/'live_review.py').read_text());early=ast.parse((Path(sys.argv[1])/'light_home_cards.py').read_text())
 f=lambda tree:ast.dump(next(n for n in tree.body if isinstance(n,ast.FunctionDef) and n.name=='media_item'),include_attributes=False)
@@ -116,5 +116,5 @@ item={'title':'Example','label':'Example','file':'plugin://plugin.video.themovie
 projected=HeroProjection(owner).render(owner,item)
 assert projected['play']=='Episodes'
 assert projected['properties']['hero']==item['art']['fanart']
-assert projected['properties']['allEpisodes']=='true'
+assert projected['properties']['allEpisodes']=='false'
 ''')

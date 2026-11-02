@@ -4,9 +4,9 @@ ROOT=Path(__file__).resolve().parents[1]
 class UpdateNotesRelease(unittest.TestCase):
  def test_current_versions_and_exact_state_module(self):
   addon=ROOT/'controller-source/addon'
-  self.assertEqual(E.parse(addon/'addon.xml').getroot().get('version'),'0.1.119')
+  self.assertEqual(E.parse(addon/'addon.xml').getroot().get('version'),'0.1.120')
   source=ROOT/'installer-source/plugin.program.blacklanturninstaller'
-  self.assertEqual(E.parse(source/'addon.xml').getroot().get('version'),'1.0.50')
+  self.assertEqual(E.parse(source/'addon.xml').getroot().get('version'),'1.0.51')
   # Accepted startup code defers only tempfile's import into write_state.
   # Every remaining statement must stay identical across the two state owners.
   import ast
@@ -26,7 +26,7 @@ class UpdateNotesRelease(unittest.TestCase):
     self.assertTrue(entry['summary']);self.assertLessEqual(len(entry['summary']),6)
     self.assertTrue(all(len(x)<=240 and 'http' not in x for x in entry['summary']))
  def test_current_manifest_and_history_immutable(self):
-  addon=ROOT/'controller-source/addon';manifest=json.loads((ROOT/'controller-source/manifest119.json').read_text())
+  addon=ROOT/'controller-source/addon';manifest=json.loads((ROOT/'controller-source/manifest120.json').read_text())
   actual={p.relative_to(addon).as_posix():hashlib.sha256(p.read_bytes()).hexdigest() for p in addon.rglob('*') if p.is_file() and '__pycache__' not in p.parts and p.suffix!='.pyc'}
   self.assertEqual(actual,manifest['files'])
   self.assertEqual(json.loads((ROOT/'controller-source/manifest87.json').read_text())['controller'],'0.1.87')

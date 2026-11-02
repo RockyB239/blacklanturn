@@ -2,6 +2,8 @@
 import sys,time,json
 from pathlib import Path
 import xbmc,xbmcgui,xbmcvfs,xbmcaddon
+# Kodi abort signals belong to existing Monitor instances, not future ones.
+monitor=xbmc.Monitor()
 ROOT=Path(__file__).resolve().parent
 sys.path.insert(0,str(ROOT))
 from live_runtime import validate_paths,SkinStartupGate
@@ -10,9 +12,10 @@ STORE=Path(xbmcvfs.translatePath(xbmcaddon.Addon('script.blacklanturn.preview').
 EVIDENCE=STORE/'logs';EVIDENCE.mkdir(parents=True,exist_ok=True)
 def record(event,**values):
     with (EVIDENCE/'runtime.jsonl').open('a') as f:f.write(json.dumps(dict(event=event,time=time.time(),**values))+'\n')
-def run_live_review(startup=None,early_home=None):
+def run_live_review(startup=None,early_home=None,monitor=None):
+    if monitor is None:monitor=xbmc.Monitor()
     resume=None;playback_resume=None;owner_skin=xbmc.getSkinDir()
-    while not xbmc.Monitor().abortRequested() and xbmc.getSkinDir()==owner_skin:
+    while not monitor.abortRequested() and xbmc.getSkinDir()==owner_skin:
         lightweight=bool(early_home and not resume and not playback_resume)
         if lightweight:
             from light_home_view import LightweightHome
@@ -30,6 +33,7 @@ def run_live_review(startup=None,early_home=None):
             if lightweight:w.dispose()
             else:w.alive=False
         del w
+        if monitor.abortRequested():return
         if playback:
             from playback_runtime import play_and_wait
             from youtube_core import video_id
@@ -74,11 +78,11 @@ def run_live_review(startup=None,early_home=None):
             xbmc.executeJSONRPC(json.dumps({'jsonrpc':'2.0','id':1,'method':'GUI.ActivateWindow','params':{'window':request['target'],'parameters':request['parameters']}}))
         else:xbmc.executebuiltin('ActivateWindow('+request['target']+')')
         if request.get('script'):xbmc.executebuiltin('RunScript('+request['script']+')')
-        while not xbmc.Monitor().abortRequested():
+        while not monitor.abortRequested():
             outcome=gate.tick(xbmcgui.getCurrentWindowId(),time.monotonic())
             if outcome!='wait':break
             xbmc.sleep(100)
-        if xbmc.Monitor().abortRequested():return
+        if monitor.abortRequested():return
         if outcome=='failed':xbmcgui.Dialog().notification('BlackLanturn','This page could not open; returning to BlackLanturn.')
         record('core_settings_return',target=request['target'],outcome=outcome,category=request['category'],row=request['row'])
         resume=request
@@ -122,15 +126,15 @@ try:
                 from live_review import LiveReview
         except Exception as exc:
             preload_error=exc
-        while not xbmc.Monitor().abortRequested():
+        while not monitor.abortRequested():
             outcome=gate.tick(xbmc.getSkinDir(),xbmc.getCondVisibility('Window.IsVisible(yesnodialog)'),time.monotonic())
             if outcome!='wait':break
             xbmc.sleep(100)
-        if not xbmc.Monitor().abortRequested() and outcome=='ready':
+        if not monitor.abortRequested() and outcome=='ready':
             if preload_error is not None:raise preload_error
             record('installed_profile',profile=str(PROFILE),addon=str(ROOT),skin=xbmc.getSkinDir())
-            if early_home:run_live_review(startup,early_home)
-            else:run_live_review(startup)
+            if early_home:run_live_review(startup,early_home,monitor)
+            else:run_live_review(startup,monitor=monitor)
 except Exception:
     if startup is not None:startup.release()
     home.setProperty('BlackLanturn.Recovery.Visible','true');home.clearProperty('BlackLanturn.Handoff.Status')

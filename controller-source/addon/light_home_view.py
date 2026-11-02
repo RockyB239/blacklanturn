@@ -71,11 +71,12 @@ class LightweightHome(xbmcgui.WindowXML):
         if not hero:return
         self._selected=item
         for key,value in hero['properties'].items():self.setProperty(key,value)
+        self.setProperty('allEpisodes','false')
         self.getControl(101).setLabel(hero['play']);self.getControl(103).setLabel(hero['saved']);self.getControl(251).setHeight(hero['height'])
         from youtube_core import automatic_preview
-        has=hero['properties'].get('allEpisodes')=='true';cfg=self._early['config'];mode=cfg.get('PreviewMode','manual')
+        cfg=self._early['config'];mode=cfg.get('PreviewMode','manual')
         manual=not automatic_preview(cfg,'Home',mode) and self._early['record']['properties']['previewsReady']=='true'
-        self.getControl(101).controlRight(self.getControl(102));self.getControl(103).controlLeft(self.getControl(102));self.getControl(103).controlRight(self.getControl(105 if manual else 106 if has else 103));self.getControl(105).controlLeft(self.getControl(103));self.getControl(105).controlRight(self.getControl(106 if has else 105));self.getControl(106).controlLeft(self.getControl(105 if manual else 103))
+        self.getControl(101).controlRight(self.getControl(102));self.getControl(103).controlLeft(self.getControl(102));self.getControl(103).controlRight(self.getControl(105 if manual else 103));self.getControl(105).controlLeft(self.getControl(103));self.getControl(105).controlRight(self.getControl(105))
     def _sync_selection(self):
         if not self._early:return
         focus=self.getFocusId()

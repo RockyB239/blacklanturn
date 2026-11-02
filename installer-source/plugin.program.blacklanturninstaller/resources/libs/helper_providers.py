@@ -37,7 +37,9 @@ def prepare(marker,archive,home):
     needs_group=tuple(int(x) for x in version.split('.')[:3])>=(6,19,3)
     revision=marker.get('helper_sync_policy')
     if revision is None and not needs_group:return
-    if revision!='providers-1' or marker.get('installer_min_version')!=('1.0.48' if marker.get('cocoscrapers_policy')=='parallel-airdate-1' else '1.0.47') or not needs_group:
+    shutdown=marker.get('shutdown_patch')
+    minimum='1.0.51' if shutdown=='retained-monitor-1' else '1.0.48' if marker.get('cocoscrapers_policy')=='parallel-airdate-1' else '1.0.47'
+    if shutdown not in (None,'retained-monitor-1') or revision!='providers-1' or marker.get('installer_min_version')!=minimum or not needs_group:
         raise managed.ProtectionError('Update BlackLanturn Installer before installing this Helper sync provider group.')
     verify_archive(archive)
     if home is None:raise managed.ProtectionError('Helper sync provider source verification needs the current profile.')

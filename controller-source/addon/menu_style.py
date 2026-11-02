@@ -9,3 +9,9 @@ def publish_native_icons(config,window_factory=None):
   window_factory=lambda:xbmcgui.Window(10000)
  window=window_factory();pack=selected_pack(config)
  for key,slug in NATIVE_ICONS.items():window.setProperty('BlackLanturn.Icon.'+key,icon_path(ROOT,slug,pack))
+
+ # Reuse the existing offline refresh; never write the user's preferences.
+ finish='glass' if pack=='smoked-glass' else 'silver'
+ media=ROOT/'resources/icon-packs/packs'/('smoked-glass' if finish=='glass' else 'sculpted-silver')
+ for state in ('Rest','Focus'):
+  window.setProperty('BlackLanturn.Navigation.'+state,str(media/('navigation-'+finish+'-'+state.lower()+'.png')))

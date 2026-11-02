@@ -37,7 +37,9 @@ def prepare(marker,archive,home):
     raw=archive.read(key)
     protected=managed._versions.normalize_metadata(ID,raw)!=raw
     if revision is None and not protected:return
-    if revision!=POLICY or marker.get('installer_min_version')!='1.0.48' or not protected:
+    shutdown=marker.get('shutdown_patch')
+    minimum='1.0.51' if shutdown=='retained-monitor-1' else '1.0.48'
+    if shutdown not in (None,'retained-monitor-1') or revision!=POLICY or marker.get('installer_min_version')!=minimum or not protected:
         raise managed.ProtectionError('Update BlackLanturn Installer before installing this CocoScrapers source policy.')
     verify_archive(archive)
     if home is None:raise managed.ProtectionError('CocoScrapers source verification needs the current profile.')

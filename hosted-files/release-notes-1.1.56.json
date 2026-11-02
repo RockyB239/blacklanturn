@@ -1,0 +1,28 @@
+{
+  "title": "BlackLanturn Build 1.1.56",
+  "summary": "Cleaner navigation, matching buttons, roomier menus and more reliable shutdown.",
+  "sections": [
+    {
+      "heading": "Cleaner navigation",
+      "bullets": [
+        "Expanded sidebar uses a soft feathered shade that keeps navigation readable without a solid panel.",
+        "Category and action buttons match your Silver or Smoked Glass icon pack.",
+        "Episodes opens the season list; the duplicate All episodes button is removed."
+      ]
+    },
+    {
+      "heading": "Roomier menus and reliable shutdown",
+      "bullets": [
+        "Event log and detailed selection lists have more space around their contents.",
+        "Controller and Umbrella retain Kodi\u2019s shutdown signal and stop launching work when Kodi closes."
+      ]
+    },
+    {
+      "heading": "Your complete setup stays saved",
+      "bullets": [
+        "Update BlackLanturn keeps your accounts, authorizations, playback choices, sources, saved data and other installed add-ons.",
+        "Installer 1.0.51 delivers both editions and their reviewed add-on patches together."
+      ]
+    }
+  ]
+}

@@ -137,12 +137,12 @@ class PreviewSetup(unittest.TestCase):
   self.assertTrue(p.configured(fields,{}))
   self.assertTrue(p.configured({}, {'keys':{'user':{'api_key':'key','client_id':'id','client_secret':'secret'}}}))
   self.assertFalse(p.configured(fields,{},enabled=False))
- def test_hidden_preview_does_not_block_all_episodes_navigation(self):
+ def test_hidden_preview_ends_action_navigation_at_my_stuff(self):
   from test_discovery_controller import DiscoveryController
   w,_,c=DiscoveryController().state();w.selected=result('Show','tv',1);w.previews_ready=False
   route=[];c[103].controlRight=route.append
   w.row_navigation()
-  self.assertIs(route[-1],c[106])
+  self.assertIs(route[-1],c[103])
  def test_youtube_settings_return_rechecks_readiness_and_navigation(self):
   calls=[]
   w=SimpleNamespace(refresh_preview_setup=lambda:calls.append('checked'),row_navigation=lambda:calls.append('navigation'))

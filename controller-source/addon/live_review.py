@@ -1061,15 +1061,14 @@ class LiveReview(LibraryActions,RowCustomization,TitleFeedback,YouTubeBrowser,xb
             first=900 if self.rows[0] or not self.window_ready[0] else 901 if self.rows[1] else 101
             if getattr(self,'search_state',None) and not any(self.rows):first=600
             self.getControl(600).controlUp(self.getControl(101 if self.selected else 600))
-            has_episodes=bool(show_identity(self.selected or {}) and not self.episode_browser_context)
             manual_preview=not automatic_preview(getattr(self,'config',{}),getattr(self,'section',''),self.preview_mode) and (getattr(self,'section','')=='YouTube' or getattr(self,'previews_ready',True))
             if getattr(self,'startup_idle',False):
                 idle=self.getControl(5);idle.controlRight(self.getControl(first));idle.controlDown(self.getControl(first))
             if self.mode=='home':
                 self.getControl(101).controlRight(self.getControl(101 if discovery_result(getattr(self,'selected',None) or {}) else 102))
                 self.getControl(103).controlLeft(self.getControl(102))
-                self.getControl(103).controlRight(self.getControl(105 if manual_preview else 106 if has_episodes else 103))
-                self.getControl(105).controlLeft(self.getControl(103));self.getControl(105).controlRight(self.getControl(106 if has_episodes else 105))
+                self.getControl(103).controlRight(self.getControl(105 if manual_preview else 103))
+                self.getControl(105).controlLeft(self.getControl(103));self.getControl(105).controlRight(self.getControl(105))
                 self.getControl(106).controlLeft(self.getControl(105 if manual_preview else 103))
                 self.getControl(600).controlDown(self.getControl(600 if getattr(self,'search_state',None) and getattr(self,'adaptive_browsing',False) else first))
                 for cid in (101,102,103,105,106):self.getControl(cid).controlDown(self.getControl(first))
@@ -1208,7 +1207,7 @@ class LiveReview(LibraryActions,RowCustomization,TitleFeedback,YouTubeBrowser,xb
             self.setProperty('title',headline);self.setProperty('episodeLine',episode_line)
             self.setProperty('episodeMeta',episode_card(item)['meta'] if self.episode_browser_context else '')
             self.getControl(251).setHeight(105 if episode_line else 155)
-            self.setProperty('allEpisodes','true' if show_identity(item) and not self.episode_browser_context else 'false')
+            self.setProperty('allEpisodes','false')
             presentation=title_presentation(item,self.config.get('TitleLogos',True))
             self.logo_source=presentation['logo']
             decisions=getattr(self,'logo_decisions',None)
@@ -1218,8 +1217,8 @@ class LiveReview(LibraryActions,RowCustomization,TitleFeedback,YouTubeBrowser,xb
             discovery=discovery_result(item)
             self.setProperty('browsable','true' if discovery or item.get('type')=='addon' or item.get('_page_control') else 'false')
             self.getControl(101).setLabel(item['label'] if item.get('_page_control') else 'Open add-on' if item.get('type')=='addon' else discovery['button'] if discovery else 'Episodes' if item.get('filetype')=='directory' and item.get('year') else 'Resume' if episode_line and watch_state(item)['state']=='progress' else 'Play')
-            self.getControl(103).controlRight(self.getControl(105 if self.mode=='home' and not automatic_preview(getattr(self,'config',{}),getattr(self,'section',''),self.preview_mode) and (getattr(self,'section','')=='YouTube' or getattr(self,'previews_ready',True)) else 106 if show_identity(item) and not self.episode_browser_context else 103))
-            self.getControl(105).controlRight(self.getControl(103 if self.mode=='details' else 106 if show_identity(item) and not self.episode_browser_context else 105))
+            self.getControl(103).controlRight(self.getControl(105 if self.mode=='home' and not automatic_preview(getattr(self,'config',{}),getattr(self,'section',''),self.preview_mode) and (getattr(self,'section','')=='YouTube' or getattr(self,'previews_ready',True)) else 103))
+            self.getControl(105).controlRight(self.getControl(103 if self.mode=='details' else 105))
             self.display_ratings([] if discovery or is_youtube(item) else rating_badges(item));self.setProperty('plot',item.get('plot') or ('Browse movies and shows from this studio.' if entity_kind(item)=='company' else 'Browse the titles in this collection.' if entity_kind(item)=='collection' else ''))
             if is_youtube(item):
                 self.setProperty('hero',item.get('_youtube_folder_icon','') if item.get('filetype')=='directory' else art.get('thumb') or item.get('thumbnail') or art.get('fanart',''))
@@ -1765,7 +1764,7 @@ class LiveReview(LibraryActions,RowCustomization,TitleFeedback,YouTubeBrowser,xb
             self.getControl(101).controlDown(self.getControl(3000));self.getControl(103).controlDown(self.getControl(3000));self.getControl(105).controlDown(self.getControl(3000))
             self.getControl(101).controlRight(self.getControl(105 if preview_available else 103))
             self.getControl(105).controlLeft(self.getControl(101));self.getControl(105).controlRight(self.getControl(103))
-            self.getControl(103).controlLeft(self.getControl(105 if preview_available else 101));self.getControl(103).controlRight(self.getControl(106 if show_identity(item) and not self.episode_browser_context else 103))
+            self.getControl(103).controlLeft(self.getControl(105 if preview_available else 101));self.getControl(103).controlRight(self.getControl(103))
             self.getControl(106).controlDown(self.getControl(3000));self.getControl(106).controlLeft(self.getControl(103))
             self.related_history=PageHistory();self.related_path='';self.related_owner=object();owner=self.related_owner;self.related_request=None
             self.related=[];self.title_related_raw=None;self.cast_people=[]

@@ -222,7 +222,12 @@ def prepare_policy(marker, archive):
     coco = marker.get('cocoscrapers_policy')
     if coco is not None and (coco != 'parallel-airdate-1' or not providers):
         raise ValueError('Update BlackLanturn Installer before installing this build.')
+    shutdown = marker.get('shutdown_patch')
+    if shutdown is not None and (shutdown != 'retained-monitor-1' or not coco):
+        raise ValueError('Update BlackLanturn Installer before installing this build.')
     minimum = '1.0.48' if coco else '1.0.47' if providers else ('1.0.40' if marker.get('installer_min_version')=='1.0.40' else '1.0.39') if registration_policy else '1.0.30' if update_policy else policy()['installer_min_version']
+    if shutdown:
+        minimum = '1.0.51'
     if (revision != policy()['policy'] or marker.get('installer_min_version') != minimum
             or marker.get('youtube_refresh_patch') != 'youtube-freshness-2'):
         raise ValueError('Update BlackLanturn Installer before installing this build.')
