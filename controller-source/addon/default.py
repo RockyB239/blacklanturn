@@ -32,6 +32,8 @@ def run_live_review(startup=None,early_home=None,monitor=None):
         finally:
             if lightweight:w.dispose()
             else:w.alive=False
+        # Return state is detached above; retire the native view before playback.
+        controller=None
         del w
         if monitor.abortRequested():return
         if playback:

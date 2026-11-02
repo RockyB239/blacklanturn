@@ -122,3 +122,64 @@ class ExplicitOpenFocus(unittest.TestCase):
         extract(ROOT/'live_review.py','onClick',{'discovery_result':lambda item:None},'LiveReview')(obj,101)
         self.assertEqual(obj.paths[0],'plugin://plugin.video.example/seasons')
         self.assertEqual(focus[0],900,'Explicit Open must focus the child results')
+
+class SlowForegroundPageFocus(unittest.TestCase):
+ state=PageFailures.state
+ def test_next_page_finishing_after_user_moves_keeps_new_row_and_hero(self):
+  queue=[];focus=[900];observed=[]
+  class Thread(InlineThread):
+   def start(self):queue.append(self.target)
+  obj,props,applied,load=self.state(lambda p:[{'file':'next-title'}],Thread)
+  obj.getFocusId=lambda:focus[0];obj.setFocusId=lambda cid:focus.__setitem__(0,cid)
+  obj.apply_row=lambda *a,**kw:observed.append(kw)
+  load(obj,0,'plugin://plugin.video.example/next')
+  focus[0]=901
+  queue[0]()
+  self.assertEqual(focus[0],901,'Late page completion pulled focus back to the old row')
+  self.assertFalse(observed[0].get('update_selected',True),'Late page replaced the newly selected title hero')
+ def test_explicit_page_open_still_focuses_results_if_user_has_not_moved(self):
+  obj,props,applied,load=self.state(lambda p:[{'file':'child'}]);focus=[101]
+  obj.getFocusId=lambda:focus[0];obj.setFocusId=lambda cid:focus.__setitem__(0,cid)
+  load(obj,0,'plugin://plugin.video.example/child');self.assertEqual(focus[0],900)
+
+class RepeatedPageRequests(unittest.TestCase):
+ state=PageFailures.state
+ def test_cache_invalidation_allows_a_fresh_same_page_request(self):
+  for replace_cache in (False,True):
+   queue=[]
+   class Thread(InlineThread):
+    def start(self):queue.append(self.target)
+   obj,props,applied,load=self.state(lambda path:[{'file':path}],Thread)
+   obj.result_cache=SimpleNamespace(revision=1)
+   target='plugin://plugin.video.example/next';load(obj,0,target)
+   if replace_cache:obj.result_cache=SimpleNamespace(revision=1)
+   else:obj.result_cache.revision+=1
+   load(obj,0,target)
+   self.assertEqual(len(queue),2,'Invalidated request suppressed a fresh retry')
+   queue[0]();queue[1]();self.assertEqual(len(applied),1)
+ def test_repeated_next_clicks_share_one_inflight_provider_request(self):
+  queue=[];calls=[]
+  class Thread(InlineThread):
+   def start(self):queue.append(self.target)
+  obj,props,applied,load=self.state(lambda path:(calls.append(path) or [{'file':'next'}]),Thread)
+  target='plugin://plugin.video.example/next'
+  for _ in range(50):load(obj,0,target)
+  self.assertEqual(len(queue),1,'Repeated clicks spawned parallel requests for the same page')
+  queue[0]();self.assertEqual(calls,[target]);self.assertEqual(len(applied),1)
+ def test_a_failed_page_can_be_retried_after_the_inflight_request_finishes(self):
+  queue=[];failed=[True]
+  class Thread(InlineThread):
+   def start(self):queue.append(self.target)
+  def fetch(path):
+   if failed[0]:raise RuntimeError('network timeout')
+   return [{'file':'recovered'}]
+  obj,props,applied,load=self.state(fetch,Thread);target='plugin://plugin.video.example/next'
+  load(obj,0,target);queue.pop(0)();failed[0]=False;load(obj,0,target);queue.pop(0)()
+  self.assertEqual(applied[0][1],[{'file':'recovered'}])
+ def test_a_new_navigation_generation_is_not_suppressed_by_an_older_request(self):
+  queue=[]
+  class Thread(InlineThread):
+   def start(self):queue.append(self.target)
+  obj,props,applied,load=self.state(lambda path:[{'file':path}],Thread);target='plugin://plugin.video.example/next'
+  load(obj,0,target);obj.generation+=1;load(obj,0,target);self.assertEqual(len(queue),2)
+  queue[0]();queue[1]();self.assertEqual(len(applied),1)

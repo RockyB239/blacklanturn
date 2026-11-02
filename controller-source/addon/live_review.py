@@ -1283,6 +1283,11 @@ class LiveReview(LibraryActions,RowCustomization,TitleFeedback,YouTubeBrowser,xb
         generation=self.generation
         if not hasattr(self,'path_tokens'):self.path_tokens={}
         if not hasattr(self,'failed_paths'):self.failed_paths={}
+        if not hasattr(self,'page_request_targets'):self.page_request_targets={}
+        cache=getattr(self,'result_cache',None);revision=cache.revision if cache is not None else None
+        request=(generation,id(cache),revision,path,back,position)
+        if self.page_request_targets.get(n)==request and n in getattr(self,'loading_paths',{}):return
+        self.page_request_targets[n]=request
         token=self.path_tokens.get(n,0)+1;self.path_tokens[n]=token
         if not hasattr(self,'loading_paths'):self.loading_paths={}
         self.loading_paths[n]=(generation,token);self.stop_preview()
@@ -1290,8 +1295,7 @@ class LiveReview(LibraryActions,RowCustomization,TitleFeedback,YouTubeBrowser,xb
         focus_before=getattr(self,'getFocusId',lambda:900+n)()
         if not self.rows[n]:self.setProperty('rowState'+str(n),'loading');self.setProperty('rowMessage'+str(n),'Loading provider page…')
         self.setProperty('notice','Loading provider page…')
-        cache=getattr(self,'result_cache',None);revision=cache.revision if cache is not None else None
-        def current():return self.alive and generation==self.generation and self.path_tokens.get(n)==token and (cache is None or cache.revision==revision)
+        def current():return self.alive and generation==self.generation and self.path_tokens.get(n)==token and cache is getattr(self,'result_cache',None) and (cache is None or cache.revision==revision)
         def work():
             try:
                 if not current():return
@@ -1315,8 +1319,10 @@ class LiveReview(LibraryActions,RowCustomization,TitleFeedback,YouTubeBrowser,xb
                         # Explicit navigation replaces the old visible owner and its
                         # deferred automatic result, including same-path back/retry.
                         self.row_cache.pop(self.row_offset+n,None)
-                        self.apply_row(n,files,label or self.getProperty('row'+str(n)),position,display_position=back,ranked_start=not back)
-                        if (not preserve_focus and (not getattr(self,'search_state',None) or self.getFocusId() in (0,900,901))) or (preserve_focus and focus_before==900+n and getattr(self,'getFocusId',lambda:focus_before)()==focus_before):self.setFocusId(900+n if self.rows[n] else 600 if getattr(self,'search_state',None) or getattr(self,'episode_browser_context',None) else 50)
+                        focus_now=getattr(self,'getFocusId',lambda:focus_before)()
+                        owns_focus=focus_now==focus_before
+                        self.apply_row(n,files,label or self.getProperty('row'+str(n)),position,display_position=back,ranked_start=not back,**({} if owns_focus else {'update_selected':False}))
+                        if owns_focus and ((not preserve_focus and (not getattr(self,'search_state',None) or focus_now in (0,900,901))) or (preserve_focus and focus_before==900+n)):self.setFocusId(900+n if self.rows[n] else 600 if getattr(self,'search_state',None) or getattr(self,'episode_browser_context',None) else 50)
                         event('page_loaded',row=n,count=len(files),back=back)
             except Exception as exc:
                 with self.preview_dispatch_lock:
@@ -1327,7 +1333,8 @@ class LiveReview(LibraryActions,RowCustomization,TitleFeedback,YouTubeBrowser,xb
                         self.setProperty('notice','Page unavailable; current titles remain visible. Open title actions to retry.')
                 event('page_error',error_type=type(exc).__name__)
             finally:
-                if self.loading_paths.get(n)==(generation,token):self.loading_paths.pop(n,None)
+                if self.loading_paths.get(n)==(generation,token):
+                    self.loading_paths.pop(n,None);self.page_request_targets.pop(n,None)
         threading.Thread(target=work,name='BlackLanturnLivePage',daemon=True).start()
     def chosen(self,cid=None):
         cid=cid or self.getFocusId()
@@ -1398,7 +1405,10 @@ class LiveReview(LibraryActions,RowCustomization,TitleFeedback,YouTubeBrowser,xb
         self.restart_pending_rows()
         event('browse_restored',section=self.section,page=self.active_page,mode=self.mode,offset=self.row_offset,positions=state['positions'])
     def refresh_watch_status(self,sync=False,browse_state=None):
-        if self.actions_open:return
+        def refresh_owner():
+            cache=getattr(self,'result_cache',None)
+            return (self.generation,id(cache),cache.revision if cache is not None else None,getattr(self,'row_request_serial',0),tuple(self.paths),tuple(getattr(self,'path_tokens',{}).get(n) for n in range(2)))
+        if self.actions_open or getattr(self,'watch_refresh_owner',None)==refresh_owner():return
         if self.section=='YouTube':
             # Queued feed metadata predates this watch update. Retire it
             # permanently, including after watch_refresh_generation is cleared.
@@ -1407,13 +1417,24 @@ class LiveReview(LibraryActions,RowCustomization,TitleFeedback,YouTubeBrowser,xb
         self.invalidate_row_results(preserve_display=True)
         self.generation+=1
         self.row_window_busy=False
-        self.actions_open=True;self.stop_preview();generation=self.generation;self.watch_refresh_generation=generation
+        generation=self.generation;self.watch_refresh_generation=generation
+        owner=refresh_owner();self.watch_refresh_owner=owner
+        self.stop_preview()
+        def current():return self.alive and refresh_owner()==owner
+        def row_current(n,path):return current() and self.paths[n]==path
+        input_epoch=getattr(self,'input_generation',0)
         # Native selection/focus messages may still be queued after restore_browse.
         focus=browse_state['focus'] if browse_state is not None else self.getFocusId()
         selected=dict(self.selected or {});paths=list(self.paths);rows=[list(r) for r in self.rows]
         positions=list(browse_state['positions']) if browse_state is not None else [self.getControl(900+n).getSelectedPosition() for n in range(2)]
         anchor_rows=browse_state.get('rows',rows) if browse_state is not None else rows
         anchors=[row[pos] if 0<=pos<len(row) else None for row,pos in zip(anchor_rows,positions)]
+        def owns_input():return not self.actions_open and getattr(self,'input_generation',0)==input_epoch and item_key(self.selected or {})==item_key(selected)
+        def row_position(n,files):
+            if owns_input():return restored_position(files,anchors[n],positions[n])
+            position=self.getControl(900+n).getSelectedPosition();displayed=self.rows[n]
+            anchor=displayed[position] if 0<=position<len(displayed) else None
+            return restored_position(files,anchor,position)
         labels=[getattr(self,'failed_paths',{}).get(n,{}).get('label') or getattr(self,'row_labels',{}).get(n,self.getProperty('row'+str(n))) for n in range(2)]
         youtube_current=self.youtube_request_guard(generation) if self.section=='YouTube' else None
         self.row_cache={};self.setProperty('notice','Refreshing watched status…')
@@ -1422,13 +1443,17 @@ class LiveReview(LibraryActions,RowCustomization,TitleFeedback,YouTubeBrowser,xb
             try:
                 if sync and self.section!='YouTube':
                     xbmc.executebuiltin(watch_sync_command())
-                    if not wait_for_helper(lambda:self.alive):unavailable=True
+                    if not wait_for_helper(current):unavailable=True
                 for n,path in enumerate(paths):
-                    if not self.alive or generation!=self.generation:return
+                    if not current():return
+                    if not row_current(n,path):continue
                     if not path:
                         if hasattr(self,'hydrate_library_items'):
-                            files=self.hydrate_library_items(rows[n]);position=restored_position(files,anchors[n],positions[n])
-                            if self.alive and generation==self.generation:self.apply_row(n,files,labels[n],position,update_selected=False)
+                            files=self.hydrate_library_items(rows[n])
+                            with self.preview_dispatch_lock:
+                                if row_current(n,path):
+                                    position=row_position(n,files)
+                                    if row_current(n,path):self.apply_row(n,files,labels[n],position,update_selected=False)
                         continue
                     try:
                         with self.list_lock:
@@ -1439,33 +1464,36 @@ class LiveReview(LibraryActions,RowCustomization,TitleFeedback,YouTubeBrowser,xb
                             else:
                                 filtered=getattr(self,'anime_metadata',None) is not None and should_exclude_anime(self,path)
                                 files=[] if filtered and upstream_path(provider_path(path))!=provider_path(path) else get_list(provider_path(path))
-                                files=self.fill_discovery_page(path,files,lambda:self.alive and generation==self.generation,refresh=True)
+                                files=self.fill_discovery_page(path,files,lambda n=n,path=path:row_current(n,path),refresh=True)
                     except Exception:unavailable=True;continue
-                    anchor=anchors[n]
-                    position=restored_position(files,anchor,positions[n])
-                    if self.alive and generation==self.generation:
-                        if self.section=='YouTube':self.remember_youtube_watch_items(files)
-                        self.apply_row(n,files,labels[n],position,update_selected=False)
-                        getattr(self,'failed_paths',{}).pop(n,None)
-                        match=next((x for x in files if item_key(x)==item_key(selected)),None)
-                        if match:fresh_selected=refreshed_watch_item(selected,match)
+                    with self.preview_dispatch_lock:
+                        if row_current(n,path):
+                            position=row_position(n,files)
+                            if not row_current(n,path):continue
+                            if self.section=='YouTube':self.remember_youtube_watch_items(files)
+                            self.apply_row(n,files,labels[n],position,update_selected=False)
+                            getattr(self,'failed_paths',{}).pop(n,None)
+                            match=next((x for x in files if item_key(x)==item_key(selected)),None)
+                            if match:fresh_selected=refreshed_watch_item(selected,match)
+                if not current():return
                 if fresh_selected is None and selected and trakt_command(selected) and not unavailable:
                     params=title_details_params(selected);kind=params.pop('tmdb_type')
                     try:
                         found=get_list(tmdb('details',kind,**params))
                         if found:fresh_selected=refreshed_watch_item(selected,found[0])
                     except Exception:unavailable=True
-                if not self.alive or generation!=self.generation:return
+                if not current():return
                 if fresh_selected:getattr(self,'refresh_library_watch',lambda _:None)(fresh_selected)
-                self.update(fresh_selected or selected)
-                self.setProperty('notice','Some status data could not refresh; previous information retained' if unavailable else 'Watched status refreshed')
+                if owns_input():self.update(fresh_selected or selected)
+                if owns_input() or self.getProperty('notice')=='Refreshing watched status…':self.setProperty('notice','Some status data could not refresh; previous information retained' if unavailable else 'Watched status refreshed')
                 event('watch_status_refreshed',available=not unavailable,matched=bool(fresh_selected),section=self.section)
             except Exception as exc:
                 event('watch_refresh_error',error_type=type(exc).__name__)
             finally:
-                if getattr(self,'watch_refresh_generation',None)==generation:self.watch_refresh_generation=None
-                self.actions_open=False;self.focus_key=None;self.dwell=time.monotonic()
-                if self.alive and generation==self.generation and focus in (101,102,103,105,106,600,900,901,3000,3100):self.setFocusId(focus)
+                if getattr(self,'watch_refresh_owner',None)==owner:self.watch_refresh_generation=None;self.watch_refresh_owner=None
+                if current():
+                    self.focus_key=None;self.dwell=time.monotonic()
+                    if owns_input() and (browse_state is not None or self.getFocusId()==focus) and focus in (101,102,103,105,106,600,900,901,3000,3100):self.setFocusId(focus)
         threading.Thread(target=work,name='BlackLanturnWatchRefresh',daemon=True).start()
     def choose_playback_player(self,item,save_default=False):
         kind=playback_kind(item)

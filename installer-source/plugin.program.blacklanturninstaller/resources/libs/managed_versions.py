@@ -228,6 +228,11 @@ def prepare_policy(marker, archive):
     minimum = '1.0.48' if coco else '1.0.47' if providers else ('1.0.40' if marker.get('installer_min_version')=='1.0.40' else '1.0.39') if registration_policy else '1.0.30' if update_policy else policy()['installer_min_version']
     if shutdown:
         minimum = '1.0.51'
+    reliability = marker.get('reliability_patch')
+    if reliability is not None:
+        if reliability != 'navigation-focus-1' or not shutdown:
+            raise ValueError('Update BlackLanturn Installer before installing this build.')
+        minimum = '1.0.52'
     if (revision != policy()['policy'] or marker.get('installer_min_version') != minimum
             or marker.get('youtube_refresh_patch') != 'youtube-freshness-2'):
         raise ValueError('Update BlackLanturn Installer before installing this build.')

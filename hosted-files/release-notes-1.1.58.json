@@ -1,0 +1,28 @@
+{
+  "title": "BlackLanturn Build 1.1.58",
+  "summary": "More reliable browsing, watched-status refresh and playback return, with clearer source fallback messages.",
+  "sections": [
+    {
+      "heading": "Smoother browsing and playback",
+      "bullets": [
+        "Late row updates keep your current title and selection in place.",
+        "Watched-status refresh runs without blocking Play or resetting your selection.",
+        "Duplicate page requests are combined and retired views are released before playback."
+      ]
+    },
+    {
+      "heading": "Clearer menus",
+      "bullets": [
+        "Confirmation buttons stay inside their panel.",
+        "Play Next briefly explains when size/service matching or opening sources requires manual selection."
+      ]
+    },
+    {
+      "heading": "Your setup stays saved",
+      "bullets": [
+        "Use Update BlackLanturn to keep settings, accounts, history and other installed add-ons.",
+        "Included add-ons and tested BlackLanturn patches update together. No new monitoring service is added."
+      ]
+    }
+  ]
+}

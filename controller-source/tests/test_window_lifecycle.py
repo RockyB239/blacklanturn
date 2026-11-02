@@ -38,6 +38,23 @@ def extract(path, name, namespace, class_name=None):
     return method
 
 class WindowLifecycle(unittest.TestCase):
+    def test_retired_full_window_is_released_before_provider_playback(self):
+        import weakref
+        windows=[]
+        class Window:
+            def __init__(self,*args):
+                windows.append(weakref.ref(self));self.core_settings_request=None
+                self.playback_request='file:///local-test.mp4';self.playback_return={'selected':{}}
+                self.playback_options={}
+            def doModal(self):pass
+        def provider(*args):
+            self.assertIsNone(windows[0](),'Closed native view is retained throughout provider playback')
+            return False
+        namespace={'xbmc':SimpleNamespace(getSkinDir=lambda:'skin.blacklanturn.preview',Monitor=lambda:SimpleNamespace(abortRequested=lambda:False)),
+            'ROOT':ROOT,'record':lambda *a,**k:None}
+        run=extract(ROOT/'default.py','run_live_review',namespace)
+        with patch.dict(sys.modules,{'live_review':SimpleNamespace(LiveReview=Window),'playback_runtime':SimpleNamespace(play_and_wait=provider)}):run()
+
     def test_foreign_skin_reinitialization_closes_before_touching_native_controls(self):
         calls=[]
         def forbidden(*args):self.fail('Reloaded controls must not be mutated under another skin')

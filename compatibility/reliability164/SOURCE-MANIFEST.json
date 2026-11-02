@@ -1,0 +1,12 @@
+{
+  "schema": 1,
+  "candidate": "reliability164",
+  "public_version_unchanged": true,
+  "files": {
+    "addons/plugin.video.umbrella/resources/lib/modules/source_preferences.py": "110d7083a60a1ca9c0509f39c19ad8291cd356de84faad1bba210c6225024014",
+    "addons/plugin.video.umbrella/resources/lib/modules/sources.py": "ec6ad4f5253d0677a0e893881a584d9fba5c8eb7e9e2903a414a04261ad9ad01",
+    "addons/script.blacklanturn.preview/live_review.py": "0ad20a20f4b0128eb27ca4af268a27397d6168f3db0e2df8011529d99ad54fce",
+    "addons/skin.blacklanturn.preview/xml/DialogConfirm.xml": "0ba0a61205aa2bfbf273cbc8d95dc942e12fe5bf38367798552f96e4000896c6",
+    "addons/script.blacklanturn.preview/default.py": "7a23d8a67f603a35dee7353669b42afd37b7c0b58f230f00e7c78591a1153166"
+  }
+}
