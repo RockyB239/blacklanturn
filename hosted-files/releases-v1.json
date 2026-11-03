@@ -2,6 +2,116 @@
   "schema": 1,
   "releases": [
     {
+      "id": "blacklanturn-general-1.1.59-r0",
+      "edition": "general",
+      "version": "1.1.59",
+      "revision": 0,
+      "title": "BlackLanturn Build 1.1.59",
+      "summary": "Shelf filters, Pick Three, streaming-service discovery and the Watch Tonight queue.",
+      "sections": [
+        {
+          "heading": "Browse your way",
+          "bullets": [
+            "Filter a movie shelf by runtime, see titles new since your last visit, or use Pick Three.",
+            "Browse movies and shows by streaming service in your TMDb Helper region.",
+            "Use More like this to help shape recommendations."
+          ]
+        },
+        {
+          "heading": "Plan what to watch",
+          "bullets": [
+            "Keep a short Watch Tonight queue in My Stuff."
+          ]
+        },
+        {
+          "heading": "Keep your setup",
+          "bullets": [
+            "Use Update BlackLanturn to preserve settings, sign-ins, history and other installed add-ons."
+          ]
+        }
+      ],
+      "files": {
+        "addons/plugin.program.blacklanturninstaller/addon.xml": "c631f917ad9801316c44cbed9032eb6eec3d33953ab4ec2c6f51e3e69cb8a664",
+        "addons/plugin.program.blacklanturninstaller/resources/libs/cocoscrapers_policy.py": "59413df9421f46dc7b2f53a1b97edb34977db914b5fc25705813857e1297acf6",
+        "addons/plugin.program.blacklanturninstaller/resources/libs/helper_providers.py": "3b8107d4fb663b0d72dce869037e8f789165841195b99034efbaf8d71db58afa",
+        "addons/plugin.program.blacklanturninstaller/resources/libs/managed_versions.py": "14679d9317e302e76591c19e615946cdc83fbcf5e7859910057e8f686521676b",
+        "addons/script.blacklanturn.preview/action_panel_model.py": "1871bb493faf86125f4f813429344c324afa146109dc64acfdbdf55524a75646",
+        "addons/script.blacklanturn.preview/addon.xml": "22a1318ab3f42a0eeff59705605367a687dd9f80876cc8a34472c9789e864779",
+        "addons/script.blacklanturn.preview/backend_core.py": "0afa8e09b90bdb3d3b068365105b1f459eff712cbab3094f03fb54d4bedd2a8b",
+        "addons/script.blacklanturn.preview/backend_ui.py": "088b8ab5e24ac9bb4279b969b99104204103cada5b05941482db41d09360432e",
+        "addons/script.blacklanturn.preview/coming_up.py": "119c6a23bb66cf232e2f7c5cc73b07c89636bad0da91541cbbc19a95c7f4fa7c",
+        "addons/script.blacklanturn.preview/genre_lookahead.py": "2bf6f72026f35758e3d79a6d0e197b87430fd36a2ce7079f89354bc5539efc03",
+        "addons/script.blacklanturn.preview/genre_picker.py": "2b53cddd2bb5481facb2e8124f6d0c08a2eca2dd4387a784de11a3ba6beec240",
+        "addons/script.blacklanturn.preview/library_ui.py": "b7c0bf7a8100953e273a9e197521d6d43a1b71bd805150fc80dba58e5aa48b3e",
+        "addons/script.blacklanturn.preview/live_core.py": "ca957f2aa283e7383eea24e6f0326c78ae5be2bb076402a2191f3b6b9cf25f99",
+        "addons/script.blacklanturn.preview/live_review.py": "c840003ca0be7870554c75d075db23ccb58a37b8b5f9c4265cc449348e83c277",
+        "addons/script.blacklanturn.preview/page_ahead.py": "a23765639000c8e6e92e70e0b35b2682b3594e503cc5e2b5deeadc9e7fc850ba",
+        "addons/script.blacklanturn.preview/resources/skins/Default/1080i/LiveReview.xml": "caff65f3a724337beef59aef43cfcde279c81ae156275268486db075f035836f",
+        "addons/script.blacklanturn.preview/search_ui.py": "688ef9ead07f006db5d6760fbf36938e166bb7dc8ed723018f4f9fb91f8f7141",
+        "addons/script.blacklanturn.preview/shelf_tools.py": "3f9e8ac55633d25e5293c54ff4901d13e4f6cb05800162d5a6e8496b4cd68017",
+        "addons/script.blacklanturn.preview/shelf_visits.py": "c0f2a5fa2cb4e1eb332f09929faa6d22b63ed24ee5857d6125e37c4e50faced4",
+        "addons/script.blacklanturn.preview/title_feedback_ui.py": "f782cf79b595805da69fec58b0b1dfa7b5e87d2ad3ac75cf92c5e1cf6b53a85d",
+        "addons/script.blacklanturn.preview/title_preferences.py": "735c89698559e2b1819b6c83030eb0169896fc1369206631cd43da3897ea22c2",
+        "addons/script.blacklanturn.preview/update_notes_ui.py": "5f23ea543cfad143be15fd2c573fcef2d2d8bbc3eae1ed566397b7a89f5906e8",
+        "addons/script.blacklanturn.preview/watch_tonight.py": "23cd0fc0c91bdbc760088499dd5fa8de76a168087ff09f21db71e70abd6c19bc"
+      }
+    },
+    {
+      "id": "blacklanturn-apple-1.1.59-r0",
+      "edition": "apple",
+      "version": "1.1.59",
+      "revision": 0,
+      "title": "BlackLanturn Build 1.1.59",
+      "summary": "Shelf filters, Pick Three, streaming-service discovery and the Watch Tonight queue.",
+      "sections": [
+        {
+          "heading": "Browse your way",
+          "bullets": [
+            "Filter a movie shelf by runtime, see titles new since your last visit, or use Pick Three.",
+            "Browse movies and shows by streaming service in your TMDb Helper region.",
+            "Use More like this to help shape recommendations."
+          ]
+        },
+        {
+          "heading": "Plan what to watch",
+          "bullets": [
+            "Keep a short Watch Tonight queue in My Stuff."
+          ]
+        },
+        {
+          "heading": "Keep your setup",
+          "bullets": [
+            "Use Update BlackLanturn to preserve settings, sign-ins, history and other installed add-ons."
+          ]
+        }
+      ],
+      "files": {
+        "addons/plugin.program.blacklanturninstaller/addon.xml": "c631f917ad9801316c44cbed9032eb6eec3d33953ab4ec2c6f51e3e69cb8a664",
+        "addons/plugin.program.blacklanturninstaller/resources/libs/cocoscrapers_policy.py": "59413df9421f46dc7b2f53a1b97edb34977db914b5fc25705813857e1297acf6",
+        "addons/plugin.program.blacklanturninstaller/resources/libs/helper_providers.py": "3b8107d4fb663b0d72dce869037e8f789165841195b99034efbaf8d71db58afa",
+        "addons/plugin.program.blacklanturninstaller/resources/libs/managed_versions.py": "14679d9317e302e76591c19e615946cdc83fbcf5e7859910057e8f686521676b",
+        "addons/script.blacklanturn.preview/action_panel_model.py": "1871bb493faf86125f4f813429344c324afa146109dc64acfdbdf55524a75646",
+        "addons/script.blacklanturn.preview/addon.xml": "22a1318ab3f42a0eeff59705605367a687dd9f80876cc8a34472c9789e864779",
+        "addons/script.blacklanturn.preview/backend_core.py": "0afa8e09b90bdb3d3b068365105b1f459eff712cbab3094f03fb54d4bedd2a8b",
+        "addons/script.blacklanturn.preview/backend_ui.py": "088b8ab5e24ac9bb4279b969b99104204103cada5b05941482db41d09360432e",
+        "addons/script.blacklanturn.preview/coming_up.py": "119c6a23bb66cf232e2f7c5cc73b07c89636bad0da91541cbbc19a95c7f4fa7c",
+        "addons/script.blacklanturn.preview/genre_lookahead.py": "2bf6f72026f35758e3d79a6d0e197b87430fd36a2ce7079f89354bc5539efc03",
+        "addons/script.blacklanturn.preview/genre_picker.py": "2b53cddd2bb5481facb2e8124f6d0c08a2eca2dd4387a784de11a3ba6beec240",
+        "addons/script.blacklanturn.preview/library_ui.py": "b7c0bf7a8100953e273a9e197521d6d43a1b71bd805150fc80dba58e5aa48b3e",
+        "addons/script.blacklanturn.preview/live_core.py": "ca957f2aa283e7383eea24e6f0326c78ae5be2bb076402a2191f3b6b9cf25f99",
+        "addons/script.blacklanturn.preview/live_review.py": "c840003ca0be7870554c75d075db23ccb58a37b8b5f9c4265cc449348e83c277",
+        "addons/script.blacklanturn.preview/page_ahead.py": "a23765639000c8e6e92e70e0b35b2682b3594e503cc5e2b5deeadc9e7fc850ba",
+        "addons/script.blacklanturn.preview/resources/skins/Default/1080i/LiveReview.xml": "caff65f3a724337beef59aef43cfcde279c81ae156275268486db075f035836f",
+        "addons/script.blacklanturn.preview/search_ui.py": "688ef9ead07f006db5d6760fbf36938e166bb7dc8ed723018f4f9fb91f8f7141",
+        "addons/script.blacklanturn.preview/shelf_tools.py": "3f9e8ac55633d25e5293c54ff4901d13e4f6cb05800162d5a6e8496b4cd68017",
+        "addons/script.blacklanturn.preview/shelf_visits.py": "c0f2a5fa2cb4e1eb332f09929faa6d22b63ed24ee5857d6125e37c4e50faced4",
+        "addons/script.blacklanturn.preview/title_feedback_ui.py": "f782cf79b595805da69fec58b0b1dfa7b5e87d2ad3ac75cf92c5e1cf6b53a85d",
+        "addons/script.blacklanturn.preview/title_preferences.py": "735c89698559e2b1819b6c83030eb0169896fc1369206631cd43da3897ea22c2",
+        "addons/script.blacklanturn.preview/update_notes_ui.py": "5f23ea543cfad143be15fd2c573fcef2d2d8bbc3eae1ed566397b7a89f5906e8",
+        "addons/script.blacklanturn.preview/watch_tonight.py": "23cd0fc0c91bdbc760088499dd5fa8de76a168087ff09f21db71e70abd6c19bc"
+      }
+    },
+    {
       "id": "blacklanturn-general-1.1.58-r0",
       "edition": "general",
       "version": "1.1.58",

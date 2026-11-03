@@ -1,0 +1,26 @@
+{
+  "title": "BlackLanturn Build 1.1.59",
+  "summary": "Shelf filters, Pick Three, streaming-service discovery and the Watch Tonight queue.",
+  "sections": [
+    {
+      "heading": "Browse your way",
+      "bullets": [
+        "Filter a movie shelf by runtime, see titles new since your last visit, or use Pick Three.",
+        "Browse movies and shows by streaming service in your TMDb Helper region.",
+        "Use More like this to help shape recommendations."
+      ]
+    },
+    {
+      "heading": "Plan what to watch",
+      "bullets": [
+        "Keep a short Watch Tonight queue in My Stuff."
+      ]
+    },
+    {
+      "heading": "Keep your setup",
+      "bullets": [
+        "Use Update BlackLanturn to preserve settings, sign-ins, history and other installed add-ons."
+      ]
+    }
+  ]
+}
