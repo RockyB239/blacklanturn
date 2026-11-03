@@ -1,7 +1,8 @@
 """Release58: promote the frozen, tested164 overlays onto immutable public57."""
-import argparse,hashlib,importlib.util,json,sys,zipfile,xml.etree.ElementTree as E
+import argparse,hashlib,importlib.util,io,json,subprocess,sys,zipfile,xml.etree.ElementTree as E
 from pathlib import Path
 R=Path(__file__).resolve().parents[1]
+RELEASE_COMMIT='f4bb1b62af95ea8b5e2baa22d36761b2a3d05b6e'
 def load(name,path):
  s=importlib.util.spec_from_file_location(name,path);m=importlib.util.module_from_spec(s);s.loader.exec_module(m);return m
 def sha(raw):return hashlib.sha256(raw).hexdigest()
@@ -11,9 +12,14 @@ def file_sha(p):
   for chunk in iter(lambda:f.read(1024*1024),b''):h.update(chunk)
  return h.hexdigest()
 def inventory(root):return {p.relative_to(root).as_posix():p.read_bytes() for p in root.rglob('*') if p.is_file() and '__pycache__' not in p.parts and p.suffix not in ('.pyc','.pyo') and p.name!='.DS_Store'}
+def frozen_inventory(path):
+ prefix=path.rstrip('/')+'/'
+ raw=subprocess.check_output(['git','archive','--format=zip',RELEASE_COMMIT,path],cwd=R)
+ with zipfile.ZipFile(io.BytesIO(raw)) as archive:
+  return {name[len(prefix):]:archive.read(name) for name in archive.namelist() if name.startswith(prefix) and not name.endswith('/')}
 def build(baselines,out):
  candidate=load('candidate165',R/'tools/build_reliability_candidate164.py');legacy=load('legacy165',R/'tools/build_release.py');components=load('components165',R/'installer-source/plugin.program.blacklanturninstaller/resources/libs/component_update.py')
- patches=candidate.overlays();controller=inventory(R/'controller-source/addon');installer=inventory(R/'installer-source/plugin.program.blacklanturninstaller');CP='addons/script.blacklanturn.preview/';IP='addons/plugin.program.blacklanturninstaller/'
+ controller=frozen_inventory('controller-source/addon');installer=frozen_inventory('installer-source/plugin.program.blacklanturninstaller');patches=candidate.overlays(controller);CP='addons/script.blacklanturn.preview/';IP='addons/plugin.program.blacklanturninstaller/'
  for name,files,manifest,version in [('controller',controller,R/'controller-source/manifest122.json','0.1.122'),('installer',installer,R/'compatibility/reliability165/installer-manifest52.json','1.0.52')]:
   if {n:sha(v) for n,v in files.items()}!=json.loads(manifest.read_text())['files'] or E.fromstring(files['addon.xml']).get('version')!=version:raise ValueError(name+' frozen source differs')
  sys.path.insert(0,str(R/'installer-source/plugin.program.blacklanturninstaller'));managed=load('managed165',R/'installer-source/plugin.program.blacklanturninstaller/resources/libs/managed_addons.py');validator=load('releases165',R/'controller-source/addon/release_updates.py')

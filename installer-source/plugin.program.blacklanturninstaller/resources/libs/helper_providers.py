@@ -41,6 +41,9 @@ def prepare(marker,archive,home):
     minimum='1.0.51' if shutdown=='retained-monitor-1' else '1.0.48' if marker.get('cocoscrapers_policy')=='parallel-airdate-1' else '1.0.47'
     reliability=marker.get('reliability_patch')
     if reliability=='navigation-focus-1' and shutdown=='retained-monitor-1':minimum='1.0.52'
+    if marker.get('browse_patch') is not None:
+        try:minimum=managed._versions.browse_minimum(marker,minimum)
+        except ValueError as exc:raise managed.ProtectionError(str(exc)) from exc
     if (reliability is not None and (reliability!='navigation-focus-1' or shutdown!='retained-monitor-1')) or shutdown not in (None,'retained-monitor-1') or revision!='providers-1' or marker.get('installer_min_version')!=minimum or not needs_group:
         raise managed.ProtectionError('Update BlackLanturn Installer before installing this Helper sync provider group.')
     verify_archive(archive)

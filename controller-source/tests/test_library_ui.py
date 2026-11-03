@@ -46,3 +46,62 @@ class FranchiseOwnership(unittest.TestCase):
   with patch.dict(sys.modules,{'live_review':fake,'xbmcgui':SimpleNamespace()}),patch.object(library_ui.threading,'Thread',Worker):
    w.open_movie_series(w.selected);w.selected=title(2);pending.pop()()
   self.assertEqual(opened,[]);self.assertEqual(calls,[])
+
+class WatchTonightUI(unittest.TestCase):
+ def test_open_next_opens_exact_episode_details_without_removing_it(self):
+  from test_watch_tonight import EPISODE
+  from watch_tonight import toggle
+  w=Window(toggle({},EPISODE));w.details=lambda item:w.opened.append(item['file'])
+  with patch.dict(sys.modules,{'xbmcgui':SimpleNamespace()}):
+   w.open_next_watch_tonight()
+  self.assertEqual(w.opened,[EPISODE['file']])
+  self.assertEqual(w.saves,0)
+  self.assertFalse(w.actions_open)
+  self.assertFalse(hasattr(w,'playback_request'))
+
+ def test_remote_move_up_persists_new_order_and_cancel_keeps_it(self):
+  from test_watch_tonight import EPISODE,MOVIE
+  from watch_tonight import entries,toggle
+  choices=iter([1,1,-1]);w=Window(toggle(toggle({},MOVIE),EPISODE))
+  dialog=SimpleNamespace(select=lambda *a,**k:next(choices))
+  with patch.dict(sys.modules,{'xbmcgui':SimpleNamespace(Dialog=lambda:dialog)}):
+   w.manage_watch_tonight()
+  self.assertEqual([item['title'] for item in entries(w.config)],['Episode','Movie'])
+  self.assertEqual(w.saves,1)
+
+class ComingUpUI(unittest.TestCase):
+ def test_private_calendar_stays_out_of_my_stuff_until_the_helper_cache_is_account_scoped(self):
+  w=Window({});w.section='My Stuff'
+  actions={key for key,_ in w.library_context_actions()}
+  self.assertNotIn('coming_up',actions)
+  self.assertTrue({'watch_tonight','watch_tonight_next'}<=actions)
+
+ def test_abandoned_explicit_request_cannot_fetch_or_show_dialog(self):
+  import library_ui
+  import threading
+  pending=[];calls=[];w=Window({});w.preview_dispatch_lock=threading.RLock();w.list_lock=threading.Lock()
+  properties={'notice':'Before'};w.getProperty=properties.get;w.setProperty=properties.__setitem__
+  class Worker:
+   def __init__(self,target,**kw):self.target=target
+   def start(self):pending.append(self.target)
+  modules={'live_review':SimpleNamespace(get_list=lambda url:calls.append(url)),
+           'xbmcaddon':SimpleNamespace(Addon=lambda name:SimpleNamespace(getSetting=lambda k:'stored')),
+           'xbmcgui':SimpleNamespace()}
+  with patch.dict(sys.modules,modules),patch.object(library_ui.threading,'Thread',Worker):
+   w.open_coming_up();w.input_generation+=1;pending.pop()()
+  self.assertEqual(calls,[])
+  self.assertFalse(w.actions_open)
+  self.assertEqual(properties['notice'],'Before')
+
+ def test_calendar_picker_distinguishes_date_from_streaming_and_opens_details(self):
+  from datetime import date
+  from test_watch_tonight import EPISODE
+  w=Window({});w.details=w.opened.append;heads=[]
+  def select(heading, labels, **kwargs):
+   heads.append(heading)
+   return 0
+  today=date(2026,11,3)
+  w.show_coming_up(SimpleNamespace(select=select),{today:[EPISODE]},today)
+  self.assertEqual(heads,['Coming Up · TV air dates only','Today · Nov 3 · Streaming availability unknown'])
+  self.assertEqual(w.opened,[EPISODE])
+  self.assertFalse(hasattr(w,'playback_request'))

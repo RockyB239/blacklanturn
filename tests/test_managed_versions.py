@@ -173,17 +173,19 @@ class ManagedVersions(unittest.TestCase):
 
     def test_current_builder_rejects_unpinned_installer_metadata_before_outputs(self):
         import shutil
-        spec = importlib.util.spec_from_file_location('build_current155', ROOT / 'tools/build_release165.py')
-        builder = importlib.util.module_from_spec(spec); spec.loader.exec_module(builder)
+        import sys
+        with patch.object(sys,'path',[str(ROOT/'tools'),*sys.path]):
+            import build_release170 as builder
         with tempfile.TemporaryDirectory() as directory:
             root=Path(directory)
-            for name in ('tools','controller-source','compatibility'):
-                (root/name).symlink_to(ROOT/name,target_is_directory=True)
             source=root/'installer-source/plugin.program.blacklanturninstaller'
             shutil.copytree(ROOT/'installer-source/plugin.program.blacklanturninstaller',source,ignore=shutil.ignore_patterns('__pycache__'))
-            path=source/'addon.xml';path.write_bytes(path.read_bytes().replace(b'<addon ',b'<addon foreign="true" ',1))
-            with patch.object(builder,'R',root),self.assertRaisesRegex(ValueError,'installer frozen source differs'):
-                builder.build(root/'baselines',root/'output')
+            with patch.object(builder,'INSTALLER',source):
+                frozen=root/'frozen.json'
+                frozen.write_bytes(builder.json_bytes(builder.source_record(*builder.source_inputs())))
+                path=source/'addon.xml';path.write_bytes(path.read_bytes().replace(b'<addon ',b'<addon foreign="true" ',1))
+                with self.assertRaisesRegex(ValueError,'Frozen source manifest differs'):
+                    builder.build(root/'baselines',root/'output',frozen)
             self.assertFalse(any((root/'output').glob('*.zip')))
 
     def test_new_policy_requires_current_installer_and_exact_metadata(self):

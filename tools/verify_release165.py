@@ -2,9 +2,11 @@
 from pathlib import Path
 import argparse,atexit,hashlib,importlib.util,json,shutil,sys,tempfile,zipfile,xml.etree.ElementTree as E
 R=Path(__file__).resolve().parents[1]
-p=argparse.ArgumentParser();p.add_argument('--artifacts',type=Path,required=True);p.add_argument('--baselines',type=Path,required=True);p.add_argument('--output',type=Path,required=True);args=p.parse_args()
+p=argparse.ArgumentParser();p.add_argument('--artifacts',type=Path,required=True);p.add_argument('--baselines',type=Path,required=True);p.add_argument('--output',type=Path,required=True)
+p.add_argument('--baseline-version',default='1.1.57');p.add_argument('--installer-version',default='1.0.52');args=p.parse_args()
 A=args.artifacts.resolve();scratch=tempfile.TemporaryDirectory();atexit.register(scratch.cleanup);I=Path(scratch.name)/'plugin.program.blacklanturninstaller'
-with zipfile.ZipFile(A/'plugin.program.blacklanturninstaller-1.0.52.zip') as z:
+installer_name='plugin.program.blacklanturninstaller-'+args.installer_version+'.zip'
+with zipfile.ZipFile(A/installer_name) as z:
  assert z.testzip() is None;assert all(n.startswith('plugin.program.blacklanturninstaller/') for n in z.namelist());z.extractall(I.parent)
 LIB=I/'resources/libs';sys.path[:0]=[str(I),str(R/'tests')]
 import test_compatibility as compat_fixture
@@ -30,10 +32,11 @@ artifact_pins={}
 for row in [report[e] for e in ('general','apple')]:
  for kind in ('full','components'):
   entry=row[kind];actual=digest((A/entry['file']).read_bytes());assert actual==entry['sha256'],entry['file'];artifact_pins[entry['file']]=actual
-installer_name='plugin.program.blacklanturninstaller-1.0.52.zip'
 artifact_pins[installer_name]=digest((A/installer_name).read_bytes())
+assert artifact_pins[installer_name]==report['installer']['sha256']
 for label,edition in [('general','General'),('apple','Apple-TV-Mac')]:
- full=A/report[label]['full']['file'];component=A/report[label]['components']['file'];baseline=args.baselines/('BlackLanturn-'+edition+'-Kodi21-1.1.57.zip')
+ full=A/report[label]['full']['file'];component=A/report[label]['components']['file'];baseline=args.baselines/('BlackLanturn-'+edition+'-Kodi21-'+args.baseline_version+'.zip')
+ assert digest(baseline.read_bytes())==report[label]['baseline_sha256']
  with zipfile.ZipFile(full) as z:
   assert z.testzip() is None;assert len(z.namelist())==len(set(z.namelist()));entry=json.loads(z.read('userdata/blacklanturn-releases.json'))['releases'][0]
   for n,pin in entry['files'].items():assert digest(z.read(n))==pin,n

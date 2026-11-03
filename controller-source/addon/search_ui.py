@@ -143,6 +143,9 @@ def discovery_result(item,crew=False):
     kind=params.get('tmdb_type',[''])[0];identity=params.get('tmdb_id',[''])[0];info=params.get('info',[''])[0]
     if source.netloc!='plugin.video.themoviedb.helper':return None
     name=item.get('title') or item.get('label') or 'Discovery'
+    if item.get('_streaming_provider') and info=='discover':
+        return {'heading':name+' / TMDB & JUSTWATCH','button':'Browse titles',
+                'rows':[{'label':name,'path':item['file']}]}
     company=params.get('with_companies',[''])[0]
     if info=='discover' and company.isdigit():
         return {'heading':name+' / STUDIO','button':'View titles','rows':[{'label':label+' · '+name,'path':route('discover',media,with_companies=company,with_id='True',sort_by='popularity.desc')} for media,label in [('movie','Movies'),('tv','Shows')]]}

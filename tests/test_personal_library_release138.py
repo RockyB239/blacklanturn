@@ -5,8 +5,10 @@ class PersonalLibraryRelease(unittest.TestCase):
  def test_new_release_proof_covers_all_personal_library_runtime_files(self):
   p=ROOT/'controller-source/manifest121.json';self.assertTrue(p.is_file(),'New personal-library source requires a new manifest')
   m=json.loads(p.read_text());self.assertEqual(m['controller'],'0.1.121')
+  from historical_release_fixture import published_controller
+  source=published_controller('121')
   for n in ('personal_library.py','library_ui.py','local_watch.py','movie_series.py','series_end.py','series_end_core.py','series_metadata.py','series_end_ui.py','resources/skins/Default/1080i/SeriesEnd.xml'):
-   self.assertEqual(m['files'][n],hashlib.sha256((ROOT/'controller-source/addon'/n).read_bytes()).hexdigest())
+   self.assertEqual(m['files'][n],hashlib.sha256(source[n]).hexdigest())
   builder=(ROOT/'tools/build_release157.py').read_text()
   self.assertIn('CP+n for n in controller',builder,'Every controller file must be covered by installed-release proof')
  def test_release_notes_overflow_is_rejected_by_the_packaging_gate(self):

@@ -26,6 +26,7 @@ from title_feedback_ui import TitleFeedback
 from row_layout import RowLayouts
 from row_layout_ui import RowCustomization
 from library_ui import LibraryActions
+from shelf_tools import ShelfTools
 from series_status import SeriesStatus
 from icon_packs import icon_path,selected_pack,with_pack,PACK_CHOICES,DEFAULT_PACK
 from extensions import inline_request
@@ -72,9 +73,9 @@ def choose_action_panel(*args,**kwargs):
     from action_panel import choose_action
     return choose_action(*args,**kwargs)
 
-def choose_genre(section,pages,current_page,pack=DEFAULT_PACK):
+def choose_genre(section,pages,current_page,pack=DEFAULT_PACK,observe=None,read_labels=None):
     from genre_picker import choose_genre as choose
-    return choose(section,pages,current_page,pack)
+    return choose(section,pages,current_page,pack,observe=observe,read_labels=read_labels)
 
 def load_related(make_path,provider,kind,identity,valid=lambda:True):
     from related_titles import load_related as load
@@ -119,6 +120,11 @@ def get_list(path):
     query=parse_qs(urlsplit(path).query)
     if urlsplit(path).netloc=='plugin.video.themoviedb.helper' and query.get('info')==['blacklanturn_search_matches']:
         return load_best_matches(query.get('query',[''])[0],get_list,workers=2,batch_provider=get_list)
+    if urlsplit(path).netloc=='plugin.video.themoviedb.helper' and query.get('info')==['blacklanturn_streaming_services']:
+        from shelf_tools import streaming_folders
+        kind=query.get('tmdb_type',[''])[0]
+        if kind not in ('movie','tv'):raise ValueError('Choose Movies or Shows')
+        return streaming_folders(get_list(tmdb('watch_providers',kind)),kind)
     category=catalogue_category(path)
     if category:
         content='video' if category=='video' else 'executable'
@@ -136,7 +142,7 @@ def get_list(path):
     if query.get('info')==['search']:
         for item in files:item['_search_kind']=entity_kind(item)
     for item in files:item['_rating_source']='TMDb' if urlsplit(path).netloc=='plugin.video.themoviedb.helper' else 'Rating'
-    event('provider_list',addon=urlsplit(path).netloc,count=len(files),seconds=round(time.monotonic()-start,2),last_label=files[-1].get('label') if files else None,folder_count=sum(x.get('filetype')=='directory' for x in files))
+    event('provider_list',addon=urlsplit(path).netloc,count=len(files),seconds=round(time.monotonic()-start,2),last_label=files[-1].get('label') if files and query.get('info')!=['trakt_calendar'] else None,folder_count=sum(x.get('filetype')=='directory' for x in files))
     reader=globals().get('SERIES_STATUS')
     if reader is not None and urlsplit(path).netloc=='plugin.video.themoviedb.helper':files=reader.enrich(files)
     return files
@@ -186,7 +192,7 @@ class PreviewPlayer(xbmc.Player):
     def __init__(self):super().__init__();self.failed=False
     def onPlayBackError(self):self.failed=True
 
-class LiveReview(LibraryActions,RowCustomization,TitleFeedback,YouTubeBrowser,xbmcgui.WindowXML):
+class LiveReview(LibraryActions,RowCustomization,TitleFeedback,ShelfTools,YouTubeBrowser,xbmcgui.WindowXML):
     enable_logo_readability=True
     def onInit(self):
         # Kodi may initialize this object again with recreated native controls.
@@ -257,6 +263,8 @@ class LiveReview(LibraryActions,RowCustomization,TitleFeedback,YouTubeBrowser,xb
         self.snapshot_cache=None;self.configure_row_snapshots()
         # Explicit private A/B trial only; serialized provider calls are not cancellable.
         self.defer_public_refresh=True;self.deferred_public_refresh=None
+        self.genre_lookahead_enabled=True;self.genre_request=None
+        self.shelf_visit_badges={};self.shelf_visit_store=getattr(self,'shelf_visit_store',None)
         self.prefetch_trial=False;self.prefetch_attempted=set();self.prefetch_busy=False
         self.preview_mode=self.config.get('PreviewMode','manual');self.setProperty('previewMode',self.preview_mode)
         # Initial setup owns the one sidebar build, including connection failures.
@@ -617,6 +625,7 @@ class LiveReview(LibraryActions,RowCustomization,TitleFeedback,YouTubeBrowser,xb
             self.set_rows(my_stuff_rows(self.config['Saved'],tmdb)+getattr(self,'personal_rows',lambda:[])());return
         self.set_rows(page_rows(self.config,self.section))
     def set_rows(self,definitions):
+        self.shelf_visit_badges={}
         self.setProperty('youtubeCategoryFolder','false')
         if hasattr(self,'arrange_rows'):definitions=self.arrange_rows(definitions)
         self.page_definitions=list(definitions);self.row_offset=0;self.row_cache={};self.window_ready=[False,False]
@@ -657,6 +666,7 @@ class LiveReview(LibraryActions,RowCustomization,TitleFeedback,YouTubeBrowser,xb
         self.row_cache={}
     def retained_row_items(self,definition):
         path=definition.get('path','')
+        if definition.get('_current_shelf_view'):return row_items(definition,get_list),False
         if 'local_items' in definition or not path.startswith(TMDB):return None,False
         metadata=getattr(self,'anime_metadata',None)
         filtered=metadata is not None and should_exclude_anime(self,path)
@@ -736,6 +746,7 @@ class LiveReview(LibraryActions,RowCustomization,TitleFeedback,YouTubeBrowser,xb
             if 'local_items' not in definition and hasattr(self,'remember_fetched_youtube_row'):self.remember_fetched_youtube_row(definition,files,owner_current)
             return files
         if 'local_items' in definition:
+            if definition.get('_current_shelf_view'):return row_items(definition,get_list)
             # Hydration already isolates the saved snapshots before updating status.
             if hasattr(self,'hydrate_library_items'):
                 return self.hydrate_library_items(definition['local_items'])
@@ -773,7 +784,13 @@ class LiveReview(LibraryActions,RowCustomization,TitleFeedback,YouTubeBrowser,xb
             params=parse_qs(urlsplit(path).query)
             if params.get('info')==['blacklanturn_search_matches']:
                 files=load_best_matches(params.get('query',[''])[0],lambda part:self.cached_provider_list(part,revision,current),current,workers=2,batch_provider=get_list if getattr(self,'batch_search_enabled',False) else None,cache=cache,revision=revision)
-            else:files=get_list(provider_path(path))
+            else:
+                request=getattr(self,'genre_request',None)
+                files=None
+                if request is not None and request[1] is cache and request[2]==revision and not definition.get('_snapshot_refresh'):
+                    files=request[0].take(path,current)
+                    if files:event('genre_lookahead_reused')
+                if not files:files=get_list(provider_path(path))
             with self.preview_dispatch_lock:
                 if not current():raise PageCancelled('Row navigation changed')
                 if self.configure_row_snapshots():self.restart_pending_rows()
@@ -1149,6 +1166,26 @@ class LiveReview(LibraryActions,RowCustomization,TitleFeedback,YouTubeBrowser,xb
         self.show_row_window(offset,slot);return True
     def prepare_discovery_order(self,n,files):
         return order_discovery_row(self,n,files)
+    def annotate_shelf_cards(self,n,files):
+        visits=getattr(self,'shelf_visit_badges',None)
+        if (visits is None or getattr(self,'section','') not in ('Movies','Shows')
+            or self.mode!='home' or self.episode_browser_context or getattr(self,'search_state',None)
+            or getattr(self,'discovery_stack',None) or getattr(self,'person_context',None) or not files):
+            return files
+        path=self.paths[n]
+        if not public_path(path):return files
+        params=parse_qs(urlsplit(path).query)
+        if params.get('page',['1'])!=['1'] or params.get('bl_start',['0'])!=['0']:return files
+        from shelf_visits import ShelfVisits,title_key
+        from shelf_tools import visit_key
+        key=visit_key(self,n)
+        if key not in visits:
+            if not any(title_key(item) for item in files):return files
+            if self.shelf_visit_store is None:self.shelf_visit_store=ShelfVisits(STORE/'shelf-visits.json')
+            visits[key]=self.shelf_visit_store.visit(json.dumps(key),files)
+        marked=visits[key]
+        return [dict(item,_new_since_visit=True) if title_key(item) in marked else item for item in files] if marked else files
+
     def apply_row(self,n,files,label,position=0,update_selected=True,display_position=False,ranked_start=False):
         with self.preview_dispatch_lock:
             original=files[position] if 0<=position<len(files) else None
@@ -1175,7 +1212,11 @@ class LiveReview(LibraryActions,RowCustomization,TitleFeedback,YouTubeBrowser,xb
             if not hasattr(self,'row_states'):self.row_states={}
             state='ready' if files else 'empty' if label else ''
             immutable=getattr(self,'section','')=='YouTube' and self.paths[n].startswith('plugin://plugin.video.youtube/')
-            built=[media_item(d,immutable=True) if immutable else media_item(d) for d in files]
+            cards=getattr(self,'annotate_shelf_cards',lambda n,files:files)(n,files)
+            built=[media_item(d,immutable=True) if immutable else media_item(d) for d in cards]
+            if cards is not files:
+                for item,data in zip(built,cards):
+                    if data.get('_new_since_visit'):item.setProperty('newSinceVisit','true')
             self.rows[n]=files;c=self.getControl(900+n);c.reset();c.addItems(built);c.setVisible(bool(files));self.window_ready[n]=True
             self.row_states[n]=state;self.setProperty('rowState'+str(n),state);self.setProperty('rowMessage'+str(n),row_message(label,state,search=bool(getattr(self,'search_state',None))))
             self.setProperty('row'+str(n),label if files else label+'  ·  No titles' if label else '')
@@ -1348,6 +1389,7 @@ class LiveReview(LibraryActions,RowCustomization,TitleFeedback,YouTubeBrowser,xb
     def capture_browse(self,include_stack=True):
         fields=('section','mode','navigation_id','active_page','page_definitions','row_offset','row_cache','rows','paths','histories','last_row','return_focus','selected','person_context','episode_browser_context','season_sources','season_title','season_position')
         state={key:getattr(self,key) for key in fields}
+        state['shelf_visit_badges']=getattr(self,'shelf_visit_badges',{})
         state.update(layout_raw_rows=copy.deepcopy(getattr(self,'layout_raw_rows',self.page_definitions)),layout_active_scope=getattr(self,'layout_active_scope',None))
         state.update(youtube_identity=getattr(getattr(self,'youtube_connection',None),'identity',''),youtube_tab=getattr(self,'youtube_tab','home'),youtube_query=getattr(self,'youtube_query',''),youtube_pages=copy.deepcopy(getattr(self,'youtube_pages',{})),snapshot_rows=copy.deepcopy(getattr(self,'snapshot_rows',{})),window_ready=list(getattr(self,'window_ready',[True,True])),search_state=copy.deepcopy(getattr(self,'search_state',None)),search_origin=copy.deepcopy(getattr(self,'search_origin',None)),row_states=copy.deepcopy(getattr(self,'row_states',{})),failed_paths=copy.deepcopy(getattr(self,'failed_paths',{})),row_labels=copy.deepcopy(getattr(self,'row_labels',{})))
         if hasattr(self,'raw_title_row'):
@@ -1374,6 +1416,7 @@ class LiveReview(LibraryActions,RowCustomization,TitleFeedback,YouTubeBrowser,xb
             self.navigation_id='youtube' if self.section=='YouTube' else 'home';self.load_section();return False
         self.generation+=1;self.path_tokens={};self.row_window_busy=False
         self.loading_paths={}
+        self.shelf_visit_badges={}
         for key,value in state.items():
             if key not in ('positions','focus','properties','snapshot_rows','window_ready'):setattr(self,key,copy.deepcopy(value))
         self.refresh_navigation()
@@ -1596,6 +1639,7 @@ class LiveReview(LibraryActions,RowCustomization,TitleFeedback,YouTubeBrowser,xb
                 options.append(('retry','Retry unavailable lists'))
                 if not item:options.append(('settings','Open integration settings'))
             options.extend(getattr(self,'library_context_actions',lambda:[])())
+            options.extend(getattr(self,'shelf_actions',lambda *args:[])(focus,genre_available))
             if not options:return
             chooser=getattr(self,'show_title_actions',None)
             chosen=chooser(options,item,focus) if chooser is not None else xbmcgui.Dialog().contextmenu([label for _,label in options])
@@ -1609,9 +1653,14 @@ class LiveReview(LibraryActions,RowCustomization,TitleFeedback,YouTubeBrowser,xb
         action=options[chosen][0]
         if action.startswith('title_'):self.change_title_feedback(item,action)
         elif action=='library_add':self.add_to_collection(item)
+        elif action=='watch_tonight_toggle':self.toggle_watch_tonight(item)
+        elif action=='watch_tonight':self.manage_watch_tonight()
+        elif action=='watch_tonight_next':self.open_next_watch_tonight()
         elif action=='movie_series':self.open_movie_series(item)
         elif action=='collections':self.manage_collections()
         elif action=='saved_searches':self.manage_searches()
+        elif action=='shelf_tools':self.show_shelf_tools(focus)
+        elif action=='streaming_services':self.browse_streaming_services(tmdb)
         elif action=='save_search':self.save_current_search()
         elif action=='youtube_refresh':self.refresh_youtube_recommendations()
         elif action=='genre':
@@ -2183,12 +2232,43 @@ class LiveReview(LibraryActions,RowCustomization,TitleFeedback,YouTubeBrowser,xb
             c.getListItem(0).setProperty('active','true')
         self.setProperty('browseFilters','true' if self.browse_sources else 'false')
         self.getControl(900).controlUp(self.getControl(600 if self.browse_sources or getattr(self,'search_state',None) else 101))
+    def prepare_genre_lookahead(self):
+        from genre_lookahead import GenreLookahead
+        from update_activity import active
+        paths={}
+        cache=self.result_cache
+        snapshots=self.snapshot_cache
+        for page in self.browse_sources:
+            if page['id']==self.active_page:continue
+            rows=page_rows(self.config,self.section,page['id'])
+            if not rows:continue
+            path=rows[0]['path']
+            if not public_path(path):continue
+            query=parse_qs(urlsplit(path).query)
+            if query.get('info')==['discover'] and query.get('page',['1'])==['1'] and 'bl_start' not in query and upstream_path(path)==path:
+                paths[page['id']]=path
+        def cached(path):
+            return (active() or xbmc.Monitor().abortRequested() or cache.get(path) is not None
+                    or cache.get('filtered-v1:'+path) is not None
+                    or (snapshots is not None and snapshots.get(path) is not None))
+        def fetch(path):
+            event('genre_lookahead_started')
+            return get_list(path)
+        return GenreLookahead(paths,fetch,cached),cache,cache.revision
+
     def browse_source(self):
         if self.section=='YouTube':self.select_youtube_tab();return
         if self.section in ('Movies','Shows'):
             self.actions_open=True;self.stop_preview()
-            try:selected=choose_genre(self.section,self.browse_sources,self.active_page,selected_pack(self.config))
-            finally:self.dwell=time.monotonic();self.actions_open=False
+            request=self.prepare_genre_lookahead() if getattr(self,'genre_lookahead_enabled',False) else None
+            self.genre_request=None
+            options={'observe':request[0].observe,'read_labels':gui_labels} if request else {}
+            try:selected=choose_genre(self.section,self.browse_sources,self.active_page,selected_pack(self.config),**options)
+            finally:
+                if request:request[0].close()
+                self.dwell=time.monotonic();self.actions_open=False
+            if request and selected and request[0].paths.get(selected)==request[0].path:
+                self.genre_request=request
             if selected is None:return
             index=0 if selected=='' else next((n for n,p in enumerate(self.browse_sources,1) if p['id']==selected),-1)
         else:index=self.getControl(600).getSelectedPosition()
@@ -2273,7 +2353,8 @@ class LiveReview(LibraryActions,RowCustomization,TitleFeedback,YouTubeBrowser,xb
         elif action=='title_logos':
             self.config['TitleLogos']=not self.config.get('TitleLogos',True);self.save()
             if self.selected:self.update(self.selected)
-        elif action in ('hidden_titles','reduced_titles'):self.manage_title_feedback('hide' if action=='hidden_titles' else 'less')
+        elif action in ('hidden_titles','reduced_titles','preferred_titles'):
+            self.manage_title_feedback({'hidden_titles':'hide','reduced_titles':'less','preferred_titles':'more'}[action])
         elif action=='rows':self.customize_rows()
         elif action=='row_sources':self.manage_rows()
         elif action in ('genres','categories'):self.categories(edit=True,collection='Genres' if action=='genres' else 'Categories')

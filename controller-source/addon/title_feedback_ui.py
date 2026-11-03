@@ -27,8 +27,9 @@ class TitleFeedback:
         kind='show' if key.startswith('tv:') else 'movie'
         state=store.state(item)
         if state=='hide':return [('title_restore','Unhide this '+kind)]
-        if state=='less':return [('title_restore','Restore normal frequency'),('title_hide','Hide this '+kind)]
-        return [('title_hide','Hide this '+kind),('title_less','Show this title less often')]
+        if state=='less':return [('title_restore','Restore normal frequency'),('title_hide','Hide this '+kind),('title_more','Show more like this')]
+        if state=='more':return [('title_restore','Remove Show more like this'),('title_hide','Hide this '+kind),('title_less','Show this title less often')]
+        return [('title_hide','Hide this '+kind),('title_less','Show this title less often'),('title_more','Show more like this')]
     def raw_title_row(self,n):
         raw=getattr(self,'title_raw_rows',{}).get(n)
         return raw[1] if raw and raw[0]==self.paths[n] else self.rows[n]
@@ -90,7 +91,14 @@ class TitleFeedback:
             prior=next((dict((k,v) for k,v in r.items() if k!='key') for r in self.title_preferences.entries(state) if r['key']==title_key(item)),None)
             with self.preview_dispatch_lock:
                 if action=='title_restore':
-                    self.title_preferences.restore(item);heading='Title restored';message='This title is eligible for normal recommendations again.'
+                    self.title_preferences.restore(item)
+                    if state=='more':
+                        heading='Preference removed';message='Similar titles return to their usual order.'
+                    else:
+                        heading='Title restored';message='This title is eligible for normal recommendations again.'
+                elif action=='title_more':
+                    self.title_preferences.set(item,'more')
+                    heading='Preference saved';message='Similar titles may appear earlier in recommendations on this device.'
                 else:
                     self.title_preferences.set(item,'hide' if action=='title_hide' else 'less')
                     heading='Title hidden' if action=='title_hide' else 'You’ll see this title less often'
@@ -103,12 +111,13 @@ class TitleFeedback:
             xbmcgui.Dialog().ok('BlackLanturn','This choice could not be saved. Existing title preferences and your accounts are unchanged.')
         finally:self.dwell=time.monotonic();self.actions_open=False
     def manage_title_feedback(self,mode):
-        title='Hidden titles' if mode=='hide' else 'Reduced titles'
+        title,verb={'hide':('Hidden titles','unhide'),'less':('Reduced titles','restore normal frequency'),
+                    'more':('Show more like this','remove a preference')}[mode]
         while self.alive:
             rows=self.title_preferences.entries(mode)
             if not rows:
                 xbmcgui.Dialog().ok(title,'No titles in this list.');return
             labels=[r['label']+'  ·  '+('Show' if r['key'].startswith('tv:') else 'Movie') for r in rows]
-            chosen=xbmcgui.Dialog().select(title+' · Select to '+('unhide' if mode=='hide' else 'restore normal frequency'),labels)
+            chosen=xbmcgui.Dialog().select(title+' · Select to '+verb,labels)
             if chosen<0:return
             self.change_title_feedback(record_item(rows[chosen]),'title_restore')

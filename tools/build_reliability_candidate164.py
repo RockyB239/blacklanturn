@@ -35,9 +35,11 @@ def qualify(report,before,after):
  if report.get('playback_source_sha256') and after.get('playback_source_sha256')!=report['playback_source_sha256']:return {'passed':False,'failures':['Playback receipt source differs from candidate entry point']}
  gate=load('candidate164_visible',ROOT/'tools/device_validation/experience_gate.py')
  return gate.compare(before,after)
-def overlays():
+def overlays(controller=None):
  folder=ROOT/'compatibility/reliability164'
- result={'addons/script.blacklanturn.preview/'+n:(ROOT/'controller-source/addon'/n).read_bytes() for n in ('live_review.py','default.py')}
+ names=('live_review.py','default.py')
+ if controller is None:controller={n:(ROOT/'controller-source/addon'/n).read_bytes() for n in names}
+ result={'addons/script.blacklanturn.preview/'+n:controller[n] for n in names}
  result['addons/skin.blacklanturn.preview/xml/DialogConfirm.xml']=(folder/'skin/xml/DialogConfirm.xml').read_bytes()
  result.update({UP+n:(folder/'umbrella'/n).read_bytes() for n in NAMES})
  manifest=json.loads((folder/'SOURCE-MANIFEST.json').read_text())

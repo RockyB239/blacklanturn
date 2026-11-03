@@ -206,6 +206,15 @@ def verify_archive_metadata(archive):
     verify_source_adapters(data)
 
 
+def browse_minimum(marker, minimum):
+    browse = marker.get('browse_patch')
+    if browse is None:
+        return minimum
+    if browse == 'shelf-tools-1' and minimum == '1.0.52':
+        return '1.0.53'
+    raise ValueError('Update BlackLanturn Installer before installing this build.')
+
+
 def prepare_policy(marker, archive):
     revision = marker.get('managed_update_policy')
     if revision is None:
@@ -233,6 +242,7 @@ def prepare_policy(marker, archive):
         if reliability != 'navigation-focus-1' or not shutdown:
             raise ValueError('Update BlackLanturn Installer before installing this build.')
         minimum = '1.0.52'
+    minimum = browse_minimum(marker, minimum)
     if (revision != policy()['policy'] or marker.get('installer_min_version') != minimum
             or marker.get('youtube_refresh_patch') != 'youtube-freshness-2'):
         raise ValueError('Update BlackLanturn Installer before installing this build.')

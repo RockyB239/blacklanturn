@@ -8,6 +8,7 @@ def eligible(path):
         u=urlsplit(path);q=parse_qs(u.query,keep_blank_values=True)
         if (u.scheme,u.netloc,u.path)!=('plugin','plugin.video.themoviedb.helper','/') or u.fragment:return False
         if any(len(v)!=1 for v in q.values()):return False
+        if 'with_watch_providers' in q:return False
         if q.get('info',[''])[0] not in ('trakt_trending','trakt_popular','search','popular','top_rated','upcoming','now_playing','trending_day','trending_week','airing_today','on_the_air','discover','similar','recommendations'):return False
         if q.get('tmdb_type',['movie'])[0] not in ('movie','tv','both','person','company','collection'):return False
         if not q.get('page',['1'])[0].isdigit() or not 1<=int(q.get('page',['1'])[0])<=10000:return False

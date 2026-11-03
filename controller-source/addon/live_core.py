@@ -69,6 +69,7 @@ def card_artwork(item):
     if item.get('_page_control') and art.get('navigation'):return {'image':art['navigation'],'kind':'paging'}
     if item.get('type')=='addon':return {'image':art.get('square') or art.get('icon',''),'kind':'square'}
     query=parse_qs(urlsplit(item.get('file','')).query)
+    if item.get('_streaming_provider') and art.get('icon'):return {'image':art['icon'],'kind':'square'}
     if query.get('info')==['discover'] and query.get('with_companies',[''])[0].isdigit():
         logo=art.get('thumb') or art.get('icon') or item.get('thumbnail','')
         if logo:return {'image':logo,'kind':'square'}

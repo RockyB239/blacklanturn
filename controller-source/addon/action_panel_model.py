@@ -3,6 +3,23 @@ from urllib.parse import urlsplit,parse_qs
 GROUPS=(('save','Save & organize','collections'),('trakt','Trakt & watch status','history'),('discover','Discover','search'),('recommend','Recommendations','popular'),('refresh','Refresh','updates'))
 GROUP_FOR={'category':'discover','search':'discover','home':'discover','mark_watched':'trakt','refresh_watch':'refresh','local':'save','library_add':'save','collections':'save','saved_searches':'save','save_search':'save','trakt':'trakt','movie_series':'discover','discover':'discover','youtube_refresh':'refresh','refresh':'refresh','reload_list':'refresh','refresh_metadata':'refresh','retry':'refresh','previous':'refresh','settings':'refresh','default_player':'refresh','normal_autoplay':'refresh'}
 DESCRIPTIONS={'local':'Your My Stuff is saved on this device.','library_add':'Choose one of your personal collections.','collections':'View and manage your personal collections.','saved_searches':'Run a search you saved earlier.','save_search':'Keep this search for another time.','trakt':'Manage watched progress, watchlist and lists on Trakt.','movie_series':'Watch the movies in their release order.','discover':'Explore collections and work by the cast and creators.','title_hide':'Hide only this title from discovery rows.','title_less':'Reduce this title without changing your genres.','title_restore':'Restore this title’s normal visibility.','refresh':'Get the latest watched progress from Trakt.','reload_list':'Get fresh titles for the list you’re browsing.','refresh_metadata':'Update this title’s information and artwork.','youtube_refresh':'Refresh your YouTube recommendations.','retry':'Retry lists that could not load.','previous':'Return to the preceding page in this row.','default_player':'Choose the player used for future playback.','normal_autoplay':'Stop following the source chosen for this viewing session.'}
+GROUP_FOR.update({
+ 'watch_tonight_toggle':'save',
+ 'watch_tonight':'save',
+ 'watch_tonight_next':'save',
+ 'coming_up':'discover',
+ 'shelf_tools':'discover',
+ 'streaming_services':'discover',
+})
+DESCRIPTIONS.update({
+ 'watch_tonight_toggle':'Change whether this title is in your queue on this device.',
+ 'watch_tonight':'Open, reorder, or remove queued movies and episodes.',
+ 'watch_tonight_next':'Open details for the first title in your queue.',
+ 'coming_up':'See upcoming TV air dates from your Trakt calendar.',
+ 'shelf_tools':'Filter or choose from the titles already shown in this shelf.',
+ 'streaming_services':'Browse regional availability from TMDb and JustWatch.',
+ 'title_more':'Prefer similar titles in recommendations on this device.',
+})
 
 def build_panel(options,episode=False):
  actions=[{'id':key,'label':label,'description':DESCRIPTIONS.get(key,'')} for key,label in options if not(episode and key=='genre')]

@@ -39,6 +39,40 @@ class Preferences(unittest.TestCase):
   with tempfile.TemporaryDirectory() as d:
    s=m.TitlePreferences(Path(d)/'p');a=movie();n={'label':'Next','_page_control':'next','file':'plugin://next/'};s.set(a,'hide')
    self.assertEqual(s.apply([a,n]),[n]);self.assertEqual(s.apply([a,n],enabled=False),[a,n])
+ def test_more_prefers_similar_loaded_titles_and_preserves_other_cards_and_controls(self):
+  m=load(self)
+  with tempfile.TemporaryDirectory() as d:
+   p=Path(d)/'p';s=m.TitlePreferences(p,session='first')
+   anchor=dict(movie(),genre=['Drama','Science Fiction'],set='Example Collection')
+   broad=movie(2)
+   related=dict(movie(3),genre=[' science fiction ','DRAMA'])
+   collection=dict(movie(4),genre=[],set='example collection')
+   show=dict(movie(5,kind='tv'),genre=['Drama','Science Fiction'])
+   hidden=dict(movie(6),genre=related['genre'])
+   control={'label':'Next','_page_control':'next','file':'plugin://next/'}
+   source=[broad,control,related,collection,show,hidden,anchor]
+   s.set(anchor,'more');s.set(hidden,'hide')
+   reopened=m.TitlePreferences(p,session='next')
+   self.assertEqual(reopened.state(anchor),'more')
+   self.assertEqual(reopened.apply(source),[collection,control,related,broad,show,anchor])
+   self.assertEqual(reopened.apply(source,enabled=False),source)
+   self.assertIs(reopened.apply(source)[0],collection)
+   self.assertEqual(source,[broad,control,related,collection,show,hidden,anchor])
+   reopened.restore(anchor)
+   self.assertEqual(reopened.apply(source),[broad,control,related,collection,show,anchor])
+ def test_more_and_negative_feedback_can_replace_and_undo_one_another(self):
+  m=load(self)
+  with tempfile.TemporaryDirectory() as d:
+   p=Path(d)/'p';s=m.TitlePreferences(p);a=movie();b=movie(2)
+   s.set(b,'hide')
+   s.set(a,'less');before=s.set(a,'more')
+   self.assertEqual(before['mode'],'less')
+   self.assertEqual(s.entries('more')[0]['key'],'movie:1')
+   self.assertEqual(json.loads(p.read_text())['titles']['movie:2']['mode'],'hide')
+   s.restore(a,before)
+   reopened=m.TitlePreferences(p)
+   self.assertEqual(reopened.state(a),'less')
+   self.assertEqual(reopened.state(b),'hide')
  def test_corrupt_store_is_not_overwritten_and_failed_write_keeps_memory(self):
   m=load(self)
   with tempfile.TemporaryDirectory() as d:
@@ -56,6 +90,15 @@ class Preferences(unittest.TestCase):
 if __name__=='__main__':unittest.main()
 
 class FeedbackIntegration(unittest.TestCase):
+ def test_explicit_regional_service_catalog_keeps_provider_order_and_titles(self):
+  m=load(self)
+  from types import SimpleNamespace
+  state=SimpleNamespace(section='Movies',mode='home',discovery_stack=[{}])
+  path='plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=movie&with_watch_providers=8&watch_region=GB'
+  self.assertFalse(m.discovery_scope(state,path))
+  self.assertFalse(m.discovery_scope(state,path+'&page=2'))
+  self.assertTrue(m.discovery_scope(state,path.replace('&with_watch_providers=8','&with_companies=8')))
+
  def test_discovery_scope_keeps_search_saved_trakt_progress_and_episodes(self):
   m=load(self)
   from types import SimpleNamespace
@@ -90,9 +133,10 @@ class FeedbackIntegration(unittest.TestCase):
   with tempfile.TemporaryDirectory() as d:
    store=m.TitlePreferences(Path(d)/'p');s=SimpleNamespace(title_preferences=store)
    action=extract(p,'title_feedback_actions',{'title_key':m.title_key},'TitleFeedback')
-   self.assertEqual(action(s,movie()),[('title_hide','Hide this movie'),('title_less','Show this title less often')])
+   self.assertEqual(action(s,movie()),[('title_hide','Hide this movie'),('title_less','Show this title less often'),('title_more','Show more like this')])
    store.set(movie(),'hide');self.assertEqual(action(s,movie())[0],('title_restore','Unhide this movie'))
    store.restore(movie());store.set(movie(),'less');self.assertEqual(action(s,movie())[0],('title_restore','Restore normal frequency'))
+   store.set(movie(),'more');self.assertEqual(action(s,movie())[0],('title_restore','Remove Show more like this'))
    self.assertEqual(action(s,{'label':'Unknown'}),[])
  def test_all_hidden_titles_leave_row_empty_without_fetching_replacements(self):
   m=load(self)

@@ -136,14 +136,172 @@ class LibraryActions:
             except Exception:
                 if current():self.setProperty('notice','Movie series is unavailable; your browsing position was kept')
         threading.Thread(target=work,name='BlackLanturnMovieSeries',daemon=True).start()
+    @owned
+    def toggle_watch_tonight(self, item):
+        import xbmcgui
+        from watch_tonight import contains, item_key, toggle
+        added = not contains(self.config, item_key(item))
+        updated = toggle(self.config, item)
+        self.commit_library(updated)
+        xbmcgui.Dialog().notification('Watch Tonight', 'Added to your queue' if added else 'Removed from your queue', time=2200)
+
+    @owned
+    def open_next_watch_tonight(self):
+        import xbmcgui
+        from watch_tonight import entries
+        items = entries(self.config)
+        if items:
+            self.details(items[0])
+        else:
+            xbmcgui.Dialog().ok('Watch Tonight', 'Choose Add to Watch Tonight in a movie or episode’s Options.')
+
+    @owned
+    def manage_watch_tonight(self):
+        import xbmcgui
+        from watch_tonight import edit, entries, item_key, label
+        dialog = xbmcgui.Dialog()
+        position = 0
+        while self.alive:
+            items = entries(self.config)
+            if not items:
+                dialog.ok('Watch Tonight', 'Choose Add to Watch Tonight in a movie or episode’s Options.')
+                return
+            labels = [f'{index + 1}. {label(item)}' for index, item in enumerate(items)]
+            position = dialog.select('Watch Tonight', labels, preselect=min(position, len(items) - 1))
+            if position < 0:
+                return
+            item = items[position]
+            actions = [('open', 'Open details')]
+            if position > 0:
+                actions.append(('up', 'Move up'))
+            if position + 1 < len(items):
+                actions.append(('down', 'Move down'))
+            actions.append(('remove', 'Remove from Watch Tonight'))
+            choice = dialog.select(label(item), [caption for _, caption in actions])
+            if choice < 0:
+                continue
+            action = actions[choice][0]
+            if action == 'open':
+                self.details(item)
+                return
+            self.commit_library(edit(self.config, item_key(item), action))
+            position += {'up': -1, 'down': 1}.get(action, 0)
+
+    def open_coming_up(self):
+        from datetime import date
+        import xbmcaddon
+        import xbmcgui
+        from coming_up import calendar_path, group_airings, load_airings
+        from live_review import get_list
+
+        notice = 'Loading upcoming Trakt air dates…'
+        with self.preview_dispatch_lock:
+            if not self.alive or self.actions_open or getattr(self, 'settings_open', False):
+                return
+            self.input_generation = getattr(self, 'input_generation', 0) + 1
+            epoch = self.input_generation
+            generation = getattr(self, 'generation', 0)
+            lifetime = getattr(self, 'window_lifetime', None)
+            self.dwell = time.monotonic()
+            previous = self.getProperty('notice')
+            prior = getattr(self, 'coming_up_request', None)
+            request = (object(), prior[1] if prior and previous == notice else previous)
+            self.coming_up_request = request
+            self.stop_preview()
+            self.setProperty('notice', notice)
+
+        def current():
+            return (self.alive and epoch == self.input_generation
+                    and generation == getattr(self, 'generation', 0)
+                    and lifetime is getattr(self, 'window_lifetime', None)
+                    and self.coming_up_request is request
+                    and not self.actions_open and not getattr(self, 'settings_open', False))
+
+        def clear_notice():
+            if self.alive and lifetime is getattr(self, 'window_lifetime', None) and self.coming_up_request is request:
+                self.coming_up_request = None
+                if self.getProperty('notice') == notice:
+                    self.setProperty('notice', request[1])
+
+        def provider(path):
+            with self.list_lock:
+                return get_list(path) if current() else []
+
+        def work():
+            if not current():
+                with self.preview_dispatch_lock:
+                    clear_notice()
+                return
+            groups = {}
+            today = date.today()
+            try:
+                helper = xbmcaddon.Addon('plugin.video.themoviedb.helper')
+                if not helper.getSetting('trakt_token').strip():
+                    message = 'Connect Trakt in TMDb Helper settings to see your upcoming TV air dates.'
+                else:
+                    groups = group_airings(load_airings(calendar_path(), provider, current), today)
+                    message = 'Trakt returned no air dates for the next seven days. Check the connection if you expected airings.'
+            except Exception:
+                message = 'Trakt air dates are unavailable. Try again later.'
+            with self.preview_dispatch_lock:
+                owns_request = current()
+                clear_notice()
+                if not owns_request:
+                    return
+                self.actions_open = True
+            try:
+                self.stop_preview()
+                dialog = xbmcgui.Dialog()
+                if groups:
+                    self.show_coming_up(dialog, groups, today)
+                else:
+                    dialog.ok('Coming Up', message)
+            finally:
+                self.actions_open = False
+                self.dwell = time.monotonic()
+
+        threading.Thread(target=work, name='BlackLanturnComingUp', daemon=True).start()
+
+    def show_coming_up(self, dialog, groups, today):
+        from watch_tonight import label
+        days = list(groups)
+        labels = ['Date unknown' if day is None else
+                  f"{'Today' if day == today else day.strftime('%A')} · {day.strftime('%b')} {day.day}"
+                  for day in days]
+        position = 0
+        while self.alive:
+            position = dialog.select('Coming Up · TV air dates only', labels, preselect=position)
+            if position < 0:
+                return
+            items = groups[days[position]]
+            selected = dialog.select(labels[position]+' · Streaming availability unknown', [label(item) for item in items])
+            if selected >= 0 and self.alive:
+                self.details(items[selected])
+                return
+
     def library_title_actions(self,item):
         key=title_key(item)
-        if not key:return []
-        return [('library_add','Add to collection…')]+([('movie_series','View movie series · release order')] if key.startswith('movie:') else [])
+        actions = [('library_add', 'Add to collection…')] if key else []
+        if key and key.startswith('movie:'):
+            actions.append(('movie_series', 'View movie series · release order'))
+        from watch_tonight import contains, item_key
+        queue_key = item_key(item)
+        if queue_key:
+            try:
+                queued = contains(self.config, queue_key)
+                label = 'Remove from Watch Tonight' if queued else 'Add to Watch Tonight'
+            except ValueError:
+                label = 'Watch Tonight…'
+            actions.append(('watch_tonight_toggle', label))
+        return actions
     def library_context_actions(self):
         actions=[]
         if getattr(self,'search_state',None):actions.append(('save_search','Save this search…'))
-        if getattr(self,'section','')=='My Stuff':actions.extend([('collections','Personal collections…'),('saved_searches','Saved searches…')])
+        if getattr(self,'section','')=='My Stuff':
+            # The bundled Helper's personal calendar caches are shared across
+            # Trakt accounts in the profile. Keep the picker private until scoped.
+            actions.extend([('watch_tonight_next', 'Open next from Watch Tonight'), ('watch_tonight', 'Manage Watch Tonight…'),
+                            ('collections','Personal collections…'), ('saved_searches','Saved searches…')])
         return actions
     def refresh_library_watch(self,fresh):
         import personal_library as library

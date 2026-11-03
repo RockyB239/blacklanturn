@@ -19,7 +19,7 @@ MENU_ICONS={
  'ratings':'top-rated','rating_order':'top-rated','status_display':'weather',
  'collections':'collections','saved_searches':'search','rows':'playlist','sidebar':'home',
  'genres':'genres','categories':'collections','row_sources':'video-addons',
- 'series_end_suggestions':'tv','hidden_titles':'bookmark','reduced_titles':'bookmark',
+ 'series_end_suggestions':'tv','hidden_titles':'bookmark','reduced_titles':'bookmark','preferred_titles':'bookmark',
  'preview_mode':'movies','preview_delay':'history','preview_language':'international',
  'youtube_previews':'youtube','youtube_end_suggestions':'youtube','youtube_end_autoplay':'youtube',
  'help':'guide','update_notes':'updates','startup_preview':'builds','clear_search':'search','recovery':'restore'}

@@ -1,5 +1,6 @@
 """Labelled native grid over the configured genre/category pages."""
 from pathlib import Path
+import threading
 import xbmcgui
 from navigation_core import default_icon
 ROOT=Path(__file__).resolve().parent
@@ -12,6 +13,7 @@ class GenrePicker(xbmcgui.WindowXMLDialog):
         items=[]
         for page in self.choices:
             item=xbmcgui.ListItem(label=page['label'])
+            if getattr(self,'observe',None):item.setProperty('genreLookaheadId',page['id'])
             aliases={'All':'collections','Action & Adventure':'adventure','Sci-Fi & Fantasy':'science-fiction','Westerns':'western'}
             icon=aliases.get(page['label']) or default_icon(page['label'],{'kind':'page'})
             artwork=icon_path(ROOT,icon,getattr(self,'pack','original'))
@@ -19,6 +21,17 @@ class GenrePicker(xbmcgui.WindowXMLDialog):
         panel=self.getControl(5000);panel.reset();panel.addItems(items)
         panel.selectItem(next((n for n,p in enumerate(self.choices) if p['id']==self.current_page),0))
         self.setFocusId(5000)
+        if getattr(self,'observe',None):
+            def watch_focus():
+                keys=['System.CurrentControlId','Container(5000).ListItem.Property(genreLookaheadId)']
+                while not self.closed_for_lookahead.wait(.1):
+                    try:
+                        state=self.read_labels(keys)
+                        if self.closed_for_lookahead.is_set():return
+                        self.observe(state[keys[1]] if state[keys[0]]=='5000' else '')
+                    except (RuntimeError, KeyError):
+                        return
+            threading.Thread(target=watch_focus,name='BlackLanturnGenreFocus',daemon=True).start()
     def onClick(self,cid):
         if cid==5000:
             index=self.getControl(5000).getSelectedPosition()
@@ -27,8 +40,12 @@ class GenrePicker(xbmcgui.WindowXMLDialog):
         elif cid==5001:self.close()
     def onAction(self,action):
         if action.getId() in (9,10,92,216,247):self.close()
-def choose_genre(section,pages,current_page,pack='original'):
+def choose_genre(section,pages,current_page,pack='original',observe=None,read_labels=None):
     dialog=GenrePicker('GenrePicker.xml',str(ROOT),'Default','1080i')
     dialog.section=section;dialog.pages=pages;dialog.current_page=current_page;dialog.pack=pack;dialog.result=None
-    dialog.doModal();result=dialog.result;del dialog
-    return result
+    dialog.observe=observe;dialog.read_labels=read_labels;dialog.closed_for_lookahead=threading.Event()
+    try:
+        dialog.doModal()
+        return dialog.result
+    finally:
+        dialog.closed_for_lookahead.set()
