@@ -1,0 +1,7 @@
+# Quality166 approved scope
+
+User approved the proposed order on November2: update-notice reliability, bounded one-row scrolling preparation, menu consistency audit, Apple TV playback/exit reliability, and exact history restoration for tests. Execute on windowed Mac first, then Apple TV. Do not access or change Fire Stick. Preserve playback settings, accounts, personal Fight Zone and other user data. No public publication in this pass.
+
+Approach: retain OpenWizard, curated release feed and existing caches. Align Home with the Installer's existing remote-over-bundled validated catalogue precedence. Keep exact receipt and managed-file checks. Test the existing optional one-row prefetch, which is currently off, before adopting changes. Do not add unrestricted parallel fetches, repeated polling, permanent monitors or visual redesign. Prefer rejecting a slower experiment over retaining it. Menu changes require a demonstrated geometry/focus defect. Native playback tests must capture exact target history before and restore only new test events/resumes afterward. Apple TV uses supported native controls, never Kodi screenshots. Shared code remains cross-platform.
+
+Alternatives considered: broad bypass of completion proofs rejected because managed patches must still verify; whole-feed reloads and many-row prefetch rejected for memory/network cost. Current one-row experiment will be accepted only with actual native speed and resource evidence. Existing offline cache fallback must remain.

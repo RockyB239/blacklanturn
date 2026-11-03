@@ -131,7 +131,9 @@ def sample(rpc=None):
             os.replace(tmp,cache)
         finally:
             if os.path.exists(tmp):os.unlink(tmp)
-    merged={entry['id']:entry for entry in catalog['releases']+bundled_catalog['releases']}
+    # Match the Installer: validated current feed/cache supersedes bundled
+    # metadata for the same release. Offline bundled releases remain available.
+    merged={entry['id']:entry for entry in bundled_catalog['releases']+catalog['releases']}
     catalog=releases.validate_catalog({'schema':1,'releases':sorted(merged.values(),key=releases.order)[-30:]})
     marker=json.loads((home_path()/'userdata/blacklanturn-build.json').read_text())
     return releases.transact(state_path(),lambda old:releases.refresh(old,marker,catalog,now,home_path()),legacy_path())
