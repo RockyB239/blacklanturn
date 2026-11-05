@@ -73,9 +73,20 @@ class ShelfToolsTests(unittest.TestCase):
         path = streaming_folders([folder], 'movie')[0]['file']
         native_next = {'filetype': 'directory', 'label': 'Next page',
                        'file': path + '&page=2&plugin_category=Service'}
+        native_next['file'] = native_next['file'].replace('&widget=false', '') + '&cacheonly=False'
         cards, position = page_cards([movie(1), native_next], PageHistory(), path)
         self.assertEqual(cards[1]['_page_control'], 'next')
-        self.assertEqual(cards[1]['file'], native_next['file'])
+        self.assertTrue(cards[1]['art']['navigation'].endswith('/page-next.png'))
+        query = parse_qs(urlsplit(cards[1]['file']).query)
+        self.assertEqual([query[key] for key in ('page', 'with_watch_providers', 'watch_region', 'widget')],
+                         [['2'], ['8'], ['GB'], ['false']])
+        wrong_region = dict(native_next, file=native_next['file'].replace('watch_region=GB', 'watch_region=US'))
+        self.assertNotIn('_page_control', page_cards([wrong_region], PageHistory(), path)[0][0])
+        history = PageHistory()
+        history.push(path, 1)
+        third = dict(native_next, file=native_next['file'].replace('page=2', 'page=3'))
+        controls, _ = page_cards([movie(3), third], history, cards[1]['file'])
+        self.assertEqual([item.get('_page_control') for item in controls], ['previous', None, 'next'])
         self.assertEqual(position, 0)
 
     def test_current_shelf_filter_view_paints_without_hydration_or_provider_requests(self):

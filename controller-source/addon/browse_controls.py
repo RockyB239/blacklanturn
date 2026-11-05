@@ -37,9 +37,17 @@ def should_exclude_anime(state,path):
                  or page.get('id') in ('bl-movies-animation','bl-shows-animation')):return False
     return True
 
+def streaming_page_target(origin,target):
+    # Helper omits its widget display flag from the Next folder. Restore
+    # the explicit non-widget route so the next page remains pageable too.
+    if 'with_watch_providers=' not in origin or '&widget=false' not in origin:return target
+    from streaming_cache import streaming_page_target as normalize
+    return normalize(origin,target)
+
+
 def is_next_page(item,path):
     if item.get('filetype')!='directory':return False
-    before,after=urlsplit(path),urlsplit(item.get('file',''))
+    before,after=urlsplit(path),urlsplit(streaming_page_target(path,item.get('file','')))
     old,new=parse_qs(before.query),parse_qs(after.query)
     if (before.scheme,before.netloc,before.path)!=(after.scheme,after.netloc,after.path):return False
     try:
@@ -62,7 +70,7 @@ def page_cards(files,history,path,position=0,display_position=False):
     for item in files:
         if item.get('_page_control')=='previous':continue
         if is_next_page(item,path):
-            more.append(page_card('next',item['file']))
+            more.append(page_card('next',streaming_page_target(path,item['file'])))
         else:ordinary.append(item)
     result=ordinary+more
     if history.pages:
@@ -70,7 +78,7 @@ def page_cards(files,history,path,position=0,display_position=False):
     if display_position and not already_displayed:
         selected=max(0,min(position,len(result)-1))
     elif original:
-        selected=next((n for n,x in enumerate(result) if x.get('file')==original.get('file')),0)
+        selected=next((n for n,x in enumerate(result) if x.get('file')==streaming_page_target(path,original.get('file',''))),0)
     else:selected=0
     return result,selected
 

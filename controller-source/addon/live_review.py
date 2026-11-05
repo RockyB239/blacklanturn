@@ -124,7 +124,11 @@ def get_list(path):
         from shelf_tools import streaming_folders
         kind=query.get('tmdb_type',[''])[0]
         if kind not in ('movie','tv'):raise ValueError('Choose Movies or Shows')
-        return streaming_folders(get_list(tmdb('watch_providers',kind)),kind)
+        source=tmdb('watch_providers',kind)
+        files=directory_items(rpc('Files.GetDirectory',{'directory':source,'media':'video','properties':['title','art','thumbnail']}))
+        cards=streaming_folders(files,kind)
+        event('streaming_directory',kind='catalog',count=len(cards),seconds=round(time.monotonic()-start,3))
+        return cards
     category=catalogue_category(path)
     if category:
         content='video' if category=='video' else 'executable'
@@ -676,6 +680,8 @@ class LiveReview(LibraryActions,RowCustomization,TitleFeedback,ShelfTools,YouTub
         files=self.result_cache.get(path)
         if files is not None:
             return (None,False) if filtered and needs_fill(path,files,first_page_keep(self,path,metadata.without_anime),size=first_page_minimum(definition)) else (files,False)
+        saved=getattr(self,'retained_streaming_items',lambda path:None)(path)
+        if saved is not None:return saved,False
         snapshots=getattr(self,'snapshot_cache',None)
         # Freshness is still 30 seconds for Trakt. Only current-account session data
         # may paint while the normal owned worker refreshes it. Other private rows
@@ -733,6 +739,34 @@ class LiveReview(LibraryActions,RowCustomization,TitleFeedback,ShelfTools,YouTub
             if not current() or cache.revision!=revision:raise PageCancelled('Search navigation changed')
             cache.put(path,files,revision=revision,ttl=30 if parse_qs(urlsplit(path).query).get('info',[''])[0].startswith('trakt') else 120)
         return files
+    def streaming_snapshot(self,path):
+        # The normal startup rows never import or open this cache.
+        if 'with_watch_providers=' not in path and 'info=blacklanturn_streaming_services&' not in path:return None
+        snapshot=getattr(self,'snapshot_cache',None)
+        if snapshot is None:return None
+        from streaming_cache import StreamingRows
+        with self.preview_dispatch_lock:
+            stores=getattr(self,'streaming_stores',None)
+            if stores is None:stores=self.streaming_stores={}
+            return StreamingRows.for_route(STORE,snapshot.scope,path,stores=stores)
+
+    def retained_streaming_items(self,path):
+        streaming=self.streaming_snapshot(path)
+        saved=streaming.get(path) if streaming is not None else None
+        if saved is None:return None
+        if streaming.mode=='titles':
+            from local_watch import hydrate_local
+            from home_progress import PENDING_SCOPE
+            saved=hydrate_local(PROFILE/'addon_data/plugin.video.themoviedb.helper',saved)
+            home=getattr(self,'home_snapshot_cache',None)
+            for item in saved:
+                item['_rating_source']='TMDb'
+                if home is not None and home.scope and item.get('filetype')=='file' and playback_kind(item)=='movie':
+                    item[PENDING_SCOPE]=home.scope
+            saved=SERIES_STATUS.enrich(saved)
+        event('streaming_cache_hit',kind=streaming.mode,count=len(saved))
+        return saved
+
     def cached_row_items(self,definition,expected_revision=None,owner_current=lambda:True):
         path=definition.get('path','')
         if path.startswith('plugin://plugin.video.youtube/') and getattr(self,'section','')=='YouTube':
@@ -782,6 +816,9 @@ class LiveReview(LibraryActions,RowCustomization,TitleFeedback,ShelfTools,YouTub
         files=None if definition.get('_snapshot_refresh') else cache.get(path)
         if files is None:
             params=parse_qs(urlsplit(path).query)
+            snapshot_owner=getattr(self,'snapshot_cache',None)
+            streaming=getattr(self,'streaming_snapshot',lambda path:None)(path)
+            streaming_revision=streaming.revision if streaming is not None else None
             if params.get('info')==['blacklanturn_search_matches']:
                 files=load_best_matches(params.get('query',[''])[0],lambda part:self.cached_provider_list(part,revision,current),current,workers=2,batch_provider=get_list if getattr(self,'batch_search_enabled',False) else None,cache=cache,revision=revision)
             else:
@@ -801,6 +838,9 @@ class LiveReview(LibraryActions,RowCustomization,TitleFeedback,ShelfTools,YouTub
                 info=parse_qs(urlsplit(path).query).get('info',[''])[0]
                 cache.put(path,files,revision=revision,ttl=30 if info.startswith('trakt') else 120,allow_empty=info.startswith('trakt'))
                 if not filtered_snapshot and revision==cache.revision and snapshots is not None and any(snapshots is getattr(self,key,None) for key in ('snapshot_cache','home_snapshot_cache')):snapshots.put(path,files,revision=snapshot_revision)
+            if streaming is not None and current() and snapshot_owner is getattr(self,'snapshot_cache',None):
+                stored=streaming.put(path,files,revision=streaming_revision)
+                event('streaming_cache_write',kind=streaming.mode,stored=stored,count=len(files))
         self.publish_cache_stats()
         filled=self.fill_discovery_page(path,files,current,refresh=definition.get('_snapshot_refresh',False),minimum=first_page_minimum(definition))
         if filtered_snapshot:remember_snapshot_fill(filled)
@@ -1213,7 +1253,7 @@ class LiveReview(LibraryActions,RowCustomization,TitleFeedback,ShelfTools,YouTub
             state='ready' if files else 'empty' if label else ''
             immutable=getattr(self,'section','')=='YouTube' and self.paths[n].startswith('plugin://plugin.video.youtube/')
             cards=getattr(self,'annotate_shelf_cards',lambda n,files:files)(n,files)
-            built=[media_item(d,immutable=True) if immutable else media_item(d) for d in cards]
+            built=[media_item(d,immutable=True) if immutable or d.get('_streaming_provider') else media_item(d) for d in cards]
             if cards is not files:
                 for item,data in zip(built,cards):
                     if data.get('_new_since_visit'):item.setProperty('newSinceVisit','true')
@@ -1743,6 +1783,9 @@ class LiveReview(LibraryActions,RowCustomization,TitleFeedback,ShelfTools,YouTub
         def work():
             try:
                 if not current():return
+                streaming=getattr(self,'streaming_snapshot',lambda path:None)(path)
+                if streaming is not None:streaming.discard(path)
+                streaming_revision=streaming.revision if streaming is not None else None
                 files=get_list(provider_path(path))
                 if old and not files:raise RuntimeError('List is unavailable')
                 if not current():return
@@ -1773,6 +1816,7 @@ class LiveReview(LibraryActions,RowCustomization,TitleFeedback,ShelfTools,YouTub
                         match=next((x for x in self.rows[slot] if item_key(x)==item_key(selected)),None)
                         if match:self.update(match)
                     if current():self.setProperty('notice','List refreshed')
+                if streaming is not None and current():streaming.put(path,files,revision=streaming_revision)
             except Exception:
                 if current():self.setProperty('notice','List refresh is unavailable; current titles and position were kept')
             finally:

@@ -87,6 +87,11 @@ jobs:
           for edition in General Apple-TV-Mac; do
             curl --fail --location --retry 3 "https://github.com/RockyB239/blacklanturn/releases/download/v1.1.58/BlackLanturn-${edition}-Kodi21-1.1.58.zip" -o "baselines/BlackLanturn-${edition}-Kodi21-1.1.58.zip"
           done
+      - name: Download pinned 1.1.59 packaging baselines
+        run: |
+          for edition in General Apple-TV-Mac; do
+            curl --fail --location --retry 3 "https://github.com/RockyB239/blacklanturn/releases/download/v1.1.59/BlackLanturn-${edition}-Kodi21-1.1.59.zip" -o "baselines/BlackLanturn-${edition}-Kodi21-1.1.59.zip"
+          done
       - name: Installer and update protection tests
         run: python -m unittest discover -s tests -v
       - name: Controller regression checks
@@ -109,8 +114,15 @@ jobs:
           UPNEXT132_RELEASE_DIR=artifacts155 python -m unittest discover -s compatibility/reliability165/tests -v
           python tools/release_report.py artifacts155/BlackLanturn-General-Kodi21-1.1.58.zip --output artifacts155/current-general.json
           python tools/release_report.py artifacts155/BlackLanturn-Apple-TV-Mac-Kodi21-1.1.58.zip --output artifacts155/current-apple.json
-      - name: Verify 1.1.59 full and component packages locally
+      - name: Verify 1.1.59 full and component packages against historical source
         run: |
-          python tools/build_release170.py --freeze source170.json
-          python tools/build_release170.py --manifest source170.json --baselines baselines --output artifacts170
+          source170="$RUNNER_TEMP/blacklanturn-source170"
+          git worktree add --detach "$source170" 563ba2cd87b5977cb337ba3928f46d820916beec
+          python "$source170/tools/build_release170.py" --freeze source170.json
+          python "$source170/tools/build_release170.py" --manifest source170.json --baselines baselines --output artifacts170
           python tools/verify_release165.py --baseline-version 1.1.58 --installer-version 1.0.53 --artifacts artifacts170 --baselines baselines --output artifacts170/package-matrix.json
+      - name: Verify 1.1.60 full and component packages locally
+        run: |
+          python tools/build_release173.py --freeze source173.json
+          python tools/build_release173.py --manifest source173.json --baselines baselines --output artifacts173
+          python tools/verify_release165.py --baseline-version 1.1.59 --installer-version 1.0.53 --artifacts artifacts173 --baselines baselines --output artifacts173/package-matrix.json
