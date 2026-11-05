@@ -159,7 +159,9 @@ jobs:
           done
       - name: Verify reproducible 1.1.62 full and component packages
         run: |
-          python compatibility/responsiveness179/release179.py freeze --baselines baselines --output source179
+          source179_root="$RUNNER_TEMP/blacklanturn-source179"
+          git worktree add --detach "$source179_root" 282d7c7caf2d032a6df165c52060b844c206fbd6
+          python "$source179_root/compatibility/responsiveness179/release179.py" freeze --source "$source179_root" --baselines baselines --output source179
           python source179/pipeline/release179.py build --snapshot source179 --baselines baselines --output artifacts179
           python source179/pipeline/verify179.py --snapshot source179 --artifacts artifacts179 --baselines baselines --output artifacts179-verification.json
           python source179/pipeline/release179.py build --snapshot source179 --baselines baselines --output rebuild179
