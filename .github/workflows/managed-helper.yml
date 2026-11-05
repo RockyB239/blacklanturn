@@ -21,86 +21,86 @@ jobs:
         run: |
           mkdir -p baselines
           for edition in General Apple-TV-Mac; do
-            curl --fail --location --retry 3 "https://github.com/RockyB239/blacklanturn/releases/download/v1.1.2/BlackLanturn-${edition}-Kodi21-1.1.2.zip" -o "baselines/BlackLanturn-${edition}-Kodi21-1.1.2.zip"
+            curl --fail --location --retry-all-errors --connect-timeout 20 --max-time 180 --retry 3 "https://github.com/RockyB239/blacklanturn/releases/download/v1.1.2/BlackLanturn-${edition}-Kodi21-1.1.2.zip?bl_ci=${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}" -o "baselines/BlackLanturn-${edition}-Kodi21-1.1.2.zip"
           done
       - name: Download pinned update baselines
         run: |
           for edition in General Apple-TV-Mac; do
-            curl --fail --location --retry 3 "https://github.com/RockyB239/blacklanturn/releases/download/v1.1.29/BlackLanturn-${edition}-Kodi21-1.1.29.zip" -o "baselines/BlackLanturn-${edition}-Kodi21-1.1.29.zip"
+            curl --fail --location --retry-all-errors --connect-timeout 20 --max-time 180 --retry 3 "https://github.com/RockyB239/blacklanturn/releases/download/v1.1.29/BlackLanturn-${edition}-Kodi21-1.1.29.zip?bl_ci=${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}" -o "baselines/BlackLanturn-${edition}-Kodi21-1.1.29.zip"
           done
       - name: Download pinned artwork release baselines
         run: |
           for edition in General Apple-TV-Mac; do
-            curl --fail --location --retry 3 "https://github.com/RockyB239/blacklanturn/releases/download/v1.1.30/BlackLanturn-${edition}-Kodi21-1.1.30.zip" -o "baselines/BlackLanturn-${edition}-Kodi21-1.1.30.zip"
+            curl --fail --location --retry-all-errors --connect-timeout 20 --max-time 180 --retry 3 "https://github.com/RockyB239/blacklanturn/releases/download/v1.1.30/BlackLanturn-${edition}-Kodi21-1.1.30.zip?bl_ci=${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}" -o "baselines/BlackLanturn-${edition}-Kodi21-1.1.30.zip"
           done
       - name: Download pinned landscape release baselines
         run: |
           for edition in General Apple-TV-Mac; do
-            curl --fail --location --retry 3 "https://github.com/RockyB239/blacklanturn/releases/download/v1.1.32/BlackLanturn-${edition}-Kodi21-1.1.32.zip" -o "baselines/BlackLanturn-${edition}-Kodi21-1.1.32.zip"
+            curl --fail --location --retry-all-errors --connect-timeout 20 --max-time 180 --retry 3 "https://github.com/RockyB239/blacklanturn/releases/download/v1.1.32/BlackLanturn-${edition}-Kodi21-1.1.32.zip?bl_ci=${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}" -o "baselines/BlackLanturn-${edition}-Kodi21-1.1.32.zip"
           done
       - name: Download pinned current-addon baseline
         run: |
           for edition in General Apple-TV-Mac; do
-            curl --fail --location --retry 3 "https://github.com/RockyB239/blacklanturn/releases/download/v1.1.33/BlackLanturn-${edition}-Kodi21-1.1.33.zip" -o "baselines/BlackLanturn-${edition}-Kodi21-1.1.33.zip"
+            curl --fail --location --retry-all-errors --connect-timeout 20 --max-time 180 --retry 3 "https://github.com/RockyB239/blacklanturn/releases/download/v1.1.33/BlackLanturn-${edition}-Kodi21-1.1.33.zip?bl_ci=${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}" -o "baselines/BlackLanturn-${edition}-Kodi21-1.1.33.zip"
           done
       - name: Download pinned provider release baseline
         run: |
           for edition in General Apple-TV-Mac; do
-            curl --fail --location --retry 3 "https://github.com/RockyB239/blacklanturn/releases/download/v1.1.34/BlackLanturn-${edition}-Kodi21-1.1.34.zip" -o "baselines/BlackLanturn-${edition}-Kodi21-1.1.34.zip"
+            curl --fail --location --retry-all-errors --connect-timeout 20 --max-time 180 --retry 3 "https://github.com/RockyB239/blacklanturn/releases/download/v1.1.34/BlackLanturn-${edition}-Kodi21-1.1.34.zip?bl_ci=${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}" -o "baselines/BlackLanturn-${edition}-Kodi21-1.1.34.zip"
           done
       - name: Download pinned customization baseline
         run: |
           for edition in General Apple-TV-Mac; do
-            curl --fail --location --retry 3 "https://github.com/RockyB239/blacklanturn/releases/download/v1.1.35/BlackLanturn-${edition}-Kodi21-1.1.35.zip" -o "baselines/BlackLanturn-${edition}-Kodi21-1.1.35.zip"
+            curl --fail --location --retry-all-errors --connect-timeout 20 --max-time 180 --retry 3 "https://github.com/RockyB239/blacklanturn/releases/download/v1.1.35/BlackLanturn-${edition}-Kodi21-1.1.35.zip?bl_ci=${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}" -o "baselines/BlackLanturn-${edition}-Kodi21-1.1.35.zip"
           done
       - name: Download pinned Options release baseline
         run: |
           for edition in General Apple-TV-Mac; do
-            curl --fail --location --retry 3 "https://github.com/RockyB239/blacklanturn/releases/download/v1.1.36/BlackLanturn-${edition}-Kodi21-1.1.36.zip" -o "baselines/BlackLanturn-${edition}-Kodi21-1.1.36.zip"
+            curl --fail --location --retry-all-errors --connect-timeout 20 --max-time 180 --retry 3 "https://github.com/RockyB239/blacklanturn/releases/download/v1.1.36/BlackLanturn-${edition}-Kodi21-1.1.36.zip?bl_ci=${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}" -o "baselines/BlackLanturn-${edition}-Kodi21-1.1.36.zip"
           done
       - name: Download pinned personal-library baseline
         run: |
           for edition in General Apple-TV-Mac; do
-            curl --fail --location --retry 3 "https://github.com/RockyB239/blacklanturn/releases/download/v1.1.37/BlackLanturn-${edition}-Kodi21-1.1.37.zip" -o "baselines/BlackLanturn-${edition}-Kodi21-1.1.37.zip"
+            curl --fail --location --retry-all-errors --connect-timeout 20 --max-time 180 --retry 3 "https://github.com/RockyB239/blacklanturn/releases/download/v1.1.37/BlackLanturn-${edition}-Kodi21-1.1.37.zip?bl_ci=${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}" -o "baselines/BlackLanturn-${edition}-Kodi21-1.1.37.zip"
           done
       - name: Download pinned refinement baseline
         run: |
           for edition in General Apple-TV-Mac; do
-            curl --fail --location --retry 3 "https://github.com/RockyB239/blacklanturn/releases/download/v1.1.38/BlackLanturn-${edition}-Kodi21-1.1.38.zip" -o "baselines/BlackLanturn-${edition}-Kodi21-1.1.38.zip"
+            curl --fail --location --retry-all-errors --connect-timeout 20 --max-time 180 --retry 3 "https://github.com/RockyB239/blacklanturn/releases/download/v1.1.38/BlackLanturn-${edition}-Kodi21-1.1.38.zip?bl_ci=${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}" -o "baselines/BlackLanturn-${edition}-Kodi21-1.1.38.zip"
           done
       - name: Download pinned notice-history baseline
         run: |
-          curl --fail --location --retry 2 -o baselines/BlackLanturn-General-Kodi21-1.1.39.zip https://github.com/RockyB239/blacklanturn/releases/download/v1.1.39/BlackLanturn-General-Kodi21-1.1.39.zip
-          curl --fail --location --retry 2 -o baselines/BlackLanturn-Apple-TV-Mac-Kodi21-1.1.39.zip https://github.com/RockyB239/blacklanturn/releases/download/v1.1.39/BlackLanturn-Apple-TV-Mac-Kodi21-1.1.39.zip
+          curl --fail --location --retry-all-errors --connect-timeout 20 --max-time 180 --retry 2 -o baselines/BlackLanturn-General-Kodi21-1.1.39.zip https://github.com/RockyB239/blacklanturn/releases/download/v1.1.39/BlackLanturn-General-Kodi21-1.1.39.zip?bl_ci=${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}
+          curl --fail --location --retry-all-errors --connect-timeout 20 --max-time 180 --retry 2 -o baselines/BlackLanturn-Apple-TV-Mac-Kodi21-1.1.39.zip https://github.com/RockyB239/blacklanturn/releases/download/v1.1.39/BlackLanturn-Apple-TV-Mac-Kodi21-1.1.39.zip?bl_ci=${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}
       - name: Download current public baseline
         run: |
           for edition in General Apple-TV-Mac; do
-            curl --fail --location --retry 3 "https://github.com/RockyB239/blacklanturn/releases/download/v1.1.40/BlackLanturn-${edition}-Kodi21-1.1.40.zip" -o "baselines/BlackLanturn-${edition}-Kodi21-1.1.40.zip"
+            curl --fail --location --retry-all-errors --connect-timeout 20 --max-time 180 --retry 3 "https://github.com/RockyB239/blacklanturn/releases/download/v1.1.40/BlackLanturn-${edition}-Kodi21-1.1.40.zip?bl_ci=${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}" -o "baselines/BlackLanturn-${edition}-Kodi21-1.1.40.zip"
           done
       - name: Download pinned reliability baseline
         run: |
           for edition in General Apple-TV-Mac; do
-            curl --fail --location --retry 3 "https://github.com/RockyB239/blacklanturn/releases/download/v1.1.57/BlackLanturn-${edition}-Kodi21-1.1.57.zip" -o "baselines/BlackLanturn-${edition}-Kodi21-1.1.57.zip"
+            curl --fail --location --retry-all-errors --connect-timeout 20 --max-time 180 --retry 3 "https://github.com/RockyB239/blacklanturn/releases/download/v1.1.57/BlackLanturn-${edition}-Kodi21-1.1.57.zip?bl_ci=${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}" -o "baselines/BlackLanturn-${edition}-Kodi21-1.1.57.zip"
           done
       - name: Download pinned 1.1.58 packaging baselines
         run: |
           for edition in General Apple-TV-Mac; do
-            curl --fail --location --retry 3 "https://github.com/RockyB239/blacklanturn/releases/download/v1.1.58/BlackLanturn-${edition}-Kodi21-1.1.58.zip" -o "baselines/BlackLanturn-${edition}-Kodi21-1.1.58.zip"
+            curl --fail --location --retry-all-errors --connect-timeout 20 --max-time 180 --retry 3 "https://github.com/RockyB239/blacklanturn/releases/download/v1.1.58/BlackLanturn-${edition}-Kodi21-1.1.58.zip?bl_ci=${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}" -o "baselines/BlackLanturn-${edition}-Kodi21-1.1.58.zip"
           done
       - name: Download pinned 1.1.59 packaging baselines
         run: |
           for edition in General Apple-TV-Mac; do
-            curl --fail --location --retry 3 "https://github.com/RockyB239/blacklanturn/releases/download/v1.1.59/BlackLanturn-${edition}-Kodi21-1.1.59.zip" -o "baselines/BlackLanturn-${edition}-Kodi21-1.1.59.zip"
+            curl --fail --location --retry-all-errors --connect-timeout 20 --max-time 180 --retry 3 "https://github.com/RockyB239/blacklanturn/releases/download/v1.1.59/BlackLanturn-${edition}-Kodi21-1.1.59.zip?bl_ci=${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}" -o "baselines/BlackLanturn-${edition}-Kodi21-1.1.59.zip"
           done
       - name: Download pinned 1.1.60 packaging baselines
         run: |
           for edition in General Apple-TV-Mac; do
-            curl --fail --location --retry 3 "https://github.com/RockyB239/blacklanturn/releases/download/v1.1.60/BlackLanturn-${edition}-Kodi21-1.1.60.zip" -o "baselines/BlackLanturn-${edition}-Kodi21-1.1.60.zip"
+            curl --fail --location --retry-all-errors --connect-timeout 20 --max-time 180 --retry 3 "https://github.com/RockyB239/blacklanturn/releases/download/v1.1.60/BlackLanturn-${edition}-Kodi21-1.1.60.zip?bl_ci=${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}" -o "baselines/BlackLanturn-${edition}-Kodi21-1.1.60.zip"
           done
       - name: Download pinned 1.1.61-r1 packaging baselines
         run: |
           for edition in General Apple-TV-Mac; do
-            curl --fail --location --retry 3 "https://github.com/RockyB239/blacklanturn/releases/download/v1.1.61/BlackLanturn-${edition}-Kodi21-1.1.61.zip" -o "baselines/BlackLanturn-${edition}-Kodi21-1.1.61.zip"
+            curl --fail --location --retry-all-errors --connect-timeout 20 --max-time 180 --retry 3 "https://github.com/RockyB239/blacklanturn/releases/download/v1.1.61/BlackLanturn-${edition}-Kodi21-1.1.61.zip?bl_ci=${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}" -o "baselines/BlackLanturn-${edition}-Kodi21-1.1.61.zip"
           done
           python - <<'PYCODE'
           import hashlib
