@@ -2,6 +2,82 @@
   "schema": 1,
   "releases": [
     {
+      "id": "blacklanturn-general-1.1.61-r1",
+      "edition": "general",
+      "version": "1.1.61",
+      "revision": 1,
+      "title": "BlackLanturn Build 1.1.61",
+      "summary": "Browse streaming services in a logo grid, then explore Popular, Recent Releases and genres.",
+      "sections": [
+        {
+          "heading": "Browse streaming services",
+          "bullets": [
+            "Find pinned and featured services in the streaming-services grid.",
+            "Browse Popular, Recent Releases and genre shelves for a service.",
+            "Lists you open take priority over older browse requests."
+          ]
+        },
+        {
+          "heading": "Keep your setup",
+          "bullets": [
+            "Use Update BlackLanturn to preserve settings, sign-ins, history and other installed add-ons."
+          ]
+        }
+      ],
+      "files": {
+        "addons/script.blacklanturn.preview/addon.xml": "616562e8a0a815811b8b63afbb39363a8c42f897decbed298dcc42389d3675b2",
+        "addons/script.blacklanturn.preview/browse_controls.py": "b3082e67a563a5b64e4d93ac9b5438abebd716df6e3d47498f5564676d92134b",
+        "addons/script.blacklanturn.preview/live_review.py": "9268c41b9a30a4ffb0eb84a658ced7399711bb288098648eab6d6add0dfda03e",
+        "addons/script.blacklanturn.preview/provider_work.py": "4e25bbdc9bf97fd425262f01cbf38fa42c9664c289e5e4fbff97b132e0994572",
+        "addons/script.blacklanturn.preview/resources/skins/Default/1080i/LiveReview.xml": "3ec02c389b2ec7aad8f8e676a969faaaed023d76b3f990141f44941195727894",
+        "addons/script.blacklanturn.preview/resources/skins/Default/1080i/StreamingServicesGrid.xml": "1dbaf944e20b210a774a07ae85fed9d1bd75aad6e639696edf6a9cbc05c77bca",
+        "addons/script.blacklanturn.preview/search_ui.py": "796f4482b15dcf13fd6a7849f73b0c58c25b0983fd2f6a2365acd788aaf22341",
+        "addons/script.blacklanturn.preview/shelf_tools.py": "f95ca3c074f4e9300f52a220c0776567e4a01d8810b5ebc07a73421770e628b2",
+        "addons/script.blacklanturn.preview/streaming_cache.py": "4ef2d7d0c3254ac29dcbdf96df5fe8d637d26f3c04e9ea4d7ccd39ce01adc4f6",
+        "addons/script.blacklanturn.preview/streaming_services.py": "028649653606cf809c656c1e72b39c97eafe9b00dff5310fbbb6c5667bf88397",
+        "addons/script.blacklanturn.preview/streaming_services_ui.py": "9ba1afd376b4c333a230dd1e5e7fcc542c95a555eca98e09faec076c019b7829",
+        "addons/script.blacklanturn.preview/streaming_shelves.py": "034106b6927ec97680012b6b7a7cfac1d3bad7c984d466e3db35a1ed2021d855"
+      }
+    },
+    {
+      "id": "blacklanturn-apple-1.1.61-r1",
+      "edition": "apple",
+      "version": "1.1.61",
+      "revision": 1,
+      "title": "BlackLanturn Build 1.1.61",
+      "summary": "Browse streaming services in a logo grid, then explore Popular, Recent Releases and genres.",
+      "sections": [
+        {
+          "heading": "Browse streaming services",
+          "bullets": [
+            "Find pinned and featured services in the streaming-services grid.",
+            "Browse Popular, Recent Releases and genre shelves for a service.",
+            "Lists you open take priority over older browse requests."
+          ]
+        },
+        {
+          "heading": "Keep your setup",
+          "bullets": [
+            "Use Update BlackLanturn to preserve settings, sign-ins, history and other installed add-ons."
+          ]
+        }
+      ],
+      "files": {
+        "addons/script.blacklanturn.preview/addon.xml": "616562e8a0a815811b8b63afbb39363a8c42f897decbed298dcc42389d3675b2",
+        "addons/script.blacklanturn.preview/browse_controls.py": "b3082e67a563a5b64e4d93ac9b5438abebd716df6e3d47498f5564676d92134b",
+        "addons/script.blacklanturn.preview/live_review.py": "9268c41b9a30a4ffb0eb84a658ced7399711bb288098648eab6d6add0dfda03e",
+        "addons/script.blacklanturn.preview/provider_work.py": "4e25bbdc9bf97fd425262f01cbf38fa42c9664c289e5e4fbff97b132e0994572",
+        "addons/script.blacklanturn.preview/resources/skins/Default/1080i/LiveReview.xml": "3ec02c389b2ec7aad8f8e676a969faaaed023d76b3f990141f44941195727894",
+        "addons/script.blacklanturn.preview/resources/skins/Default/1080i/StreamingServicesGrid.xml": "1dbaf944e20b210a774a07ae85fed9d1bd75aad6e639696edf6a9cbc05c77bca",
+        "addons/script.blacklanturn.preview/search_ui.py": "796f4482b15dcf13fd6a7849f73b0c58c25b0983fd2f6a2365acd788aaf22341",
+        "addons/script.blacklanturn.preview/shelf_tools.py": "f95ca3c074f4e9300f52a220c0776567e4a01d8810b5ebc07a73421770e628b2",
+        "addons/script.blacklanturn.preview/streaming_cache.py": "4ef2d7d0c3254ac29dcbdf96df5fe8d637d26f3c04e9ea4d7ccd39ce01adc4f6",
+        "addons/script.blacklanturn.preview/streaming_services.py": "028649653606cf809c656c1e72b39c97eafe9b00dff5310fbbb6c5667bf88397",
+        "addons/script.blacklanturn.preview/streaming_services_ui.py": "9ba1afd376b4c333a230dd1e5e7fcc542c95a555eca98e09faec076c019b7829",
+        "addons/script.blacklanturn.preview/streaming_shelves.py": "034106b6927ec97680012b6b7a7cfac1d3bad7c984d466e3db35a1ed2021d855"
+      }
+    },
+    {
       "id": "blacklanturn-general-1.1.60-r0",
       "edition": "general",
       "version": "1.1.60",

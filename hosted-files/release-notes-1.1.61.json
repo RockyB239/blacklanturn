@@ -1,0 +1,20 @@
+{
+  "title": "BlackLanturn Build 1.1.61",
+  "summary": "Browse streaming services in a logo grid, then explore Popular, Recent Releases and genres.",
+  "sections": [
+    {
+      "heading": "Browse streaming services",
+      "bullets": [
+        "Find pinned and featured services in the streaming-services grid.",
+        "Browse Popular, Recent Releases and genre shelves for a service.",
+        "Lists you open take priority over older browse requests."
+      ]
+    },
+    {
+      "heading": "Keep your setup",
+      "bullets": [
+        "Use Update BlackLanturn to preserve settings, sign-ins, history and other installed add-ons."
+      ]
+    }
+  ]
+}
