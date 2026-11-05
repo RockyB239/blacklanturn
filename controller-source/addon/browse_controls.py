@@ -30,7 +30,7 @@ def should_exclude_anime(state,path):
     if getattr(state,'discovery_stack',[]):return False
     query=parse_qs(urlsplit(path).query)
     info=query.get('info',[''])[0]
-    if info in ('trakt_watchlist','trakt_ondeck','trakt_inprogress','trakt_nextepisodes','trakt_history','trakt_collection','trakt_favorites'):return False
+    if info in ('blacklanturn_streaming_services','trakt_watchlist','trakt_ondeck','trakt_inprogress','trakt_nextepisodes','trakt_history','trakt_collection','trakt_favorites'):return False
     pages=[p for group in ('Genres','Categories') for p in getattr(state,'config',{}).get(group,[])]
     page=next((p for p in pages if p.get('id')==getattr(state,'active_page',None)),None)
     if page and (re.search(r'\b(?:animation|anime)\b',page.get('label',''),re.I)

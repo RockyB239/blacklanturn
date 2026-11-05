@@ -46,6 +46,15 @@ class PanelRefreshOwnership(unittest.TestCase):
  def test_list_refresh_keeps_anchor_after_title_filtering(self):
   w,c,e,j,ns,raw=self.state(filtered=True);w.refresh_panel_list();j.pop()()
   self.assertIn(('notice','List refreshed'),e);self.assertEqual(c[900].items[c[900].position]['title'],'B')
+ def test_streaming_reload_saves_raw_continuation_before_showing_success(self):
+  w,c,e,j,ns,raw=self.state()
+  saved=[]
+  cache=SimpleNamespace(revision=2,discard=lambda path:None,put=lambda path,files,revision:saved.append((path,files,revision,list(e))))
+  w.streaming_snapshot=lambda path:cache
+  w.fill_discovery_page=lambda path,files,current,**kw:files[1:]
+  w.refresh_panel_list();j.pop()()
+  self.assertEqual(saved[0][:3],(w.paths[0],raw,2))
+  self.assertNotIn(('notice','List refreshed'),saved[0][3])
  def test_related_refresh_keeps_anchor_after_previous_card(self):
   w,c,e,j,ns,raw=self.state(related=True,previous=True);w.refresh_panel_list();j.pop()()
   self.assertIn(('notice','List refreshed'),e);self.assertEqual(c[3100].items[c[3100].position]['title'],'B')

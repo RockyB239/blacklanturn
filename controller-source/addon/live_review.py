@@ -1861,9 +1861,8 @@ class LiveReview(LibraryActions,RowCustomization,TitleFeedback,ShelfTools,YouTub
             try:
                 if not current():return
                 streaming=getattr(self,'streaming_snapshot',lambda path:None)(path)
-                if streaming is not None:streaming.discard(path)
                 streaming_revision=streaming.revision if streaming is not None else None
-                files=get_list(provider_path(path))
+                raw_files=files=get_list(provider_path(path))
                 if old and not files:raise RuntimeError('List is unavailable')
                 if not current():return
                 if not related:files=getattr(self,'fill_discovery_page',lambda p,f,c,**k:f)(path,files,current,refresh=True)
@@ -1892,8 +1891,9 @@ class LiveReview(LibraryActions,RowCustomization,TitleFeedback,ShelfTools,YouTub
                         if cache is not None:cache.put(path,files,revision=cache.revision)
                         match=next((x for x in self.rows[slot] if item_key(x)==item_key(selected)),None)
                         if match:self.update(match)
-                    if current():self.setProperty('notice','List refreshed')
-                if streaming is not None and current():streaming.put(path,files,revision=streaming_revision)
+                    if current():
+                        if streaming is not None:streaming.put(path,raw_files,revision=streaming_revision)
+                        self.setProperty('notice','List refreshed')
             except Exception:
                 if current():self.setProperty('notice','List refresh is unavailable; current titles and position were kept')
             finally:

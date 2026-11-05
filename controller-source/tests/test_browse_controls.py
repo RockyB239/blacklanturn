@@ -47,6 +47,7 @@ class BrowseControls(unittest.TestCase):
         m=module(self);s=SimpleNamespace(section='Shows',active_page='international',config={'Genres':[{'id':'animation','label':'Animation','rows':[]}], 'Categories':[]},search_state=None,episode_browser_context=None,person_context=None,discovery_stack=[])
         path='plugin://plugin.video.themoviedb.helper/?info=trakt_trending&tmdb_type=tv'
         self.assertTrue(m.should_exclude_anime(s,path))
+        self.assertFalse(m.should_exclude_anime(s,path.replace('trakt_trending','blacklanturn_streaming_services')))
         s.active_page='animation';self.assertFalse(m.should_exclude_anime(s,path));s.active_page=None
         for kind in ['trakt_watchlist','trakt_ondeck','trakt_inprogress','trakt_nextepisodes','trakt_history']:
             self.assertFalse(m.should_exclude_anime(s,path.replace('trakt_trending',kind)),kind)

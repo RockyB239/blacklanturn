@@ -21,12 +21,13 @@ from build_release170 import (
 
 VERSIONS = {'build': '1.1.61', 'controller': '0.1.125', 'installer': '1.0.53'}
 BASE_VERSION = '1.1.60'
+RELEASE_REVISION = 1
 BASELINES = {
     'general': ('General', 'b249c1754a743cd93677916411319abf831cf62e119fd7dfe670b406bb369c14'),
     'apple': ('Apple-TV-Mac', 'c814d03091e36b4f5b834b68b50d538d603304b699747b0931c165cb674683b9'),
 }
 CONTROLLER_FILES = frozenset({
-    'addon.xml', 'live_review.py', 'provider_work.py', 'search_ui.py', 'shelf_tools.py',
+    'addon.xml', 'browse_controls.py', 'live_review.py', 'provider_work.py', 'search_ui.py', 'shelf_tools.py',
     'streaming_cache.py', 'streaming_services.py', 'streaming_services_ui.py', 'streaming_shelves.py',
     'resources/skins/Default/1080i/LiveReview.xml',
     'resources/skins/Default/1080i/StreamingServicesGrid.xml',
@@ -45,7 +46,7 @@ NOTES = {
         {'heading': 'Browse streaming services',
          'bullets': ['Find pinned and featured services in the streaming-services grid.',
                      'Browse Popular, Recent Releases and genre shelves for a service.',
-                     'Lists you open take priority over background streaming refreshes.']},
+                     'Lists you open take priority over older browse requests.']},
         {'heading': 'Keep your setup',
          'bullets': ['Use Update BlackLanturn to preserve settings, sign-ins, history and other installed add-ons.']},
     ],
@@ -181,7 +182,8 @@ def build(baselines, output, manifest):
             if history[0] != current or any(sha(before[name]) != digest for name, digest in current['files'].items()):
                 raise ValueError('Active baseline proof differs for ' + label)
             marker.update(build_version=VERSIONS['build'], controller_version=VERSIONS['controller'],
-                          release_id=release_id(label, VERSIONS['build']))
+                          release_id=f"blacklanturn-{label}-{VERSIONS['build']}-r{RELEASE_REVISION}",
+                          release_revision=RELEASE_REVISION)
             data[MARKER] = json_bytes(marker)
             entry = dict(id=marker['release_id'], edition=label, version=VERSIONS['build'],
                          revision=marker['release_revision'], **NOTES,
