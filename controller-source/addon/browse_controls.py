@@ -3,6 +3,7 @@
 Only public genre/country metadata is read. No account tables, keys, writes or
 per-title network requests are used. Missing metadata leaves a title available.
 """
+from contextlib import closing
 from collections import OrderedDict
 from pathlib import Path
 from urllib.parse import parse_qs,urlsplit
@@ -115,7 +116,7 @@ class AnimeMetadata:
                 db=folder/'ItemDetails.db'
                 if not db.is_file():continue
                 try:
-                    with sqlite3.connect(db.resolve().as_uri()+'?mode=ro',uri=True,timeout=.05) as c:
+                    with closing(sqlite3.connect(db.resolve().as_uri()+'?mode=ro',uri=True,timeout=.05)) as c:
                         if not {'parent_id','tmdb_id'}<={x[1] for x in c.execute('PRAGMA table_info(genre)')}:continue
                         if not {'parent_id','iso_country'}<={x[1] for x in c.execute('PRAGMA table_info(country)')}:continue
                         self.reads+=1

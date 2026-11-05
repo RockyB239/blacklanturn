@@ -1,4 +1,5 @@
 """Conservative end-of-available-series decisions; no playback or account writes."""
+from contextlib import closing
 import sqlite3,math,time
 from datetime import date
 from live_core import episode_identity
@@ -37,7 +38,7 @@ def latest_available(profile,key,now=None,today=None):
     db=helper_database(profile);now=time.time() if now is None else now;today=today or date.today()
     if not db or not key:return False
     try:
-        with sqlite3.connect(db.resolve().as_uri()+'?mode=ro',uri=True,timeout=.05) as c:
+        with closing(sqlite3.connect(db.resolve().as_uri()+'?mode=ro',uri=True,timeout=.05)) as c:
             row=c.execute('SELECT s.season,e.episode,e.premiered,n.premiered,b.expiry FROM tvshow t JOIN baseitem b ON b.id=t.id JOIN episode e ON e.id=t.last_episode_to_air_id JOIN season s ON s.id=e.season_id LEFT JOIN episode n ON n.id=t.next_episode_to_air_id WHERE t.tmdb_id=?', (key[0],)).fetchone()
         if not row or not math.isfinite(float(row[4])) or row[4]<now:return False
         last=date.fromisoformat(row[2]);nxt=date.fromisoformat(row[3]) if row[3] else None

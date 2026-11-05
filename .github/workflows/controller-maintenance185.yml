@@ -1,0 +1,41 @@
+name: Controller maintenance 1.1.63
+on:
+  push:
+    branches:
+      - release/1.1.63
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install test dependencies
+        run: python -m pip install requests==2.32.5 Pillow==11.1.0
+      - name: Download pinned public 1.1.62 packages
+        run: |
+          mkdir baselines
+          for name in BlackLanturn-General-Kodi21-1.1.62.zip BlackLanturn-Apple-TV-Mac-Kodi21-1.1.62.zip plugin.program.blacklanturninstaller-1.0.54.zip; do
+            curl --fail --location --retry-all-errors --connect-timeout 20 --max-time 180 --retry 3 "https://github.com/RockyB239/blacklanturn/releases/download/v1.1.62/$name?bl_ci=$GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT" -o "baselines/$name"
+          done
+      - name: Controller regressions
+        run: PYTHONPATH=controller-source/addon python -m unittest discover -s controller-source/tests
+      - name: Build and verify the exact release
+        run: |
+          pipeline=compatibility/controller-maintenance185
+          python "$pipeline/release.py" --baselines baselines --output candidate
+          python "$pipeline/verify.py" --baselines baselines --artifacts candidate --output verification.json
+          python "$pipeline/release.py" --baselines baselines --output rebuilt
+          cmp candidate/SHA256SUMS rebuilt/SHA256SUMS
+      - uses: actions/upload-artifact@v4
+        with:
+          name: release-verification
+          path: |
+            candidate/SHA256SUMS
+            candidate/source-manifest.json
+            candidate/candidate-packages.json
+            verification*.json

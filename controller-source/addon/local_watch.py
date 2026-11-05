@@ -1,4 +1,5 @@
 """Read visible local-shelf status from Helper's existing sync cache; no sync/network."""
+from contextlib import closing
 from copy import deepcopy
 import sqlite3,math
 from title_preferences import title_key
@@ -11,7 +12,7 @@ def hydrate_local(profile,items):
     if not keys:return result
     data={}
     try:
-        with sqlite3.connect(db.resolve().as_uri()+'?mode=ro',uri=True,timeout=.03) as c:
+        with closing(sqlite3.connect(db.resolve().as_uri()+'?mode=ro',uri=True,timeout=.03)) as c:
             ids=list(keys.values())
             for start in range(0,len(ids),128):
                 batch=ids[start:start+128];marks=','.join('?' for _ in batch)

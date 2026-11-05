@@ -1,0 +1,10 @@
+{
+  "addon.xml": "cab0f9d813e8d1c0ebbbad783f8f016dadea0787df2970b1ed13f0fc042efcbb",
+  "browse_controls.py": "326d8127257e85c319098d6724bdf97b4a636c7623b4465de3a47028a350b5bc",
+  "discovery_order.py": "eb6e7724b7abf429284d706199ae61dccd68a4963341fb7a348a40171bacfd86",
+  "local_watch.py": "464ee7eb62a535e3ebfaa454947bb2d0033ef4800cb910ff00fcb170943992b5",
+  "movie_series.py": "0fecf2b2267e232b46a256df896dae6a214255bfd07a82aafefd68f406ee89c4",
+  "preview_language.py": "aae2023159dd04b5bfb60e44105701948333c1bb7c61e6d3fcb4bf30a67ab65c",
+  "series_end_core.py": "38d5c3846469ad33e9c307a50f957405db9a7f47a048e779a188f77baae820c5",
+  "series_status.py": "14ef8ee32fef3ea798ec23d65f72eaaa03351caf6a9f19cfe6850ba9f8aefcaa"
+}

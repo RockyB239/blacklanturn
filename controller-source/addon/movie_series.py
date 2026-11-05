@@ -1,4 +1,5 @@
 """Release-order franchise browsing, only on an explicit user request."""
+from contextlib import closing
 from datetime import date
 from title_preferences import title_key
 import sqlite3
@@ -12,7 +13,7 @@ def collection_identity(profile,ident):
     db=helper_database(profile)
     if db is None or not str(ident).isdigit():return None
     try:
-        with sqlite3.connect(db.resolve().as_uri()+'?mode=ro',uri=True,timeout=.05) as c:
+        with closing(sqlite3.connect(db.resolve().as_uri()+'?mode=ro',uri=True,timeout=.05)) as c:
             row=c.execute('SELECT collection.tmdb_id, collection.title FROM movie JOIN belongs ON belongs.id=movie.id JOIN collection ON collection.id=belongs.parent_id WHERE movie.tmdb_id=?',(ident,)).fetchone()
         return {'id':str(row[0]),'name':row[1] or 'Movie series'} if row and str(row[0]).isdigit() else None
     except (OSError,sqlite3.Error):return None

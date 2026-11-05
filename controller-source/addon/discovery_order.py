@@ -20,9 +20,9 @@ def votes(item):
         return v if math.isfinite(v) and v>=0 else None
     except (ValueError,TypeError):return None
 
-def hard_eligible(item,policy):
+def hard_eligible(item,policy,*,ident=None):
     """Pure eligibility shared by page readiness and final row ordering."""
-    ident=identity(item)
+    if ident is None:ident=identity(item)
     if not ident:return True
     if ident in (policy.get('exclude_ids') or []):return False
     ceiling=policy.get('max_votes')
@@ -56,36 +56,37 @@ class Selector:
             for item in files:
                 ident=identity(item)
                 if not ident:controls.append(item);continue
-                if not hard_eligible(item,policy):continue
-                titles.append(item)
-            byid={identity(x):x for x in titles}
+                if not hard_eligible(item,policy,ident=ident):continue
+                titles.append((ident,item))
             seen=set().union(*(v for k,v in self.exposed.items() if k[0]==namespace and k!=key)) if self.exposed else set()
             previous=self.orders.get(key)
             if previous is not None:
+                byid={pair[0]:pair for pair in titles}
                 chosen=[byid[i] for i in previous if i in byid]
-                chosen_ids={identity(x) for x in chosen};chosen.extend(x for x in titles if identity(x) not in chosen_ids)
+                chosen_ids={ident for ident,_ in chosen}
+                chosen.extend(pair for pair in titles if pair[0] not in chosen_ids)
             else:
                 # Fresh titles lead. Allow two shared titles and two from each
                 # known franchise in the first screen, then retain deferred items.
-                pending=sorted(enumerate(titles),key=lambda pair:(identity(pair[1]) in seen,pair[0]))
+                pending=sorted(titles,key=lambda pair:pair[0] in seen)
                 head=[];tail=[];families=Counter();repeats=0
-                for _,item in pending:
-                    ident=identity(item);family=franchise(item);repeat=ident in seen
+                for ident,item in pending:
+                    family=franchise(item);repeat=ident in seen
                     if len(head)<12 and (not repeat or repeats<2) and (not family or families[family]<2):
-                        head.append(item);repeats+=repeat
+                        head.append((ident,item));repeats+=repeat
                         if family:families[family]+=1
-                    else:tail.append(item)
+                    else:tail.append((ident,item))
                 # A short candidate pool is reported, not filled with unrelated
                 # data or made inaccessible. Provider continuation stays intact.
                 if len(head)<12:
                     count=min(12-len(head),len(tail));head.extend(tail[:count]);tail=tail[count:]
                 chosen=head+tail
-            self.orders[key]=tuple(identity(x) for x in chosen);self.orders.move_to_end(key)
-            self.exposed[key]={identity(x) for x in chosen[:12]};self.exposed.move_to_end(key)
+            self.orders[key]=tuple(ident for ident,_ in chosen);self.orders.move_to_end(key)
+            self.exposed[key]={ident for ident,_ in chosen[:12]};self.exposed.move_to_end(key)
             while len(self.orders)>self.max_entries:self.orders.popitem(last=False)
             while len(self.exposed)>self.max_entries:self.exposed.popitem(last=False)
-            self.last={'namespace':namespace,'row':row,'count':len(chosen),'head_repeats':sum(identity(x) in seen for x in chosen[:12]),'eligible_count':len(titles),'filtered_count':len(files)-len(controls)-len(titles)}
-            return chosen+controls
+            self.last={'namespace':namespace,'row':row,'count':len(chosen),'head_repeats':sum(ident in seen for ident,_ in chosen[:12]),'eligible_count':len(titles),'filtered_count':len(files)-len(controls)-len(titles)}
+            return [item for _,item in chosen]+controls
 
 def _canonical(path):
     u=urlsplit(path)

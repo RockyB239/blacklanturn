@@ -4,6 +4,7 @@ Kodi directory JSON omits the video's language. Cache schema is checked before
 reading; unavailable or changed caches leave the normal candidate fallback intact.
 No account tables, keys, network requests or database writes are used here.
 """
+from contextlib import closing
 from pathlib import Path
 import re,sqlite3
 
@@ -16,7 +17,7 @@ def cached_video_metadata(helper_profile,identity):
         db=folder/'ItemDetails.db'
         if not db.is_file():continue
         try:
-            with sqlite3.connect(db.resolve().as_uri()+'?mode=ro',uri=True,timeout=.25) as connection:
+            with closing(sqlite3.connect(db.resolve().as_uri()+'?mode=ro',uri=True,timeout=.25)) as connection:
                 columns={r[1] for r in connection.execute('PRAGMA table_info(video)')}
                 if not {'parent_id','key','name','iso_language','content'}<=columns:continue
                 rows=connection.execute('SELECT key,name,iso_language,content FROM video WHERE parent_id=?',(identity[0]+'.'+str(identity[1]),)).fetchall()
@@ -33,7 +34,7 @@ def cached_title_aliases(helper_profile,identity):
         db=folder/'ItemDetails.db'
         if not db.is_file():continue
         try:
-            with sqlite3.connect(db.resolve().as_uri()+'?mode=ro',uri=True,timeout=.25) as connection:
+            with closing(sqlite3.connect(db.resolve().as_uri()+'?mode=ro',uri=True,timeout=.25)) as connection:
                 columns={r[1] for r in connection.execute('PRAGMA table_info('+table+')')}
                 if not {'id','title','originaltitle'}<=columns:continue
                 row=connection.execute('SELECT title,originaltitle FROM '+table+' WHERE id=?',(identity[0]+'.'+str(identity[1]),)).fetchone()

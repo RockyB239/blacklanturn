@@ -1,4 +1,5 @@
 """Public series state from existing TMDbHelper cache; no network or account reads."""
+from contextlib import closing
 from collections import OrderedDict
 from pathlib import Path
 from urllib.parse import urlsplit,parse_qs
@@ -25,7 +26,7 @@ class SeriesStatus:
                     db=folder/'ItemDetails.db'
                     if not db.is_file():continue
                     try:
-                        with sqlite3.connect(db.resolve().as_uri()+'?mode=ro',uri=True,timeout=.02) as c:
+                        with closing(sqlite3.connect(db.resolve().as_uri()+'?mode=ro',uri=True,timeout=.02)) as c:
                             self.reads+=1
                             for start in range(0,len(missing),128):
                                 batch=missing[start:start+128];marks=','.join('?' for _ in batch)
