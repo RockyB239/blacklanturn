@@ -41,8 +41,8 @@ class LatestWorker:
 _rows=LatestWorker()
 _streaming_rows=LatestWorker()
 
-def submit_latest(owner,work,*,foreground=False):
-    if foreground:
+def submit_latest(owner,work,*,foreground=False,prefetch=False):
+    if foreground and not prefetch:
         # Only explicit streaming rows use this lane. The fixed key keeps at
         # most one pending selection behind the current synchronous lookup.
         _streaming_rows.submit('visible-rows',work)

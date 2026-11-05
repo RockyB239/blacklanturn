@@ -7,14 +7,16 @@ ROOT=Path(__file__).resolve().parent
 class GenrePicker(xbmcgui.WindowXMLDialog):
     def onInit(self):
         from icon_packs import icon_path
+        from shelf_tools import STREAMING_GENRE_ID
         self.result=None
-        self.choices=[{'id':'','label':'All'}]+list(self.pages)
+        self.choices=[{'id':'','label':'All'},{'id':STREAMING_GENRE_ID,'label':'Streaming Services'}]+list(self.pages)
+        self.setProperty('genreOverflow','true' if len(self.choices)>18 else 'false')
         self.setProperty('section','Browse '+self.section)
         items=[]
         for page in self.choices:
             item=xbmcgui.ListItem(label=page['label'])
             if getattr(self,'observe',None):item.setProperty('genreLookaheadId',page['id'])
-            aliases={'All':'collections','Action & Adventure':'adventure','Sci-Fi & Fantasy':'science-fiction','Westerns':'western'}
+            aliases={'Streaming Services':'services','All':'collections','Action & Adventure':'adventure','Sci-Fi & Fantasy':'science-fiction','Westerns':'western'}
             icon=aliases.get(page['label']) or default_icon(page['label'],{'kind':'page'})
             artwork=icon_path(ROOT,icon,getattr(self,'pack','original'))
             item.setArt({'icon':artwork,'thumb':artwork});items.append(item)

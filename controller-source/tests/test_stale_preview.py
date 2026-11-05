@@ -20,6 +20,17 @@ class StalePreview(unittest.TestCase):
  def test_a_current_trailer_is_not_stopped(self):
   cleared,calls=self.check({'file':'plugin://plugin.video.youtube/play/?video_id=ABC','title':'Carrie Official Trailer'},1)
   self.assertFalse(cleared);self.assertNotIn('Player.Stop',calls)
+ def test_expired_local_youtube_proxy_trailer_is_released(self):
+  cleared,calls=self.check({'file':'http://127.0.0.1:50152/youtube/manifest/dash/test','title':'Official Trailer'},22)
+  self.assertTrue(cleared);self.assertIn('Player.Stop',calls)
+ def test_current_local_proxy_trailer_is_not_stopped(self):
+  cleared,calls=self.check({'file':'http://127.0.0.1:50152/youtube/manifest/dash/test','title':'Official Trailer'},1)
+  self.assertFalse(cleared);self.assertNotIn('Player.Stop',calls)
+ def test_other_http_players_are_not_treated_as_proxy_trailers(self):
+  for path,title in [('http://127.0.0.1:50152/other/manifest','Official Trailer'),('https://example.com/youtube/manifest/dash/test','Official Trailer'),('http://127.0.0.1:50152/youtube/manifest/dash/test','A full movie')]:
+   with self.subTest(path=path,title=title):
+    cleared,calls=self.check({'file':path,'title':title},22)
+    self.assertFalse(cleared);self.assertNotIn('Player.Stop',calls)
  def test_full_playback_is_never_treated_as_a_stale_preview(self):
   for path,title in [('plugin://plugin.video.umbrella/?action=play','A movie'),('plugin://plugin.video.youtube/play/?video_id=ABC','A full movie')]:
    cleared,calls=self.check({'file':path,'title':title},22)

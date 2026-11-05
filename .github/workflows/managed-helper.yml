@@ -97,6 +97,18 @@ jobs:
           for edition in General Apple-TV-Mac; do
             curl --fail --location --retry 3 "https://github.com/RockyB239/blacklanturn/releases/download/v1.1.60/BlackLanturn-${edition}-Kodi21-1.1.60.zip" -o "baselines/BlackLanturn-${edition}-Kodi21-1.1.60.zip"
           done
+      - name: Download pinned 1.1.61-r1 packaging baselines
+        run: |
+          for edition in General Apple-TV-Mac; do
+            curl --fail --location --retry 3 "https://github.com/RockyB239/blacklanturn/releases/download/v1.1.61/BlackLanturn-${edition}-Kodi21-1.1.61.zip" -o "baselines/BlackLanturn-${edition}-Kodi21-1.1.61.zip"
+          done
+          python - <<'PYCODE'
+          import hashlib
+          from pathlib import Path
+          pins = {'General': 'abe0beb95868e07fde1ef276e7e9adb72e79728eb063bcac5849178a9a78c7a4', 'Apple-TV-Mac': 'e41855a60c24e19299002b593a529d0e6dc91e6ebee73497883bfae9f874e8fc'}
+          for edition, pin in pins.items():
+              assert hashlib.sha256(Path(f'baselines/BlackLanturn-{edition}-Kodi21-1.1.61.zip').read_bytes()).hexdigest() == pin
+          PYCODE
       - name: Installer and update protection tests
         run: python -m unittest discover -s tests -v
       - name: Controller regression checks
@@ -133,8 +145,22 @@ jobs:
           python "$source173/tools/build_release173.py" --freeze source173.json
           python "$source173/tools/build_release173.py" --manifest source173.json --baselines baselines --output artifacts173
           python tools/verify_release165.py --baseline-version 1.1.59 --installer-version 1.0.53 --artifacts artifacts173 --baselines baselines --output artifacts173/package-matrix.json
-      - name: Verify 1.1.61 full and component packages locally
+      - name: Verify 1.1.61 full and component packages against historical source
         run: |
-          python tools/build_release174.py --freeze source174.json
-          python tools/build_release174.py --manifest source174.json --baselines baselines --output artifacts174
+          source174="$RUNNER_TEMP/blacklanturn-source174"
+          git worktree add --detach "$source174" 52d86137ef26ceeb9d254f77368cd0245493760b
+          python "$source174/tools/build_release174.py" --freeze source174.json
+          python "$source174/tools/build_release174.py" --manifest source174.json --baselines baselines --output artifacts174
           python tools/verify_release165.py --baseline-version 1.1.60 --installer-version 1.0.53 --artifacts artifacts174 --baselines baselines --output artifacts174/package-matrix.json
+      - name: Preview transport ownership and fallback regressions in both editions
+        run: |
+          for edition in general apple; do
+            BLACKLANTURN_PREVIEW_EDITION="$edition" python -m unittest discover -s compatibility/responsiveness179/tests -v
+          done
+      - name: Verify reproducible 1.1.62 full and component packages
+        run: |
+          python compatibility/responsiveness179/release179.py freeze --baselines baselines --output source179
+          python source179/pipeline/release179.py build --snapshot source179 --baselines baselines --output artifacts179
+          python source179/pipeline/verify179.py --snapshot source179 --artifacts artifacts179 --baselines baselines --output artifacts179-verification.json
+          python source179/pipeline/release179.py build --snapshot source179 --baselines baselines --output rebuild179
+          cmp artifacts179/SHA256SUMS rebuild179/SHA256SUMS

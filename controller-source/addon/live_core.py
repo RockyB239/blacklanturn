@@ -139,7 +139,10 @@ def clear_stale_preview(rpc):
         if player.get('type')!='video':continue
         pid=player['playerid'];item=rpc('Player.GetItem',{'playerid':pid,'properties':['title','file']}).get('result',{}).get('item',{})
         source=urlsplit(item.get('file',''))
-        if source.scheme!='plugin' or source.netloc!='plugin.video.youtube' or 'trailer' not in (item.get('title') or item.get('label','')).lower():continue
+        youtube_plugin=source.scheme=='plugin' and source.netloc=='plugin.video.youtube'
+        youtube_proxy=(source.scheme=='http' and source.hostname in ('127.0.0.1','localhost','::1')
+                       and source.path.startswith('/youtube/manifest/'))
+        if not (youtube_plugin or youtube_proxy) or 'trailer' not in (item.get('title') or item.get('label','')).lower():continue
         props=rpc('Player.GetProperties',{'playerid':pid,'properties':['time','totaltime']}).get('result',{})
         try:elapsed,total=seconds(props.get('time',{})),seconds(props.get('totaltime',{}))
         except (TypeError,ValueError):continue

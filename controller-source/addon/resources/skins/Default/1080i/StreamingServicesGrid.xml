@@ -15,16 +15,16 @@
       <colordiffuse>D0080B0E</colordiffuse>
     </control>
     <control type="image">
-      <left>268</left>
-      <top>85</top>
-      <width>1384</width>
-      <height>909</height>
+      <left>212</left>
+      <top>58</top>
+      <width>1496</width>
+      <height>962</height>
       <texture border="20">options-panel.png</texture>
       <aspectratio>stretch</aspectratio>
     </control>
     <control type="label">
-      <left>326</left>
-      <top>113</top>
+      <left>275</left>
+      <top>85</top>
       <width>1000</width>
       <height>54</height>
       <label>Streaming services</label>
@@ -33,8 +33,8 @@
       <aligny>center</aligny>
     </control>
     <control type="label">
-      <left>326</left>
-      <top>168</top>
+      <left>275</left>
+      <top>137</top>
       <width>950</width>
       <height>40</height>
       <label>$INFO[Window.Property(region),REGION  ,]</label>
@@ -43,25 +43,43 @@
       <aligny>center</aligny>
     </control>
     <control type="image">
-      <left>1525</left>
-      <top>109</top>
+      <left>1587</left>
+      <top>85</top>
       <width>62</width>
       <height>66</height>
       <texture>blacklanturn-lantern.png</texture>
       <aspectratio>keep</aspectratio>
     </control>
+    <control type="image">
+      <left>275</left>
+      <top>184</top>
+      <width>220</width>
+      <height>64</height>
+      <texture border="16" fallback="filter-rest.png">$INFO[Window(Home).Property(BlackLanturn.Navigation.Rest)]</texture>
+      <aspectratio>stretch</aspectratio>
+    </control>
+    <control type="image">
+      <left>275</left>
+      <top>184</top>
+      <width>220</width>
+      <height>64</height>
+      <texture border="16" fallback="filter-focus.png">$INFO[Window(Home).Property(BlackLanturn.Navigation.Focus)]</texture>
+      <aspectratio>stretch</aspectratio>
+      <visible>Control.HasFocus(5001)</visible>
+    </control>
     <control type="button" id="5001">
-      <left>326</left>
-      <top>218</top>
-      <width>182</width>
-      <height>52</height>
+      <left>275</left>
+      <top>184</top>
+      <width>220</width>
+      <height>64</height>
       <label>Featured</label>
-      <font>font20_title</font>
-      <textcolor>FFE0EAF1</textcolor>
-      <focusedcolor>FFFFFFFF</focusedcolor>
+      <font>font25_title</font>
+      <textcolor>FFCED5DC</textcolor>
+      <focusedcolor>FFF5F5F5</focusedcolor>
       <align>center</align>
-      <texturefocus>focus-teal.png</texturefocus>
-      <texturenofocus>button-dark.png</texturenofocus>
+      <aligny>center</aligny>
+      <texturefocus>-</texturefocus>
+      <texturenofocus>-</texturenofocus>
       <onleft>5001</onleft>
       <onright>5002</onright>
       <onup>5001</onup>
@@ -69,27 +87,45 @@
       <ondown condition="!String.IsEqual(Window.Property(gridAvailable),true)">5007</ondown>
     </control>
     <control type="image">
-      <left>341</left>
-      <top>269</top>
-      <width>152</width>
+      <description>BlackLanturn active tab</description>
+      <left>365</left>
+      <top>235</top>
+      <width>40</width>
       <height>3</height>
       <texture>white.png</texture>
-      <aspectratio>stretch</aspectratio>
-      <colordiffuse>FF29D9EE</colordiffuse>
+      <colordiffuse>FF16D7ED</colordiffuse>
       <visible>String.IsEqual(Window.Property(activeTab),featured)</visible>
     </control>
+    <control type="image">
+      <left>513</left>
+      <top>184</top>
+      <width>220</width>
+      <height>64</height>
+      <texture border="16" fallback="filter-rest.png">$INFO[Window(Home).Property(BlackLanturn.Navigation.Rest)]</texture>
+      <aspectratio>stretch</aspectratio>
+    </control>
+    <control type="image">
+      <left>513</left>
+      <top>184</top>
+      <width>220</width>
+      <height>64</height>
+      <texture border="16" fallback="filter-focus.png">$INFO[Window(Home).Property(BlackLanturn.Navigation.Focus)]</texture>
+      <aspectratio>stretch</aspectratio>
+      <visible>Control.HasFocus(5002)</visible>
+    </control>
     <control type="button" id="5002">
-      <left>520</left>
-      <top>218</top>
-      <width>182</width>
-      <height>52</height>
+      <left>513</left>
+      <top>184</top>
+      <width>220</width>
+      <height>64</height>
       <label>Pinned</label>
-      <font>font20_title</font>
-      <textcolor>FFE0EAF1</textcolor>
-      <focusedcolor>FFFFFFFF</focusedcolor>
+      <font>font25_title</font>
+      <textcolor>FFCED5DC</textcolor>
+      <focusedcolor>FFF5F5F5</focusedcolor>
       <align>center</align>
-      <texturefocus>focus-teal.png</texturefocus>
-      <texturenofocus>button-dark.png</texturenofocus>
+      <aligny>center</aligny>
+      <texturefocus>-</texturefocus>
+      <texturenofocus>-</texturenofocus>
       <onleft>5001</onleft>
       <onright>5003</onright>
       <onup>5002</onup>
@@ -97,27 +133,45 @@
       <ondown condition="!String.IsEqual(Window.Property(gridAvailable),true)">5007</ondown>
     </control>
     <control type="image">
-      <left>535</left>
-      <top>269</top>
-      <width>152</width>
+      <description>BlackLanturn active tab</description>
+      <left>603</left>
+      <top>235</top>
+      <width>40</width>
       <height>3</height>
       <texture>white.png</texture>
-      <aspectratio>stretch</aspectratio>
-      <colordiffuse>FF29D9EE</colordiffuse>
+      <colordiffuse>FF16D7ED</colordiffuse>
       <visible>String.IsEqual(Window.Property(activeTab),pinned)</visible>
     </control>
+    <control type="image">
+      <left>751</left>
+      <top>184</top>
+      <width>220</width>
+      <height>64</height>
+      <texture border="16" fallback="filter-rest.png">$INFO[Window(Home).Property(BlackLanturn.Navigation.Rest)]</texture>
+      <aspectratio>stretch</aspectratio>
+    </control>
+    <control type="image">
+      <left>751</left>
+      <top>184</top>
+      <width>220</width>
+      <height>64</height>
+      <texture border="16" fallback="filter-focus.png">$INFO[Window(Home).Property(BlackLanturn.Navigation.Focus)]</texture>
+      <aspectratio>stretch</aspectratio>
+      <visible>Control.HasFocus(5003)</visible>
+    </control>
     <control type="button" id="5003">
-      <left>714</left>
-      <top>218</top>
-      <width>182</width>
-      <height>52</height>
+      <left>751</left>
+      <top>184</top>
+      <width>220</width>
+      <height>64</height>
       <label>All A–Z</label>
-      <font>font20_title</font>
-      <textcolor>FFE0EAF1</textcolor>
-      <focusedcolor>FFFFFFFF</focusedcolor>
+      <font>font25_title</font>
+      <textcolor>FFCED5DC</textcolor>
+      <focusedcolor>FFF5F5F5</focusedcolor>
       <align>center</align>
-      <texturefocus>focus-teal.png</texturefocus>
-      <texturenofocus>button-dark.png</texturenofocus>
+      <aligny>center</aligny>
+      <texturefocus>-</texturefocus>
+      <texturenofocus>-</texturenofocus>
       <onleft>5002</onleft>
       <onright>5006</onright>
       <onup>5003</onup>
@@ -125,20 +179,20 @@
       <ondown condition="!String.IsEqual(Window.Property(gridAvailable),true)">5007</ondown>
     </control>
     <control type="image">
-      <left>729</left>
-      <top>269</top>
-      <width>152</width>
+      <description>BlackLanturn active tab</description>
+      <left>841</left>
+      <top>235</top>
+      <width>40</width>
       <height>3</height>
       <texture>white.png</texture>
-      <aspectratio>stretch</aspectratio>
-      <colordiffuse>FF29D9EE</colordiffuse>
+      <colordiffuse>FF16D7ED</colordiffuse>
       <visible>String.IsEqual(Window.Property(activeTab),all)</visible>
     </control>
     <control type="label">
-      <left>925</left>
-      <top>218</top>
+      <left>989</left>
+      <top>184</top>
       <width>660</width>
-      <height>52</height>
+      <height>64</height>
       <label>$INFO[Window.Property(featuredSource)]</label>
       <font>font20_title</font>
       <textcolor>FFB4BCC5</textcolor>
@@ -147,10 +201,10 @@
       <visible>String.IsEqual(Window.Property(activeTab),featured)</visible>
     </control>
     <control type="label">
-      <left>925</left>
-      <top>218</top>
+      <left>989</left>
+      <top>184</top>
       <width>660</width>
-      <height>52</height>
+      <height>64</height>
       <label>Saved on this Kodi profile</label>
       <font>font20_title</font>
       <textcolor>FFB4BCC5</textcolor>
@@ -159,10 +213,10 @@
       <visible>String.IsEqual(Window.Property(activeTab),pinned)</visible>
     </control>
     <control type="label">
-      <left>925</left>
-      <top>218</top>
+      <left>989</left>
+      <top>184</top>
       <width>660</width>
-      <height>52</height>
+      <height>64</height>
       <label>Alphabetical directory</label>
       <font>font20_title</font>
       <textcolor>FFB4BCC5</textcolor>
@@ -171,10 +225,10 @@
       <visible>String.IsEqual(Window.Property(activeTab),all)</visible>
     </control>
     <control type="panel" id="5000">
-      <left>320</left>
-      <top>285</top>
-      <width>1104</width>
-      <height>552</height>
+      <left>269</left>
+      <top>266</top>
+      <width>1200</width>
+      <height>600</height>
       <orientation>vertical</orientation>
       <scrolltime>0</scrolltime>
       <onright>5006</onright>
@@ -187,25 +241,25 @@
       <ondown condition="String.IsEqual(Window.Property(nextPage),true)">5005</ondown>
       <ondown condition="!String.IsEqual(Window.Property(nextPage),true) + String.IsEqual(Window.Property(previousPage),true)">5004</ondown>
       <ondown condition="!String.IsEqual(Window.Property(nextPage),true) + !String.IsEqual(Window.Property(previousPage),true)">5007</ondown>
-      <itemlayout width="184" height="184">
+      <itemlayout width="200" height="200">
         <control type="image">
           <left>6</left>
           <top>5</top>
-          <width>172</width>
-          <height>172</height>
+          <width>188</width>
+          <height>188</height>
           <texture border="12">genre-tile.png</texture>
           <aspectratio>stretch</aspectratio>
         </control>
         <control type="image">
-          <left>44</left>
-          <top>17</top>
-          <width>96</width>
-          <height>96</height>
+          <left>47</left>
+          <top>18</top>
+          <width>106</width>
+          <height>106</height>
           <texture fallback="services.png">$INFO[ListItem.Art(icon)]</texture>
           <aspectratio>keep</aspectratio>
         </control>
         <control type="image">
-          <left>145</left>
+          <left>161</left>
           <top>17</top>
           <width>20</width>
           <height>23</height>
@@ -215,34 +269,34 @@
         </control>
         <control type="textbox">
           <left>16</left>
-          <top>121</top>
-          <width>152</width>
-          <height>51</height>
+          <top>132</top>
+          <width>168</width>
+          <height>53</height>
           <label>$INFO[ListItem.Label]</label>
           <font>font20_title</font>
           <textcolor>FFDCE1E5</textcolor>
           <align>center</align>
         </control>
       </itemlayout>
-      <focusedlayout width="184" height="184">
+      <focusedlayout width="200" height="200">
         <control type="image">
           <left>6</left>
           <top>5</top>
-          <width>172</width>
-          <height>172</height>
+          <width>188</width>
+          <height>188</height>
           <texture border="12">genre-tile-focus.png</texture>
           <aspectratio>stretch</aspectratio>
         </control>
         <control type="image">
-          <left>44</left>
-          <top>17</top>
-          <width>96</width>
-          <height>96</height>
+          <left>47</left>
+          <top>18</top>
+          <width>106</width>
+          <height>106</height>
           <texture fallback="services.png">$INFO[ListItem.Art(icon)]</texture>
           <aspectratio>keep</aspectratio>
         </control>
         <control type="image">
-          <left>145</left>
+          <left>161</left>
           <top>17</top>
           <width>20</width>
           <height>23</height>
@@ -252,9 +306,9 @@
         </control>
         <control type="textbox">
           <left>16</left>
-          <top>121</top>
-          <width>152</width>
-          <height>51</height>
+          <top>132</top>
+          <width>168</width>
+          <height>53</height>
           <label>$INFO[ListItem.Label]</label>
           <font>font20_title</font>
           <textcolor>FFFFFFFF</textcolor>
@@ -263,31 +317,42 @@
       </focusedlayout>
     </control>
     <control type="label">
-      <left>326</left>
-      <top>340</top>
+      <left>275</left>
+      <top>313</top>
+      <width>1076</width>
+      <height>55</height>
+      <label>$INFO[Window.Property(catalogStatus)]</label>
+      <font>font25_title</font>
+      <textcolor>FFB4BCC5</textcolor>
+      <aligny>center</aligny>
+      <visible>!String.IsEmpty(Window.Property(catalogStatus))</visible>
+    </control>
+    <control type="label">
+      <left>275</left>
+      <top>313</top>
       <width>1076</width>
       <height>55</height>
       <label>No pinned services in this region.</label>
       <font>font25_title</font>
       <textcolor>FFB4BCC5</textcolor>
       <aligny>center</aligny>
-      <visible>!String.IsEqual(Window.Property(gridAvailable),true)</visible>
+      <visible>!String.IsEqual(Window.Property(gridAvailable),true) + String.IsEmpty(Window.Property(catalogStatus))</visible>
     </control>
     <control type="label">
-      <left>326</left>
-      <top>401</top>
+      <left>275</left>
+      <top>374</top>
       <width>1076</width>
       <height>50</height>
       <label>Open Featured or All A–Z to choose a service to pin.</label>
       <font>font20_title</font>
       <textcolor>FFB4BCC5</textcolor>
       <aligny>center</aligny>
-      <visible>!String.IsEqual(Window.Property(gridAvailable),true)</visible>
+      <visible>!String.IsEqual(Window.Property(gridAvailable),true) + String.IsEmpty(Window.Property(catalogStatus))</visible>
     </control>
     <control type="button" id="5006">
-      <left>1437</left>
-      <top>289</top>
-      <width>150</width>
+      <left>1488</left>
+      <top>271</top>
+      <width>161</width>
       <height>58</height>
       <label>$INFO[Window.Property(pinButtonLabel)]</label>
       <font>font20_title</font>
@@ -305,9 +370,9 @@
       <onup condition="String.IsEqual(Window.Property(activeTab),all)">5003</onup>
     </control>
     <control type="button" id="5007">
-      <left>1437</left>
-      <top>868</top>
-      <width>150</width>
+      <left>1488</left>
+      <top>892</top>
+      <width>161</width>
       <height>58</height>
       <label>Close</label>
       <font>font20_title</font>
@@ -327,8 +392,8 @@
       <onleft condition="String.IsEqual(Window.Property(activeTab),all) + !String.IsEqual(Window.Property(gridAvailable),true)">5003</onleft>
     </control>
     <control type="button" id="5004">
-      <left>1147</left>
-      <top>868</top>
+      <left>1194</left>
+      <top>892</top>
       <width>132</width>
       <height>58</height>
       <label>Previous</label>
@@ -346,8 +411,8 @@
       <onright condition="!String.IsEqual(Window.Property(nextPage),true)">5007</onright>
     </control>
     <control type="button" id="5005">
-      <left>1290</left>
-      <top>868</top>
+      <left>1337</left>
+      <top>892</top>
       <width>132</width>
       <height>58</height>
       <label>Next</label>
@@ -365,8 +430,8 @@
       <onleft condition="!String.IsEqual(Window.Property(previousPage),true)">5000</onleft>
     </control>
     <control type="label">
-      <left>326</left>
-      <top>855</top>
+      <left>275</left>
+      <top>880</top>
       <width>670</width>
       <height>44</height>
       <label>Select to browse  ·  Context menu to pin  ·  Back to close</label>
@@ -376,8 +441,8 @@
       <visible>!String.IsEqual(Window.Property(pinMode),true) + String.IsEqual(Window.Property(gridAvailable),true)</visible>
     </control>
     <control type="label">
-      <left>326</left>
-      <top>855</top>
+      <left>275</left>
+      <top>880</top>
       <width>670</width>
       <height>44</height>
       <label>Select a tile to pin or unpin it.</label>
@@ -387,8 +452,8 @@
       <visible>String.IsEqual(Window.Property(pinMode),true) + String.IsEqual(Window.Property(gridAvailable),true)</visible>
     </control>
     <control type="label">
-      <left>326</left>
-      <top>904</top>
+      <left>275</left>
+      <top>929</top>
       <width>690</width>
       <height>42</height>
       <label>$INFO[Window.Property(pinNotice)]</label>
@@ -397,8 +462,8 @@
       <aligny>center</aligny>
     </control>
     <control type="label">
-      <left>1001</left>
-      <top>869</top>
+      <left>1048</left>
+      <top>893</top>
       <width>126</width>
       <height>56</height>
       <label>$INFO[Window.Property(pageSummary)]</label>

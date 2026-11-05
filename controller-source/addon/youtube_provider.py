@@ -266,9 +266,44 @@ class _PreviewContext:
     def get_settings(self,**kwargs):return _PreviewSettings(self.base.get_settings(**kwargs))
     def send_notification(self,*args,**kwargs):self.effects.append((self.base.send_notification,args,kwargs))
 
+def _preview_proxy_base(context):
+    settings=context.get_settings();address=settings.httpd_listen();port=settings.httpd_port()
+    host='127.0.0.1' if address in ('0.0.0.0','127.0.0.1','localhost') else '::1' if address=='::' else address
+    return 'http://%s:%s'%('['+host+']' if ':' in host else host,port)
+
+def _scope_preview_item(item,context,token):
+    from urllib.parse import urlsplit,parse_qs,parse_qsl
+    path=item.getPath();raw,separator,encoded_headers=path.partition('|');parts=urlsplit(raw)
+    proxy=_preview_proxy_base(context)
+    if parts.path=='/youtube/manifest/dash':
+        from youtube_plugin.kodion.network import get_connect_address
+        if parts.netloc!=get_connect_address(context,as_netloc=True) and parts.hostname not in ('127.0.0.1','localhost','::1'):raise ValueError('Foreign preview manifest')
+        if parse_qs(parts.query).get('file')!=['blacklanturn-preview-%s.mpd'%token]:raise ValueError('Unscoped preview manifest')
+        normalized=proxy+parts.path+'?'+parts.query
+        if normalized!=path:item.setPath(normalized)
+        return item
+    from youtube_plugin.kodion.network import get_connect_address
+    from youtube_plugin.kodion.network.preview_transport import wrap_url
+    headers=dict(parse_qsl(encoded_headers or item.getProperty('inputstream.adaptive.stream_headers'),keep_blank_values=True))
+    item.setPath(wrap_url(raw,proxy,token,headers))
+    return item
+
+def _cancel_transport(path,token,proxy=None):
+    from urllib.parse import urlsplit,urlunsplit,urlencode
+    from urllib.request import Request,urlopen,ProxyHandler,build_opener
+    parts=urlsplit(path)
+    # The transport control is allowed only on the installed loopback proxy.
+    if proxy is None or parts.netloc!=urlsplit(proxy).netloc:return False
+    url=urlunsplit((parts.scheme,parts.netloc,'/youtube/stream/blacklanturn-preview-cancel',urlencode({'__blpreview':token}),''))
+    try:
+        with build_opener(ProxyHandler({})).open(Request(url),timeout=.5) as response:return response.status==204
+    except Exception:return False
+
 class PreparedPreview:
     def __init__(self,item,effects,current):
         self.listitem,self.path,self.effects,self.current,self.published=item,item.getPath(),effects,current,False
+    def cancel(self):
+        return _cancel_transport(self.path,self.transport_token,self.transport_proxy) if getattr(self,'transport_token',None) else False
     def publish(self):
         if self.published or not self.current():return False
         self.published=True
@@ -280,6 +315,8 @@ def _prepare_preview(runtime,context):
     from youtube_plugin.kodion.items import playback_item
     media=_play_stream(runtime.provider,context)
     if not media or isinstance(media,tuple):return None
+    from urllib.parse import urlsplit
+    if media.use_mpd() and urlsplit(media.get_uri()).path!='/youtube/manifest/dash':return None
     return playback_item(context,media)
 
 def resolve_preview(path,current):
@@ -297,14 +334,17 @@ def resolve_preview(path,current):
     def number(key):
         try:value=float(values.get(key,['0'])[0]);return value if math.isfinite(value) and value>=0 else 0.0
         except (TypeError,ValueError):return 0.0
-    params={'video_id':ident,'incognito':True,'screensaver':True,'start':number('start'),'end':number('end')}
+    params={'video_id':ident,'incognito':True,'screensaver':True,'start':number('start'),'end':number('end'),'_blacklanturn_preview':__import__('uuid').uuid4().hex}
     if not current():return None
     with _session(current) as runtime:
         context=_PreviewContext(runtime.context,params)
         item=_prepare_preview(runtime,context)
-        if not current() or item is None:return None
+        if item is None:return None
         if urlsplit(item.getPath()).scheme not in ('http','https'):raise ValueError('Preview did not resolve to a stream')
-        return PreparedPreview(item,context.effects,current)
+        item=_scope_preview_item(item,context,params['_blacklanturn_preview'])
+        prepared=PreparedPreview(item,context.effects,current);prepared.transport_token=params['_blacklanturn_preview'];prepared.transport_proxy=_preview_proxy_base(context)
+        if not current():prepared.cancel();return None
+        return prepared
 
 class _AccountWatchNext:
     """Override one read on a proxy; never mutate the installed add-on/client."""

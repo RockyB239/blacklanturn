@@ -10,6 +10,7 @@ GROUP_FOR.update({
  'coming_up':'discover',
  'shelf_tools':'discover',
  'streaming_services':'discover',
+ 'jump_streaming_shelf':'discover',
 })
 DESCRIPTIONS.update({
  'watch_tonight_toggle':'Change whether this title is in your queue on this device.',
@@ -18,6 +19,7 @@ DESCRIPTIONS.update({
  'coming_up':'See upcoming TV air dates from your Trakt calendar.',
  'shelf_tools':'Filter or choose from the titles already shown in this shelf.',
  'streaming_services':'Browse regional availability from TMDb and JustWatch.',
+ 'jump_streaming_shelf':'Go directly to a row for this service.',
  'title_more':'Prefer similar titles in recommendations on this device.',
 })
 

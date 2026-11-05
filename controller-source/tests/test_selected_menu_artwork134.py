@@ -33,8 +33,8 @@ class SelectedMenus(unittest.TestCase):
   for pack in ('sculpted-silver','smoked-glass','original'):
    s=mod.GenrePicker();s.section='Movies';s.pages=[{'id':'h','label':'Horror'}];s.current_page='h';s.pack=pack;s.onInit()
    suffix='resources/media' if pack=='original' else 'resources/icon-packs/packs/'+pack
-   self.assertEqual(s.controls[5000].items[1].art['icon'],str(ROOT/suffix/'horror.png'))
-  icon_packs._assets['smoked-glass'].pop('horror');s.pack='smoked-glass';s.onInit();self.assertEqual(s.controls[5000].items[1].art['icon'],str(ROOT/'resources/media/horror.png'))
+   self.assertEqual(s.controls[5000].items[2].art['icon'],str(ROOT/suffix/'horror.png'))
+  icon_packs._assets['smoked-glass'].pop('horror');s.pack='smoked-glass';s.onInit();self.assertEqual(s.controls[5000].items[2].art['icon'],str(ROOT/'resources/media/horror.png'))
  def test_backend_categories_options_and_header_share_pack(self):
   # Supplying art only to the sidebar leaves backend menus with another style.
   mod=load('backend_ui')

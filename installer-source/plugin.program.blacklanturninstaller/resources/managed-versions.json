@@ -6,6 +6,12 @@
     "plugin.video.themoviedb.helper": [
       {
         "upstream_version": "6.19.6",
+        "managed_version": "1:6.19.6+blacklanturn.2",
+        "upstream_sha256": "5a4603b72401abe7a061d27b6b897af57d2220ef750c7996f465c32989efba6e",
+        "managed_sha256": "6bab5e747f99a24e1f46158b7cf370585baf66b9deeaa6758e56fa8860c3d584"
+      },
+      {
+        "upstream_version": "6.19.6",
         "managed_version": "1:6.19.6+blacklanturn.1",
         "upstream_sha256": "5a4603b72401abe7a061d27b6b897af57d2220ef750c7996f465c32989efba6e",
         "managed_sha256": "fae6afddfba772c911ea76e3a2ab2d43e36ac21a89ae3347435e5bb01af1c2c5"
@@ -82,6 +88,18 @@
       }
     ],
     "plugin.video.youtube": [
+      {
+        "upstream_version": "7.4.4a",
+        "managed_version": "1:7.4.4a+blacklanturn.2",
+        "upstream_sha256": "73c675e03caa62402c092fb8c6895cee87dac7f84854eef3d7cce5eb9badadf2",
+        "managed_sha256": "646f4a628113f54a0b5ddfde9c49c11bb4b89779e85df28ffaa07ae5de6f0f4b"
+      },
+      {
+        "upstream_version": "7.4.4",
+        "managed_version": "1:7.4.4+blacklanturn.2",
+        "upstream_sha256": "e75de5d79110bf773591eb73be702529d3d64d3c6c693b539862c8d14eee4887",
+        "managed_sha256": "dd7a81144f8911874f1479677d4dd606595c921372008adc1da0f6746a4b9c05"
+      },
       {
         "upstream_version": "7.4.4",
         "managed_version": "1:7.4.4+blacklanturn.1",

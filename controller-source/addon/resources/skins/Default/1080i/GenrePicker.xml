@@ -48,7 +48,7 @@
       <orientation>vertical</orientation>
       <scrolltime>160</scrolltime>
       <onleft>5000</onleft>
-      <onright>5002</onright>
+      <onright>5000</onright>
       <onup>5000</onup>
       <ondown>5001</ondown>
       <pagecontrol>5002</pagecontrol>
@@ -110,13 +110,14 @@
       </focusedlayout>
     </control>
     <control type="scrollbar" id="5002">
+      <visible>String.IsEqual(Window.Property(genreOverflow),true)</visible>
       <left>1562</left>
       <top>244</top>
       <width>8</width>
       <height>552</height>
       <texturesliderbackground>button-dark.png</texturesliderbackground>
-      <texturesliderbar colordiffuse="FF29D9EE">white.png</texturesliderbar>
-      <texturesliderbarfocus colordiffuse="FF29D9EE">white.png</texturesliderbarfocus>
+      <texturesliderbar colordiffuse="FF677986">white.png</texturesliderbar>
+      <texturesliderbarfocus colordiffuse="FF677986">white.png</texturesliderbarfocus>
       <onleft>5000</onleft>
       <ondown>5001</ondown>
       <onright>5000</onright>

@@ -208,6 +208,11 @@ def verify_archive_metadata(archive):
 
 def browse_minimum(marker, minimum):
     browse = marker.get('browse_patch')
+    responsiveness = marker.get('responsiveness_patch')
+    if responsiveness is not None:
+        if responsiveness != 'preview-services-1' or browse != 'shelf-tools-1' or minimum != '1.0.52':
+            raise ValueError('Update BlackLanturn Installer before installing this build.')
+        return '1.0.54'
     if browse is None:
         return minimum
     if browse == 'shelf-tools-1' and minimum == '1.0.52':

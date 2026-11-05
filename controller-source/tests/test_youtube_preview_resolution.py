@@ -4,27 +4,31 @@ from pathlib import Path
 from contextlib import contextmanager
 from types import SimpleNamespace
 from unittest.mock import patch
-sys.path.insert(0,str(Path(__file__).parents[1]/'addon'))
+sys.path.insert(0,str(Path(__file__).resolve().parents[1]/'addon'))
 import youtube_provider as provider
 
 class PreviewResolution(unittest.TestCase):
+ def setUp(self):
+  self.cancel=patch.object(provider,'_cancel_transport',return_value=True);self.cancel.start();self.addCleanup(self.cancel.stop)
+  self.network=patch.dict(sys.modules,{'youtube_plugin.kodion.network':SimpleNamespace(get_connect_address=lambda *a,**k:'127.0.0.1:50152')});self.network.start();self.addCleanup(self.network.stop)
  def state(self):
   effects=[];params={'existing':'keep'}
   ui=SimpleNamespace(set_property=lambda *a,**k:effects.append(('property',a)),clear_property=lambda *a,**k:effects.append(('clear',a)),
    get_property=lambda *a,**k:True,pop_property=lambda *a,**k:effects.append(('pop',a)),show_notification=lambda *a,**k:effects.append(('toast',a)))
-  settings=SimpleNamespace(default_player_web_urls=lambda:True,default_player_fallback=lambda:True)
+  settings=SimpleNamespace(default_player_web_urls=lambda:True,default_player_fallback=lambda:True,httpd_listen=lambda:'127.0.0.1',httpd_port=lambda:50152)
   context=SimpleNamespace(get_params=lambda:params,get_ui=lambda:ui,get_settings=lambda **k:settings,
    send_notification=lambda *a,**k:effects.append(('notification',a)))
   @contextmanager
   def session(current):yield SimpleNamespace(context=context,provider=object())
   def prepare(runtime,ctx):
-   self.assertEqual(ctx.get_params(),{'video_id':'Abc_123-Xyz','incognito':True,'screensaver':True,'start':0.0,'end':30.0})
+   scoped=dict(ctx.get_params());token=scoped.pop('_blacklanturn_preview');self.assertRegex(token,r'^[a-f0-9]{32}$')
+   self.assertEqual(scoped,{'video_id':'Abc_123-Xyz','incognito':True,'screensaver':True,'start':0.0,'end':30.0})
    self.assertFalse(ctx.get_settings().default_player_web_urls());self.assertFalse(ctx.get_settings().default_player_fallback())
    self.assertFalse(ctx.get_ui().get_property('external-player-intent',as_bool=True))
    self.assertIsNone(ctx.get_ui().pop_property('full-video-quality-prompt',as_bool=True))
    ctx.get_ui().set_property('player-data',{'use_local_history':False,'use_remote_history':False})
    ctx.send_notification('playback-init',{'preview':True})
-   return SimpleNamespace(getPath=lambda:'https://fixture.invalid/resolved.mpd')
+   return SimpleNamespace(getPath=lambda:'http://127.0.0.1:50152/youtube/manifest/dash?file=blacklanturn-preview-'+token+'.mpd')
   return effects,params,session,prepare
  def resolve(self,*args,**kwargs):
   fn=getattr(provider,'resolve_preview',None);self.assertTrue(callable(fn),'Preview must resolve off the Kodi playback queue')
@@ -34,7 +38,7 @@ class PreviewResolution(unittest.TestCase):
   with patch.object(provider,'_session',session),patch.object(provider,'_prepare_preview',prepare,create=True):
    result=self.resolve('plugin://plugin.video.youtube/play/?video_id=Abc_123-Xyz&end=30',lambda:True)
   self.assertEqual(effects,[]);self.assertEqual(params,{'existing':'keep'})
-  self.assertEqual(result.path,'https://fixture.invalid/resolved.mpd');self.assertTrue(result.publish());self.assertFalse(result.publish())
+  self.assertIn('/youtube/manifest/dash?file=blacklanturn-preview-',result.path);self.assertTrue(result.publish());self.assertFalse(result.publish())
   self.assertEqual([x[0] for x in effects],['property','notification'])
  def test_cancelled_resolution_never_publishes_or_returns_a_late_player_job(self):
   effects,params,session,prepare=self.state();entered=threading.Event();release=threading.Event();owner=[True];result=[]
@@ -55,3 +59,26 @@ class PreviewResolution(unittest.TestCase):
    with self.subTest(path=path),patch.object(provider,'_session',session),patch.object(provider,'_prepare_preview',lambda *a:SimpleNamespace(getPath=lambda:path),create=True):
     with self.assertRaises(ValueError):self.resolve('plugin://plugin.video.youtube/play/?video_id=Abc_123-Xyz',lambda:True)
   self.assertEqual(effects,[])
+
+ def test_unscoped_provider_transport_fails_closed(self):
+  effects,params,session,prepare=self.state()
+  for path in ['http://127.0.0.1:50152/youtube/manifest/dash?file=samevideo.mpd']:
+   with patch.object(provider,'_session',session),patch.object(provider,'_prepare_preview',lambda *a:SimpleNamespace(getPath=lambda:path)):
+    with self.assertRaises(ValueError):self.resolve('plugin://plugin.video.youtube/play/?video_id=Abc_123-Xyz',lambda:True)
+
+ def test_progressive_and_hls_paths_are_wrapped_without_settings_writes(self):
+  from urllib.parse import urlsplit,parse_qs
+  import importlib.util
+  root=Path(__file__).resolve().parents[2]/'compatibility/responsiveness179/common'
+  spec=importlib.util.spec_from_file_location('fixture_transport',root/'preview_transport.py');transport=importlib.util.module_from_spec(spec);spec.loader.exec_module(transport)
+  modules={'youtube_plugin.kodion.network':SimpleNamespace(get_connect_address=lambda *a,**k:'127.0.0.1:50152'),'youtube_plugin.kodion.network.preview_transport':transport}
+  for path in ['https://fixture.invalid/video.mp4|User-Agent=test','https://fixture.invalid/master.m3u8']:
+   item=SimpleNamespace(getPath=lambda:path,getProperty=lambda key:'',setPath=lambda value:setattr(item,'scoped',value))
+   with patch.dict(sys.modules,modules):provider._scope_preview_item(item,SimpleNamespace(get_settings=lambda:SimpleNamespace(httpd_listen=lambda:'0.0.0.0',httpd_port=lambda:50152)),'a'*32)
+   parts=urlsplit(item.scoped);params=parse_qs(parts.query)
+   self.assertEqual(parts.netloc,'127.0.0.1:50152');self.assertEqual(params['__blpreview'],['a'*32]);self.assertEqual(params['__host'],['fixture.invalid'])
+
+ def test_preview_proxy_uses_configured_bind_without_changing_normal_address(self):
+  for address,expected in [('0.0.0.0','http://127.0.0.1:50152'),('::','http://[::1]:50152'),('192.168.1.42','http://192.168.1.42:50152')]:
+   context=SimpleNamespace(get_settings=lambda:SimpleNamespace(httpd_listen=lambda:address,httpd_port=lambda:50152))
+   self.assertEqual(provider._preview_proxy_base(context),expected)

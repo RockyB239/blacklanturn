@@ -24,10 +24,21 @@ class GenrePickerTests(unittest.TestCase):
   for name in ('onInit','onClick','onAction'):setattr(s,name,MethodType(ns[name],s))
   s.setProperty=lambda *a:None;s.onInit();return s,panel
  def test_picker_preselects_id_displays_labels_and_returns_stable_page(self):
-  s,p=self.picker();self.assertEqual(p.pos,2);self.assertEqual([i.label for i in p.items],['All','Horror','Stand-up'])
+  s,p=self.picker();self.assertEqual(p.pos,3);self.assertEqual([i.label for i in p.items],['All','Streaming Services','Horror','Stand-up'])
   for i in p.items:self.assertTrue(Path(i.art['icon']).is_file())
-  p.selectItem(1);s.onClick(5000);self.assertEqual(s.result,'h')
+  p.selectItem(2);s.onClick(5000);self.assertEqual(s.result,'h')
   p.selectItem(0);s.onClick(5000);self.assertEqual(s.result,'')
+ def test_compact_genre_control_contains_its_content_without_an_underline(self):
+  from xml.etree import ElementTree as ET
+  window=ET.parse(ROOT/'resources/skins/Default/1080i/LiveReview.xml')
+  control=window.find(".//control[@id='600']")
+  layouts=[child for child in control if child.get('condition')=='String.IsEqual(Window.Property(genreChooser),true)']
+  self.assertEqual(len(layouts),2)
+  for layout in layouts:
+   self.assertLess(int(layout.get('width')),500)
+   for child in layout.findall('control'):
+    self.assertLessEqual(int(child.findtext('left','0'))+int(child.findtext('width','0')),int(layout.get('width')))
+    self.assertNotEqual(child.findtext('texture'),'white.png')
  def test_back_returns_no_selection(self):
   s,p=self.picker();s.onAction(SimpleNamespace(getId=lambda:92));self.assertIsNone(s.result)
 class GenreControllerTests(unittest.TestCase):
@@ -46,6 +57,13 @@ class GenreControllerTests(unittest.TestCase):
   s,c,calls=self.state();s.browse_source();self.assertEqual(s.active_page,'h');self.assertIn(('rows',s.config['Genres'][0]['rows']),calls);self.assertFalse(s.actions_open)
  def test_cancel_retains_current_page_and_rows(self):
   s,c,calls=self.state(None);s.browse_source();self.assertEqual(s.active_page,'h');self.assertFalse(any(x[0] in ('rows','all') for x in calls));self.assertFalse(s.actions_open)
+ def test_streaming_services_opens_same_grid_without_changing_genre(self):
+  s,_,calls=self.state('blacklanturn-streaming-services')
+  s.open_service_grid=lambda:calls.append(('grid',s.actions_open))
+  s.browse_source()
+  self.assertIn(('grid',False),calls)
+  self.assertEqual(s.active_page,'h')
+  self.assertFalse(any(x[0] in ('rows','all') for x in calls))
  def test_all_returns_to_section_landing_rows(self):
   s,c,calls=self.state('');s.browse_source();self.assertIn(('all',),calls)
  def test_addons_keep_video_and_program_category_strip(self):

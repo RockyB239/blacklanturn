@@ -49,7 +49,7 @@ class PreviewNavigationStop(unittest.TestCase):
   class InlineThread:
    def __init__(self,target,**kwargs):self.target=target
    def start(self):self.target()
-  candidate=extract(ROOT/'live_review.py','play_preview_candidate',{'threading':SimpleNamespace(Thread=InlineThread),'resolve_preview':lambda url,current:SimpleNamespace(path='https://fixture.invalid/preview.mpd',listitem=object(),publish=lambda:True),'rpc':lambda *a:{'result':{}},'time':time,'parse_qs':parse_qs,'urlsplit':urlsplit,'event':lambda *a,**k:None,'xbmc':SimpleNamespace(executebuiltin=lambda *a:calls.append(('stop',)))},'LiveReview')
+  candidate=extract(ROOT/'live_review.py','play_preview_candidate',{'threading':SimpleNamespace(Thread=InlineThread),'resolve_preview':lambda url,current:SimpleNamespace(path='https://fixture.invalid/preview.mpd',listitem=object(),publish=lambda:True,cancel=lambda:calls.append('transport_cancel')),'rpc':lambda *a:{'result':{}},'time':time,'parse_qs':parse_qs,'urlsplit':urlsplit,'event':lambda *a,**k:None,'xbmc':SimpleNamespace(executebuiltin=lambda *a:calls.append(('stop',)))},'LiveReview')
   return w,candidate,calls,props
 
  def test_slow_resolution_does_not_block_navigation_or_change_decoder_settings(self):
@@ -128,5 +128,16 @@ class PreviewNavigationStop(unittest.TestCase):
   w.stop_preview=cancel
   preview=extract(ROOT/'live_review.py','preview',{'time':time,'event':lambda *a,**k:None,'threading':threading},'LiveReview')
   preview(w);self.assertFalse(w.owned_preview)
+
+
+ def test_transport_cancel_precedes_native_stop_and_is_retired(self):
+  w,stop,calls,release,entered,props=self.state()
+  w.preview_transport=SimpleNamespace(cancel=lambda:calls.append('transport_cancel'))
+  stop(w)
+  self.assertLess(calls.index('transport_cancel'),calls.index(('PlayerControl(Stop)',False)))
+  self.assertIsNone(w.preview_transport)
+ def test_transport_owner_is_retained_only_for_dispatched_preview(self):
+  w,candidate,calls,props=self.candidate();candidate(w,'plugin://plugin.video.youtube/play/?video_id=test')
+  self.assertIsNotNone(w.preview_transport);self.assertNotIn('transport_cancel',calls)
 
 if __name__=='__main__':unittest.main()

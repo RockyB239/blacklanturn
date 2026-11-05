@@ -94,6 +94,62 @@ class StreamingRowsTests(unittest.TestCase):
             self.assertEqual(state.getProperty('row0'), 'Comedy')
             self.assertEqual(state.rows[1], [])
 
+    def test_down_preserves_current_posters_until_next_shelf_is_ready(self):
+        from streaming_shelves import service_shelves
+        from test_snapshot_controller import SnapshotController
+
+        definitions = service_shelves('Service', ROW)['rows']
+        with tempfile.TemporaryDirectory() as folder:
+            card = {'file': MOVIE, 'title': 'Current title', 'filetype': 'file'}
+            state, calls, controls, queue = SnapshotController().state(folder, lambda path: [card])
+            controls[611] = type(controls[101])()
+            state.set_rows(definitions)
+            queue.pop(0)()
+            first = state.rows[0]
+            self.assertEqual(calls, [ROW])
+            self.assertTrue(state.shift_rows(1, 0))
+            self.assertIs(state.rows[0], first)
+            self.assertEqual((state.row_offset, state.focus), (0, 900))
+            self.assertEqual(state.getProperty('rowState1'), 'loading')
+            self.assertEqual(len(queue), 1)
+            queue.pop(0)()
+            self.assertEqual(calls, [ROW, definitions[1]['path']])
+            self.assertIs(state.rows[0], first)
+            self.assertEqual(state.getProperty('row1'), 'Recent Releases')
+            state.actions_open=False
+            state.settle_streaming_shelf()
+            self.assertEqual((state.row_offset, state.focus), (1, 900))
+            self.assertEqual(state.getProperty('row0'), 'Recent Releases')
+            self.assertTrue(state.load_next_streaming_shelf(prefetch=True))
+            queue.pop(0)()
+            self.assertEqual(calls, [ROW, definitions[1]['path'], definitions[2]['path']])
+            self.assertEqual((state.getProperty('row0'), state.getProperty('row1')), ('Recent Releases', 'Action'))
+            self.assertTrue(state.shift_rows(1, 0))
+            self.assertEqual((state.row_offset, state.focus), (2, 900))
+            self.assertEqual(state.getProperty('row0'), 'Action')
+            self.assertTrue(state.shift_rows(-1, 0))
+            self.assertTrue(state.shift_rows(-1, 0))
+            self.assertEqual((state.row_offset, state.focus), (0, 900))
+            self.assertEqual(state.getProperty('row0'), 'Popular')
+
+    def test_down_can_retire_an_unfinished_shelf(self):
+        from streaming_shelves import service_shelves
+        from test_snapshot_controller import SnapshotController
+
+        definitions = service_shelves('Service', ROW)['rows']
+        with tempfile.TemporaryDirectory() as folder:
+            card = {'file': MOVIE, 'title': 'Available title', 'filetype': 'file'}
+            state, calls, controls, queue = SnapshotController().state(folder, lambda path: [card])
+            controls[611] = type(controls[101])()
+            state.set_rows(definitions)
+            self.assertTrue(state.shift_rows(1, 0))
+            self.assertEqual(state.row_offset, 1)
+            self.assertEqual(state.getProperty('row0'), 'Recent Releases · Loading…')
+            while queue:
+                queue.pop(0)()
+            self.assertEqual(calls, [definitions[1]['path']])
+            self.assertEqual(state.focus, 900)
+
     def test_fresh_streaming_row_paints_before_any_provider_worker_runs(self):
         from test_snapshot_controller import SnapshotController
         with tempfile.TemporaryDirectory() as folder:

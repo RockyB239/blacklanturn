@@ -1,0 +1,84 @@
+{
+  "schema": 1,
+  "notes": {
+    "title": "BlackLanturn Build 1.1.62",
+    "summary": "More responsive previews and streaming-service browsing, with playback and navigation fixes.",
+    "sections": [
+      {
+        "heading": "Browse and preview",
+        "bullets": [
+          "Cancel an abandoned preview while preparing another title.",
+          "Open streaming-service lists sooner and keep navigation tied to your current selection."
+        ]
+      },
+      {
+        "heading": "Playback and navigation",
+        "bullets": [
+          "Keep provider selection, artwork and navigation consistent across supported devices.",
+          "Prevent abandoned previews from holding up navigation."
+        ]
+      },
+      {
+        "heading": "Keep your setup",
+        "bullets": [
+          "Use Update BlackLanturn to preserve settings, sign-ins, history and other installed add-ons."
+        ]
+      }
+    ]
+  },
+  "overlays": [
+    {
+      "target": "addons/plugin.video.themoviedb.helper/resources/tmdbhelper/lib/sync/providers/selection.py",
+      "source": "../reliability178/helper-selection.py",
+      "before_sha256": "270b482e43b311d02c1dad7a60a22d8eb1dac15a3937caee7bf1271e5561fc24",
+      "sha256": "13d13d16031c237fbdcb215954cacc7fd7af553e56f58d4315689e88f87d7f01"
+    },
+    {
+      "target": "addons/plugin.video.youtube/resources/lib/youtube_plugin/youtube/client/player_client.py",
+      "source": "general/player_client.py",
+      "before_sha256": "cec04fc03b713ba5d0f25dee3b060fec8e0448b2a54696965bd1bcfd09213d38",
+      "sha256": "8944eb98c12770372ac358e1230b9964e68b2f64973a206d3626c05fb6554b68",
+      "editions": [
+        "general"
+      ]
+    },
+    {
+      "target": "addons/plugin.video.youtube/resources/lib/youtube_plugin/youtube/client/player_client.py",
+      "source": "apple/player_client.py",
+      "before_sha256": "29c5a3585b61f10870c98c71043c79ed8e288d769749340c82875f40961c97ac",
+      "sha256": "43fd57e3383a0729c005e87783b663e6e17202b1ae3d0554ecd4bf2dc4e857fc",
+      "editions": [
+        "apple"
+      ]
+    },
+    {
+      "target": "addons/plugin.video.youtube/resources/lib/youtube_plugin/kodion/network/http_server.py",
+      "source": "general/http_server.py",
+      "before_sha256": "fcf33d76464561d48116e2fbf7bc72bca0b46b5eb94667271a1d830f05469fb2",
+      "sha256": "dc23fcb254796256202e7567747a21761d7b040442d921b5fb6507bfe519b9f9",
+      "editions": [
+        "general"
+      ]
+    },
+    {
+      "target": "addons/plugin.video.youtube/resources/lib/youtube_plugin/kodion/network/http_server.py",
+      "source": "apple/http_server.py",
+      "before_sha256": "43b06e8fdc24c51ae7e86a0c0fce2449a09934870af70536cca3fed10330297e",
+      "sha256": "85d3916ca2dd2de05901d74555be6e955536453cc4d94f5f4986bd280fb6036a",
+      "editions": [
+        "apple"
+      ]
+    },
+    {
+      "target": "addons/plugin.video.youtube/resources/lib/youtube_plugin/kodion/network/preview_transport.py",
+      "source": "common/preview_transport.py",
+      "before_sha256": null,
+      "sha256": "8e5280c02be49158830a3c7a61524cb3d13951dad33a68df7fcdef9c9c3b8313"
+    }
+  ],
+  "native_acceptance_required": [
+    "mac",
+    "fire",
+    "apple"
+  ]
+}

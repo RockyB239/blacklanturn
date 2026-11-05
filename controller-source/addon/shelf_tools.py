@@ -7,6 +7,7 @@ from urllib.parse import parse_qs, urlencode, urlsplit
 from shelf_visits import title_key
 
 SERVICE_ROUTE = 'blacklanturn_streaming_services'
+STREAMING_GENRE_ID = 'blacklanturn-streaming-services'
 HELPER = 'plugin://plugin.video.themoviedb.helper/'
 RUNTIME_LIMITS = (90, 120)
 

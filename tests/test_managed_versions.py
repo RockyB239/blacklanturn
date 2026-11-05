@@ -172,21 +172,25 @@ class ManagedVersions(unittest.TestCase):
         self.assertEqual(data, before)
 
     def test_current_builder_rejects_unpinned_installer_metadata_before_outputs(self):
-        import shutil
-        import sys
-        with patch.object(sys,'path',[str(ROOT/'tools'),*sys.path]):
-            import build_release174 as builder
+        path = ROOT / 'compatibility/responsiveness179/release179.py'
+        spec = importlib.util.spec_from_file_location('current179_drift_boundary', path)
+        builder = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(builder)
         with tempfile.TemporaryDirectory() as directory:
-            root=Path(directory)
-            source=root/'installer-source/plugin.program.blacklanturninstaller'
-            shutil.copytree(ROOT/'installer-source/plugin.program.blacklanturninstaller',source,ignore=shutil.ignore_patterns('__pycache__'))
-            with patch.object(builder,'INSTALLER',source):
-                frozen=root/'frozen.json'
-                frozen.write_bytes(builder.json_bytes(builder.source_record(*builder.source_inputs())))
-                path=source/'addon.xml';path.write_bytes(path.read_bytes().replace(b'<addon ',b'<addon foreign="true" ',1))
-                with self.assertRaisesRegex(ValueError,'Frozen source manifest differs'):
-                    builder.build(root/'baselines',root/'output',frozen)
-            self.assertFalse(any((root/'output').glob('*.zip')))
+            root = Path(directory)
+            snapshot = root / 'snapshot'
+            source = snapshot / 'source/installer-source/plugin.program.blacklanturninstaller/addon.xml'
+            source.parent.mkdir(parents=True)
+            source.write_bytes(b'<addon id="plugin.program.blacklanturninstaller" version="1.0.54"/>')
+            pipeline = snapshot / 'pipeline/release179.py'
+            pipeline.parent.mkdir()
+            pipeline.write_bytes(path.read_bytes())
+            frozen = {'versions': builder.VERSIONS, 'files': builder.record(builder.inventory(snapshot))}
+            (snapshot / 'source-manifest.json').write_bytes(builder.encoded(frozen))
+            source.write_bytes(source.read_bytes().replace(b'<addon ', b'<addon foreign="true" ', 1))
+            with self.assertRaisesRegex(ValueError, 'Frozen snapshot has drifted'):
+                builder.build(snapshot, root / 'baselines', root / 'output')
+            self.assertFalse((root / 'output').exists())
 
     def test_new_policy_requires_current_installer_and_exact_metadata(self):
         import io

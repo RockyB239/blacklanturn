@@ -42,18 +42,20 @@ class StreamingForeground(unittest.TestCase):
         picker = []
         transitions = []
         card = {'file': NETFLIX, 'label': 'Netflix'}
-        deadline = time.monotonic() + 2
-        progress = SimpleNamespace(create=lambda *args: transitions.append('created'),
-                                   iscanceled=lambda: time.monotonic() >= deadline,
-                                   close=lambda: transitions.append('closed'))
-        gui = SimpleNamespace(DialogProgress=lambda: progress)
-        kodi = SimpleNamespace(Monitor=lambda: SimpleNamespace(abortRequested=lambda: False))
-
+        shown = threading.Event()
+        finished = threading.Event()
+        def open_grid(root, profile, cards, *, load, initial_card):
+            self.assertIsNone(cards)
+            transitions.append('grid')
+            shown.set()
+            load(lambda rows: (picker.extend(rows), finished.set()), lambda: True)
+            self.assertTrue(finished.wait(2))
         def fetch(definition, **kwargs):
             if definition['path'] == MOVIES:
                 movies_started.set()
                 release_movies.wait(5)
                 return []
+            self.assertTrue(shown.is_set())
             self.assertEqual(definition['path'], CATALOG)
             return [card]
 
@@ -64,9 +66,9 @@ class StreamingForeground(unittest.TestCase):
             stop_preview=lambda: None, configure_row_snapshots=lambda: False,
             retained_row_items=lambda definition: (None, False),
         )
-        grid = SimpleNamespace(choose_streaming_service=lambda root, profile, cards, **kwargs: picker.extend(cards))
+        grid = SimpleNamespace(choose_streaming_service=open_grid)
         load = live_method('request_row_loads')
-        browse = live_method('browse_streaming_services', xbmcgui=gui, xbmc=kodi, ROOT=None, PROFILE=None)
+        browse = live_method('browse_streaming_services', ROOT=None, PROFILE=None)
         load(owner, [(0, {'path': MOVIES, 'label': 'Popular Movies'})])
         background = provider_work._rows.thread
         try:
@@ -79,7 +81,7 @@ class StreamingForeground(unittest.TestCase):
         finally:
             release_movies.set()
             background.join(2)
-        self.assertEqual(transitions, ['created', 'closed'])
+        self.assertEqual(transitions, ['grid'])
         self.assertFalse(owner.actions_open)
 
     def test_foreground_executes_only_the_latest_pending_selection(self):

@@ -31,4 +31,4 @@ def service_shelves(name, path):
     ]
     rows.extend(row(label, with_genres=movie_id if movie else show_id)
                 for label, movie_id, show_id in GENRES)
-    return {'heading': name + ' / TMDB & JUSTWATCH', 'button': 'Browse titles', 'rows': rows}
+    return {'heading': name + ' / TMDB & JUSTWATCH', 'button': 'Browse titles', 'rows': rows, 'hide_captions': True}

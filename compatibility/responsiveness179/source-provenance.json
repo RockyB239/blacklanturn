@@ -1,0 +1,25 @@
+{
+  "schema": 1,
+  "baseline": "public61-r1",
+  "preview_source_sha256": {
+    "player_client.py": "43fd57e3383a0729c005e87783b663e6e17202b1ae3d0554ecd4bf2dc4e857fc",
+    "live_review.py": "8cd3dd2953b1263f8434875e3327b3d61c0d72f083bbea305d028cdb1c8ddc74",
+    "preview_transport.py": "8e5280c02be49158830a3c7a61524cb3d13951dad33a68df7fcdef9c9c3b8313",
+    "http_server.py": "85d3916ca2dd2de05901d74555be6e955536453cc4d94f5f4986bd280fb6036a",
+    "youtube_provider.py": "ced39734dddb27f0e5944be01b76bdac02e7757042b21ad2707422c6c941c1d2"
+  },
+  "general_source_sha256": {
+    "player_client.py": "8944eb98c12770372ac358e1230b9964e68b2f64973a206d3626c05fb6554b68",
+    "http_server.py": "dc23fcb254796256202e7567747a21761d7b040442d921b5fb6507bfe519b9f9",
+    "preview_transport.py": "8e5280c02be49158830a3c7a61524cb3d13951dad33a68df7fcdef9c9c3b8313"
+  },
+  "scope": [
+    "Helper178 provider selection",
+    "controller177/178/179",
+    "preview-only transport179"
+  ],
+  "excluded": [
+    "playback-retry170",
+    "rows179 Helper sync-overlap proposal"
+  ]
+}
