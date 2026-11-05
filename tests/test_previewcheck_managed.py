@@ -14,8 +14,14 @@ class PreviewCheckManaged(unittest.TestCase):
   for isa,dash in ((False,True),(True,False),(False,False)):
    self.assertEqual(self.c.inspect('1:7.4.4+blacklanturn.1',self.code,isa,dash),'settings')
  def test_unreviewed_epoch_brand_and_apple_variant_are_not_assumed_compatible(self):
-  for v in ('1:7.4.4+blacklanturn.2','2:7.4.4+blacklanturn.1','1:7.4.4a+blacklanturn.1','7.5.0'):
+  for v in ('2:7.4.4+blacklanturn.1','1:7.4.4a+blacklanturn.1','7.5.0'):
    self.assertEqual(self.c.inspect(v,self.code,True,True),'review')
+ def test_current_general_client_requires_its_own_hash_and_settings(self):
+  with patch.object(self.c.hashlib, 'sha256', return_value=types.SimpleNamespace(
+      hexdigest=lambda: '8944eb98c12770372ac358e1230b9964e68b2f64973a206d3626c05fb6554b68')):
+   self.assertEqual(self.c.inspect('1:7.4.4+blacklanturn.2', self.code, True, True), 'verified')
+   self.assertEqual(self.c.inspect('1:7.4.4+blacklanturn.2', self.code, True, False), 'settings')
+  self.assertEqual(self.c.inspect('1:7.4.4+blacklanturn.2', self.code, True, True), 'replaced')
  def test_legacy_tested_version_remains_supported(self):
   self.assertEqual(self.c.inspect('7.4.4',self.code,True,True),'verified')
  def test_startup_runs_the_real_guard_for_protected_version_without_warning(self):

@@ -70,7 +70,7 @@ def apply_preview_check(data):
  prefix='addons/service.blacklanturn.previewcheck/'
  present={name[len(prefix):]:sha(raw) for name,raw in data.items() if name.startswith(prefix)}
  if not present:return  # The Apple edition does not ship this Fire TV check.
- if present not in (receipt['upstream_files'],receipt['candidate_files']):
+ if present not in (receipt['upstream_files'],receipt['previous_candidate_files'],receipt['candidate_files']):
   raise ValueError('Unknown General preview checker; compatibility review is required')
  candidates={p.name:p.read_bytes() for p in (root/'candidate').iterdir() if p.is_file()}
  if {n:sha(raw) for n,raw in candidates.items()}!=receipt['candidate_files']:
