@@ -142,12 +142,3 @@ class ShelfTools:
         finally:
             self.dwell = time.monotonic()
             self.actions_open = False
-
-    def browse_streaming_services(self, make_path):
-        kind = {'Movies': 'movie', 'Shows': 'tv'}.get(self.section)
-        if kind is None:
-            return
-        self.open_discovery({'heading': self.section.upper() + ' / STREAMING SERVICES',
-                             'rows': [{'label': 'Streaming services · TMDb / JustWatch',
-                                       'path': make_path(SERVICE_ROUTE, kind)}]})
-        self.last_row = 0

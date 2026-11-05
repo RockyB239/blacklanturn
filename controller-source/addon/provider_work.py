@@ -1,4 +1,4 @@
-"""One serial provider worker with a bounded, replaceable foreground queue."""
+"""Serial row workers with replaceable queues for the visible owner."""
 from collections import OrderedDict
 from contextlib import nullcontext
 import threading
@@ -39,8 +39,15 @@ class LatestWorker:
                 pass
 
 _rows=LatestWorker()
+_streaming_rows=LatestWorker()
 
-def submit_latest(owner,work):
+def submit_latest(owner,work,*,foreground=False):
+    if foreground:
+        # Only explicit streaming rows use this lane. The fixed key keeps at
+        # most one pending selection behind the current synchronous lookup.
+        _streaming_rows.submit('visible-rows',work)
+        return
+
     def owned():
         cache=getattr(owner,'snapshot_cache',None)
         with getattr(owner,'youtube_saved_request',nullcontext)():

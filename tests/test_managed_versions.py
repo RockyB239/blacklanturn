@@ -175,7 +175,7 @@ class ManagedVersions(unittest.TestCase):
         import shutil
         import sys
         with patch.object(sys,'path',[str(ROOT/'tools'),*sys.path]):
-            import build_release173 as builder
+            import build_release174 as builder
         with tempfile.TemporaryDirectory() as directory:
             root=Path(directory)
             source=root/'installer-source/plugin.program.blacklanturninstaller'

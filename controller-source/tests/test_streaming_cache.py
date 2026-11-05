@@ -50,10 +50,49 @@ class StreamingRowsTests(unittest.TestCase):
         self.assertIsNone(self.store().get(ROW))
         self.assertFalse(self.store(CATALOG).put(CATALOG, [{'file':MOVIE,'filetype':'file'}]))
 
+    def test_filtered_cache_and_branded_paging_preserve_genre(self):
+        from browse_controls import page_cards
+        from live_core import PageHistory
+
+        comedy = ROW + '&with_genres=35'
+        next_page = {'file': NEXT + '&with_genres=35', 'filetype': 'directory'}
+        card = {'file': MOVIE, 'label': 'Title', 'filetype': 'file'}
+        store = self.store(comedy)
+        self.assertTrue(store.put(comedy, [card, next_page]))
+        self.assertIsNone(store.get(ROW))
+        self.assertIsNone(store.get(comedy.replace('35', '18')))
+        mismatched = dict(next_page, file=NEXT + '&with_genres=18')
+        self.assertFalse(store.put(comedy, [card, mismatched]))
+        cards, _ = page_cards(store.get(comedy), PageHistory(), comedy)
+        self.assertEqual(cards[-1]['_page_control'], 'next')
+        self.assertIn('&with_genres=35&widget=false', cards[-1]['file'])
+
     def test_force_reload_discard_removes_existing_snapshot(self):
         self.assertTrue(self.store().put(ROW, [{'file': MOVIE, 'label': 'Title', 'filetype': 'file'}]))
         self.store().discard(ROW)
         self.assertIsNone(self.store().get(ROW))
+
+    def test_provider_opens_popular_then_loads_only_the_requested_row(self):
+        from streaming_shelves import service_shelves
+        from test_snapshot_controller import SnapshotController
+
+        definitions = service_shelves('Service', ROW)['rows']
+        with tempfile.TemporaryDirectory() as folder:
+            card = {'file': MOVIE, 'title': 'Current title', 'filetype': 'file'}
+            state, calls, controls, queue = SnapshotController().state(folder, lambda path: [card])
+            controls[611] = type(controls[101])()
+
+            state.set_rows(definitions)
+            self.assertEqual(calls, [])
+            queue.pop(0)()
+            self.assertEqual(calls, [ROW])
+            self.assertEqual(state.getProperty('row0'), 'Popular')
+            self.assertEqual(state.rows[1], [])
+            state.show_row_window(3, 0)
+            queue.pop(0)()
+            self.assertEqual(calls, [ROW, definitions[3]['path']])
+            self.assertEqual(state.getProperty('row0'), 'Comedy')
+            self.assertEqual(state.rows[1], [])
 
     def test_fresh_streaming_row_paints_before_any_provider_worker_runs(self):
         from test_snapshot_controller import SnapshotController

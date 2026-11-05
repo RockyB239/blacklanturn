@@ -18,6 +18,11 @@ def _query(path):
         return {}
 
 
+def _filters(kind):
+    date = 'primary_release_date' if kind == 'movie' else 'first_air_date'
+    return {'sort_by', 'with_genres', date + '.gte', date + '.lte'}
+
+
 def _provider(fields, paging=False):
     if (fields.get('info') != 'discover' or fields.get('tmdb_type') not in ('movie', 'tv')
             or not re.fullmatch(r'[1-9][0-9]{0,8}', fields.get('with_watch_providers', ''))
@@ -25,6 +30,17 @@ def _provider(fields, paging=False):
             or fields.get('with_id') != 'true' or fields.get('nextpage') != 'true'):
         return False
     allowed = {'info', 'tmdb_type', 'with_watch_providers', 'watch_region', 'with_id', 'nextpage', 'widget'}
+    kind = fields['tmdb_type']
+    date = 'primary_release_date' if kind == 'movie' else 'first_air_date'
+    filters = fields.keys() & _filters(kind)
+    if filters == {'with_genres'}:
+        if not re.fullmatch(r'[1-9][0-9]{0,4}', fields['with_genres']):
+            return False
+    elif filters and (filters != {'sort_by', date + '.gte', date + '.lte'}
+                      or fields['sort_by'] != date + '.desc'
+                      or fields[date + '.gte'] != 't-365' or fields[date + '.lte'] != 't-0'):
+        return False
+    allowed |= filters
     if not paging:
         return fields.get('widget') == 'false' and not fields.keys() - allowed
     return (not fields.keys() - allowed - {'page', 'cacheonly', 'plugin_category'}
@@ -43,7 +59,7 @@ def streaming_page_target(origin, target):
     return target
 
 
-def _route(path):
+def streaming_route(path):
     fields = _query(path)
     if fields.get('tmdb_type') not in ('movie', 'tv'):
         return None
@@ -74,7 +90,7 @@ class StreamingRows(PublicRowSnapshots):
 
     @classmethod
     def for_route(cls, directory, scope, path, stores=None, **kwargs):
-        mode = _route(path)
+        mode = streaming_route(path)
         if not scope or not mode:
             return None
         if stores is None:
@@ -85,11 +101,16 @@ class StreamingRows(PublicRowSnapshots):
         return store
 
     def path_allowed(self, path):
-        return _route(path) == self.mode
+        return streaming_route(path) == self.mode
 
     def sanitize_items(self, files):
         if self.mode == 'catalog':
-            items = _items(files, lambda path: path if _route(path) == 'titles' else '', max_items=512)
+            def service_path(path):
+                fields = _query(path)
+                if _provider(fields) and not fields.keys() & _filters(fields['tmdb_type']):
+                    return path
+                return ''
+            items = _items(files, service_path, max_items=512)
             if items and all(i.get('filetype') == 'directory' for i in items):
                 return [dict(i, _streaming_provider=True) for i in items]
             return None
@@ -104,7 +125,7 @@ class StreamingRows(PublicRowSnapshots):
             if target.get('tmdb_type') != source.get('tmdb_type'):
                 return False
             if self.mode == 'titles' and target.get('info') == 'discover' and any(
-                    target.get(k) != source.get(k) for k in ('with_watch_providers', 'watch_region')):
+                    target.get(k) != source.get(k) for k in {'with_watch_providers', 'watch_region'} | _filters(source['tmdb_type'])):
                 return False
         return True
 

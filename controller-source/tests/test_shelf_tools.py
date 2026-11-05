@@ -64,6 +64,27 @@ class ShelfToolsTests(unittest.TestCase):
         self.assertEqual(view['rows'][0]['path'], cards[0]['file'])
         self.assertFalse(eligible(cards[0]['file'] + '&page=2'))
 
+    def test_provider_view_offers_popular_recent_and_genres_in_provider_scope(self):
+        from search_ui import discovery_result
+
+        for kind, date, action in (('movie', 'primary_release_date', '28'),
+                                   ('tv', 'first_air_date', '10759')):
+            source = TMDB + f'info=discover&tmdb_type={kind}&with_watch_providers=8&watch_region=GB'
+            card = streaming_folders([{'file': source, 'filetype': 'directory', 'label': 'Service'}], kind)[0]
+            view = discovery_result(card)
+            rows = view['rows']
+            self.assertEqual([row['label'] for row in rows[:3]], ['Popular', 'Recent Releases', 'Action'])
+            fields = [parse_qs(urlsplit(row['path']).query) for row in rows]
+            for row, query in zip(rows, fields):
+                self.assertTrue(row['_explicit_streaming'])
+                self.assertEqual(query['tmdb_type'], [kind])
+                self.assertEqual(query['with_watch_providers'], ['8'])
+                self.assertEqual(query['watch_region'], ['GB'])
+            self.assertEqual(fields[1]['sort_by'], [date + '.desc'])
+            self.assertEqual(fields[1][date + '.lte'], ['t-0'])
+            self.assertEqual(fields[1][date + '.gte'], ['t-365'])
+            self.assertEqual(fields[2]['with_genres'], [action])
+
     def test_streaming_page_continuation_keeps_the_exact_region_and_provider(self):
         from browse_controls import page_cards
         from live_core import PageHistory
