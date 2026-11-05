@@ -2,6 +2,66 @@
   "schema": 1,
   "releases": [
     {
+      "id": "blacklanturn-general-1.1.60-r0",
+      "edition": "general",
+      "version": "1.1.60",
+      "revision": 0,
+      "title": "BlackLanturn Build 1.1.60",
+      "summary": "Faster return visits and paging inside BlackLanturn streaming-service lists.",
+      "sections": [
+        {
+          "heading": "Browse streaming services",
+          "bullets": [
+            "Reopen a streaming-service list to reuse recently loaded titles.",
+            "Use Next Page to keep browsing titles inside BlackLanturn.",
+            "Use Refresh List to request current results."
+          ]
+        },
+        {
+          "heading": "Keep your setup",
+          "bullets": [
+            "Use Update BlackLanturn to preserve settings, sign-ins, history and other installed add-ons."
+          ]
+        }
+      ],
+      "files": {
+        "addons/script.blacklanturn.preview/addon.xml": "a85af1341e319dc3df6e48e0473f782d6abccfb9915444d19a9fc651ea7e445f",
+        "addons/script.blacklanturn.preview/browse_controls.py": "f4a8473e8384e0ba2cac998692f20e2818283c9bc2324801ce9b7874c9915381",
+        "addons/script.blacklanturn.preview/live_review.py": "3a745260c3aa0ab89ec9268378bc66ae9e207fb39d2bd2a2bbb4f4cbadc0629f",
+        "addons/script.blacklanturn.preview/streaming_cache.py": "39383edf3e973ea5afe8d47ae70c1fd941f539c11a1f33d800268b60bb095fd0"
+      }
+    },
+    {
+      "id": "blacklanturn-apple-1.1.60-r0",
+      "edition": "apple",
+      "version": "1.1.60",
+      "revision": 0,
+      "title": "BlackLanturn Build 1.1.60",
+      "summary": "Faster return visits and paging inside BlackLanturn streaming-service lists.",
+      "sections": [
+        {
+          "heading": "Browse streaming services",
+          "bullets": [
+            "Reopen a streaming-service list to reuse recently loaded titles.",
+            "Use Next Page to keep browsing titles inside BlackLanturn.",
+            "Use Refresh List to request current results."
+          ]
+        },
+        {
+          "heading": "Keep your setup",
+          "bullets": [
+            "Use Update BlackLanturn to preserve settings, sign-ins, history and other installed add-ons."
+          ]
+        }
+      ],
+      "files": {
+        "addons/script.blacklanturn.preview/addon.xml": "a85af1341e319dc3df6e48e0473f782d6abccfb9915444d19a9fc651ea7e445f",
+        "addons/script.blacklanturn.preview/browse_controls.py": "f4a8473e8384e0ba2cac998692f20e2818283c9bc2324801ce9b7874c9915381",
+        "addons/script.blacklanturn.preview/live_review.py": "3a745260c3aa0ab89ec9268378bc66ae9e207fb39d2bd2a2bbb4f4cbadc0629f",
+        "addons/script.blacklanturn.preview/streaming_cache.py": "39383edf3e973ea5afe8d47ae70c1fd941f539c11a1f33d800268b60bb095fd0"
+      }
+    },
+    {
       "id": "blacklanturn-general-1.1.59-r0",
       "edition": "general",
       "version": "1.1.59",

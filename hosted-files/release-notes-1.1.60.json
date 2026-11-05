@@ -1,0 +1,20 @@
+{
+  "title": "BlackLanturn Build 1.1.60",
+  "summary": "Faster return visits and paging inside BlackLanturn streaming-service lists.",
+  "sections": [
+    {
+      "heading": "Browse streaming services",
+      "bullets": [
+        "Reopen a streaming-service list to reuse recently loaded titles.",
+        "Use Next Page to keep browsing titles inside BlackLanturn.",
+        "Use Refresh List to request current results."
+      ]
+    },
+    {
+      "heading": "Keep your setup",
+      "bullets": [
+        "Use Update BlackLanturn to preserve settings, sign-ins, history and other installed add-ons."
+      ]
+    }
+  ]
+}
