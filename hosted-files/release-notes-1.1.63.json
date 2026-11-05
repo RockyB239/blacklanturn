@@ -1,0 +1,19 @@
+{
+  "title": "BlackLanturn Build 1.1.63",
+  "summary": "Browsing maintenance for local database connections and discovery sorting.",
+  "sections": [
+    {
+      "heading": "Browsing",
+      "bullets": [
+        "Release local database connections promptly during browsing.",
+        "Reuse title IDs during discovery sorting while keeping the same row order."
+      ]
+    },
+    {
+      "heading": "Update your build",
+      "bullets": [
+        "Use Update BlackLanturn in Installer 1.0.54 to keep your settings, sign-ins and history."
+      ]
+    }
+  ]
+}
