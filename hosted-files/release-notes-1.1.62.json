@@ -1,0 +1,26 @@
+{
+  "title": "BlackLanturn Build 1.1.62",
+  "summary": "More responsive previews and streaming-service browsing, with playback and navigation fixes.",
+  "sections": [
+    {
+      "heading": "Browse and preview",
+      "bullets": [
+        "Cancel an abandoned preview while preparing another title.",
+        "Open streaming-service lists sooner and keep navigation tied to your current selection."
+      ]
+    },
+    {
+      "heading": "Playback and navigation",
+      "bullets": [
+        "Keep provider selection, artwork and navigation consistent across supported devices.",
+        "Prevent abandoned previews from holding up navigation."
+      ]
+    },
+    {
+      "heading": "Keep your setup",
+      "bullets": [
+        "Use Update BlackLanturn to preserve settings, sign-ins, history and other installed add-ons."
+      ]
+    }
+  ]
+}
