@@ -41,3 +41,8 @@ jobs:
             candidate/source-manifest.json
             candidate/candidate-packages.json
             verification*.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: verified-release-packages
+          compression-level: 0
+          path: candidate/*.zip
