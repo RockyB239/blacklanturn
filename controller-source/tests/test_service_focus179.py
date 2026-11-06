@@ -58,7 +58,9 @@ class ServiceFocusController179(unittest.TestCase):
         owner=SimpleNamespace(section='Movies',actions_open=False,alive=True,generation=1,result_cache=SimpleNamespace(revision=0),stop_preview=lambda:None,configure_row_snapshots=lambda:False,retained_row_items=lambda d:([{'file':NETFLIX}],False),prepare_streaming_lookahead=lambda:(request,owner.result_cache,0),last_row=0,discovery_stack=[{}])
         def open_discovery(value):
             self.assertEqual(owner.genre_request,(request,owner.result_cache,0));self.assertTrue(request.closed.is_set())
-        owner.open_discovery=open_discovery
+        owner.open_regional_service=open_discovery
+        store=SimpleNamespace(selected=lambda default:default,default_region=lambda:'US',visible=lambda cards,kind,region:cards)
+        owner.regional_services=lambda:store
         def choose(*args,**kwargs):
             self.assertEqual(kwargs['observe'],request.observe)
             return {'file':NETFLIX}

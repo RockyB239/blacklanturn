@@ -138,8 +138,8 @@ def get_list(path):
     result=rpc('Files.GetDirectory',{'directory':path,'media':'video','properties':PROPERTIES})
     if 'error' in result:event('directory_rpc_error',message=result['error'].get('message'))
     elif 'with_watch_providers' in query:
-        from streaming_cache import streaming_route
-        if streaming_route(path)=='titles':
+        from streaming_cache import streaming_title_route
+        if streaming_title_route(path):
             directory=result.get('result')
             if not isinstance(directory,dict) or not isinstance(directory.get('files'),list):
                 raise ValueError('Streaming shelf returned an invalid directory')
@@ -642,6 +642,7 @@ class LiveReview(LibraryActions,RowCustomization,TitleFeedback,ShelfTools,YouTub
         self.setProperty('youtubeCategoryFolder','false')
         if hasattr(self,'arrange_rows'):definitions=self.arrange_rows(definitions)
         self.page_definitions=list(definitions);self.row_offset=0;self.row_cache={};self.window_ready=[False,False]
+        self.setProperty('streamingAlternateLabel','')
         self.show_row_window(0,0)
     def publish_cache_stats(self):
         for key,value in self.result_cache.stats().items():self.setProperty('rowCache'+key.title(),str(value))
@@ -931,8 +932,15 @@ class LiveReview(LibraryActions,RowCustomization,TitleFeedback,ShelfTools,YouTub
         return StreamingLookahead(fetch,cached),cache,revision
 
 
+    def regional_services(self):
+        from regional_catalog import RegionalCatalog
+        store=getattr(self,'regional_service_store',None)
+        if store is None:store=self.regional_service_store=RegionalCatalog(PROFILE)
+        return store
+
     def browse_streaming_services(self,make_path,initial_card=None):
         from shelf_tools import SERVICE_ROUTE
+        from streaming_services import service_key
         from streaming_services_ui import choose_streaming_service
 
         kind={'Movies':'movie','Shows':'tv'}.get(self.section)
@@ -943,50 +951,146 @@ class LiveReview(LibraryActions,RowCustomization,TitleFeedback,ShelfTools,YouTub
             if self.configure_row_snapshots():self.restart_pending_rows()
             generation=self.generation
             revision=self.result_cache.revision
-            definition={'path':make_path(SERVICE_ROUTE,kind)}
+            store=self.regional_services()
+            saved_key=service_key(initial_card)
+            region=saved_key.split(':',1)[0] if saved_key else store.selected(store.default_region())
             def current():
                 return self.alive and self.generation==generation and self.result_cache.revision==revision
 
-            cards,_=self.retained_row_items(definition)
-            def load_catalog(deliver,dialog_open):
+            # Reuse a previous release's public directory only for its exact country.
+            cards,_=self.retained_row_items({'path':make_path(SERVICE_ROUTE,kind)})
+            if cards and all((service_key(item) or '').startswith(region+':') for item in cards):
+                cards=store.visible(cards,kind,region)
+            else:
+                cards=None
+
+            def request_catalog(code,deliver,dialog_open):
                 def owned():
                     return current() and dialog_open()
                 def fetch():
                     if not owned():return
                     try:
-                        result=self.cached_row_items(definition,expected_revision=revision,owner_current=owned)
+                        result,state=store.load(kind,code)
                     except Exception as exc:
                         event('streaming_catalog_error',error_type=type(exc).__name__)
-                        result=[]
-                    if owned():deliver(result)
+                        result,state=None,'error'
+                    if owned():deliver(result,state)
                 submit_latest(self,fetch,foreground=True)
+
             request=getattr(self,'prepare_streaming_lookahead',lambda:None)() if getattr(self,'streaming_lookahead_enabled',True) else None
-            options={'observe':request[0].observe,'read_labels':gui_labels} if request else {}
+            options={'observe':request[0].observe if request else None,'read_labels':gui_labels}
             try:
                 card=choose_streaming_service(ROOT,PROFILE,cards,initial_card=initial_card,
-                                              load=load_catalog if cards is None else None,**options)
+                    region_store=store,media_kind=kind,region=region,request_catalog=request_catalog,**options)
             finally:
                 if request:request[0].close()
             self.genre_request=None
             if request and card and current() and request[0].path==card.get('file'):
                 self.genre_request=request
-            discovery=discovery_result(card) if card and current() else None
-            if discovery:
-                self.open_discovery(discovery)
+            if card and current():
+                self.open_regional_service(card)
                 self.last_row=0
                 self.discovery_stack[-1]['streaming_grid_return']=card
         finally:
             self.dwell=time.monotonic()
             self.actions_open=False
 
+    def open_regional_service(self,card):
+        from streaming_cache import _query
+        from streaming_shelves import service_shelves
+        from regional_catalog import helper_region_names
+        region=_query(card['file']).get('watch_region')
+        store=self.regional_services()
+        names,_=store.cached_regions()
+        name=names.get(region) or helper_region_names().get(region,region)
+        discovery=service_shelves(card.get('title') or card.get('label','Streaming service'),
+                                  card['file'],adaptive=True,region_name=name)
+        if discovery:
+            self.open_discovery(discovery)
+
+    def streaming_layout(self):
+        definitions=getattr(self,'page_definitions',())
+        return definitions[0].get('_streaming_layout') if definitions else None
+
+    def note_streaming_catalog(self,definition,files):
+        layout=getattr(self,'streaming_layout',lambda:None)()
+        if layout is None:return
+        path=definition['path']
+        if path!=layout.path:
+            if not files and path in layout.candidates:layout.reject(path)
+            return
+        from streaming_cache import _query
+        fields=_query(layout.path)
+        identity=(fields['tmdb_type'],fields['watch_region'],fields['with_watch_providers'])
+        store=self.regional_services()
+        if files:
+            if layout.empty:
+                layout.empty=False
+                layout.baseline=None
+                layout.compact=False
+                layout.alternate_checked=False
+            store.mark_available(*identity)
+        else:
+            layout.empty=True
+            layout.baseline=[]
+            layout.compact=True
+            store.mark_empty(*identity)
+
+    def streaming_alternate_label(self,layout):
+        from streaming_cache import _query
+        card=layout.movie_card if layout is not None else None
+        if not card:return ''
+        query=_query(card['file'])
+        name=card['title'].removesuffix(' · '+query['watch_region'])
+        return 'Browse '+name+(' Movies' if query['tmdb_type']=='movie' else ' Shows')
+
+    def prepare_streaming_alternate(self):
+        from adaptive_services import film_first
+        from streaming_cache import _query
+        from streaming_services import service_key
+        layout=self.streaming_layout()
+        if layout is None or layout.baseline is None or layout.alternate_checked:return
+        fields=_query(layout.path)
+        kind,region,provider=(fields[key] for key in ('tmdb_type','watch_region','with_watch_providers'))
+        if not (layout.empty or kind=='tv' and film_first(provider)):return
+        layout.alternate_checked=True
+        other='movie' if kind=='tv' else 'tv'
+        cache=self.result_cache;revision=cache.revision
+        def current():
+            return self.alive and self.streaming_layout() is layout and cache.revision==revision
+        def work():
+            try:
+                if not current():return
+                store=self.regional_services()
+                cards,fresh=store.cached(other,region)
+                if not fresh:cards,_=store.load(other,region)
+                if cards is None or not current():return
+                card=next((item for item in cards if service_key(item)==region+':'+provider),None)
+                if not card:return
+                files=self.cached_provider_list(card['file'],revision,current)
+                with self.preview_dispatch_lock:
+                    if current() and files:
+                        layout.movie_card=card
+                        self.setProperty('streamingAlternateLabel',self.streaming_alternate_label(layout))
+            except Exception as exc:
+                event('streaming_alternate_error',error_type=type(exc).__name__)
+        threading.Thread(target=work,name='BlackLanturnStreamingAlternate',daemon=True).start()
+
+    def open_streaming_alternate(self):
+        layout=self.streaming_layout()
+        if layout and layout.movie_card:self.open_regional_service(layout.movie_card)
 
     def streaming_shelf_view(self):
         definitions=getattr(self,'page_definitions',[])
         return bool(definitions and definitions[0].get('_explicit_streaming'))
 
-    def streaming_shelf_index(self,start,direction):
+    def streaming_shelf_index(self,start,direction,*,confirmed=False):
+        layout=getattr(self,'streaming_layout',lambda:None)()
         for index in range(start,len(self.page_definitions) if direction>0 else -1,direction):
-            if self.result_cache.get(self.page_definitions[index]['path'])!=[]:return index
+            path=self.page_definitions[index]['path']
+            if layout is not None and path!=layout.path and path not in layout.accepted:
+                if confirmed or not layout.available(path):continue
+            if self.result_cache.get(path)!=[]:return index
         return None
 
     def row_definition_index(self,n):
@@ -1020,8 +1124,9 @@ class LiveReview(LibraryActions,RowCustomization,TitleFeedback,ShelfTools,YouTub
         self.stop_preview();self.selected=None;self.generation+=1;generation=self.generation
         if getattr(self,'search_state',None):clear_search_selection(self)
         self.row_offset=offset;self.focus_key=None;self.window_ready=[False,False];definitions=self.page_definitions[offset:offset+2]
+        layout=getattr(self,'streaming_layout',lambda:None)() if streaming else None
         if streaming:
-            self.streaming_lower_index=self.streaming_shelf_index(offset+1,1)
+            self.streaming_lower_index=self.streaming_shelf_index(offset+1,1,confirmed=layout is not None)
             definitions=[self.page_definitions[offset]]
             if self.streaming_lower_index is not None:definitions.append(self.page_definitions[self.streaming_lower_index])
         addon_browser=getattr(self,'section','')=='Add-ons' and not (getattr(self,'search_state',None) or getattr(self,'episode_browser_context',None) or getattr(self,'discovery_stack',[]))
@@ -1040,7 +1145,7 @@ class LiveReview(LibraryActions,RowCustomization,TitleFeedback,ShelfTools,YouTub
                 cached=dict(cached,files=None,deferred=False);self.row_cache[index]=cached
             if n>=len(definitions) or (streaming and n==1 and not (cached and (cached.get('files') or cached.get('state')=='error'))):
                 self.paths[n]='';self.histories[n]=PageHistory();self.apply_row(n,[],'')
-                if streaming and n<len(definitions):self.setProperty('row1',definitions[n]['label'])
+                if streaming and layout is None and n<len(definitions):self.setProperty('row1',definitions[n]['label'])
                 continue
             if cached and cached.get('files') is not None:
                 self.paths[n]=cached['path'];self.histories[n]=cached['history']
@@ -1077,6 +1182,8 @@ class LiveReview(LibraryActions,RowCustomization,TitleFeedback,ShelfTools,YouTub
                 self.paths[n]=definition['path'];self.histories[n]=cached['history'] if cached else PageHistory()
                 retained,refresh=self.retained_row_items(definition)
                 if retained is not None:
+                    if not retained and not refresh and definition.get('_explicit_streaming') and self.result_cache.get(definition['path'])==[]:
+                        getattr(self,'note_streaming_catalog',lambda definition,files:None)(definition,retained)
                     self.apply_row(n,retained,definition['label'],definition.get('position',0),**({'ranked_start':True} if definition.get('_ranked_start') else {}),**({'display_position':True} if definition.get('_display_position') else {}))
                     if refresh:
                         self.snapshot_rows[n]=True;definition['_snapshot_refresh']=True;pending.append((n,definition))
@@ -1128,6 +1235,8 @@ class LiveReview(LibraryActions,RowCustomization,TitleFeedback,ShelfTools,YouTub
                             with self.preview_dispatch_lock:
                                 if current(n,definition):
                                     if definition.get('_streaming_retry'):self.failed_paths.pop(n,None)
+                                    if definition.get('_explicit_streaming') and not definition.get('_snapshot_refresh'):
+                                        getattr(self,'note_streaming_catalog',lambda definition,files:None)(definition,files)
                                     if definition.get('_snapshot_refresh'):
                                         self.apply_refreshed_row(n,files,definition['label'])
                                         if definition.get('_streaming_retry'):
@@ -1152,8 +1261,12 @@ class LiveReview(LibraryActions,RowCustomization,TitleFeedback,ShelfTools,YouTub
                                     retained=bool(self.rows[n]) if definition.get('_snapshot_refresh') else False
                                     if not retained:self.apply_row(n,[],definition['label'])
                                     self.failed_paths[n]={'path':definition['path'],'label':definition['label'],'back':True,'position':definition.get('position',0)}
-                                    self.row_states[n]='error';self.setProperty('row'+str(n),definition['label']+(' · Search unavailable' if getattr(self,'search_state',None) else ' · Unavailable'));self.setProperty('rowState'+str(n),'ready' if retained else 'error')
-                                    message=row_message(definition['label'],'error',search=bool(getattr(self,'search_state',None)),streaming=foreground)
+                                    layout=getattr(self,'streaming_layout',lambda:None)()
+                                    candidate_error=n==1 and layout is not None and definition['path'] not in layout.accepted
+                                    self.row_states[n]='error'
+                                    self.setProperty('row'+str(n),'' if candidate_error else definition['label']+(' · Search unavailable' if getattr(self,'search_state',None) else ' · Unavailable'))
+                                    self.setProperty('rowState'+str(n),'ready' if retained else 'error')
+                                    message=row_message('More rows' if candidate_error else definition['label'],'error',search=bool(getattr(self,'search_state',None)),streaming=foreground)
                                     self.setProperty('rowMessage'+str(n),message)
                                     self.setProperty('notice',message if foreground else 'List unavailable · Open title actions to retry or check its integration in Settings.')
                                     if foreground and n==0 and not retained:self.setProperty('streamingRetryLabel','Retry shelf')
@@ -1347,6 +1460,8 @@ class LiveReview(LibraryActions,RowCustomization,TitleFeedback,ShelfTools,YouTub
         if self.rows[1]:
             if not prefetch:self.show_row_window(self.streaming_lower_index,0)
             return True
+        layout=getattr(self,'streaming_layout',lambda:None)()
+        if layout is not None and getattr(self,'streaming_step',None):return not prefetch
         index=self.streaming_shelf_index(self.row_offset+1,1)
         if index is None:return False
         if index!=self.streaming_lower_index:
@@ -1360,11 +1475,13 @@ class LiveReview(LibraryActions,RowCustomization,TitleFeedback,ShelfTools,YouTub
         if self.paths[1]:return True
         definition=self.page_definitions[index]
         self.paths[1]=definition['path'];self.window_ready[1]=False
-        self.setProperty('row1',definition['label']+' · Loading…')
-        self.setProperty('rowState1','loading')
-        self.setProperty('rowMessage1',row_message(definition['label'],'loading'))
+        if layout is None:
+            self.setProperty('row1',definition['label']+' · Loading…')
+            self.setProperty('rowState1','loading')
+            self.setProperty('rowMessage1',row_message(definition['label'],'loading'))
         retained,_=self.retained_row_items(definition)
         if retained is not None:
+            if layout is not None and not retained:layout.reject(definition['path'])
             self.apply_row(1,retained,definition['label'],update_selected=False)
             if not prefetch:self.settle_streaming_shelf()
         else:self.request_row_loads([(1,definition)],prefetch=prefetch)
@@ -1392,7 +1509,13 @@ class LiveReview(LibraryActions,RowCustomization,TitleFeedback,ShelfTools,YouTub
         if direction<0 and slot==1 and self.rows[0]:
             self.last_row=0;self.setFocusId(900);return True
         if direction>0 and slot==0 and self.window_ready[0] and self.load_next_streaming_shelf():return True
-        # A second Down may pass a pending lower shelf. Retired work cannot paint the new view.
+        if getattr(self,'streaming_layout',lambda:None)() is not None:
+            if direction>0:return False
+            offset=self.streaming_shelf_index(self.row_offset-1,-1,confirmed=True)
+            if offset is None:return False
+            self.last_row=0;self.show_row_window(offset,0)
+            return True
+        # Older fixed lists can skip a pending lower row.
         offset=self.row_offset+direction
         if direction>0 and (slot==1 or (self.rows[0] and self.paths[1])):
             offset=self.streaming_lower_index+1
@@ -1407,7 +1530,9 @@ class LiveReview(LibraryActions,RowCustomization,TitleFeedback,ShelfTools,YouTub
         try:
             self.stop_preview()
             slot=1 if self.getFocusId()==901 else 0
-            indices=[i for i,row in enumerate(definitions) if self.result_cache.get(row['path'])!=[]]
+            layout=getattr(self,'streaming_layout',lambda:None)()
+            indices=[i for i,row in enumerate(definitions) if self.result_cache.get(row['path'])!=[]
+                     and (layout is None or row['path']==layout.path or row['path'] in layout.accepted)]
             focused=self.row_definition_index(slot)
             choice=xbmcgui.Dialog().select('Jump to row',[definitions[i]['label'] for i in indices],
                                            preselect=indices.index(focused) if focused in indices else 0)
@@ -1457,6 +1582,11 @@ class LiveReview(LibraryActions,RowCustomization,TitleFeedback,ShelfTools,YouTub
 
     def apply_row(self,n,files,label,position=0,update_selected=True,display_position=False,ranked_start=False):
         with self.preview_dispatch_lock:
+            layout=getattr(self,'streaming_layout',lambda:None)()
+            if layout is not None:
+                initial=layout.baseline is None
+                files=layout.filter(self.paths[n],files)
+                if initial and layout.baseline is not None:layout.order(self.page_definitions)
             confirmed_empty=not files and getattr(self,'streaming_shelf_view',lambda:False)()
             original=files[position] if 0<=position<len(files) else None
             if getattr(self,'section','')=='YouTube' and hasattr(self,'prepare_youtube_row'):
@@ -1681,7 +1811,7 @@ class LiveReview(LibraryActions,RowCustomization,TitleFeedback,ShelfTools,YouTub
             pos=self.getControl(900+n).getSelectedPosition();anchor=self.rows[n][pos] if 0<=pos<len(self.rows[n]) else None
             state['positions'].append(restored_position(state['rows'][n],anchor,pos) if hasattr(self,'raw_title_row') else pos)
         state['focus']=self.getFocusId()
-        state['properties']={key:self.getProperty(key) for key in ('eyebrow','captionRows','scroll','browseFilters','row0','row1','episodeBrowser','searchBrowser','page','rowState0','rowState1','rowMessage0','rowMessage1','heroCompact','addonBrowser','genreChooser','filmographyBrowser','youtubeBrowser','previewMode','previewsReady','streamingRetryLabel')}
+        state['properties']={key:self.getProperty(key) for key in ('eyebrow','captionRows','scroll','browseFilters','row0','row1','episodeBrowser','searchBrowser','page','rowState0','rowState1','rowMessage0','rowMessage1','heroCompact','addonBrowser','genreChooser','filmographyBrowser','youtubeBrowser','previewMode','previewsReady','streamingRetryLabel','streamingAlternateLabel')}
         state=copy.deepcopy(state)
         if state.get('episode_browser_context'):state['episode_browser_context'].pop('play_using_show',None)
         return state
@@ -1722,7 +1852,7 @@ class LiveReview(LibraryActions,RowCustomization,TitleFeedback,ShelfTools,YouTub
             self.details(state['selected'],cast_position=state.get('cast_position'));self.return_focus=state['return_focus']
         elif state['selected']:self.update(state['selected'])
         if not current():return
-        focus=state['focus'] if state['focus'] in (101,102,103,105,106,600,610,611,900,901) else 101 if self.mode=='details' else 900+self.last_row
+        focus=state['focus'] if state['focus'] in (101,102,103,105,106,600,610,611,612,900,901) else 101 if self.mode=='details' else 900+self.last_row
         self.setFocusId(focus);self.focus_key=None
         if not current():return
         self.restart_pending_rows()
@@ -1907,7 +2037,12 @@ class LiveReview(LibraryActions,RowCustomization,TitleFeedback,ShelfTools,YouTub
                 options.append(('local','Remove from My Stuff on this device' if saved else 'Save to My Stuff on this device'))
                 options.extend(getattr(self,'library_title_actions',lambda _:[])(item))
                 if command:options.append(('trakt','Trakt: Watched, progress & lists'))
-                if self.rating_identity(item):options.append(('discover','Discover collections & creator credits'))
+                identity=self.rating_identity(item)
+                if identity:options.append(('discover','Discover collections & creator credits'))
+                if identity and item.get('type') not in ('season','episode') and not episode_identity(item):
+                    params=parse_qs(urlsplit(item.get('file','')).query)
+                    if 'season' not in params and params.get('info')!=['episodes']:
+                        options.append(('where_to_watch','Where to Watch'))
             if (not item or discovery) and genre_available:options.append(('genre','Choose genre…'))
             if item and not discovery:
                 options.extend(getattr(self,'title_feedback_actions',lambda _:[])(item))
@@ -1962,6 +2097,7 @@ class LiveReview(LibraryActions,RowCustomization,TitleFeedback,ShelfTools,YouTub
         elif action=='play':self.update(item);self.onClick(101)
         elif action=='sync_settings':self.run_setting('sync_settings')
         elif action=='details':self.details(item)
+        elif action=='where_to_watch':self.where_to_watch(item)
         elif action=='discover':self.discover_more(item)
         elif action=='local':self.update(item);self.onClick(103)
         elif action=='player':self.choose_playback_player(item)
@@ -2801,9 +2937,11 @@ class LiveReview(LibraryActions,RowCustomization,TitleFeedback,ShelfTools,YouTub
                 if getattr(self,'section','')=='YouTube':self.prefetch_youtube_row()
                 if self.mode=='home' and getattr(self,'streaming_shelf_view',lambda:False)():
                     self.settle_streaming_shelf()
+                    self.prepare_streaming_alternate()
                     if (focus==900 and not self.nav and not self.actions_open and not self.settings_open
                             and self.window_ready[0] and not getattr(self,'row_window_busy',False)
-                            and not self.paths[1] and time.monotonic()-self.dwell>=.45
+                            and (not self.paths[1] or self.row_states.get(1)=='empty')
+                            and time.monotonic()-self.dwell>=.45
                             and not self.owned_preview and not self.player.isPlaying()):
                         self.load_next_streaming_shelf(prefetch=True)
                 if getattr(self,'prefetch_trial',False):self.prefetch_next_row()
@@ -2894,6 +3032,21 @@ class LiveReview(LibraryActions,RowCustomization,TitleFeedback,ShelfTools,YouTub
                 else:self.load_path(n,path,back=True,position=self.getControl(900+n).getSelectedPosition(),preserve_focus=True)
         if pending:
             self.request_row_loads(pending,0 if self.getFocusId()==611 else None)
+    def where_to_watch(self,item):
+        from streaming_availability import show_where_to_watch
+        identity=self.rating_identity(item)
+        if not identity:return
+        self.actions_open=True
+        try:
+            self.stop_preview()
+            store=self.regional_services()
+            region=store.selected(store.default_region())
+            names,_=store.cached_regions()
+            show_where_to_watch(xbmcgui.Dialog(),*identity,item.get('title') or item.get('label'),region,names)
+        finally:
+            self.dwell=time.monotonic()
+            self.actions_open=False
+
     def discover_more(self,item):
         self.actions_open=True
         try:
@@ -2995,8 +3148,10 @@ class LiveReview(LibraryActions,RowCustomization,TitleFeedback,ShelfTools,YouTub
             if self.rows[0] or self.rows[1]:self.setFocusId(900 if self.rows[0] else 901)
         elif cid in (700,701,710,711,712,713,720,721):self.arrow(cid)
         elif cid==610:self.refresh_youtube_recommendations()
+        elif cid==612 and self.streaming_shelf_view():self.open_streaming_alternate()
         elif cid==611 and getattr(self,'streaming_shelf_view',lambda:False)():
             if self.row_states.get(0)=='error':self.retry_lists()
+            elif self.getProperty('streamingAlternateLabel'):self.setFocusId(612)
             else:self.shift_rows(1,0)
         elif cid==600:
             if self.episode_browser_context:self.select_episode_season()
@@ -3108,7 +3263,8 @@ class LiveReview(LibraryActions,RowCustomization,TitleFeedback,ShelfTools,YouTub
                     return
             if getattr(self,'streaming_shelf_view',lambda:False)() and focus in (611,900,901):
                 if self.shift_rows(-1 if cid==3 else 1,1 if focus==901 else 0):return
-                if cid==3 and focus==900:self.setFocusId(101)
+                if cid==3 and focus==900:self.setFocusId(612 if self.getProperty('streamingAlternateLabel') else 101)
+                if cid==3 and focus==611 and self.getProperty('streamingAlternateLabel'):self.setFocusId(612)
                 return
             previous=self.focus_key[0] if self.focus_key else focus
             if getattr(self,'adaptive_browsing',False) and focus in (900,901) and previous in (900,901):

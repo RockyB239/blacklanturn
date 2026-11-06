@@ -44,11 +44,12 @@ class StreamingForeground(unittest.TestCase):
         card = {'file': NETFLIX, 'label': 'Netflix'}
         shown = threading.Event()
         finished = threading.Event()
-        def open_grid(root, profile, cards, *, load, initial_card):
+        def open_grid(root, profile, cards, *, request_catalog, initial_card, region_store, media_kind, region, observe, read_labels):
             self.assertIsNone(cards)
             transitions.append('grid')
             shown.set()
-            load(lambda rows: (picker.extend(rows), finished.set()), lambda: True)
+            self.assertEqual((media_kind,region), ('movie','US'))
+            request_catalog(region,lambda rows,state: (picker.extend(rows), finished.set()),lambda: True)
             self.assertTrue(finished.wait(2))
         def fetch(definition, **kwargs):
             if definition['path'] == MOVIES:
@@ -65,10 +66,13 @@ class StreamingForeground(unittest.TestCase):
             startup_idle=True, rows=[[], []], cached_row_items=fetch, section='Movies', actions_open=False,
             stop_preview=lambda: None, configure_row_snapshots=lambda: False,
             retained_row_items=lambda definition: (None, False),
+            regional_services=lambda:SimpleNamespace(
+                default_region=lambda:'US',selected=lambda default:default,
+                load=lambda kind,region:(fetch({'path':CATALOG}),'fresh')),
         )
         grid = SimpleNamespace(choose_streaming_service=open_grid)
         load = live_method('request_row_loads')
-        browse = live_method('browse_streaming_services', ROOT=None, PROFILE=None)
+        browse = live_method('browse_streaming_services', ROOT=None, PROFILE=None, gui_labels=lambda keys:{})
         load(owner, [(0, {'path': MOVIES, 'label': 'Popular Movies'})])
         background = provider_work._rows.thread
         try:

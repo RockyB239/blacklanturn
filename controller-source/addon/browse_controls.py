@@ -57,6 +57,11 @@ def is_next_page(item,path):
     ignored={'page','bl_start','cacheonly','plugin_category','update_listing','reload'}
     return {k:v for k,v in old.items() if k not in ignored}=={k:v for k,v in new.items() if k not in ignored}
 
+def mismatched_streaming_page(item,path):
+    if 'with_watch_providers=' not in path or item.get('filetype')!='directory':return False
+    query=parse_qs(urlsplit(item.get('file','')).query)
+    return query.get('info')==['discover'] and 'page' in query
+
 def page_card(direction,path):
     label='Previous' if direction=='previous' else 'Next'
     image=str(Path(__file__).resolve().parent/'resources/media'/('page-'+direction+'.png'))
@@ -72,7 +77,7 @@ def page_cards(files,history,path,position=0,display_position=False):
         if item.get('_page_control')=='previous':continue
         if is_next_page(item,path):
             more.append(page_card('next',streaming_page_target(path,item['file'])))
-        else:ordinary.append(item)
+        elif not mismatched_streaming_page(item,path):ordinary.append(item)
     result=ordinary+more
     if history.pages:
         result.insert(0,page_card('previous','blacklanturn://previous-page'))

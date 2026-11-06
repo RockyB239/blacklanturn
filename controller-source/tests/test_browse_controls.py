@@ -1,3 +1,4 @@
+from urllib.parse import parse_qs, urlsplit
 import ast,importlib.util,sqlite3,tempfile,unittest,time
 from pathlib import Path
 from types import SimpleNamespace,MethodType
@@ -143,7 +144,8 @@ class ControllerControls(unittest.TestCase):
                         return options.index('Choose genre…') if 'Choose genre…' in options else -1
                     ns={'xbmcgui':SimpleNamespace(Dialog=lambda:SimpleNamespace(contextmenu=menu)),
                         'can_choose_genre':m.can_choose_genre,'trakt_command':lambda _:'trakt',
-                        'choose_player_path':lambda _:'plugin://player','discovery_result':lambda _:None,'resume_options':lambda _: {},'event':lambda *a,**kw:None}
+                        'choose_player_path':lambda _:'plugin://player','discovery_result':lambda _:None,'resume_options':lambda _: {},'event':lambda *a,**kw:None,
+                        'episode_identity':lambda _:None,'parse_qs':parse_qs,'urlsplit':urlsplit}
                     extract(ROOT/'live_review.py','title_actions',ns,'LiveReview')(state)
                     self.assertEqual(calls,['genre'])
                     choices=menus[0];genre=choices.index('Choose genre…')

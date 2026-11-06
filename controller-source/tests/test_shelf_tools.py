@@ -102,7 +102,7 @@ class ShelfToolsTests(unittest.TestCase):
         self.assertEqual([query[key] for key in ('page', 'with_watch_providers', 'watch_region', 'widget')],
                          [['2'], ['8'], ['GB'], ['false']])
         wrong_region = dict(native_next, file=native_next['file'].replace('watch_region=GB', 'watch_region=US'))
-        self.assertNotIn('_page_control', page_cards([wrong_region], PageHistory(), path)[0][0])
+        self.assertEqual(page_cards([wrong_region], PageHistory(), path)[0], [])
         history = PageHistory()
         history.push(path, 1)
         third = dict(native_next, file=native_next['file'].replace('page=2', 'page=3'))

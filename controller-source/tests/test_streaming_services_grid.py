@@ -237,3 +237,57 @@ class GridTests(unittest.TestCase):
         self.assertEqual(panel.findtext('onright'), str(ui.MANAGE))
         for control in (ui.FEATURED, ui.PINNED, ui.ALL, ui.MANAGE, ui.PREVIOUS, ui.NEXT, ui.CANCEL):
             self.assertIsNotNone(skin.find(f".//control[@id='{control}']"))
+
+    def test_failed_country_switch_retains_previous_grid_and_latest_country_wins(self):
+        ui, grid = self.ui, self.dialog
+        pending, saved = [], []
+        grid.region_store = SimpleNamespace(
+            cached=lambda kind, region: (None, False),
+            select=lambda code: saved.append(code) or True,
+            visible=lambda cards, kind, region: cards)
+        grid.media_kind = 'movie'
+        grid.request_catalog = lambda code, deliver, current: pending.append((code, deliver, current))
+        grid.region_names = {'US': 'United States', 'CA': 'Canada', 'GB': 'United Kingdom'}
+        grid.catalog_region = grid.requested_region = 'US'
+        grid.switch_region('CA')
+        self.assertEqual(grid.properties['region'], 'United States')
+        grid.switch_region('GB')
+        self.assertFalse(pending[0][2]())
+        pending[0][1]([card(1, 'Canadian', region='CA')], 'fresh')
+        self.assertEqual(grid.catalog_region, 'US')
+        pending[1][1](None, 'error')
+        self.assertIn('United Kingdom', grid.properties['regionStatus'])
+        self.assertEqual(grid.properties['region'], 'United States')
+        self.assertEqual(saved, [])
+        grid.switch_region('GB')
+        pending[-1][1]([], 'fresh')
+        self.assertEqual(grid.properties['region'], 'United Kingdom')
+        self.assertIn('No streaming services', grid.properties['catalogStatus'])
+        self.assertEqual(saved, ['GB'])
+
+    def test_cached_country_is_saved_before_the_user_can_select_a_tile(self):
+        grid = self.dialog
+        saved = []
+        grid.region_store = SimpleNamespace(
+            cached=lambda kind, region: ([card(1, 'Canadian', region='CA')], False),
+            select=lambda code: saved.append(code) or True,
+            selected=lambda default: saved[-1] if saved else default,
+            visible=lambda cards, kind, region: cards)
+        grid.media_kind = 'movie'
+        grid.request_catalog = lambda *args: None
+        grid.region_names = {'US': 'United States', 'CA': 'Canada'}
+        grid.catalog_region = grid.requested_region = 'US'
+        grid.switch_region('CA')
+        self.assertEqual(saved, ['CA'])
+        self.assertEqual(grid.properties['region'], 'Canada')
+
+    def test_select_ignores_a_tile_from_the_old_rendered_grid(self):
+        ui, grid = self.ui, self.dialog
+        grid.read_labels = lambda keys: {keys[0]: 'CA:3994'}
+        grid.panel.selectItem(6)
+        grid.onClick(ui.GRID)
+        self.assertIsNone(grid.result)
+        self.assertFalse(grid.closed)
+        grid.read_labels = lambda keys: {keys[0]: 'US:3994'}
+        grid.onClick(ui.GRID)
+        self.assertEqual(grid.result, card(3994, 'Service 006'))

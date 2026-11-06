@@ -18,11 +18,6 @@ def _query(path):
         return {}
 
 
-def _filters(kind):
-    date = 'primary_release_date' if kind == 'movie' else 'first_air_date'
-    return {'sort_by', 'with_genres', date + '.gte', date + '.lte'}
-
-
 def _provider(fields, paging=False):
     if (fields.get('info') != 'discover' or fields.get('tmdb_type') not in ('movie', 'tv')
             or not re.fullmatch(r'[1-9][0-9]{0,8}', fields.get('with_watch_providers', ''))
@@ -30,17 +25,18 @@ def _provider(fields, paging=False):
             or fields.get('with_id') != 'true' or fields.get('nextpage') != 'true'):
         return False
     allowed = {'info', 'tmdb_type', 'with_watch_providers', 'watch_region', 'with_id', 'nextpage', 'widget'}
+    paging_fields = {'page', 'cacheonly', 'plugin_category'} if paging else set()
+    filters = {key: value for key, value in fields.items() if key not in allowed | paging_fields}
     kind = fields['tmdb_type']
     date = 'primary_release_date' if kind == 'movie' else 'first_air_date'
-    filters = fields.keys() & _filters(kind)
-    if filters == {'with_genres'}:
-        if not re.fullmatch(r'[1-9][0-9]{0,4}', fields['with_genres']):
-            return False
-    elif filters and (filters != {'sort_by', date + '.gte', date + '.lte'}
-                      or fields['sort_by'] != date + '.desc'
-                      or fields[date + '.gte'] != 't-365' or fields[date + '.lte'] != 't-0'):
-        return False
-    allowed |= filters
+    if filters:
+        genre = set(filters) == {'with_genres'} and re.fullmatch(r'[1-9][0-9]{0,4}', filters['with_genres'])
+        recent = filters == {'sort_by': date + '.desc', date + '.gte': 't-365', date + '.lte': 't-0'}
+        if not (genre or recent):
+            from adaptive_services import valid_specialty_filters
+            if not valid_specialty_filters(kind, fields['with_watch_providers'], filters):
+                return False
+    allowed.update(filters)
     if not paging:
         return fields.get('widget') == 'false' and not fields.keys() - allowed
     return (not fields.keys() - allowed - {'page', 'cacheonly', 'plugin_category'}
@@ -54,9 +50,17 @@ def streaming_page_target(origin, target):
     before, after = _query(origin), _query(target)
     if not (_provider(before) or _provider(before, paging=True)):
         return target
-    if 'widget' not in after and _provider(after, paging=True):
+    paging_fields = {'page', 'cacheonly', 'plugin_category', 'widget'}
+    same = {k: v for k, v in before.items() if k not in paging_fields} == {
+        k: v for k, v in after.items() if k not in paging_fields}
+    if same and 'widget' not in after and _provider(after, paging=True):
         return target + '&widget=false'
     return target
+
+
+def streaming_title_route(path):
+    fields = _query(path)
+    return _provider(fields) or _provider(fields, paging=True)
 
 
 def streaming_route(path):
@@ -107,7 +111,7 @@ class StreamingRows(PublicRowSnapshots):
         if self.mode == 'catalog':
             def service_path(path):
                 fields = _query(path)
-                if _provider(fields) and not fields.keys() & _filters(fields['tmdb_type']):
+                if _provider(fields) and len(fields) == 7:
                     return path
                 return ''
             items = _items(files, service_path, max_items=512)
@@ -124,9 +128,11 @@ class StreamingRows(PublicRowSnapshots):
             target = _query(item.get('file'))
             if target.get('tmdb_type') != source.get('tmdb_type'):
                 return False
-            if self.mode == 'titles' and target.get('info') == 'discover' and any(
-                    target.get(k) != source.get(k) for k in {'with_watch_providers', 'watch_region'} | _filters(source['tmdb_type'])):
-                return False
+            if self.mode == 'titles' and target.get('info') == 'discover':
+                ignored = {'page', 'widget', 'cacheonly', 'plugin_category'}
+                if {k: v for k, v in target.items() if k not in ignored} != {
+                        k: v for k, v in source.items() if k not in ignored}:
+                    return False
         return True
 
     def get(self, path):

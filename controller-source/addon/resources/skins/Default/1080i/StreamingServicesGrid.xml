@@ -173,6 +173,7 @@
       <texturefocus>-</texturefocus>
       <texturenofocus>-</texturenofocus>
       <onleft>5002</onleft>
+      <onright condition="String.IsEqual(Window.Property(regional),true)">5008</onright>
       <onright>5006</onright>
       <onup>5003</onup>
       <ondown condition="String.IsEqual(Window.Property(gridAvailable),true)">5000</ondown>
@@ -189,10 +190,10 @@
       <visible>String.IsEqual(Window.Property(activeTab),all)</visible>
     </control>
     <control type="label">
-      <left>989</left>
-      <top>184</top>
-      <width>660</width>
-      <height>64</height>
+      <left>963</left>
+      <top>133</top>
+      <width>598</width>
+      <height>40</height>
       <label>$INFO[Window.Property(featuredSource)]</label>
       <font>font20_title</font>
       <textcolor>FFB4BCC5</textcolor>
@@ -201,10 +202,10 @@
       <visible>String.IsEqual(Window.Property(activeTab),featured)</visible>
     </control>
     <control type="label">
-      <left>989</left>
-      <top>184</top>
-      <width>660</width>
-      <height>64</height>
+      <left>963</left>
+      <top>133</top>
+      <width>598</width>
+      <height>40</height>
       <label>Saved on this Kodi profile</label>
       <font>font20_title</font>
       <textcolor>FFB4BCC5</textcolor>
@@ -213,16 +214,52 @@
       <visible>String.IsEqual(Window.Property(activeTab),pinned)</visible>
     </control>
     <control type="label">
-      <left>989</left>
-      <top>184</top>
-      <width>660</width>
-      <height>64</height>
+      <left>963</left>
+      <top>133</top>
+      <width>598</width>
+      <height>40</height>
       <label>Alphabetical directory</label>
       <font>font20_title</font>
       <textcolor>FFB4BCC5</textcolor>
       <aligny>center</aligny>
       <align>right</align>
       <visible>String.IsEqual(Window.Property(activeTab),all)</visible>
+    </control>
+    <control type="image">
+      <left>989</left><top>184</top><width>460</width><height>64</height>
+      <texture border="16" fallback="filter-rest.png">$INFO[Window(Home).Property(BlackLanturn.Navigation.Rest)]</texture>
+      <aspectratio>stretch</aspectratio>
+      <visible>String.IsEqual(Window.Property(regional),true)</visible>
+    </control>
+    <control type="image">
+      <left>989</left><top>184</top><width>460</width><height>64</height>
+      <texture border="16" fallback="filter-focus.png">$INFO[Window(Home).Property(BlackLanturn.Navigation.Focus)]</texture>
+      <aspectratio>stretch</aspectratio>
+      <visible>Control.HasFocus(5008)</visible>
+    </control>
+    <control type="button" id="5008">
+      <left>989</left><top>184</top><width>460</width><height>64</height>
+      <label>$INFO[Window.Property(regionButtonLabel)]</label>
+      <font>font25_title</font><textcolor>FFCED5DC</textcolor><focusedcolor>FFF5F5F5</focusedcolor>
+      <align>center</align><aligny>center</aligny><texturefocus>-</texturefocus><texturenofocus>-</texturenofocus>
+      <visible>String.IsEqual(Window.Property(regional),true)</visible>
+      <onleft>5003</onleft><onright>5006</onright><onup>5008</onup>
+      <ondown condition="String.IsEqual(Window.Property(gridAvailable),true)">5000</ondown>
+      <ondown condition="String.IsEqual(Window.Property(retryRegion),true)">5009</ondown>
+      <ondown>5007</ondown>
+    </control>
+    <control type="label">
+      <left>275</left><top>949</top><width>1130</width><height>45</height>
+      <label>$INFO[Window.Property(regionStatus)]</label><font>font20_title</font>
+      <textcolor>FF8FD3DF</textcolor><aligny>center</aligny>
+    </control>
+    <control type="button" id="5009">
+      <left>1488</left><top>344</top><width>161</width><height>58</height>
+      <label>Retry</label><font>font20_title</font><align>center</align>
+      <textcolor>FFE0EAF1</textcolor><focusedcolor>FFFFFFFF</focusedcolor>
+      <texturefocus>focus-teal.png</texturefocus><texturenofocus>button-dark.png</texturenofocus>
+      <visible>String.IsEqual(Window.Property(retryRegion),true)</visible>
+      <onup>5006</onup><onleft>5008</onleft><onright>5009</onright><ondown>5007</ondown>
     </control>
     <control type="panel" id="5000">
       <left>269</left>
@@ -325,7 +362,7 @@
       <font>font25_title</font>
       <textcolor>FFB4BCC5</textcolor>
       <aligny>center</aligny>
-      <visible>!String.IsEmpty(Window.Property(catalogStatus))</visible>
+      <visible>!String.IsEmpty(Window.Property(catalogStatus)) + !String.IsEqual(Window.Property(gridAvailable),true)</visible>
     </control>
     <control type="label">
       <left>275</left>
@@ -362,6 +399,7 @@
       <texturefocus>focus-teal.png</texturefocus>
       <texturenofocus>button-dark.png</texturenofocus>
       <onright>5006</onright>
+      <ondown condition="String.IsEqual(Window.Property(retryRegion),true)">5009</ondown>
       <ondown>5007</ondown>
       <onleft condition="String.IsEqual(Window.Property(gridAvailable),true)">5000</onleft>
       <onleft condition="!String.IsEqual(Window.Property(gridAvailable),true)">5003</onleft>
@@ -381,6 +419,7 @@
       <align>center</align>
       <texturefocus>focus-teal.png</texturefocus>
       <texturenofocus>button-dark.png</texturenofocus>
+      <onup condition="String.IsEqual(Window.Property(retryRegion),true)">5009</onup>
       <onup>5006</onup>
       <onright>5007</onright>
       <ondown>5007</ondown>
