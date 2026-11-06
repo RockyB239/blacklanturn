@@ -2,6 +2,82 @@
   "schema": 1,
   "releases": [
     {
+      "id": "blacklanturn-general-1.1.65-r0",
+      "edition": "general",
+      "version": "1.1.65",
+      "revision": 0,
+      "title": "BlackLanturn Build 1.1.65",
+      "summary": "Improves trailer matching and fixes empty streaming-service shelves.",
+      "sections": [
+        {
+          "heading": "Previews",
+          "bullets": [
+            "Use release years and verified season titles to distinguish similar movies and shows.",
+            "Keep credible trailer matches when their titles omit the year."
+          ]
+        },
+        {
+          "heading": "Streaming services",
+          "bullets": [
+            "Skip shelves when the service has no matching titles in your region.",
+            "Keep the previous row visible during loading and offer Retry for failed requests."
+          ]
+        }
+      ],
+      "files": {
+        "addons/plugin.program.blacklanturninstaller/addon.xml": "77357f0ddd6c684a4a81b45e2e0b77544b883c242cfc078b5a8ad7fbbe6d89d9",
+        "addons/plugin.program.blacklanturninstaller/resources/libs/managed_versions.py": "0c908ddf924e13538e22e04c80dfe3dc80fa15c09cc0bb9f4077ad1abfb24081",
+        "addons/plugin.program.blacklanturninstaller/resources/managed-helper.json": "425dd5d3793bf6353d624f5f1ce2b2afe77b3d64c03410654007b53a6ea87534",
+        "addons/plugin.program.blacklanturninstaller/resources/managed-versions.json": "03cc7fd4d4589c0f7f26b9ea22bcfbde35354bc78e6dadd850292d17ef478940",
+        "addons/plugin.video.themoviedb.helper/addon.xml": "bc4ac29b87a020db6ec47589b8b23ffcaec7a386e571f8d699f226a317ededb0",
+        "addons/plugin.video.themoviedb.helper/resources/tmdbhelper/lib/items/directories/tmdb/lists_discover.py": "69827a8895cc54866e88df763a46ce90ecae20fbfb4158a72627fc09fba755ba",
+        "addons/script.blacklanturn.preview/addon.xml": "1dc297825c8250c9447e88ad1cd0b38a432627c1247d56ee929f2eec50bb6e59",
+        "addons/script.blacklanturn.preview/live_review.py": "f4ec658ee885f12b90256b3b1948ebb3c51ad76126e5d2d2d3b8070ac0081fd7",
+        "addons/script.blacklanturn.preview/preview_fallback.py": "9f0da72e782bfd5fb3b564fd33961d257f29d5a2fc1ea3ddd455ce16bb0855ff",
+        "addons/script.blacklanturn.preview/preview_identity.py": "de1a1435c4d753541f5d7348b4795975bbf25fa9e58925b8e581e52b88845aad",
+        "addons/script.blacklanturn.preview/resources/skins/Default/1080i/LiveReview.xml": "f0a26a9bbc9a22b70589624f11b854092ee640e5f877da73883856cf1c5ee399",
+        "addons/script.blacklanturn.preview/row_feedback.py": "0de4ef19a1dca974c80520c97f1c27802eace07af6fd3cdfd66a89bdcfee0443"
+      }
+    },
+    {
+      "id": "blacklanturn-apple-1.1.65-r0",
+      "edition": "apple",
+      "version": "1.1.65",
+      "revision": 0,
+      "title": "BlackLanturn Build 1.1.65",
+      "summary": "Improves trailer matching and fixes empty streaming-service shelves.",
+      "sections": [
+        {
+          "heading": "Previews",
+          "bullets": [
+            "Use release years and verified season titles to distinguish similar movies and shows.",
+            "Keep credible trailer matches when their titles omit the year."
+          ]
+        },
+        {
+          "heading": "Streaming services",
+          "bullets": [
+            "Skip shelves when the service has no matching titles in your region.",
+            "Keep the previous row visible during loading and offer Retry for failed requests."
+          ]
+        }
+      ],
+      "files": {
+        "addons/plugin.program.blacklanturninstaller/addon.xml": "77357f0ddd6c684a4a81b45e2e0b77544b883c242cfc078b5a8ad7fbbe6d89d9",
+        "addons/plugin.program.blacklanturninstaller/resources/libs/managed_versions.py": "0c908ddf924e13538e22e04c80dfe3dc80fa15c09cc0bb9f4077ad1abfb24081",
+        "addons/plugin.program.blacklanturninstaller/resources/managed-helper.json": "425dd5d3793bf6353d624f5f1ce2b2afe77b3d64c03410654007b53a6ea87534",
+        "addons/plugin.program.blacklanturninstaller/resources/managed-versions.json": "03cc7fd4d4589c0f7f26b9ea22bcfbde35354bc78e6dadd850292d17ef478940",
+        "addons/plugin.video.themoviedb.helper/addon.xml": "bc4ac29b87a020db6ec47589b8b23ffcaec7a386e571f8d699f226a317ededb0",
+        "addons/plugin.video.themoviedb.helper/resources/tmdbhelper/lib/items/directories/tmdb/lists_discover.py": "69827a8895cc54866e88df763a46ce90ecae20fbfb4158a72627fc09fba755ba",
+        "addons/script.blacklanturn.preview/addon.xml": "1dc297825c8250c9447e88ad1cd0b38a432627c1247d56ee929f2eec50bb6e59",
+        "addons/script.blacklanturn.preview/live_review.py": "f4ec658ee885f12b90256b3b1948ebb3c51ad76126e5d2d2d3b8070ac0081fd7",
+        "addons/script.blacklanturn.preview/preview_fallback.py": "9f0da72e782bfd5fb3b564fd33961d257f29d5a2fc1ea3ddd455ce16bb0855ff",
+        "addons/script.blacklanturn.preview/preview_identity.py": "de1a1435c4d753541f5d7348b4795975bbf25fa9e58925b8e581e52b88845aad",
+        "addons/script.blacklanturn.preview/resources/skins/Default/1080i/LiveReview.xml": "f0a26a9bbc9a22b70589624f11b854092ee640e5f877da73883856cf1c5ee399",
+        "addons/script.blacklanturn.preview/row_feedback.py": "0de4ef19a1dca974c80520c97f1c27802eace07af6fd3cdfd66a89bdcfee0443"
+      }
+    },
+    {
       "id": "blacklanturn-general-1.1.64-r0",
       "edition": "general",
       "version": "1.1.64",

@@ -1,0 +1,20 @@
+{
+  "title": "BlackLanturn Build 1.1.65",
+  "summary": "Improves trailer matching and fixes empty streaming-service shelves.",
+  "sections": [
+    {
+      "heading": "Previews",
+      "bullets": [
+        "Use release years and verified season titles to distinguish similar movies and shows.",
+        "Keep credible trailer matches when their titles omit the year."
+      ]
+    },
+    {
+      "heading": "Streaming services",
+      "bullets": [
+        "Skip shelves when the service has no matching titles in your region.",
+        "Keep the previous row visible during loading and offer Retry for failed requests."
+      ]
+    }
+  ]
+}
