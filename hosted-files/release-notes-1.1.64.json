@@ -1,0 +1,13 @@
+{
+  "title": "BlackLanturn Build 1.1.64",
+  "summary": "Corrects a YouTube compatibility warning on Fire TV.",
+  "sections": [
+    {
+      "heading": "YouTube previews",
+      "bullets": [
+        "The Fire TV startup check now recognizes the tested YouTube patch already in the build.",
+        "Warnings still appear if the tested files are replaced or preview playback settings are disabled."
+      ]
+    }
+  ]
+}

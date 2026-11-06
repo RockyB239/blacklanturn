@@ -2,6 +2,52 @@
   "schema": 1,
   "releases": [
     {
+      "id": "blacklanturn-general-1.1.64-r0",
+      "edition": "general",
+      "version": "1.1.64",
+      "revision": 0,
+      "title": "BlackLanturn Build 1.1.64",
+      "summary": "Corrects a YouTube compatibility warning on Fire TV.",
+      "sections": [
+        {
+          "heading": "YouTube previews",
+          "bullets": [
+            "The Fire TV startup check now recognizes the tested YouTube patch already in the build.",
+            "Warnings still appear if the tested files are replaced or preview playback settings are disabled."
+          ]
+        }
+      ],
+      "files": {
+        "addons/plugin.video.youtube/addon.xml": "dd7a81144f8911874f1479677d4dd606595c921372008adc1da0f6746a4b9c05",
+        "addons/plugin.video.youtube/resources/lib/youtube_plugin/youtube/client/player_client.py": "8944eb98c12770372ac358e1230b9964e68b2f64973a206d3626c05fb6554b68",
+        "addons/script.blacklanturn.preview/addon.xml": "cab0f9d813e8d1c0ebbbad783f8f016dadea0787df2970b1ed13f0fc042efcbb",
+        "addons/service.blacklanturn.previewcheck/addon.xml": "3e3f79131ee6c522841af62120fa8a0437ee33545955f17e402f7f1af236fcd6",
+        "addons/service.blacklanturn.previewcheck/check.py": "107bc7a9f541a544020246a2298857811c9580864aaf43085f7197adb8aa6de1"
+      }
+    },
+    {
+      "id": "blacklanturn-apple-1.1.64-r0",
+      "edition": "apple",
+      "version": "1.1.64",
+      "revision": 0,
+      "title": "BlackLanturn Build 1.1.64",
+      "summary": "Corrects a YouTube compatibility warning on Fire TV.",
+      "sections": [
+        {
+          "heading": "YouTube previews",
+          "bullets": [
+            "The Fire TV startup check now recognizes the tested YouTube patch already in the build.",
+            "Warnings still appear if the tested files are replaced or preview playback settings are disabled."
+          ]
+        }
+      ],
+      "files": {
+        "addons/plugin.video.youtube/addon.xml": "646f4a628113f54a0b5ddfde9c49c11bb4b89779e85df28ffaa07ae5de6f0f4b",
+        "addons/plugin.video.youtube/resources/lib/youtube_plugin/youtube/client/player_client.py": "43fd57e3383a0729c005e87783b663e6e17202b1ae3d0554ecd4bf2dc4e857fc",
+        "addons/script.blacklanturn.preview/addon.xml": "cab0f9d813e8d1c0ebbbad783f8f016dadea0787df2970b1ed13f0fc042efcbb"
+      }
+    },
+    {
       "id": "blacklanturn-general-1.1.63-r0",
       "edition": "general",
       "version": "1.1.63",
