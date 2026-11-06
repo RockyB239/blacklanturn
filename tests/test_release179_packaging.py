@@ -13,6 +13,18 @@ release = importlib.util.module_from_spec(SPEC)
 SPEC.loader.exec_module(release)
 
 
+def released_installer_54(project):
+    # These tests exercise the historical 1.0.54 packager. Keep its exact
+    # published Installer input as the editable Installer evolves.
+    archive = project / release.INSTALLER / f'{release.INSTALLER}-1.0.54.zip'
+    if release.file_sha(archive) != 'b7c83dce792e85d765641724325fcbce380cf53fa2b3fcc6ada741d0a0d897d2':
+        raise ValueError('Published Installer 1.0.54 fixture differs')
+    prefix = release.INSTALLER + '/'
+    with zipfile.ZipFile(archive) as bundle:
+        return {name[len(prefix):]: bundle.read(name) for name in bundle.namelist()
+                if name.startswith(prefix) and not name.endswith('/')}
+
+
 class ReleaseBoundaries(unittest.TestCase):
     def test_overlay_requires_exact_before_and_after(self):
         with tempfile.TemporaryDirectory() as directory:
@@ -95,7 +107,7 @@ class ReleaseBoundaries(unittest.TestCase):
     def test_installer54_accepts_new_minimum_and_keeps53_baseline_support(self):
         project = Path(__file__).resolve().parents[1]
         source = project
-        installer = release.inventory(source / 'installer-source' / release.INSTALLER)
+        installer = released_installer_54(source)
         prior_source = (source / 'compatibility/responsiveness179/legacy-managed-versions53.py').read_bytes()
         baselines = Path(os.environ.get('BLACKLANTURN_RELEASE61_BASELINES', project / 'baselines'))
         if not (baselines / release.full_name('General', release.BASE_VERSION)).exists():
@@ -125,7 +137,7 @@ class ReleaseBoundaries(unittest.TestCase):
     def test_changed_helper_tree_and_baseline_remain_independently_accepted(self):
         project = Path(__file__).resolve().parents[1]
         source = project
-        installer = release.inventory(source / 'installer-source' / release.INSTALLER)
+        installer = released_installer_54(source)
         baselines = Path(os.environ.get('BLACKLANTURN_RELEASE61_BASELINES', project / 'baselines'))
         if not (baselines / release.full_name('General', release.BASE_VERSION)).exists():
             self.skipTest('Download exact public61-r1 baselines for native compatibility fixtures')
@@ -160,7 +172,7 @@ class ReleaseBoundaries(unittest.TestCase):
     def test_youtube_keeps_both_edition_versions(self):
         project = Path(__file__).resolve().parents[1]
         source = project
-        installer = release.inventory(source / 'installer-source' / release.INSTALLER)
+        installer = released_installer_54(source)
         baselines = Path(os.environ.get('BLACKLANTURN_RELEASE61_BASELINES', project / 'baselines'))
         if not (baselines / release.full_name('General', release.BASE_VERSION)).exists():
             self.skipTest('Download exact public61-r1 baselines for native compatibility fixtures')
