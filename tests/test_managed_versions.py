@@ -192,6 +192,16 @@ class ManagedVersions(unittest.TestCase):
                 builder.build(snapshot, root / 'baselines', root / 'output')
             self.assertFalse((root / 'output').exists())
 
+    def test_streaming_shelf_policy_uses_shared_installer_minimum(self):
+        responsive = {'browse_patch': 'shelf-tools-1', 'responsiveness_patch': 'preview-services-1'}
+        self.assertEqual(self.m.browse_minimum(responsive, '1.0.52'), '1.0.54')
+        self.assertEqual(self.m.browse_minimum(dict(responsive, streaming_shelves_patch='verified-empty-1'),
+                                               '1.0.52'), '1.0.55')
+        for marker in (dict(responsive, streaming_shelves_patch='future'),
+                       {'streaming_shelves_patch': 'verified-empty-1'}):
+            with self.assertRaises(ValueError):
+                self.m.browse_minimum(marker, '1.0.52')
+
     def test_new_policy_requires_current_installer_and_exact_metadata(self):
         import io
         data = self.data(); self.m.apply_metadata(data)

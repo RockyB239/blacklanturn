@@ -1,0 +1,45 @@
+name: Preview and streaming shelves 1.1.65
+on:
+  push:
+    branches:
+      - release/1.1.65
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install test dependencies
+        run: python -m pip install requests==2.32.5 Pillow==11.1.0
+      - name: Download pinned public 1.1.64 builds
+        run: |
+          mkdir baselines
+          for edition in General Apple-TV-Mac; do
+            name=BlackLanturn-${edition}-Kodi21-1.1.64.zip
+            curl --fail --location --retry-all-errors --connect-timeout 20 --max-time 180 --retry 3 "https://github.com/RockyB239/blacklanturn/releases/download/v1.1.64/$name?bl_ci=$GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT" -o "baselines/$name"
+          done
+      - name: Build and verify exact packages
+        run: |
+          pipeline=compatibility/streaming-shelves188/release.py
+          python "$pipeline" --baselines baselines --output candidate
+          python tools/verify_release165.py --baseline-version 1.1.64 --installer-version 1.0.55 --artifacts candidate --baselines baselines --output verification.json
+          python "$pipeline" --baselines baselines --output rebuilt
+          cmp candidate/SHA256SUMS rebuilt/SHA256SUMS
+      - uses: actions/upload-artifact@v4
+        with:
+          name: release-verification
+          path: |
+            candidate/SHA256SUMS
+            candidate/source-manifest.json
+            candidate/candidate-packages.json
+            verification.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: verified-release-packages
+          compression-level: 0
+          path: candidate/*.zip

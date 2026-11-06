@@ -12,6 +12,12 @@
       },
       {
         "upstream_version": "6.19.6",
+        "managed_version": "1:6.19.6+blacklanturn.3",
+        "upstream_sha256": "5a4603b72401abe7a061d27b6b897af57d2220ef750c7996f465c32989efba6e",
+        "managed_sha256": "bc4ac29b87a020db6ec47589b8b23ffcaec7a386e571f8d699f226a317ededb0"
+      },
+      {
+        "upstream_version": "6.19.6",
         "managed_version": "1:6.19.6+blacklanturn.1",
         "upstream_sha256": "5a4603b72401abe7a061d27b6b897af57d2220ef750c7996f465c32989efba6e",
         "managed_sha256": "fae6afddfba772c911ea76e3a2ab2d43e36ac21a89ae3347435e5bb01af1c2c5"
