@@ -199,6 +199,39 @@ class PreviewIdentity(unittest.TestCase):
                 verifier = identity.TitleVerifier(fetcher=lambda key: actual)
                 self.assertEqual(verifier.filter([video(1)], [selected]), [video(1)])
 
+    def test_release_year_is_used_as_evidence_without_requiring_it_in_the_title(self):
+        examples = (
+            ('Spartacus Official Trailer #1 - Kirk Douglas, Laurence Olivier Movie (1960) HD', False),
+            ('Spartacus (TV Mini Series 2004) | trailer', True),
+            ('Spartacus Official Trailer | Restored 2024', True),
+        )
+        for actual, match in examples:
+            with self.subTest(actual=actual):
+                verifier = identity.TitleVerifier(fetcher=lambda _: actual)
+                self.assertEqual(verifier.filter([video(1)], ['Spartacus'], media_type='tv', expected_year=2004),
+                                 [video(1)] if match else [])
+
+    def test_other_remakes_and_titles_with_year_like_words(self):
+        examples = (
+            ('The Thing', 1982, 'The Thing (2011) Official Trailer', False),
+            ('The Thing', 1982, 'The Thing Official Trailer', True),
+            ('Dune', 2021, 'Dune Official Trailer #1 (1984)', False),
+            ('Blade Runner 2049', 2017, 'Blade Runner 2049 Official Trailer', True),
+            ('Doctor Who', 2005, 'Doctor Who (1963) Season 1 Official Trailer', False),
+            ('American Horror Story', 2011, 'American Horror Stories (2011) Trailer', False),
+        )
+        for title, year, actual, match in examples:
+            with self.subTest(actual=actual):
+                verifier = identity.TitleVerifier(fetcher=lambda _: actual)
+                self.assertEqual(verifier.filter([video(1)], [title], expected_year=year), [video(1)] if match else [])
+
+    def test_release_year_preference_and_later_numbered_season(self):
+        titles = {f'{1:011d}': 'American Horror Story Season 13 Official Trailer (2026)',
+                  f'{2:011d}': 'American Horror Story (2011) Season 1 Trailer'}
+        verifier = identity.TitleVerifier(fetcher=titles.get)
+        self.assertEqual(verifier.filter([video(1), video(2)], ['American Horror Story'], media_type='tv', expected_year=2011),
+                         [video(2), video(1)])
+
     def test_clearly_delimited_official_trailer_prefix_does_not_break_title_anchor(self):
         for actual in ['Official Trailer: UP (2009)', 'Official Trailer | UP (2009)', 'Official Teaser - UP (2009)']:
             with self.subTest(actual=actual):

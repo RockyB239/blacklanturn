@@ -32,7 +32,7 @@ from icon_packs import icon_path,selected_pack,with_pack,PACK_CHOICES,DEFAULT_PA
 from extensions import inline_request
 from browse_controls import AnimeMetadata,can_choose_genre,should_exclude_anime,page_cards
 from filtered_pages import first_page_keep,first_page_minimum, provider_path,upstream_path,logical_files,needs_fill,fill_page,PageCancelled
-from preview_identity import TitleVerifier
+from preview_identity import TitleVerifier, first_season_aliases, release_year
 from preview_fallback import SecondaryPreviewLookup
 from preview_geometry import preview_fill_viewmode,preview_display_aspect,PreviewRendererGuard,preview_uses_compact_hero
 from preview_bars import PreviewBarScan,PreviewFramingCache,top_aligned_viewmode,framing_key
@@ -2279,7 +2279,10 @@ class LiveReview(LibraryActions,RowCustomization,TitleFeedback,ShelfTools,YouTub
             aliases=tuple(dict.fromkeys(str(item[k]) for k in names if item.get(k))) or (item.get('label',''),)
             helper_profile=Path(xbmcvfs.translatePath('special://profile/'))/'addon_data/plugin.video.themoviedb.helper'
             if identity:aliases=tuple(dict.fromkeys(aliases+tuple(cached_title_aliases(helper_profile,identity))))
-            language=self.config.get('PreviewLanguage','en');cache_key=(key,identity,language,aliases,'verified-title-2')
+            year=release_year(item.get('year')) if identity else ''
+            if identity and not year:year=release_year(str(item.get('premiered') or '').split('-',1)[0])
+            kind=identity[0] if identity else None
+            language=self.config.get('PreviewLanguage','en');cache_key=(key,identity,language,aliases,year,'verified-title-3')
             def current():return self.alive and not self.nav and not getattr(self,'actions_open',False) and not getattr(self,'settings_open',False) and token==self.preview_generation and self.owned_preview and getattr(self,'input_generation',0)==input_generation and (self.selected or {}).get('file')==key
             if not current():return
             cached=self.preview_cache.get(cache_key)
@@ -2292,10 +2295,19 @@ class LiveReview(LibraryActions,RowCustomization,TitleFeedback,ShelfTools,YouTub
                 if not current():return
                 metadata=cached_video_metadata(helper_profile,identity) if identity else {}
                 ranked=preview_candidates(item.get('trailer',''),videos,metadata=metadata,preferred_language=language)
-                candidates=self.preview_title_verifier.filter(ranked,aliases,valid=current,media_type=identity[0] if identity else None)
+                candidates=self.preview_title_verifier.filter(ranked,aliases,valid=current,media_type=kind,expected_year=year)
+                if not current():return
+                if not candidates and kind=='tv' and year and ranked:
+                    try:seasons=get_list(tmdb('seasons','tv',tmdb_id=identity[1]))
+                    except Exception:seasons=[]
+                    if not current():return
+                    extra=first_season_aliases(aliases,seasons)
+                    if extra:
+                        aliases=aliases+extra
+                        candidates=self.preview_title_verifier.filter(ranked,aliases,valid=current,media_type=kind,expected_year=year)
                 if not current():return
                 if not candidates:
-                    candidates=self.preview_secondary_lookup.lookup(candidates,identity,aliases,get_list,self.preview_title_verifier,preferred_language=language,year=item.get('year'),valid=current)
+                    candidates=self.preview_secondary_lookup.lookup(candidates,identity,aliases,get_list,self.preview_title_verifier,preferred_language=language,year=year,valid=current)
                 if not current():return
                 if candidates:
                     self.preview_cache[cache_key]=(time.monotonic(),candidates)

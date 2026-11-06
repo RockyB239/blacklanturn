@@ -20,7 +20,29 @@ _MAX_RESPONSE = 64 * 1024
 _OFFICIAL_PREFIX = re.compile(r'^\s*official\s+(?:trailer|teaser)(?:\s*#?\d+)?\s*[:|\-–—]\s*', re.IGNORECASE)
 _YEAR = re.compile(r'(?:18|19|20|21)\d{2}\Z')
 _QUALITY = re.compile(r'(?:hd|uhd|[248]k|(?:360|480|720|1080|1440|2160|4320)p)\Z')
-_TRAILER_LABELS = (('trailer',), ('teaser',), ('final', 'trailer'), ('red', 'band', 'trailer'))
+_TRAILER_LABELS = (('trailer',), ('teaser',), ('final', 'trailer'), ('red', 'band', 'trailer'),
+                   ('green', 'band', 'trailer'), ('uncensored', 'red', 'band', 'trailer'))
+_EDITION_LABELS = (('movie',), ('film',), ('miniseries',), ('mini', 'series'),
+                   ('tv', 'series'), ('tv', 'miniseries'), ('tv', 'mini', 'series'))
+_POST_MARKER_YEAR = re.compile(
+    r'\b(?:trailer|teaser)(?:\s*#\s*\d+)?\s*[([]\s*((?:18|19|20|21)\d{2})\s*[)\]]', re.I)
+_EDITION_YEAR = re.compile(
+    r'\b(?:movie|film|(?:tv\s+)?(?:mini[ -]?)?series)\s*[([]?\s*((?:18|19|20|21)\d{2})\b', re.I)
+_LATER_SEASON = re.compile(r'\b(?:season|installment)\s*0*(\d{1,2})\b', re.I)
+
+
+def release_year(value):
+    year = str(value)
+    return year if _YEAR.fullmatch(year) else ''
+
+
+def first_season_aliases(titles, seasons):
+    name = next((str(row.get('title') or row.get('label') or '').strip()
+                 for row in seasons if row.get('season') == 1), '')
+    if not name or re.fullmatch(r'(?:(?:season|series)\s*0*1|mini[ -]?series)', name, re.I):
+        return ()
+    suffix = _tokens(name)
+    return tuple(f'{title}: {name}' for title in titles if suffix and title and _tokens(title)[-len(suffix):] != suffix)
 
 
 def _public_title_opener():
@@ -89,6 +111,7 @@ def _preview_suffix(tokens, media_type=None, expected_year=None):
     marketing text can follow. A delimiter alone never establishes that boundary.
     """
     index = 0
+    later_tv_season = False
     while index < len(tokens):
         token = tokens[index]
         # Modifiers are accepted only as a complete trailer label. They cannot
@@ -101,9 +124,17 @@ def _preview_suffix(tokens, media_type=None, expected_year=None):
         if token == 'season' or token == 'installment' and media_type == 'tv':
             if index + 1 >= len(tokens) or not re.fullmatch(r'\d{1,2}', tokens[index + 1]):
                 return False
+            later_tv_season = media_type == 'tv' and int(tokens[index + 1]) > 1
             index += 2
             continue
-        if _YEAR.fullmatch(token) and expected_year and token != str(expected_year):
+        edition = next((label for label in _EDITION_LABELS
+                        if tokens[index:index + len(label)] == label
+                        and index + len(label) < len(tokens)
+                        and _YEAR.fullmatch(tokens[index + len(label)])), None)
+        if edition:
+            index += len(edition)
+            continue
+        if _YEAR.fullmatch(token) and expected_year and not later_tv_season and token != str(expected_year):
             return False
         if token == 'series' or _YEAR.fullmatch(token) or _QUALITY.fullmatch(token):
             index += 1
@@ -112,10 +143,26 @@ def _preview_suffix(tokens, media_type=None, expected_year=None):
     return True
 
 
-def _matches(actual, aliases, media_type=None, expected_year=None):
-    tokens = _tokens(_OFFICIAL_PREFIX.sub('', actual))
-    return any(tokens[:len(alias)] == alias and _preview_suffix(tokens[len(alias):], media_type=media_type, expected_year=expected_year)
-               for alias in aliases)
+def _match_rank(actual, aliases, media_type=None, expected_year=None):
+    title = _OFFICIAL_PREFIX.sub('', actual)
+    tokens = _tokens(title)
+    expected = release_year(expected_year)
+    season = _LATER_SEASON.search(title) if media_type == 'tv' else None
+    later_season = bool(season and int(season[1]) > 1)
+    edition = _EDITION_YEAR.search(title)
+    trailer_year = _POST_MARKER_YEAR.search(title) if not later_season else None
+    claims = [m[1] for m in (edition, trailer_year) if m]
+    if expected and any(year != expected for year in claims):
+        return None
+    for alias in aliases:
+        suffix = tokens[len(alias):]
+        if tokens[:len(alias)] != alias or not _preview_suffix(suffix, media_type=media_type,
+                                                               expected_year=expected):
+            continue
+        if expected and not later_season and (expected in claims or expected in suffix[:1]):
+            return 0
+        return 1
+    return None
 
 
 class TitleVerifier:
@@ -191,4 +238,10 @@ class TitleVerifier:
             actual_titles = [future.result() for future in futures]
         if len(actual_titles) != len(candidates) or any(title is None for title in actual_titles) or not valid():
             return []
-        return [url for (url, _), actual in zip(candidates, actual_titles) if _matches(actual, aliases, media_type=media_type, expected_year=expected_year)]
+        matches = []
+        for (url, _), actual in zip(candidates, actual_titles):
+            rank = _match_rank(actual, aliases, media_type, expected_year)
+            if rank is not None:
+                matches.append((rank, url))
+        matches.sort(key=lambda match: match[0])
+        return [url for _, url in matches]

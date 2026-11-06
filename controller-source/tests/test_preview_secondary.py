@@ -104,6 +104,17 @@ class SecondaryPreviewTests(unittest.TestCase):
                      row(2, 'Example Season 1 Trailer')]
         self.titles.update({'00000000001': self.rows[0]['label'], '00000000002': self.rows[1]['label']})
         self.assertEqual(self.run_lookup(), [row(2)['file'], row(1)['file']])
+    def test_tv_search_tries_year_first_then_preserves_yearless_fallback(self):
+        self.rows = [row(1)]
+        def load(path):
+            self.lookups.append(path)
+            q = parse_qs(urlsplit(path).query)['q'][0]
+            return [] if '2004' in q else self.rows
+        result = self.lookup.lookup((), ('tv', '123'), ('Example',), load, self.verifier, year=2004)
+        self.assertEqual(result, [row(1)['file']])
+        self.assertEqual([parse_qs(urlsplit(p).query)['q'][0] for p in self.lookups],
+                         ['"Example" 2004 season 1 official trailer', '"Example" season 1 official trailer'])
+
     def test_movie_search_includes_release_year_without_season_terms(self):
         self.lookup.lookup((), ('movie', '123'), ('Example',), self.load, self.verifier, year=1982)
         query = parse_qs(urlsplit(self.lookups[0]).query)

@@ -4,7 +4,7 @@ from pathlib import Path
 from types import SimpleNamespace,MethodType
 sys.path.insert(0,str(Path(__file__).parents[1]/'addon'))
 from live_core import preview_candidates,PreviewAttempts
-from preview_identity import TitleVerifier
+from preview_identity import TitleVerifier, first_season_aliases, release_year
 from preview_fallback import SecondaryPreviewLookup
 from youtube_core import preview_path,video_id
 class AccuracyFlow(unittest.TestCase):
@@ -16,8 +16,10 @@ class AccuracyFlow(unittest.TestCase):
    def start(self):self.target()
   def load(path):
    self.calls.append(path)
+   if path.startswith("(('seasons',"):
+    return getattr(self,'seasons',[])
    return getattr(self,'secondary_videos',[]) if path.startswith('plugin://plugin.video.youtube/kodion/search/') else self.videos
-  ns={'youtube_preview_path':preview_path,'youtube_video_id':video_id,'time':SimpleNamespace(monotonic=lambda:self.clock[0]),'threading':SimpleNamespace(Thread=Thread),'event':lambda *a,**k:None,'tmdb':lambda *a,**k:str((a,k)),'get_list':load,'cached_video_metadata':lambda *a:{},'cached_title_aliases':lambda *a:[],'preview_candidates':preview_candidates,'PreviewAttempts':PreviewAttempts,'Path':Path,'xbmcvfs':SimpleNamespace(translatePath=lambda _:'.')}
+  ns={'youtube_preview_path':preview_path,'youtube_video_id':video_id,'time':SimpleNamespace(monotonic=lambda:self.clock[0]),'threading':SimpleNamespace(Thread=Thread),'event':lambda *a,**k:None,'tmdb':lambda *a,**k:str((a,k)),'get_list':load,'cached_video_metadata':lambda *a:{},'cached_title_aliases':lambda *a:[],'first_season_aliases':first_season_aliases,'release_year':release_year,'preview_candidates':preview_candidates,'PreviewAttempts':PreviewAttempts,'Path':Path,'xbmcvfs':SimpleNamespace(translatePath=lambda _:'.')}
   exec(compile(ast.Module(body=[node],type_ignores=[]),str(source),'exec'),ns)
   o=SimpleNamespace(config={'PreviewLanguage':'en'},selected={'file':'selected-path','title':'American Horror Story','trailer':self.videos[0]['file']},alive=True,nav=False,player=SimpleNamespace(isPlaying=lambda:False),owned_preview=False,preview_generation=0,input_generation=0,dwell=0,preview_cache={},preview_dispatch_lock=threading.RLock(),setProperty=lambda *a:None,rating_identity=lambda item:('tv','1413'),play_preview_candidate=lambda url,*a:self.effects.append(url),preview_title_verifier=TitleVerifier(fetcher=fetcher,clock=lambda:self.clock[0]),preview_secondary_lookup=SecondaryPreviewLookup(clock=lambda:self.clock[0]))
   def stop():o.preview_generation+=1;o.owned_preview=False
@@ -65,6 +67,15 @@ class AccuracyFlow(unittest.TestCase):
   self.assertEqual(self.effects,['plugin://plugin.video.youtube/play/?video_id=2cFhUp_2N00'])
   self.assertEqual(o.selected,before);self.assertEqual(len(self.calls),2)
   o.preview();self.assertEqual(len(self.calls),2,'successful result must reuse existing preview cache')
+ def test_primary_explicit_other_edition_is_rejected(self):
+  o=self.state(lambda key:'Spartacus Official Trailer #1 - Kirk Douglas Movie (1960) HD');o.selected.update(title='Spartacus',year=2004);o.preview()
+  self.assertEqual(self.effects,[None])
+ def test_first_season_name_from_selected_show_reuses_primary_video(self):
+  o=self.state(lambda key:'Spartacus: Blood and Sand | Official Trailer | STARZ','yHxn8mTpAJU')
+  o.selected.update(title='Spartacus',year=2010);o.rating_identity=lambda item:('tv','46296')
+  self.seasons=[{'season':1,'title':'Blood and Sand'}];o.preview()
+  self.assertEqual(self.effects,[self.videos[0]['file']]);self.assertEqual(len(self.calls),2)
+
  def test_approved_normal_preview_makes_no_secondary_request(self):
   o=self.state(lambda key:'American Horror Story Official Trailer');o.preview()
   self.assertEqual(len(self.calls),1);self.assertFalse(any('search/query' in p for p in self.calls))
