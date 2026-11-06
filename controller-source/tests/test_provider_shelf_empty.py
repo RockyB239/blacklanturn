@@ -1,5 +1,6 @@
 """Check that the provider bridge completes only authoritative empty shelves."""
 import ast
+import re
 from pathlib import Path
 from types import SimpleNamespace
 import unittest
@@ -31,7 +32,7 @@ class ProviderShelfEmpty(unittest.TestCase):
         nodes = [node for node in ast.parse(SOURCE.read_text()).body
                  if getattr(node, 'name', '') in names]
         ns = {'ListStandard': ListStandard, 'ListDiscoverProperties': object,
-              'ListStandardProperties': ListStandardProperties, 'cached_property': property}
+              'ListStandardProperties': ListStandardProperties, 'cached_property': property, 're': re}
         for node in nodes:
             if getattr(node, 'name', '') == 'ListDiscoverStandardProperties':
                 node.bases = node.bases[1:]
@@ -41,7 +42,8 @@ class ProviderShelfEmpty(unittest.TestCase):
         discover.items = items
         discover.handle = handle
         discover.is_localonly = False
-        discover.params = {'tmdb_type': 'tv', 'widget': 'false', 'with_watch_providers': '11',
+        discover.params = {'tmdb_type': 'tv', 'widget': 'false', 'with_id': 'true', 'nextpage': 'true',
+                           'with_watch_providers': '11',
                            'watch_region': 'US', 'with_genres': '10759', **params}
         properties = discover.list_properties = ns['ListDiscoverStandardProperties']()
         properties.discover_params = discover.params
@@ -81,8 +83,12 @@ class ProviderShelfEmpty(unittest.TestCase):
         self.assertEqual(calls, [])
 
     def test_other_discover_and_internal_routes_do_not_complete_early(self):
-        for options in ({'handle': -1}, {'with_watch_providers': ''}, {'widget': 'true'}):
+        for options in ({'handle': -1}, {'with_watch_providers': ''}, {'with_watch_providers': '11|8'},
+                        {'widget': 'true'}, {'nextpage': 'false'}, {'with_id': ''},
+                        {'watch_region': 'USA'}, {'page': '2'}):
             with self.subTest(options=options):
                 discover, calls = self.state(**options)
                 self.assertIsNone(discover.get_directory_items())
                 self.assertEqual(calls, [])
+                if options.get('handle') != -1:
+                    self.assertEqual(discover.list_properties.cache_name_tuple, ('original',))

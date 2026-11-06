@@ -1,4 +1,6 @@
 # -*- coding: utf-8 -*-
+import re
+
 from jurialmunkey.ftools import cached_property
 from jurialmunkey.parser import try_int, split_items
 from tmdbhelper.lib.addon.tmdate import get_datetime_now, get_timedelta
@@ -129,8 +131,11 @@ class ListDiscoverProperties:
 
 
 def provider_shelf_route(params):
-    return (params.get('tmdb_type') in ('movie', 'tv') and params.get('widget') == 'false'
-            and params.get('with_watch_providers') and params.get('watch_region'))
+    return (params.get('tmdb_type') in ('movie', 'tv')
+            and params.get('with_id') == params.get('nextpage') == 'true'
+            and params.get('widget') == 'false' and str(params.get('page', '1')) == '1'
+            and re.fullmatch(r'[1-9][0-9]{0,8}', params.get('with_watch_providers', ''))
+            and re.fullmatch(r'[A-Z]{2}', params.get('watch_region', '')))
 
 
 class ListDiscoverStandardProperties(ListDiscoverProperties, ListStandardProperties):
@@ -155,8 +160,7 @@ class ListDiscoverStandardProperties(ListDiscoverProperties, ListStandardPropert
                 or any(type(response.get(key)) is not int for key in ('page', 'total_pages', 'total_results'))):
             raise RuntimeError('Provider shelf did not return a valid empty result')
         pages, total = response['total_pages'], response['total_results']
-        if (response['page'] != self.page or pages < 0 or total < 0
-                or not ((total == 0 and pages <= 1) or (total > 0 and 0 < pages < self.page))):
+        if response['page'] != 1 or pages not in (0, 1) or total != 0:
             raise RuntimeError('Provider shelf did not return a valid empty result')
         return dict(data, provider_empty=True)
 
