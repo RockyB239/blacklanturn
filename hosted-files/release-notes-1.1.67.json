@@ -1,0 +1,14 @@
+{
+  "title": "BlackLanturn Build 1.1.67",
+  "summary": "More rows for streaming services with larger catalogs.",
+  "sections": [
+    {
+      "heading": "Streaming services",
+      "bullets": [
+        "Browse more genres on services such as Netflix while smaller catalogs stay compact.",
+        "Rows appear once titles are ready, and empty rows stay out of the way.",
+        "The Browse Movies shortcut matches the other title buttons."
+      ]
+    }
+  ]
+}

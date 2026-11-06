@@ -2,6 +2,56 @@
   "schema": 1,
   "releases": [
     {
+      "id": "blacklanturn-general-1.1.67-r0",
+      "edition": "general",
+      "version": "1.1.67",
+      "revision": 0,
+      "title": "BlackLanturn Build 1.1.67",
+      "summary": "More rows for streaming services with larger catalogs.",
+      "sections": [
+        {
+          "heading": "Streaming services",
+          "bullets": [
+            "Browse more genres on services such as Netflix while smaller catalogs stay compact.",
+            "Rows appear once titles are ready, and empty rows stay out of the way.",
+            "The Browse Movies shortcut matches the other title buttons."
+          ]
+        }
+      ],
+      "files": {
+        "addons/script.blacklanturn.preview/adaptive_services.py": "92782daad7a3a46422130ac414369ef801c0d111d8edff49829f7aa8709ce29a",
+        "addons/script.blacklanturn.preview/addon.xml": "27a63119ddbba4ea624b66587e22c926ade3b9985983bc47804672672c5bbbd5",
+        "addons/script.blacklanturn.preview/live_review.py": "97d0d954ce24d4ce8890ccaf3445117831a3b997bf0e2d0d18903cc0087ae2b8",
+        "addons/script.blacklanturn.preview/resources/skins/Default/1080i/LiveReview.xml": "ed3f439c0ff5f76dc818ae41616dabe0976699b41e876bef73a2ce35b1eb8103",
+        "addons/script.blacklanturn.preview/streaming_shelves.py": "a4a1e5671ef393f074dd79bac38692170ce77b9eb36491d88efba11a5fa26e61"
+      }
+    },
+    {
+      "id": "blacklanturn-apple-1.1.67-r0",
+      "edition": "apple",
+      "version": "1.1.67",
+      "revision": 0,
+      "title": "BlackLanturn Build 1.1.67",
+      "summary": "More rows for streaming services with larger catalogs.",
+      "sections": [
+        {
+          "heading": "Streaming services",
+          "bullets": [
+            "Browse more genres on services such as Netflix while smaller catalogs stay compact.",
+            "Rows appear once titles are ready, and empty rows stay out of the way.",
+            "The Browse Movies shortcut matches the other title buttons."
+          ]
+        }
+      ],
+      "files": {
+        "addons/script.blacklanturn.preview/adaptive_services.py": "92782daad7a3a46422130ac414369ef801c0d111d8edff49829f7aa8709ce29a",
+        "addons/script.blacklanturn.preview/addon.xml": "27a63119ddbba4ea624b66587e22c926ade3b9985983bc47804672672c5bbbd5",
+        "addons/script.blacklanturn.preview/live_review.py": "97d0d954ce24d4ce8890ccaf3445117831a3b997bf0e2d0d18903cc0087ae2b8",
+        "addons/script.blacklanturn.preview/resources/skins/Default/1080i/LiveReview.xml": "ed3f439c0ff5f76dc818ae41616dabe0976699b41e876bef73a2ce35b1eb8103",
+        "addons/script.blacklanturn.preview/streaming_shelves.py": "a4a1e5671ef393f074dd79bac38692170ce77b9eb36491d88efba11a5fa26e61"
+      }
+    },
+    {
       "id": "blacklanturn-general-1.1.65-r0",
       "edition": "general",
       "version": "1.1.65",

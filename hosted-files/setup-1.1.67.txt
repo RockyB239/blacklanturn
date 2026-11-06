@@ -1,0 +1,17 @@
+BlackLanturn Build 1.1.67
+BlackLanturn Installer 1.0.55
+Kodi 21.3 Omega
+
+Choose your edition
+General is for Android TV and Fire TV. Apple TV & Mac is for compatible Kodi applications on Apple devices. Native playback components remain managed by Kodi for the device.
+
+Update an existing installation
+Open Kodi Settings > Add-ons > My add-ons > Program add-ons > BlackLanturn Installer > Versions. If your Installer is older than 1.0.55, install 1.0.55 from BlackLanturn Repository and restart Kodi. Open BlackLanturn Installer, choose Update BlackLanturn, then select your installed edition. The Update action preserves saved settings, sign-ins, history and unrelated add-ons. The Installer selects the appropriate update download automatically.
+
+First installation
+Add the BlackLanturn source, install repository.blacklanturn.zip, install BlackLanturn Installer 1.0.55 from the repository, then choose the matching build and install mode.
+
+Reinstall options
+Standard Install reinstalls the build while preserving selected accounts and supported preferences. Clean Install applies build defaults while retaining selected accounts. Use Update BlackLanturn for an existing installation when keeping its saved setup.
+
+Apply the archives with BlackLanturn Installer. Keep your recovery backup until you have checked the updated installation. Build payloads are available from the BlackLanturn GitHub release; the repository source supplies the repository and Installer downloads.
