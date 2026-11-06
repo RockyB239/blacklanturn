@@ -137,6 +137,12 @@ def get_list(path):
         return catalogue_items(result.get('result',{}).get('addons',[]),category)
     result=rpc('Files.GetDirectory',{'directory':path,'media':'video','properties':PROPERTIES})
     if 'error' in result:event('directory_rpc_error',message=result['error'].get('message'))
+    elif 'with_watch_providers' in query:
+        from streaming_cache import streaming_route
+        if streaming_route(path)=='titles':
+            directory=result.get('result')
+            if not isinstance(directory,dict) or not isinstance(directory.get('files'),list):
+                raise ValueError('Streaming shelf returned an invalid directory')
     files=directory_items(result)
     if urlsplit(path).netloc=='plugin.video.youtube':
         from youtube_artwork import cached_fit_cards
@@ -816,7 +822,7 @@ class LiveReview(LibraryActions,RowCustomization,TitleFeedback,ShelfTools,YouTub
             filled=self.fill_discovery_page(path,[],current,refresh=definition.get('_snapshot_refresh',False),minimum=first_page_minimum(definition))
             if filtered_snapshot:remember_snapshot_fill(filled)
             return filled
-        files=None if definition.get('_snapshot_refresh') else cache.get(path)
+        files=None if definition.get('_snapshot_refresh') or definition.get('_streaming_retry') else cache.get(path)
         if files is None:
             params=parse_qs(urlsplit(path).query)
             snapshot_owner=getattr(self,'snapshot_cache',None)
@@ -827,10 +833,10 @@ class LiveReview(LibraryActions,RowCustomization,TitleFeedback,ShelfTools,YouTub
             else:
                 request=getattr(self,'genre_request',None)
                 files=None
-                if request is not None and request[1] is cache and request[2]==revision and not definition.get('_snapshot_refresh'):
+                if request is not None and request[1] is cache and request[2]==revision and not (definition.get('_snapshot_refresh') or definition.get('_streaming_retry')):
                     files=request[0].take(path,current)
                     if files:event('genre_lookahead_reused')
-                if not files:files=get_list(provider_path(path))
+                if files is None or (not files and not definition.get('_explicit_streaming')):files=get_list(provider_path(path))
             with self.preview_dispatch_lock:
                 if not current():raise PageCancelled('Row navigation changed')
                 if self.configure_row_snapshots():self.restart_pending_rows()
@@ -839,7 +845,8 @@ class LiveReview(LibraryActions,RowCustomization,TitleFeedback,ShelfTools,YouTub
                 # retain only account-owned display fields. A failed/unfinished
                 # filtered fill must not replace the last successful display.
                 info=parse_qs(urlsplit(path).query).get('info',[''])[0]
-                cache.put(path,files,revision=revision,ttl=30 if info.startswith('trakt') else 120,allow_empty=info.startswith('trakt'))
+                cache.put(path,files,revision=revision,ttl=30 if info.startswith('trakt') else 120,
+                          allow_empty=info.startswith('trakt') or definition.get('_explicit_streaming',False))
                 if not filtered_snapshot and revision==cache.revision and snapshots is not None and any(snapshots is getattr(self,key,None) for key in ('snapshot_cache','home_snapshot_cache')):snapshots.put(path,files,revision=snapshot_revision)
             if streaming is not None and current() and snapshot_owner is getattr(self,'snapshot_cache',None):
                 stored=streaming.put(path,files,revision=streaming_revision)
@@ -883,7 +890,8 @@ class LiveReview(LibraryActions,RowCustomization,TitleFeedback,ShelfTools,YouTub
         # provider cache. Retain even [] until navigation consumes the result.
         deferred={'files':copy.deepcopy(files),'path':path,'history':self.histories[n],'label':label,'position':restored_position(files,anchor,position),'state':'ready' if files else 'empty','failed':None,'message':row_message(label,'ready' if files else 'empty'),'snapshot':False,'deferred':True,'revision':owner[1]}
         if not current():return
-        self.row_cache[self.row_offset+n]=deferred
+        index=self.row_definition_index(n) if getattr(self,'streaming_shelf_view',lambda:False)() else self.row_offset+n
+        self.row_cache[index]=deferred
         trim_row_cache(self.row_cache,self.row_offset)
         if not current():return
         if hasattr(self,'hydrate_title_row'):self.hydrate_title_row(n,files)
@@ -918,7 +926,7 @@ class LiveReview(LibraryActions,RowCustomization,TitleFeedback,ShelfTools,YouTub
                 if not owned():return None
                 # Keep the original completion-time expiry if the picker stays
                 # open. Selecting a completed request reads this same cache.
-                cache.put(path,files,revision=revision,ttl=120)
+                cache.put(path,files,revision=revision,ttl=120,allow_empty=True)
             return files
         return StreamingLookahead(fetch,cached),cache,revision
 
@@ -976,6 +984,15 @@ class LiveReview(LibraryActions,RowCustomization,TitleFeedback,ShelfTools,YouTub
         definitions=getattr(self,'page_definitions',[])
         return bool(definitions and definitions[0].get('_explicit_streaming'))
 
+    def streaming_shelf_index(self,start,direction):
+        for index in range(start,len(self.page_definitions) if direction>0 else -1,direction):
+            if self.result_cache.get(self.page_definitions[index]['path'])!=[]:return index
+        return None
+
+    def row_definition_index(self,n):
+        if n==1 and self.streaming_shelf_view():return getattr(self,'streaming_lower_index',self.row_offset+1)
+        return self.row_offset+n
+
     def show_row_window(self,offset,focus_slot=None):
         from filtered_pages import path_minimum
         scope_changed=self.configure_row_snapshots()
@@ -983,8 +1000,9 @@ class LiveReview(LibraryActions,RowCustomization,TitleFeedback,ShelfTools,YouTub
         streaming=getattr(self,'streaming_shelf_view',lambda:False)()
         if offset!=self.row_offset and not scope_changed:
             for n in range(2):
-                if self.window_ready[n] and (not streaming or self.rows[n]):
-                    index=self.row_offset+n;previous=self.row_cache.get(index);position=self.getControl(900+n).getSelectedPosition()
+                if self.window_ready[n] and (not streaming or self.rows[n] or self.row_states.get(n)=='error'):
+                    index=self.row_definition_index(n) if streaming else self.row_offset+n
+                    previous=self.row_cache.get(index);position=self.getControl(900+n).getSelectedPosition()
                     raw=getattr(self,'raw_title_row',lambda slot:self.rows[slot])(n)
                     anchor=self.rows[n][position] if 0<=position<len(self.rows[n]) else None
                     position=restored_position(raw,anchor,position)
@@ -995,11 +1013,17 @@ class LiveReview(LibraryActions,RowCustomization,TitleFeedback,ShelfTools,YouTub
         trim_row_cache(self.row_cache,offset)
         self.setProperty('youtubeRowEnd','false')
         self.row_states={};self.failed_paths={};self.path_tokens={};self.loading_paths={};self.snapshot_rows={}
-        if streaming:self.streaming_step=None;self.row_window_busy=False
+        if streaming:
+            self.streaming_step=None;self.row_window_busy=False
+            self.setProperty('streamingRetryLabel','')
         for n in range(2):self.setProperty('rowState'+str(n),'');self.setProperty('rowMessage'+str(n),'')
         self.stop_preview();self.selected=None;self.generation+=1;generation=self.generation
         if getattr(self,'search_state',None):clear_search_selection(self)
         self.row_offset=offset;self.focus_key=None;self.window_ready=[False,False];definitions=self.page_definitions[offset:offset+2]
+        if streaming:
+            self.streaming_lower_index=self.streaming_shelf_index(offset+1,1)
+            definitions=[self.page_definitions[offset]]
+            if self.streaming_lower_index is not None:definitions.append(self.page_definitions[self.streaming_lower_index])
         addon_browser=getattr(self,'section','')=='Add-ons' and not (getattr(self,'search_state',None) or getattr(self,'episode_browser_context',None) or getattr(self,'discovery_stack',[]))
         self.setProperty('addonBrowser','true' if addon_browser else 'false')
         self.setProperty('heroCompact','true' if streaming or (getattr(self,'adaptive_browsing',False) and (getattr(self,'fixed_hero',False) or offset>0 or addon_browser or self.getProperty('captionRows')=='true')) else 'false')
@@ -1007,13 +1031,14 @@ class LiveReview(LibraryActions,RowCustomization,TitleFeedback,ShelfTools,YouTub
         pending=[]
         for n in range(2):
             if generation!=self.generation:return
-            index=offset+n;cached=self.row_cache.get(index)
+            index=self.row_definition_index(n) if streaming else offset+n
+            cached=self.row_cache.get(index)
             if cached and cached.get('deferred') and cached.get('revision')!=revision:
                 cached=dict(cached,files=None,deferred=False);self.row_cache[index]=cached
             metadata=getattr(self,'anime_metadata',None)
             if cached and cached.get('files') is not None and metadata is not None and should_exclude_anime(self,cached['path']) and needs_fill(cached['path'],cached['files'],first_page_keep(self,cached['path'],metadata.without_anime),positioned=True,size=path_minimum(self,cached['path'])):
                 cached=dict(cached,files=None,deferred=False);self.row_cache[index]=cached
-            if n>=len(definitions) or (streaming and n==1 and not (cached and cached.get('files'))):
+            if n>=len(definitions) or (streaming and n==1 and not (cached and (cached.get('files') or cached.get('state')=='error'))):
                 self.paths[n]='';self.histories[n]=PageHistory();self.apply_row(n,[],'')
                 if streaming and n<len(definitions):self.setProperty('row1',definitions[n]['label'])
                 continue
@@ -1033,9 +1058,12 @@ class LiveReview(LibraryActions,RowCustomization,TitleFeedback,ShelfTools,YouTub
                 cached['deferred']=False
                 if cached.get('state')=='error':
                     self.row_states[n]='error';self.setProperty('rowState'+str(n),'ready' if cached['files'] else 'error');self.setProperty('rowMessage'+str(n),cached.get('message',''))
-                    self.setProperty('row'+str(n),cached['label'])
+                    self.setProperty('row'+str(n),cached['label']+(' · Unavailable' if streaming else ''))
+                    if streaming:
+                        self.setProperty('notice',cached.get('message',''))
+                        if n==0 and not files:self.setProperty('streamingRetryLabel','Retry shelf')
                     if cached.get('failed'):self.failed_paths[n]=copy.deepcopy(cached['failed'])
-                if (cached.get('snapshot') or streaming) and fresh is None:
+                if (cached.get('snapshot') or streaming) and fresh is None and not (streaming and cached.get('state')=='error'):
                     self.snapshot_rows[n]=True
                     pending.append((n,dict(definitions[n],path=cached['path'],label=cached['label'],position=cached['position'],_snapshot_refresh=True)))
             else:
@@ -1082,9 +1110,9 @@ class LiveReview(LibraryActions,RowCustomization,TitleFeedback,ShelfTools,YouTub
             from settled_row_refresh import defer_refreshes
             pending=defer_refreshes(self,pending,focus_slot)
             foreground=False
-            if len(pending)==1 and pending[0][1].get('_explicit_streaming'):
+            if pending and all(definition.get('_explicit_streaming') for _,definition in pending):
                 from streaming_cache import streaming_route
-                foreground=streaming_route(pending[0][1]['path']) is not None
+                foreground=all(streaming_route(definition['path']) is not None for _,definition in pending)
             self.row_window_busy=bool(pending)
             def current(n,definition):
                 return (self.alive and generation==self.generation and revision==self.result_cache.revision
@@ -1099,7 +1127,12 @@ class LiveReview(LibraryActions,RowCustomization,TitleFeedback,ShelfTools,YouTub
                                 files=self.cached_row_items(definition,expected_revision=revision,owner_current=lambda n=n,definition=definition:current(n,definition))
                             with self.preview_dispatch_lock:
                                 if current(n,definition):
-                                    if definition.get('_snapshot_refresh'):self.apply_refreshed_row(n,files,definition['label'])
+                                    if definition.get('_streaming_retry'):self.failed_paths.pop(n,None)
+                                    if definition.get('_snapshot_refresh'):
+                                        self.apply_refreshed_row(n,files,definition['label'])
+                                        if definition.get('_streaming_retry'):
+                                            self.row_states[n]='ready';self.setProperty('row'+str(n),definition['label'])
+                                            self.setProperty('rowState'+str(n),'ready');self.setProperty('rowMessage'+str(n),'')
                                     else:self.apply_row(n,files,definition['label'],definition.get('position',0),**({'ranked_start':True} if definition.get('_ranked_start') else {}),**({'display_position':True} if definition.get('_display_position') else {}))
                                     if definition.get('_failed_page'):
                                         retained=definition['_failed_page'];self.failed_paths[n]=retained['request'];self.row_states[n]='error'
@@ -1119,8 +1152,11 @@ class LiveReview(LibraryActions,RowCustomization,TitleFeedback,ShelfTools,YouTub
                                     retained=bool(self.rows[n]) if definition.get('_snapshot_refresh') else False
                                     if not retained:self.apply_row(n,[],definition['label'])
                                     self.failed_paths[n]={'path':definition['path'],'label':definition['label'],'back':True,'position':definition.get('position',0)}
-                                    self.row_states[n]='error';self.setProperty('row'+str(n),definition['label']+(' · Search unavailable' if getattr(self,'search_state',None) else ' · Unavailable'));self.setProperty('rowState'+str(n),'ready' if retained else 'error');self.setProperty('rowMessage'+str(n),row_message(definition['label'],'error',search=bool(getattr(self,'search_state',None))))
-                                    self.setProperty('notice','List unavailable · Open title actions to retry or check its integration in Settings.')
+                                    self.row_states[n]='error';self.setProperty('row'+str(n),definition['label']+(' · Search unavailable' if getattr(self,'search_state',None) else ' · Unavailable'));self.setProperty('rowState'+str(n),'ready' if retained else 'error')
+                                    message=row_message(definition['label'],'error',search=bool(getattr(self,'search_state',None)),streaming=foreground)
+                                    self.setProperty('rowMessage'+str(n),message)
+                                    self.setProperty('notice',message if foreground else 'List unavailable · Open title actions to retry or check its integration in Settings.')
+                                    if foreground and n==0 and not retained:self.setProperty('streamingRetryLabel','Retry shelf')
                             event('row_error',row=n,error=str(exc))
                     if self.alive and generation==self.generation and serial==self.row_request_serial and revision==self.result_cache.revision and getattr(self,'pending_sidebar_return',False):self.restore_sidebar_focus()
                 finally:
@@ -1133,8 +1169,8 @@ class LiveReview(LibraryActions,RowCustomization,TitleFeedback,ShelfTools,YouTub
         pending=[]
         for n,path in enumerate(self.paths):
             if self.window_ready[n] and not getattr(self,'snapshot_rows',{}).get(n):continue
-            index=self.row_offset+n
-            definition=dict(self.page_definitions[index]) if index<len(self.page_definitions) else {}
+            index=self.row_definition_index(n) if getattr(self,'streaming_shelf_view',lambda:False)() else self.row_offset+n
+            definition=dict(self.page_definitions[index]) if index is not None and index<len(self.page_definitions) else {}
             if not path and 'local_items' not in definition:continue
             label=definition.get('label',self.getProperty('row'+str(n))) if not self.window_ready[n] else getattr(self,'row_labels',{}).get(n,self.getProperty('row'+str(n)))
             definition.update(path=path,label=label,position=self.getControl(900+n).getSelectedPosition())
@@ -1307,17 +1343,22 @@ class LiveReview(LibraryActions,RowCustomization,TitleFeedback,ShelfTools,YouTub
         return True
 
     def load_next_streaming_shelf(self,prefetch=False):
-        if not self.rows[0] or self.row_offset+1>=len(self.page_definitions):return False
+        if not self.rows[0]:return False
         if self.rows[1]:
-            if not prefetch:self.show_row_window(self.row_offset+1,0)
+            if not prefetch:self.show_row_window(self.streaming_lower_index,0)
             return True
+        index=self.streaming_shelf_index(self.row_offset+1,1)
+        if index is None:return False
+        if index!=self.streaming_lower_index:
+            self.streaming_lower_index=index
+            self.paths[1]=''
         if self.paths[1]:
             if prefetch or self.window_ready[1] or getattr(self,'streaming_step',None):return False
         if not prefetch:
             self.stop_preview()
             self.streaming_step=(self.generation,self.getControl(900).getSelectedPosition())
         if self.paths[1]:return True
-        definition=self.page_definitions[self.row_offset+1]
+        definition=self.page_definitions[index]
         self.paths[1]=definition['path'];self.window_ready[1]=False
         self.setProperty('row1',definition['label']+' · Loading…')
         self.setProperty('rowState1','loading')
@@ -1331,12 +1372,21 @@ class LiveReview(LibraryActions,RowCustomization,TitleFeedback,ShelfTools,YouTub
 
     def settle_streaming_shelf(self):
         step=getattr(self,'streaming_step',None)
-        if step is None:return
+        if step is None:
+            if (self.row_states.get(0)=='empty' and not self.getProperty('rowState0')
+                    and self.getFocusId()==611 and not self.actions_open
+                    and not getattr(self,'row_window_busy',False)):
+                index=self.streaming_shelf_index(self.row_offset+1,1)
+                if index is not None:self.show_row_window(index,0)
+                elif self.getProperty('notice')!='No titles available in this streaming catalog.':
+                    self.setProperty('notice','No titles available in this streaming catalog.')
+            return
         if step!=(self.generation,self.getControl(900).getSelectedPosition()) or self.getFocusId()!=900 or self.actions_open:
             self.streaming_step=None
-        elif self.window_ready[1]:
+        elif self.window_ready[1] and not getattr(self,'row_window_busy',False):
             self.streaming_step=None
-            if self.rows[1]:self.show_row_window(self.row_offset+1,0)
+            if self.rows[1]:self.show_row_window(self.streaming_lower_index,0)
+            elif self.row_states.get(1)=='empty' and not self.getProperty('rowState1'):self.load_next_streaming_shelf()
 
     def step_streaming_shelves(self,direction,slot):
         if direction<0 and slot==1 and self.rows[0]:
@@ -1345,8 +1395,9 @@ class LiveReview(LibraryActions,RowCustomization,TitleFeedback,ShelfTools,YouTub
         # A second Down may pass a pending lower shelf. Retired work cannot paint the new view.
         offset=self.row_offset+direction
         if direction>0 and (slot==1 or (self.rows[0] and self.paths[1])):
-            offset+=1
-        if not 0<=offset<len(self.page_definitions):return False
+            offset=self.streaming_lower_index+1
+        offset=self.streaming_shelf_index(offset,direction)
+        if offset is None:return False
         self.last_row=0;self.show_row_window(offset,0)
         return True
 
@@ -1356,13 +1407,17 @@ class LiveReview(LibraryActions,RowCustomization,TitleFeedback,ShelfTools,YouTub
         try:
             self.stop_preview()
             slot=1 if self.getFocusId()==901 else 0
-            selected=xbmcgui.Dialog().select('Jump to row',[row['label'] for row in definitions],preselect=self.row_offset+slot)
+            indices=[i for i,row in enumerate(definitions) if self.result_cache.get(row['path'])!=[]]
+            focused=self.row_definition_index(slot)
+            choice=xbmcgui.Dialog().select('Jump to row',[definitions[i]['label'] for i in indices],
+                                           preselect=indices.index(focused) if focused in indices else 0)
+            selected=indices[choice] if 0<=choice<len(indices) else -1
         finally:
             self.actions_open=False;self.dwell=time.monotonic()
         if not (self.alive and generation==self.generation and self.page_definitions is definitions and 0<=selected<len(definitions)):return
         if selected==self.row_offset and self.rows[0]:
             self.last_row=0;self.setFocusId(900)
-        elif selected==self.row_offset+1 and self.getFocusId()==900 and self.load_next_streaming_shelf():return
+        elif selected==self.streaming_lower_index and self.getFocusId()==900 and self.load_next_streaming_shelf():return
         else:
             self.last_row=0;self.show_row_window(selected,0)
 
@@ -1402,6 +1457,7 @@ class LiveReview(LibraryActions,RowCustomization,TitleFeedback,ShelfTools,YouTub
 
     def apply_row(self,n,files,label,position=0,update_selected=True,display_position=False,ranked_start=False):
         with self.preview_dispatch_lock:
+            confirmed_empty=not files and getattr(self,'streaming_shelf_view',lambda:False)()
             original=files[position] if 0<=position<len(files) else None
             if getattr(self,'section','')=='YouTube' and hasattr(self,'prepare_youtube_row'):
                 fresh=hasattr(self,'fresh_recommendation_row') and self.fresh_recommendation_row(n)
@@ -1422,7 +1478,9 @@ class LiveReview(LibraryActions,RowCustomization,TitleFeedback,ShelfTools,YouTub
             if not hasattr(self,'row_labels'):self.row_labels={}
             self.row_labels[n]=label
             if self.episode_browser_context and self.mode=='home':files=[episode_item(x,self.season_title) for x in files]
-            if n==0:self.finish_loading('home_ready' if files else 'home_empty_or_unavailable')
+            if n==0:
+                self.finish_loading('home_ready' if files else 'home_empty_or_unavailable')
+                self.setProperty('streamingRetryLabel','')
             if not hasattr(self,'row_states'):self.row_states={}
             state='ready' if files else 'empty' if label else ''
             immutable=getattr(self,'section','')=='YouTube' and self.paths[n].startswith('plugin://plugin.video.youtube/')
@@ -1432,8 +1490,10 @@ class LiveReview(LibraryActions,RowCustomization,TitleFeedback,ShelfTools,YouTub
                 for item,data in zip(built,cards):
                     if data.get('_new_since_visit'):item.setProperty('newSinceVisit','true')
             self.rows[n]=files;c=self.getControl(900+n);c.reset();c.addItems(built);c.setVisible(bool(files));self.window_ready[n]=True
-            self.row_states[n]=state;self.setProperty('rowState'+str(n),state);self.setProperty('rowMessage'+str(n),row_message(label,state,search=bool(getattr(self,'search_state',None))))
-            self.setProperty('row'+str(n),label if files else label+'  ·  No titles' if label else '')
+            hidden=state=='empty' and confirmed_empty
+            self.row_states[n]=state;self.setProperty('rowState'+str(n),'' if hidden else state)
+            self.setProperty('rowMessage'+str(n),'' if hidden else row_message(label,state,search=bool(getattr(self,'search_state',None))))
+            self.setProperty('row'+str(n),label if files else label+'  ·  No titles' if label and not hidden else '')
             if files:
                 c.selectItem(min(position,len(files)-1));self.setProperty('notice','Select an episode, then choose Source Select, Auto Play or Rescrape' if (getattr(self,'episode_browser_context',None) or {}).get('play_using_show') else 'Live add-on content  ·  Select a title for details')
                 if n==0 and update_selected:self.update(files[min(position,len(files)-1)])
@@ -1575,7 +1635,8 @@ class LiveReview(LibraryActions,RowCustomization,TitleFeedback,ShelfTools,YouTub
                         self.paths[n]=path;self.failed_paths.pop(n,None)
                         # Explicit navigation replaces the old visible owner and its
                         # deferred automatic result, including same-path back/retry.
-                        self.row_cache.pop(self.row_offset+n,None)
+                        streaming=getattr(self,'streaming_shelf_view',lambda:False)()
+                        self.row_cache.pop(self.row_definition_index(n) if streaming else self.row_offset+n,None)
                         focus_now=getattr(self,'getFocusId',lambda:focus_before)()
                         owns_focus=focus_now==focus_before
                         self.apply_row(n,files,label or self.getProperty('row'+str(n)),position,display_position=back,ranked_start=not back,**({} if owns_focus else {'update_selected':False}))
@@ -1586,8 +1647,10 @@ class LiveReview(LibraryActions,RowCustomization,TitleFeedback,ShelfTools,YouTub
                     if current():
                         if back and path!=previous:self.histories[n].push(path,position)
                         self.failed_paths[n]={'path':path,'label':label,'back':back,'position':position}
-                        self.row_states[n]='error';self.setProperty('rowState'+str(n),'error' if not self.rows[n] else 'ready');self.setProperty('rowMessage'+str(n),row_message(label or self.getProperty('row'+str(n)),'error'))
-                        self.setProperty('notice','Page unavailable; current titles remain visible. Open title actions to retry.')
+                        streaming=getattr(self,'streaming_shelf_view',lambda:False)()
+                        message=row_message(label or self.getProperty('row'+str(n)),'error',streaming=streaming)
+                        self.row_states[n]='error';self.setProperty('rowState'+str(n),'error' if not self.rows[n] else 'ready');self.setProperty('rowMessage'+str(n),message)
+                        self.setProperty('notice',message if streaming else 'Page unavailable; current titles remain visible. Open title actions to retry.')
                 event('page_error',error_type=type(exc).__name__)
             finally:
                 if self.loading_paths.get(n)==(generation,token):
@@ -1605,6 +1668,7 @@ class LiveReview(LibraryActions,RowCustomization,TitleFeedback,ShelfTools,YouTub
     def capture_browse(self,include_stack=True):
         fields=('section','mode','navigation_id','active_page','page_definitions','row_offset','row_cache','rows','paths','histories','last_row','return_focus','selected','person_context','episode_browser_context','season_sources','season_title','season_position')
         state={key:getattr(self,key) for key in fields}
+        if getattr(self,'streaming_shelf_view',lambda:False)():state['streaming_lower_index']=self.row_definition_index(1)
         state['shelf_visit_badges']=getattr(self,'shelf_visit_badges',{})
         state.update(layout_raw_rows=copy.deepcopy(getattr(self,'layout_raw_rows',self.page_definitions)),layout_active_scope=getattr(self,'layout_active_scope',None))
         state.update(youtube_identity=getattr(getattr(self,'youtube_connection',None),'identity',''),youtube_tab=getattr(self,'youtube_tab','home'),youtube_query=getattr(self,'youtube_query',''),youtube_pages=copy.deepcopy(getattr(self,'youtube_pages',{})),snapshot_rows=copy.deepcopy(getattr(self,'snapshot_rows',{})),window_ready=list(getattr(self,'window_ready',[True,True])),search_state=copy.deepcopy(getattr(self,'search_state',None)),search_origin=copy.deepcopy(getattr(self,'search_origin',None)),row_states=copy.deepcopy(getattr(self,'row_states',{})),failed_paths=copy.deepcopy(getattr(self,'failed_paths',{})),row_labels=copy.deepcopy(getattr(self,'row_labels',{})))
@@ -1617,7 +1681,7 @@ class LiveReview(LibraryActions,RowCustomization,TitleFeedback,ShelfTools,YouTub
             pos=self.getControl(900+n).getSelectedPosition();anchor=self.rows[n][pos] if 0<=pos<len(self.rows[n]) else None
             state['positions'].append(restored_position(state['rows'][n],anchor,pos) if hasattr(self,'raw_title_row') else pos)
         state['focus']=self.getFocusId()
-        state['properties']={key:self.getProperty(key) for key in ('eyebrow','captionRows','scroll','browseFilters','row0','row1','episodeBrowser','searchBrowser','page','rowState0','rowState1','rowMessage0','rowMessage1','heroCompact','addonBrowser','genreChooser','filmographyBrowser','youtubeBrowser','previewMode','previewsReady')}
+        state['properties']={key:self.getProperty(key) for key in ('eyebrow','captionRows','scroll','browseFilters','row0','row1','episodeBrowser','searchBrowser','page','rowState0','rowState1','rowMessage0','rowMessage1','heroCompact','addonBrowser','genreChooser','filmographyBrowser','youtubeBrowser','previewMode','previewsReady','streamingRetryLabel')}
         state=copy.deepcopy(state)
         if state.get('episode_browser_context'):state['episode_browser_context'].pop('play_using_show',None)
         return state
@@ -1852,8 +1916,9 @@ class LiveReview(LibraryActions,RowCustomization,TitleFeedback,ShelfTools,YouTub
                 if player_available:options.append(('default_player','Set default player…'))
                 options.append(('refresh','Refresh watched status'))
             if failed:
-                options.append(('retry','Retry unavailable lists'))
-                if not item:options.append(('settings','Open integration settings'))
+                streaming=getattr(self,'streaming_shelf_view',lambda:False)()
+                options.append(('retry','Retry unavailable shelves' if streaming else 'Retry unavailable lists'))
+                if not item and not streaming:options.append(('settings','Open integration settings'))
             options.extend(getattr(self,'library_context_actions',lambda:[])())
             options.extend(getattr(self,'shelf_actions',lambda *args:[])(focus,genre_available))
             if getattr(self,'streaming_shelf_view',lambda:False)() and self.mode=='home':options.append(('jump_streaming_shelf','Jump to row…'))
@@ -1982,7 +2047,8 @@ class LiveReview(LibraryActions,RowCustomization,TitleFeedback,ShelfTools,YouTub
                         if files:control.selectItem(position_new)
                         self.related=files;ownership['records']=files;self.title_related_raw=raw
                     else:
-                        self.row_cache.pop(offset+slot,None)
+                        index=self.row_definition_index(slot) if getattr(self,'streaming_shelf_view',lambda:False)() else offset+slot
+                        self.row_cache.pop(index,None)
                         # position_new indexes raw records. apply_row restores its
                         # anchor after filtering, ordering and page-card insertion.
                         self.apply_row(slot,files,self.row_labels.get(slot,''),position_new,update_selected=False)
@@ -2810,14 +2876,24 @@ class LiveReview(LibraryActions,RowCustomization,TitleFeedback,ShelfTools,YouTub
         if self.mode=='home':self.update(items[pos])
         event('mouse_row_scroll',page=self.mode,control=control,position=pos)
     def retry_lists(self):
+        streaming=getattr(self,'streaming_shelf_view',lambda:False)()
+        if streaming and getattr(self,'row_window_busy',False):return
+        pending=[]
         for n,path in enumerate(list(self.paths)):
             if path and self.row_states.get(n)=='error':
                 self.setProperty('rowState'+str(n),'loading');self.setProperty('rowMessage'+str(n),'Retrying this list…')
                 failed=self.failed_paths.get(n)
+                index=self.row_definition_index(n) if streaming else None
+                if failed and index is not None and path==failed['path']==self.page_definitions[index]['path']:
+                    pending.append((n,dict(self.page_definitions[index],position=failed['position'],
+                                           _streaming_retry=True,_snapshot_refresh=bool(self.rows[n]))))
+                    continue
                 if failed:
                     if failed['back'] and failed['path']!=self.paths[n]:self.histories[n].pop()
                     self.load_path(n,**failed,preserve_focus=True)
                 else:self.load_path(n,path,back=True,position=self.getControl(900+n).getSelectedPosition(),preserve_focus=True)
+        if pending:
+            self.request_row_loads(pending,0 if self.getFocusId()==611 else None)
     def discover_more(self,item):
         self.actions_open=True
         try:
@@ -2919,7 +2995,9 @@ class LiveReview(LibraryActions,RowCustomization,TitleFeedback,ShelfTools,YouTub
             if self.rows[0] or self.rows[1]:self.setFocusId(900 if self.rows[0] else 901)
         elif cid in (700,701,710,711,712,713,720,721):self.arrow(cid)
         elif cid==610:self.refresh_youtube_recommendations()
-        elif cid==611 and getattr(self,'streaming_shelf_view',lambda:False)():self.shift_rows(1,0)
+        elif cid==611 and getattr(self,'streaming_shelf_view',lambda:False)():
+            if self.row_states.get(0)=='error':self.retry_lists()
+            else:self.shift_rows(1,0)
         elif cid==600:
             if self.episode_browser_context:self.select_episode_season()
             elif self.search_state:self.select_search(self.getControl(600).getSelectedPosition())

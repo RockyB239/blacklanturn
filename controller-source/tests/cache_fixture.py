@@ -10,7 +10,7 @@ from public_rows import PublicRowSnapshots,snapshot_scope,public_path
 from filtered_pages import provider_path,upstream_path,logical_files,needs_fill,fill_page,PageCancelled,first_page_minimum,first_page_keep
 from browse_controls import should_exclude_anime
 from search_ui import load_best_matches
-NAMES=('streaming_shelf_view','load_next_streaming_shelf','settle_streaming_shelf','step_streaming_shelves','step_search_rows','request_row_loads','restart_pending_rows','cached_row_items','cached_provider_list','retained_row_items','fill_discovery_page','configure_row_snapshots','apply_refreshed_row','publish_cache_stats','invalidate_row_results')
+NAMES=('streaming_shelf_view','streaming_shelf_index','row_definition_index','retry_lists','load_next_streaming_shelf','settle_streaming_shelf','step_streaming_shelves','step_search_rows','request_row_loads','restart_pending_rows','cached_row_items','cached_provider_list','retained_row_items','fill_discovery_page','configure_row_snapshots','apply_refreshed_row','publish_cache_stats','invalidate_row_results')
 def bind(state,namespace):
     if not hasattr(state,"preview_dispatch_lock"):state.preview_dispatch_lock=threading.RLock()
     ns=dict(namespace,hydrate_watch_metadata=hydrate_watch_metadata,item_key=item_key,restored_position=restored_position,public_path=public_path,TMDB='plugin://plugin.video.themoviedb.helper/',parse_qs=parse_qs,urlsplit=urlsplit,provider_path=provider_path,upstream_path=upstream_path,logical_files=logical_files,needs_fill=needs_fill,first_page_minimum=first_page_minimum,first_page_keep=first_page_keep,fill_page=fill_page,PageCancelled=PageCancelled,should_exclude_anime=should_exclude_anime)

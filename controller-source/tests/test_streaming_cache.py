@@ -72,6 +72,30 @@ class StreamingRowsTests(unittest.TestCase):
         self.store().discard(ROW)
         self.assertIsNone(self.store().get(ROW))
 
+    def test_streaming_directory_requires_an_explicit_files_array(self):
+        import sys
+        from types import SimpleNamespace
+        from unittest.mock import patch
+        from urllib.parse import parse_qs, urlsplit
+
+        from live_core import directory_items, valid_source
+        from test_window_lifecycle import ROOT, extract
+
+        for response in ({}, {'result': {}}, {'result': {'files': None}},
+                         {'error': {'code': -32602, 'message': 'Invalid params.'}},
+                         {'result': {'files': []}}):
+            with self.subTest(response=response):
+                load = extract(ROOT/'live_review.py', 'get_list', dict(
+                    valid_source=valid_source, urlsplit=urlsplit, parse_qs=parse_qs,
+                    rpc=lambda *args: response, catalogue_category=lambda path: None,
+                    directory_items=directory_items, PROPERTIES=[], event=lambda *a, **k: None))
+                with patch.dict(sys.modules, {'update_activity': SimpleNamespace(wait_for_idle=lambda: True)}):
+                    if response == {'result': {'files': []}}:
+                        self.assertEqual(load(ROW), [])
+                    else:
+                        with self.assertRaises(ValueError):
+                            load(ROW)
+
     def test_provider_opens_popular_then_loads_only_the_requested_row(self):
         from streaming_shelves import service_shelves
         from test_snapshot_controller import SnapshotController
@@ -149,6 +173,99 @@ class StreamingRowsTests(unittest.TestCase):
                 queue.pop(0)()
             self.assertEqual(calls, [definitions[1]['path']])
             self.assertEqual(state.focus, 900)
+
+    def test_down_skips_confirmed_empty_shelf_and_preserves_selected_poster_until_next_loads(self):
+        from streaming_shelves import service_shelves
+        from test_snapshot_controller import SnapshotController
+
+        definitions = service_shelves('MUBI', ROW)['rows']
+        card = {'file': MOVIE, 'title': 'Current title', 'filetype': 'file'}
+        with tempfile.TemporaryDirectory() as folder:
+            state, calls, controls, queue = SnapshotController().state(
+                folder, lambda path: [] if path == definitions[1]['path'] else [card])
+            controls[611] = type(controls[101])()
+            state.actions_open = False
+            state.set_rows(definitions)
+            queue.pop(0)()
+            first = controls[900].items[0]
+
+            self.assertTrue(state.shift_rows(1, 0))
+            queue.pop(0)()
+            state.settle_streaming_shelf()
+            self.assertIs(controls[900].items[0], first)
+            self.assertEqual((state.row_offset, state.focus), (0, 900))
+            self.assertNotIn('No titles', state.getProperty('row1'))
+            self.assertNotIn('Unavailable', state.getProperty('row1'))
+            self.assertEqual(len(queue), 1)
+            queue.pop(0)()
+            state.settle_streaming_shelf()
+
+            self.assertEqual(calls, [ROW, definitions[1]['path'], definitions[2]['path']])
+            self.assertEqual((state.row_offset, state.focus), (2, 900))
+            self.assertEqual(state.getProperty('row0'), 'Action')
+            self.assertTrue(state.shift_rows(-1, 0))
+            self.assertEqual((state.row_offset, state.focus), (0, 900))
+            self.assertEqual(state.getProperty('row1'), 'Action')
+
+    def test_confirmed_empty_first_shelf_advances_to_available_shelf(self):
+        from streaming_shelves import service_shelves
+        from test_snapshot_controller import SnapshotController
+
+        definitions = service_shelves('MUBI', ROW)['rows']
+        card = {'file': MOVIE, 'title': 'Current title', 'filetype': 'file'}
+        with tempfile.TemporaryDirectory() as folder:
+            state, calls, controls, queue = SnapshotController().state(
+                folder, lambda path: [] if path == ROW else [card])
+            controls[611] = type(controls[101])()
+            state.actions_open = False
+            state.set_rows(definitions)
+            queue.pop(0)()
+            state.settle_streaming_shelf()
+            queue.pop(0)()
+
+            self.assertEqual(calls, [ROW, definitions[1]['path']])
+            self.assertEqual((state.row_offset, state.focus), (1, 900))
+
+    def test_failed_shelf_keeps_current_titles_and_offers_streaming_retry(self):
+        from streaming_shelves import service_shelves
+        from test_snapshot_controller import SnapshotController
+
+        definitions = service_shelves('MUBI', ROW)['rows']
+        card = {'file': MOVIE, 'title': 'Current title', 'filetype': 'file'}
+        outage = True
+
+        def provider(path):
+            if outage and path == definitions[1]['path']:
+                raise ValueError('Invalid params.')
+            return [card]
+
+        with tempfile.TemporaryDirectory() as folder:
+            state, calls, controls, queue = SnapshotController().state(folder, provider)
+            controls[611] = type(controls[101])()
+            state.actions_open = False
+            state.set_rows(definitions)
+            queue.pop(0)()
+            first = controls[900].items[0]
+            self.assertTrue(state.shift_rows(1, 0))
+            queue.pop(0)()
+            state.settle_streaming_shelf()
+
+            self.assertIs(controls[900].items[0], first)
+            self.assertEqual((state.row_offset, state.focus), (0, 900))
+            self.assertEqual(state.row_states[1], 'error')
+            self.assertEqual(state.failed_paths[1]['path'], definitions[1]['path'])
+            self.assertIn('Recent Releases', state.getProperty('rowMessage1'))
+            self.assertIn('Retry unavailable shelves', state.getProperty('rowMessage1'))
+            self.assertNotIn('integration', state.getProperty('rowMessage1'))
+            self.assertEqual(queue, [])
+
+            outage = False
+            state.retry_lists()
+            queue.pop(0)()
+            self.assertEqual(state.row_states[1], 'ready')
+            self.assertEqual(state.failed_paths, {})
+            self.assertIs(controls[900].items[0], first)
+            self.assertEqual(calls, [ROW, definitions[1]['path'], definitions[1]['path']])
 
     def test_fresh_streaming_row_paints_before_any_provider_worker_runs(self):
         from test_snapshot_controller import SnapshotController

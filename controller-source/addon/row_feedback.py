@@ -73,8 +73,9 @@ def provider_page_label(previous,path,current_label,requested_label):
             return current_label
     return requested_label
 
-def row_message(label,state,search=False):
+def row_message(label,state,search=False,streaming=False):
     if state=='loading':return label+' · Loading…'
+    if state=='error' and streaming:return label+' could not load. Open Options → Retry unavailable shelves.'
     if state=='error' and search:return label+' could not load results. Try another category or search, or use Options → Retry.'
     if state=='error':return label+' could not load. Open title actions to retry, or check its integration in Settings.'
     if state=='empty':return ('No results for '+label+'. Try another search.' if search else label+' · This list returned no titles.')
