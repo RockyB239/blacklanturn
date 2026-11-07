@@ -117,8 +117,6 @@ try:
         from home_startup import HomeStartup
         startup=HomeStartup(home)
         gate=SkinStartupGate(time.monotonic())
-        # Preparation uses the existing settling interval; native windows still
-        # wait for skin confirmation. Report an import failure only after that.
         preload_error=None
         early_home=None
         try:
@@ -128,13 +126,21 @@ try:
                 from live_review import LiveReview
         except Exception as exc:
             preload_error=exc
+        prepared=time.monotonic()
         while not monitor.abortRequested():
-            outcome=gate.tick(xbmc.getSkinDir(),xbmc.getCondVisibility('Window.IsVisible(yesnodialog)'),time.monotonic())
+            # Kodi enters Startup.xml on a cold launch or after accepting a
+            # skin change. Other Home entries still need the confirmation grace.
+            native_startup=xbmc.getCondVisibility(
+                'System.Platform.Android + Window.IsActive(home) + Window.Previous(12999) + !System.HasActiveModalDialog')
+            outcome=gate.tick(xbmc.getSkinDir(),xbmc.getCondVisibility('Window.IsVisible(yesnodialog)'),
+                              time.monotonic(),native_startup=native_startup)
             if outcome!='wait':break
             xbmc.sleep(100)
         if not monitor.abortRequested() and outcome=='ready':
             if preload_error is not None:raise preload_error
-            record('installed_profile',profile=str(PROFILE),addon=str(ROOT),skin=xbmc.getSkinDir())
+            record('installed_profile',profile=str(PROFILE),addon=str(ROOT),skin=xbmc.getSkinDir(),
+                   native_startup=native_startup,prepared_seconds=round(prepared-gate.started,3),
+                   settle_seconds=round(time.monotonic()-prepared,3))
             if early_home:run_live_review(startup,early_home,monitor)
             else:run_live_review(startup,monitor=monitor)
 except Exception:

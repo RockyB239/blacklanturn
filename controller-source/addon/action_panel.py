@@ -20,7 +20,7 @@ class ActionPanel(xbmcgui.WindowXMLDialog):
    self.quick_ids.append(1000+n);button.setPosition(188+n*(1544//max(1,len(quick))),286);button.setWidth(1544//max(1,len(quick))-18)
    button.setLabel(quick[n]['label'])
    icon=self.getControl(2300+n);icon.setPosition(188+n*(1544//max(1,len(quick)))+(1544//max(1,len(quick))-18)//2-min(300,len(quick[n]['label'])*15)//2-49,304);icon.setWidth(42);icon.setHeight(42)
-   slug={'play':'continue-watching','player':'video-addons','details':'guide','genre':'genres'}.get(quick[n]['id'])
+   slug={'play':'continue-watching','player':'video-addons','details':'guide','genre':'genres','jump_streaming_shelf':'genres'}.get(quick[n]['id'])
    icon.setImage(icon_path(ROOT,slug or 'collections',self.pack));icon.setVisible(bool(slug))
   for n in range(5):
    button=self.getControl(1100+n);button.setVisible(n<len(groups));self.getControl(2100+n).setVisible(n<len(groups));self.getControl(2200+n).setVisible(n<len(groups))

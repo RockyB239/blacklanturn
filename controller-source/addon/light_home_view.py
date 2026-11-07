@@ -39,9 +39,13 @@ class LightweightHome(xbmcgui.WindowXML):
             xbmc.executebuiltin('SendClick(%d,5)'%self._window_id)
         threading.Thread(target=load,name='BlackLanturnControllerImport',daemon=True).start()
     def _paint_home(self):
-        from light_home_cards import media_item
-        from browse_controls import page_cards
-        from live_core import PageHistory
+        projected=self._early.get('cards')
+        if projected:
+            from light_home_fast import replay_card
+        else:
+            from light_home_cards import media_item
+            from browse_controls import page_cards
+            from live_core import PageHistory
         record=self._early['record'];prefs=self._early['preferences']
         for key,value in record['properties'].items():self.setProperty(key,value)
         startup=getattr(self,'startup_home',None)
@@ -49,11 +53,16 @@ class LightweightHome(xbmcgui.WindowXML):
         self.setProperty('nav','closed')
         self._heroes={};self._early_rows=[]
         for n,row in enumerate(record['rows']):
-            files=prefs.apply(row['items']);files,_=page_cards(files,PageHistory(),row['path'])
+            if projected:
+                files,cards=projected[n]
+                native_items=[replay_card(card) for card in cards]
+            else:
+                files=prefs.apply(row['items']);files,_=page_cards(files,PageHistory(),row['path'])
+                native_items=[media_item(item) for item in files]
             if not files:raise ValueError('Saved Home has no visible titles')
             self._early_rows.append(files)
             self._heroes.update((item['file'],hero) for item,hero in zip(row['items'],row['heroes']))
-            control=self.getControl(900+n);control.setHeight(276);control.reset();control.addItems([media_item(item) for item in files]);control.setVisible(True);control.selectItem(0)
+            control=self.getControl(900+n);control.setHeight(276);control.reset();control.addItems(native_items);control.setVisible(True);control.selectItem(0)
             self.setProperty('row'+str(n),row['label']);self.setProperty('rowState'+str(n),'ready');self.setProperty('rowMessage'+str(n),'')
         sidebar=self.getControl(50);sidebar.reset();items=[]
         for entry in record['sidebar']:
@@ -65,6 +74,7 @@ class LightweightHome(xbmcgui.WindowXML):
         for cid in (101,102,103,105,106):self.getControl(cid).controlDown(self.getControl(900))
         self.getControl(5).controlRight(self.getControl(900));self.getControl(5).controlDown(self.getControl(900))
         self._show_item(self._early_rows[0][0]);self.setFocusId(5)
+        self.setProperty('lightHomeCache','projected' if projected else 'standard')
         self.setProperty('lightHome','painted')
     def _show_item(self,item):
         hero=self._heroes.get(item.get('file'))

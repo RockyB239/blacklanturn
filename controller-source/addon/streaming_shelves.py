@@ -1,5 +1,6 @@
 """Browse a provider's catalog using the active media type and region."""
 from collections import Counter
+from contextlib import nullcontext
 from urllib.parse import urlencode
 
 from adaptive_services import candidate_filters, preview_ids, qualify_preview
@@ -39,6 +40,8 @@ class StreamingShelfLayout:
         self.empty = False
         self.candidates = set()
         self.rejected = set()
+        self.empty_shelves = set()
+        self.explicit_path = None
         self.accepted = {}
         self.movie_card = None
         self.alternate_checked = False
@@ -48,6 +51,15 @@ class StreamingShelfLayout:
             return True
         return (self.baseline is not None and not self.compact
                 and path in self.candidates and path not in self.rejected)
+
+    def can_jump(self, path):
+        if path == self.path:
+            return not self.empty
+        return not self.compact and path in self.candidates and path not in self.empty_shelves
+
+    def mark_empty(self, path):
+        self.empty_shelves.add(path)
+        self.reject(path)
 
     def reject(self, path):
         self.accepted.pop(path, None)
@@ -62,6 +74,7 @@ class StreamingShelfLayout:
                 self.baseline_ids = preview_ids(files)
                 self.compact = len(files) <= 8 and not any(is_next_page(item, path) for item in files)
             return files
+        self.empty_shelves.discard(path)
         if path in self.accepted:
             return files
         candidate = preview_ids(files)
@@ -83,6 +96,34 @@ class StreamingShelfLayout:
             counts.update(aliases.get(name, name) for name in genres)
         start = 1 + self.specialty_count
         rows[start:] = sorted(rows[start:], key=lambda row: -counts[row['label']])
+
+
+def warm_shelves(rows, layout, load, current, lock=None, *, on_confirmed=None):
+    """Index confirmed rows in browse order without waiting on the visible row."""
+    lock = lock if lock is not None else nullcontext()
+    for row in rows[1:]:
+        path = row['path']
+        with lock:
+            if not current():
+                return False
+            if not layout.available(path) or path in layout.accepted:
+                continue
+        try:
+            files = load(path)
+        except (OSError, ValueError, RuntimeError):
+            # A foreground request may retry a failed check.
+            continue
+        with lock:
+            if not current():
+                return False
+            confirmed = False
+            if files:
+                confirmed = bool(layout.filter(path, files))
+            elif files == []:
+                layout.mark_empty(path)
+        if confirmed and on_confirmed is not None:
+            on_confirmed(path, files)
+    return True
 
 
 def service_shelves(name, path, *, adaptive=False, region_name=None):

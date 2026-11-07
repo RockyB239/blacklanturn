@@ -118,3 +118,48 @@ assert projected['play']=='Episodes'
 assert projected['properties']['hero']==item['art']['fanart']
 assert projected['properties']['allEpisodes']=='false'
 ''')
+
+    def test_home_cache_proof_does_not_block_input_or_publish_a_departed_home(self):
+        self.probe(r'''
+import light_home_model as model
+from types import SimpleNamespace
+owner=SimpleNamespace(alive=True,section='Home',mode='home',row_offset=0,window_ready=[True,True],
+                      generation=1,preview_dispatch_lock=threading.RLock(),
+                      page_definitions=[{},{}],home_snapshot_cache=SimpleNamespace(scope='original'))
+proof_started=threading.Event()
+release=threading.Event()
+writes=[]
+def scope(*_):
+    proof_started.set()
+    assert release.wait(3)
+    return 'verified'
+model.policy_bytes=lambda _:()
+model.display_scope=scope
+model.write_record=lambda *args:writes.append(args)
+result=[]
+worker=threading.Thread(target=lambda:result.append(model.save_home_display(owner,Path('.'),Path('.'))),daemon=True)
+worker.start()
+try:
+    assert proof_started.wait(1)
+    assert owner.preview_dispatch_lock.acquire(timeout=.25), 'Home account proof blocked the navigation lock'
+    owner.generation+=1
+    owner.preview_dispatch_lock.release()
+finally:
+    release.set()
+    worker.join(2)
+assert result==[False] and writes==[]
+''')
+
+    def test_focus_paints_cached_ratings_once(self):
+        self.probe(r'''
+from light_home_model import HeroProjection
+from types import SimpleNamespace
+owner=SimpleNamespace(config={'Saved':[]},preview_mode='manual',previews_ready=True)
+projection=HeroProjection(owner)
+projection.rating_cache[('movie','123')]=['cached badge']
+painted=[]
+projection.display_ratings=painted.append
+item={'title':'Example','file':'plugin://plugin.video.themoviedb.helper/?info=details&tmdb_type=movie&tmdb_id=123'}
+projection.render(owner,item)
+assert painted==[['cached badge']],painted
+''')

@@ -69,13 +69,22 @@ class HeroProjection:
 
 def save_home_display(owner,store,root):
     """Called after usable Home rows; this writes only a bounded disposable file."""
+    def ready():
+        return (owner.alive and owner.section=='Home' and owner.mode=='home'
+                and owner.row_offset==0 and len(owner.page_definitions)>=2 and all(owner.window_ready))
     try:
         with owner.preview_dispatch_lock:
-            if not owner.alive or owner.section!='Home' or owner.mode!='home' or owner.row_offset or len(owner.page_definitions)<2 or not all(owner.window_ready):return False
+            if not ready():return False
             cache=getattr(owner,'home_snapshot_cache',None)
             if cache is None or not cache.scope:return False
-            policies=policy_bytes(store);scope=display_scope(store,cache.scope)
-            if not scope:return False
+            provider_scope=cache.scope;generation=getattr(owner,'generation',None)
+        # Kodi add-on enumeration and account files can take time. The
+        # visible Home and remote input do not need to wait for this proof.
+        policies=policy_bytes(store);scope=display_scope(store,provider_scope)
+        if not scope:return False
+        with owner.preview_dispatch_lock:
+            if (not ready() or getattr(owner,'home_snapshot_cache',None) is not cache
+                    or cache.scope!=provider_scope or getattr(owner,'generation',None)!=generation):return False
             rows=[];projection=HeroProjection(owner)
             for n,definition in enumerate(owner.page_definitions[:2]):
                 if set(definition)-{'label','path','enabled'} or not home_path(definition.get('path')):return False

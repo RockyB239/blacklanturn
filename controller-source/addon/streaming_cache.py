@@ -146,6 +146,13 @@ class StreamingRows(PublicRowSnapshots):
     def put(self, path, files, revision=None):
         return bool(files and self._matches(path, files) and super().put(path, files, revision=revision))
 
+    def put_warmed(self, path, files, revision):
+        with self.lock:
+            existing = self.rows.get(path)
+            if existing and 0 <= self.clock() - existing['time'] < self.max_age:
+                return False
+            return self.put(path, files, revision=revision)
+
     def discard(self, path):
         with self.lock:
             self.revision += 1

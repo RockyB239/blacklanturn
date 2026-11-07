@@ -170,11 +170,11 @@ def initialize_addons():
     if clear_stale_preview(rpc):event('stale_trailer_released')
     event('existing_integrations_ready')
 
-def media_item(data,immutable=False):
+def media_item(data,immutable=False,factory=None):
     headline,episode_line=episode_heading(data)
     # Only the YouTube browser opts in: it replaces whole cards on refresh.
     # TMDb and personal extensions mutate displayed cards and retain GUI locks.
-    li=xbmcgui.ListItem(label=episode_line or data.get('title') or data.get('label',''),path=data.get('file',''),offscreen=immutable)
+    li=(factory or xbmcgui.ListItem)(label=episode_line or data.get('title') or data.get('label',''),path=data.get('file',''),offscreen=immutable)
     art=dict(data.get('art',{}))
     selected_art=card_artwork(data)
     art['landscape']=selected_art['image'] if selected_art['kind']=='landscape' else ''
@@ -824,6 +824,12 @@ class LiveReview(LibraryActions,RowCustomization,TitleFeedback,ShelfTools,YouTub
             if filtered_snapshot:remember_snapshot_fill(filled)
             return filled
         files=None if definition.get('_snapshot_refresh') or definition.get('_streaming_retry') else cache.get(path)
+        if files is None and definition.get('_explicit_streaming') and not (definition.get('_snapshot_refresh') or definition.get('_streaming_retry')):
+            flight=getattr(self,'streaming_warmup_flight',None)
+            if flight and flight[0] is getattr(self,'streaming_warmup_scope',None) and flight[1]==path:
+                while current() and not flight[2].wait(.05):pass
+                if not current():raise PageCancelled('Row navigation changed')
+                files=cache.get(path)
         if files is None:
             params=parse_qs(urlsplit(path).query)
             snapshot_owner=getattr(self,'snapshot_cache',None)
@@ -1017,7 +1023,7 @@ class LiveReview(LibraryActions,RowCustomization,TitleFeedback,ShelfTools,YouTub
         if layout is None:return
         path=definition['path']
         if path!=layout.path:
-            if not files and path in layout.candidates:layout.reject(path)
+            if not files and path in layout.candidates:layout.mark_empty(path)
             return
         from streaming_cache import _query
         fields=_query(layout.path)
@@ -1035,6 +1041,73 @@ class LiveReview(LibraryActions,RowCustomization,TitleFeedback,ShelfTools,YouTub
             layout.baseline=[]
             layout.compact=True
             store.mark_empty(*identity)
+
+    def warm_streaming_shelves(self):
+        layout=self.streaming_layout()
+        if layout is None or layout.baseline is None or layout.compact:return
+        cache=self.result_cache;revision=cache.revision
+        previous=getattr(self,'streaming_warmup_scope',None)
+        if previous and previous[0] is layout and previous[1]==revision:return
+        from provider_work import submit_streaming_warmup
+        from streaming_shelves import warm_shelves
+        scope=(layout,revision);self.streaming_warmup_scope=scope
+        definitions=self.page_definitions
+        lock=self.preview_dispatch_lock
+        snapshot_owner=self.snapshot_cache
+        fresh_path=None
+        saved_count=0
+        def current():
+            return (self.alive and self.mode=='home' and self.page_definitions is definitions
+                    and self.result_cache is cache and cache.revision==revision and not self.owned_preview)
+        def load(path):
+            nonlocal fresh_path
+            fresh_path=None
+            deadline=time.monotonic()+2
+            while current() and time.monotonic()<deadline:
+                with lock:
+                    files=cache.get(path)
+                    if files is not None:return files
+                    # A visible row request owns its result if it started first.
+                    if not (self.paths[1]==path and not self.window_ready[1]):
+                        flight=(scope,path,threading.Event());self.streaming_warmup_flight=flight
+                        break
+                time.sleep(.05)
+            else:return None
+            try:
+                saved=self.retained_streaming_items(path)
+                if saved is not None:return saved
+                files=get_list(path)
+                with lock:
+                    if not current():return None
+                    cache.put(path,files,revision=revision,ttl=120,allow_empty=True)
+                    fresh_path=path
+                return files
+            finally:
+                with lock:
+                    if self.streaming_warmup_flight is flight:self.streaming_warmup_flight=None
+                    flight[2].set()
+        def retain_confirmed(path,files):
+            nonlocal saved_count
+            # Keep the first two useful shelves, leaving room for rows the user
+            # actually opens. Cache hits keep their original freshness deadline.
+            if snapshot_owner is None or fresh_path!=path or saved_count>=2:return
+            with lock:
+                if not current() or self.snapshot_cache is not snapshot_owner:return
+                if self.configure_row_snapshots():
+                    self.restart_pending_rows()
+                    return
+                streaming=self.streaming_snapshot(path)
+                if streaming is None:return
+                streaming_revision=streaming.revision
+            if current() and self.snapshot_cache is snapshot_owner and streaming.put_warmed(path,files,streaming_revision):
+                saved_count+=1
+        def work():
+            complete=False
+            try:
+                complete=warm_shelves(definitions,layout,load,current,lock,on_confirmed=retain_confirmed)
+            finally:
+                if not complete and self.streaming_warmup_scope is scope:self.streaming_warmup_scope=None
+        submit_streaming_warmup(work)
 
     def streaming_alternate_label(self,layout):
         from streaming_cache import _query
@@ -1143,9 +1216,15 @@ class LiveReview(LibraryActions,RowCustomization,TitleFeedback,ShelfTools,YouTub
             metadata=getattr(self,'anime_metadata',None)
             if cached and cached.get('files') is not None and metadata is not None and should_exclude_anime(self,cached['path']) and needs_fill(cached['path'],cached['files'],first_page_keep(self,cached['path'],metadata.without_anime),positioned=True,size=path_minimum(self,cached['path'])):
                 cached=dict(cached,files=None,deferred=False);self.row_cache[index]=cached
-            if n>=len(definitions) or (streaming and n==1 and not (cached and (cached.get('files') or cached.get('state')=='error'))):
+            if n>=len(definitions):
                 self.paths[n]='';self.histories[n]=PageHistory();self.apply_row(n,[],'')
-                if streaming and layout is None and n<len(definitions):self.setProperty('row1',definitions[n]['label'])
+                continue
+            if streaming and n==1 and not (cached and (cached.get('files') or cached.get('state')=='error')):
+                definition=definitions[n]
+                retained,_=self.retained_row_items(definition) if layout is not None else (None,False)
+                self.paths[n]=definition['path'] if retained else '';self.histories[n]=PageHistory()
+                self.apply_row(n,retained or [],definition['label'] if retained else '',update_selected=False)
+                if layout is None:self.setProperty('row1',definition['label'])
                 continue
             if cached and cached.get('files') is not None:
                 self.paths[n]=cached['path'];self.histories[n]=cached['history']
@@ -1481,7 +1560,7 @@ class LiveReview(LibraryActions,RowCustomization,TitleFeedback,ShelfTools,YouTub
             self.setProperty('rowMessage1',row_message(definition['label'],'loading'))
         retained,_=self.retained_row_items(definition)
         if retained is not None:
-            if layout is not None and not retained:layout.reject(definition['path'])
+            if layout is not None and not retained:layout.mark_empty(definition['path'])
             self.apply_row(1,retained,definition['label'],update_selected=False)
             if not prefetch:self.settle_streaming_shelf()
         else:self.request_row_loads([(1,definition)],prefetch=prefetch)
@@ -1531,20 +1610,77 @@ class LiveReview(LibraryActions,RowCustomization,TitleFeedback,ShelfTools,YouTub
             self.stop_preview()
             slot=1 if self.getFocusId()==901 else 0
             layout=getattr(self,'streaming_layout',lambda:None)()
-            indices=[i for i,row in enumerate(definitions) if self.result_cache.get(row['path'])!=[]
-                     and (layout is None or row['path']==layout.path or row['path'] in layout.accepted)]
+            with self.preview_dispatch_lock:
+                choices=[(i,row) for i,row in enumerate(definitions) if
+                         (layout.can_jump(row['path']) if layout else self.result_cache.get(row['path'])!=[])]
+            if not choices:return
             focused=self.row_definition_index(slot)
-            choice=xbmcgui.Dialog().select('Jump to row',[definitions[i]['label'] for i in indices],
-                                           preselect=indices.index(focused) if focused in indices else 0)
-            selected=indices[choice] if 0<=choice<len(indices) else -1
+            preselect=next((i for i,(index,_) in enumerate(choices) if index==focused),0)
+            choice=xbmcgui.Dialog().select('Jump to row',[row['label'] for _,row in choices],preselect=preselect)
         finally:
             self.actions_open=False;self.dwell=time.monotonic()
-        if not (self.alive and generation==self.generation and self.page_definitions is definitions and 0<=selected<len(definitions)):return
-        if selected==self.row_offset and self.rows[0]:
+        if not (self.alive and generation==self.generation and self.page_definitions is definitions and 0<=choice<len(choices)):return
+        selected,definition=choices[choice]
+        if definitions[self.row_offset] is definition and self.rows[0]:
             self.last_row=0;self.setFocusId(900)
-        elif selected==self.streaming_lower_index and self.getFocusId()==900 and self.load_next_streaming_shelf():return
+        elif layout is not None and definition['path']!=layout.path:
+            self.jump_to_streaming_shelf(definition)
+        elif layout is None and selected==self.streaming_lower_index and self.getFocusId()==900 and self.load_next_streaming_shelf():
+            return
         else:
             self.last_row=0;self.show_row_window(selected,0)
+
+    def jump_to_streaming_shelf(self,definition):
+        from adaptive_services import preview_ids
+        from live_core import PageHistory
+        from provider_work import submit_streaming_jump
+
+        definitions=self.page_definitions
+        path,label=definition['path'],definition['label'];layout=self.streaming_layout()
+        generation=self.generation;revision=self.result_cache.revision
+        epoch=getattr(self,'input_generation',0)
+        token=object();self.streaming_jump_token=token
+        previous_notice=self.getProperty('notice');loading='Opening '+label+'…'
+        def owns_view():
+            return (self.alive and self.generation==generation and self.page_definitions is definitions
+                    and self.streaming_jump_token is token)
+        def current():
+            return (owns_view() and self.result_cache.revision==revision
+                    and getattr(self,'input_generation',0)==epoch and not self.actions_open)
+        def finish(files):
+            with self.preview_dispatch_lock:
+                if not current():return
+                index=next((i for i,row in enumerate(definitions) if row is definition),None)
+                if index is None:return
+                if not preview_ids(files):
+                    layout.mark_empty(path)
+                    self.setProperty('notice','No titles in '+label+'.')
+                    return
+                # Explicit jumps may open a small or overlapping row without
+                # changing which shelves qualify for normal Down navigation.
+                layout.empty_shelves.discard(path)
+                layout.explicit_path=path
+                if not self.row_cache.get(index,{}).get('files'):
+                    self.row_cache[index]={'path':path,'files':files,'label':label,'position':0,
+                                           'history':PageHistory(),'deferred':True,'revision':revision}
+                self.last_row=0;self.show_row_window(index,0)
+        files,_=self.retained_row_items(definition)
+        if files is not None:
+            finish(files)
+            return
+        self.setProperty('notice',loading)
+        def work():
+            try:
+                if current():finish(self.cached_row_items(definition,expected_revision=revision,owner_current=current))
+            except Exception as exc:
+                with self.preview_dispatch_lock:
+                    if current():
+                        self.setProperty('notice',label+' could not load. Try Jump to Row again.')
+                        event('streaming_jump_error',error_type=type(exc).__name__)
+            finally:
+                with self.preview_dispatch_lock:
+                    if owns_view() and self.getProperty('notice')==loading:self.setProperty('notice',previous_notice)
+        submit_streaming_jump(work)
 
     def shift_rows(self,direction,slot):
         if getattr(self,'search_state',None) and getattr(self,'adaptive_browsing',False):return self.step_search_rows(direction,slot)
@@ -1585,7 +1721,8 @@ class LiveReview(LibraryActions,RowCustomization,TitleFeedback,ShelfTools,YouTub
             layout=getattr(self,'streaming_layout',lambda:None)()
             if layout is not None:
                 initial=layout.baseline is None
-                files=layout.filter(self.paths[n],files)
+                if n!=0 or self.paths[n]!=layout.explicit_path:
+                    files=layout.filter(self.paths[n],files)
                 if initial and layout.baseline is not None:layout.order(self.page_definitions)
             confirmed_empty=not files and getattr(self,'streaming_shelf_view',lambda:False)()
             original=files[position] if 0<=position<len(files) else None
@@ -1666,7 +1803,10 @@ class LiveReview(LibraryActions,RowCustomization,TitleFeedback,ShelfTools,YouTub
             self.getControl(101).setLabel(item['label'] if item.get('_page_control') else 'Open add-on' if item.get('type')=='addon' else discovery['button'] if discovery else 'Episodes' if item.get('filetype')=='directory' and item.get('year') else 'Resume' if episode_line and watch_state(item)['state']=='progress' else 'Play')
             self.getControl(103).controlRight(self.getControl(105 if self.mode=='home' and not automatic_preview(getattr(self,'config',{}),getattr(self,'section',''),self.preview_mode) and (getattr(self,'section','')=='YouTube' or getattr(self,'previews_ready',True)) else 103))
             self.getControl(105).controlRight(self.getControl(103 if self.mode=='details' else 105))
-            self.display_ratings([] if discovery or is_youtube(item) else rating_badges(item));self.setProperty('plot',item.get('plot') or ('Browse movies and shows from this studio.' if entity_kind(item)=='company' else 'Browse the titles in this collection.' if entity_kind(item)=='collection' else ''))
+            badges=[]
+            if not (discovery or is_youtube(item)):
+                badges=self.rating_cache.get(self.rating_identity(item)) or rating_badges(item)
+            self.display_ratings(badges);self.setProperty('plot',item.get('plot') or ('Browse movies and shows from this studio.' if entity_kind(item)=='company' else 'Browse the titles in this collection.' if entity_kind(item)=='collection' else ''))
             if is_youtube(item):
                 self.setProperty('hero',item.get('_youtube_folder_icon','') if item.get('filetype')=='directory' else art.get('thumb') or item.get('thumbnail') or art.get('fanart',''))
                 self.setProperty('meta',youtube_caption(item));self.setProperty('technicalMeta','');self.setProperty('titleLogo','');self.setProperty('browsable','true' if item.get('filetype')=='directory' else 'false')
@@ -1677,8 +1817,6 @@ class LiveReview(LibraryActions,RowCustomization,TitleFeedback,ShelfTools,YouTub
             self.getControl(250).reset()
             if getattr(self,'adaptive_browsing',False):self.getControl(254).reset()
             self.getControl(103).setLabel('Saved' if any(x.get('file')==item.get('file') for x in self.config['Saved']) else '+ My Stuff')
-            identity=self.rating_identity(item)
-            if identity in self.rating_cache:self.display_ratings(self.rating_cache[identity] or rating_badges(item))
 
     def rating_identity(self,item):
         if is_youtube(item):return None
@@ -2896,6 +3034,9 @@ class LiveReview(LibraryActions,RowCustomization,TitleFeedback,ShelfTools,YouTub
                             from light_home_model import save_home_display
                             saved=save_home_display(self,STORE,ROOT)
                             event('light_home_record',saved=bool(saved))
+                            if saved and xbmc.getCondVisibility('System.Platform.Android'):
+                                from light_home_fast import refresh_cache
+                                event('home_cards_saved',saved=refresh_cache(ROOT,STORE))
                         threading.Thread(target=save_display,name='BlackLanturnHomeDisplaySave',daemon=True).start()
                     screen=gui_labels(['System.ScreenWidth','System.ScreenHeight'])
                     width=screen['System.ScreenWidth'];height=screen['System.ScreenHeight']
@@ -2938,6 +3079,11 @@ class LiveReview(LibraryActions,RowCustomization,TitleFeedback,ShelfTools,YouTub
                 if self.mode=='home' and getattr(self,'streaming_shelf_view',lambda:False)():
                     self.settle_streaming_shelf()
                     self.prepare_streaming_alternate()
+                    if (focus==900 and self.rows[0] and self.window_ready[0]
+                            and not self.nav and not self.actions_open and not self.settings_open
+                            and not getattr(self,'row_window_busy',False)
+                            and not self.owned_preview and not self.player.isPlaying()):
+                        self.warm_streaming_shelves()
                     if (focus==900 and not self.nav and not self.actions_open and not self.settings_open
                             and self.window_ready[0] and not getattr(self,'row_window_busy',False)
                             and (not self.paths[1] or self.row_states.get(1)=='empty')

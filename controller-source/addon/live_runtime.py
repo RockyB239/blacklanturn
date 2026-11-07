@@ -7,9 +7,9 @@ REQUIRED=('plugin.video.themoviedb.helper','plugin.video.umbrella','plugin.video
 class SkinStartupGate:
  """Allow Kodi's timed confirmation to finish before opening a modal Home."""
  def __init__(self,started):self.started=started
- def tick(self,skin,confirmation_visible,now):
+ def tick(self,skin,confirmation_visible,now,*,native_startup=False):
   if skin!='skin.blacklanturn.preview' or now-self.started>30:return 'cancel'
-  if now-self.started<1 or confirmation_visible:return 'wait'
+  if confirmation_visible or (not native_startup and now-self.started<1):return 'wait'
   return 'ready'
 
 def validate_paths(home,profile,addon):

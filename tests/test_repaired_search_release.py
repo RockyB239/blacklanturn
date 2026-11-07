@@ -5,7 +5,7 @@ ROOT=Path(__file__).resolve().parents[1]
 class RepairedRelease(unittest.TestCase):
  def test_controller_has_reviewed_repair_and_preview_safety(self):
   addon=ROOT/'controller-source/addon'
-  self.assertEqual(ET.parse(addon/'addon.xml').getroot().get('version'),'0.1.130')
+  self.assertEqual(ET.parse(addon/'addon.xml').getroot().get('version'),'0.1.135')
   self.assertTrue((addon/'page_ahead.py').is_file())
   manifest=json.loads((ROOT/'controller-source/manifest122.json').read_text())
   self.assertEqual(manifest['controller'],'0.1.122')

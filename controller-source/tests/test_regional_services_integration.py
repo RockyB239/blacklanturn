@@ -144,3 +144,298 @@ class RegionalServicesIntegration(unittest.TestCase):
             self.assertEqual(len(images), 1)
             for size in ('left', 'top', 'width', 'height'):
                 self.assertEqual(images[0].findtext(size), control.findtext(size))
+
+    def test_confirmed_next_row_paints_from_session_cache_before_visiting_it(self):
+        from tempfile import TemporaryDirectory
+        from test_snapshot_controller import SnapshotController
+
+        path = BASE.replace('with_watch_providers=11', 'with_watch_providers=8')
+        rows = service_shelves('Netflix', path, adaptive=True)['rows'][:4]
+        available = [title(n) for n in range(101, 109)]
+        with TemporaryDirectory() as folder:
+            state, calls, controls, queue = SnapshotController().state(folder, lambda source: [title(n) for n in range(1, 21)])
+            controls[611] = type(controls[101])()
+            state.actions_open = False
+            state.streaming_layout = lambda: state.page_definitions[0]['_streaming_layout']
+            state.set_rows(rows)
+            queue.pop(0)()
+            next_row = state.page_definitions[1]
+            state.streaming_layout().filter(next_row['path'], available)
+            state.result_cache.put(next_row['path'], available)
+
+            state.show_row_window(0, 0)
+            self.assertEqual(state.getProperty('row1'), next_row['label'])
+            self.assertEqual(state.rows[1], available)
+            self.assertEqual((state.row_offset, state.focus, calls), (0, 900, [path]))
+            self.assertEqual(queue, [])
+
+    def test_shelf_index_qualifies_rows_without_visiting_them_and_skips_empty(self):
+        from streaming_shelves import warm_shelves
+
+        path = BASE.replace('with_watch_providers=11', 'with_watch_providers=8')
+        rows = service_shelves('Netflix', path, adaptive=True)['rows'][:5]
+        layout = rows[0]['_streaming_layout']
+        layout.filter(path, [title(n) for n in range(1, 21)])
+        first, second, third, fourth = [row['path'] for row in rows[1:]]
+        filled = [title(n) for n in range(101, 109)]
+        calls = []
+        results = {first: [], second: filled, third: filled, fourth: [title(n) for n in range(201, 209)]}
+        warm_shelves(rows, layout, lambda p: calls.append(p) or results[p], lambda: True)
+        self.assertEqual(calls, [first, second, third, fourth])
+        self.assertEqual(list(layout.accepted), [second, fourth])
+        self.assertEqual(layout.rejected, {first, third})
+
+    def test_retired_shelf_scan_does_not_qualify_or_fetch_any_more_rows(self):
+        from streaming_shelves import warm_shelves
+
+        path = BASE.replace('with_watch_providers=11', 'with_watch_providers=8')
+        rows = service_shelves('Netflix', path, adaptive=True)['rows'][:5]
+        layout = rows[0]['_streaming_layout']
+        layout.filter(path, [title(n) for n in range(1, 21)])
+        calls = []
+
+        def load(path):
+            calls.append(path)
+            return [title(n) for n in range(101, 109)]
+
+        self.assertFalse(warm_shelves(rows, layout, load, lambda: not calls))
+        self.assertEqual(calls, [rows[1]['path']])
+        self.assertEqual(layout.accepted, {})
+        self.assertEqual(layout.rejected, set())
+
+    def test_failed_background_check_remains_retryable(self):
+        from streaming_shelves import warm_shelves
+
+        path = BASE.replace('with_watch_providers=11', 'with_watch_providers=8')
+        rows = service_shelves('Netflix', path, adaptive=True)['rows'][:3]
+        layout = rows[0]['_streaming_layout']
+        layout.filter(path, [title(n) for n in range(1, 21)])
+        available = [title(n) for n in range(101, 109)]
+
+        def load(path):
+            if path == rows[1]['path']:
+                raise OSError('provider not available')
+            return available
+
+        self.assertTrue(warm_shelves(rows, layout, load, lambda: True))
+        self.assertTrue(layout.available(rows[1]['path']))
+        self.assertNotIn(rows[1]['path'], layout.accepted)
+        self.assertIn(rows[2]['path'], layout.accepted)
+
+    def test_jump_can_open_a_verified_shelf_that_was_never_scrolled_into(self):
+        from tempfile import TemporaryDirectory
+        from types import MethodType, SimpleNamespace
+        from unittest.mock import patch
+        from test_snapshot_controller import SnapshotController
+        from test_streaming_foreground import live_method
+        import provider_work
+
+        path = BASE.replace('with_watch_providers=11', 'with_watch_providers=8')
+        rows = service_shelves('Netflix', path, adaptive=True)['rows'][:4]
+        data = {row['path']: [title(i * 100 + n) for n in range(1, 13)]
+                for i, row in enumerate(rows)}
+        data[rows[1]['path']] = []
+        with TemporaryDirectory() as folder:
+            state, calls, controls, queue = SnapshotController().state(folder, data.__getitem__)
+            controls[611] = type(controls[101])()
+            state.owned_preview = state.actions_open = False
+            state.retained_streaming_items = lambda _: None
+            state.streaming_snapshot = lambda _: None
+            state.streaming_layout = lambda: state.page_definitions[0]['_streaming_layout']
+            state.warm_streaming_shelves = MethodType(
+                live_method('warm_streaming_shelves', get_list=lambda p: calls.append(p) or data[p]), state)
+            selected = []
+            def dialog(heading, labels, *, preselect):
+                self.assertEqual((heading, preselect), ('Jump to row', 0))
+                selected.extend(labels)
+                return labels.index(rows[3]['label'])
+            state.jump_to_streaming_shelf = MethodType(live_method('jump_to_streaming_shelf'), state)
+            jump = live_method('jump_streaming_shelf',
+                               xbmcgui=SimpleNamespace(Dialog=lambda: SimpleNamespace(select=dialog)))
+            state.set_rows(rows)
+            queue.pop(0)()
+            with patch.object(provider_work, 'submit_streaming_warmup', queue.append):
+                state.warm_streaming_shelves()
+                self.assertEqual(calls, [path])
+                queue.pop(0)()
+                self.assertEqual(state.row_offset, 0)
+                jump(state)
+            self.assertEqual(selected, [rows[0]['label'], rows[2]['label'], rows[3]['label']])
+            self.assertEqual(state.getProperty('row0'), rows[3]['label'])
+            self.assertEqual(calls, [row['path'] for row in rows])
+            self.assertEqual(queue, [])
+
+    def test_down_reuses_in_flight_background_request_for_the_same_row(self):
+        from tempfile import TemporaryDirectory
+        from threading import Event, Thread
+        from types import MethodType
+        from unittest.mock import patch
+        from test_snapshot_controller import SnapshotController
+        from test_streaming_foreground import live_method
+        import provider_work
+
+        path = BASE.replace('with_watch_providers=11', 'with_watch_providers=8')
+        rows = service_shelves('Netflix', path, adaptive=True)['rows'][:2]
+        baseline = [title(n) for n in range(1, 21)]
+        candidate = [title(n) for n in range(101, 109)]
+        background_started = Event()
+        finish_background = Event()
+        with TemporaryDirectory() as folder:
+            state, calls, controls, queue = SnapshotController().state(folder, lambda p: baseline if p == path else candidate)
+            controls[611] = type(controls[101])()
+            state.owned_preview = state.actions_open = False
+            state.retained_streaming_items = lambda _: None
+            state.streaming_snapshot = lambda _: None
+            state.streaming_layout = lambda: state.page_definitions[0]['_streaming_layout']
+
+            def background_fetch(path):
+                calls.append(path)
+                background_started.set()
+                if not finish_background.wait(4):
+                    raise RuntimeError('Timed out waiting for the fixture')
+                return candidate
+
+            state.warm_streaming_shelves = MethodType(
+                live_method('warm_streaming_shelves', get_list=background_fetch), state)
+            state.set_rows(rows)
+            queue.pop(0)()
+            with patch.object(provider_work, 'submit_streaming_warmup', queue.append):
+                state.warm_streaming_shelves()
+            warm = Thread(target=queue.pop(0), daemon=True)
+            warm.start()
+            try:
+                self.assertTrue(background_started.wait(2))
+                self.assertTrue(state.shift_rows(1, 0))
+                visible = Thread(target=queue.pop(0), daemon=True)
+                visible.start()
+                self.assertEqual(calls, [path, rows[1]['path']])
+            finally:
+                finish_background.set()
+                warm.join(3)
+            visible.join(3)
+            self.assertFalse(warm.is_alive() or visible.is_alive())
+            state.settle_streaming_shelf()
+            self.assertEqual(state.getProperty('row0'), rows[1]['label'])
+            self.assertEqual(calls, [path, rows[1]['path']])
+
+    def test_background_shelves_survive_a_new_window_without_refetch_until_expiry(self):
+        from tempfile import TemporaryDirectory
+        from types import MethodType
+        from unittest.mock import patch
+        from streaming_cache import StreamingRows
+        from test_snapshot_controller import SnapshotController
+        from test_streaming_foreground import live_method
+        import provider_work
+
+        path = BASE.replace('with_watch_providers=11', 'with_watch_providers=8')
+        rows = service_shelves('Netflix', path, adaptive=True)['rows'][:6]
+        empty, duplicate, first, second, third = [row['path'] for row in rows[1:]]
+        baseline = [title(n) for n in range(1, 21)]
+        fresh = {
+            empty: [], duplicate: baseline,
+            first: [dict(title(n), title=f'Title {n}', playcount=2) for n in range(100, 108)],
+            second: [dict(title(n), title=f'Title {n}') for n in range(200, 208)],
+            third: [dict(title(n), title=f'Title {n}') for n in range(300, 308)],
+        }
+        now = [1000]
+        with TemporaryDirectory() as folder:
+            state, calls, controls, queue = SnapshotController().state(folder, lambda _: baseline)
+            controls[611] = type(controls[101])()
+            state.owned_preview = False
+            state.streaming_layout = lambda: state.page_definitions[0]['_streaming_layout']
+            store = StreamingRows(Path(folder), 'scope', 'titles', clock=lambda: now[0])
+            state.streaming_snapshot = lambda _: store
+            state.retained_streaming_items = store.get
+            state.warm_streaming_shelves = MethodType(
+                live_method('warm_streaming_shelves', get_list=lambda p: calls.append(p) or fresh[p]), state)
+            state.set_rows(rows)
+            queue.pop(0)()
+            with patch.object(provider_work, 'submit_streaming_warmup', queue.append):
+                state.warm_streaming_shelves()
+                queue.pop(0)()
+
+            self.assertCountEqual(calls, [row['path'] for row in rows])
+            reopened = StreamingRows(Path(folder), 'scope', 'titles', clock=lambda: now[0])
+            state.result_cache.clear()
+            state.retained_streaming_items = reopened.get
+            for target in (first, second):
+                files, refresh = state.retained_row_items({'path': target})
+                self.assertEqual([item['file'] for item in files or []], [item['file'] for item in fresh[target]])
+                self.assertTrue(all('playcount' not in item for item in files))
+                self.assertFalse(refresh)
+            for target in (empty, duplicate, third):
+                self.assertIsNone(reopened.get(target))
+            self.assertIsNone(StreamingRows(Path(folder), 'different-scope', 'titles', clock=lambda: now[0]).get(first))
+            now[0] += 120
+            self.assertEqual(state.retained_row_items({'path': first}), (None, False))
+            self.assertCountEqual(calls, [row['path'] for row in rows])
+
+    def test_jump_lists_cold_shelves_and_opens_only_the_selected_one(self):
+        from tempfile import TemporaryDirectory
+        from types import MethodType, SimpleNamespace
+        from unittest.mock import patch
+        from test_snapshot_controller import SnapshotController
+        from test_streaming_foreground import live_method
+        import provider_work
+
+        path = BASE.replace('with_watch_providers=11', 'with_watch_providers=8')
+        for candidate in ([title(301)], [], OSError('offline'), None):
+            with self.subTest(candidate=candidate), TemporaryDirectory() as folder:
+                rows = service_shelves('Netflix', path, adaptive=True)['rows'][:5]
+                selected = rows[-1]
+
+                def provider(requested):
+                    if requested == path:
+                        return [title(n) for n in range(1, 21)]
+                    self.assertEqual(requested, selected['path'])
+                    if isinstance(candidate, Exception):
+                        raise candidate
+                    return candidate
+
+                state, calls, controls, queue = SnapshotController().state(folder, provider)
+                controls[611] = type(controls[101])()
+                state.owned_preview = state.actions_open = False
+                state.warm_streaming_shelves = lambda: None
+                state.streaming_layout = lambda: state.page_definitions[0]['_streaming_layout']
+                state.jump_to_streaming_shelf = MethodType(
+                    live_method('jump_to_streaming_shelf'), state)
+
+                def select(heading, labels, *, preselect):
+                    self.assertEqual((heading, preselect), ('Jump to row', 0))
+                    self.assertEqual(labels, [row['label'] for row in rows])
+                    self.assertEqual(calls, [path])
+                    if candidate:
+                        # The baseline can reorder genre rows while the native dialog is open.
+                        state.page_definitions[1:] = reversed(state.page_definitions[1:])
+                    return labels.index(selected['label'])
+
+                jump = live_method('jump_streaming_shelf', xbmcgui=SimpleNamespace(
+                    Dialog=lambda: SimpleNamespace(select=select)))
+                state.set_rows(rows)
+                queue.pop(0)()
+                with patch.object(provider_work, 'submit_streaming_jump', queue.append, create=True):
+                    jump(state)
+                    self.assertEqual(state.getProperty('row0'), 'Browse All Movies')
+                    self.assertEqual(calls, [path])
+                    if candidate is None:
+                        state.input_generation = 1
+                    queue.pop(0)()
+                if candidate is None:
+                    self.assertEqual(calls, [path])
+                    self.assertEqual(state.getProperty('row0'), 'Browse All Movies')
+                    self.assertNotIn('Opening', state.getProperty('notice'))
+                    continue
+                self.assertEqual(calls, [path, selected['path']])
+                self.assertEqual(state.focus, 900)
+                if isinstance(candidate, Exception):
+                    self.assertEqual(state.getProperty('row0'), 'Browse All Movies')
+                    self.assertNotIn(selected['path'], state.streaming_layout().empty_shelves)
+                    self.assertIn('could not load', state.getProperty('notice'))
+                elif candidate:
+                    self.assertEqual(state.getProperty('row0'), selected['label'])
+                    self.assertEqual(state.rows[0], candidate)
+                else:
+                    self.assertEqual(state.getProperty('row0'), 'Browse All Movies')
+                    self.assertIn(selected['path'], state.streaming_layout().empty_shelves)
+                    self.assertIn('No titles', state.getProperty('notice'))
+                self.assertEqual(queue, [])

@@ -40,6 +40,7 @@ class LatestWorker:
 
 _rows=LatestWorker()
 _streaming_rows=LatestWorker()
+_streaming_warmup=LatestWorker()
 
 def submit_latest(owner,work,*,foreground=False,prefetch=False):
     if foreground and not prefetch:
@@ -53,3 +54,13 @@ def submit_latest(owner,work,*,foreground=False,prefetch=False):
         with getattr(owner,'youtube_saved_request',nullcontext)():
             with cache.batch() if cache is not None else nullcontext():work()
     _rows.submit('visible-rows',owned)
+
+
+def submit_streaming_warmup(work):
+    """Use a single spare lane while a provider page is open."""
+    _streaming_warmup.submit('shelf-index',work)
+
+
+def submit_streaming_jump(work):
+    """Give the latest explicit jump a slot ahead of speculative lookups."""
+    _streaming_rows.submit('shelf-jump',work)

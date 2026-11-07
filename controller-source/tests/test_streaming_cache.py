@@ -72,6 +72,17 @@ class StreamingRowsTests(unittest.TestCase):
         self.store().discard(ROW)
         self.assertIsNone(self.store().get(ROW))
 
+    def test_warm_shelf_keeps_a_fresher_foreground_write_and_its_original_age(self):
+        store = self.store()
+        current = {'file': MOVIE, 'label': 'Foreground result', 'filetype': 'file'}
+        speculative = dict(current, label='Earlier background result')
+        self.assertTrue(store.put(ROW, [current]))
+        self.now += 10
+        self.assertFalse(store.put_warmed(ROW, [speculative], revision=store.revision))
+        self.assertEqual(store.get(ROW)[0]['label'], current['label'])
+        self.now += 110
+        self.assertIsNone(store.get(ROW))
+
     def test_streaming_directory_requires_an_explicit_files_array(self):
         import sys
         from types import SimpleNamespace

@@ -11,6 +11,14 @@ class ActionPanelTests(unittest.TestCase):
   flattened=panel['quick']+panel['playback']+[a for g in panel['groups'] for a in g['actions']]
   self.assertCountEqual([x['id'] for x in flattened],[x[0] for x in actions])
   self.assertEqual([x['id'] for x in panel['groups']],['save','trakt','discover','recommend','refresh'])
+ def test_streaming_jump_is_visible_on_the_quick_bar_once(self):
+  options=[('play','Open'),('player','Play using…'),('details','Details'),('genre','Choose genre…'),
+           ('discover','Discover more'),('jump_streaming_shelf','Jump to row…')]
+  panel=build_panel(options)
+  self.assertEqual([a['id'] for a in panel['quick']],['play','player','details','genre','jump_streaming_shelf'])
+  self.assertEqual([a['id'] for g in panel['groups'] for a in g['actions']],['discover'])
+  self.assertNotIn('jump_streaming_shelf',[a['id'] for a in build_panel(options[:-1])['quick']])
+
  def test_episode_genre_is_excluded_without_losing_playback(self):
   panel=build_panel([('play','Play'),('player','Play using…'),('details','Details'),('genre','Choose genre…')],episode=True)
   self.assertEqual([x['id'] for x in panel['quick']],['play','player','details'])

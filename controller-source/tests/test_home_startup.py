@@ -36,6 +36,28 @@ def method(filename, name, namespace, class_name=None):
     return namespace[name]
 
 
+class SkinStartupGateTests(unittest.TestCase):
+    def test_native_startup_transition_can_open_home_immediately(self):
+        from live_runtime import SkinStartupGate
+
+        gate = SkinStartupGate(20.0)
+        self.assertEqual(gate.tick('skin.blacklanturn.preview', False, 20.0,
+                                   native_startup=True), 'ready')
+
+    def test_skin_confirmation_and_nonstartup_paths_keep_the_existing_guards(self):
+        from live_runtime import SkinStartupGate
+
+        gate = SkinStartupGate(20.0)
+        self.assertEqual(gate.tick('skin.blacklanturn.preview', False, 20.2), 'wait')
+        self.assertEqual(gate.tick('skin.blacklanturn.preview', True, 22.0,
+                                   native_startup=True), 'wait')
+        self.assertEqual(gate.tick('skin.estuary', False, 20.2,
+                                   native_startup=True), 'cancel')
+        self.assertEqual(gate.tick('skin.blacklanturn.preview', True, 50.1,
+                                   native_startup=True), 'cancel')
+        self.assertEqual(gate.tick('skin.blacklanturn.preview', False, 21.0), 'ready')
+
+
 class EntryContractTests(unittest.TestCase):
     def run_entry(self, home, run, fail_import=False, dialog=None):
         nodes = ast.parse((ROOT / 'default.py').read_text()).body
@@ -43,7 +65,7 @@ class EntryContractTests(unittest.TestCase):
         namespace = dict(xbmcgui=SimpleNamespace(Window=lambda _: home, Dialog=lambda: SimpleNamespace(ok=dialog or (lambda *a: None))),
                          xbmc=SimpleNamespace(getSkinDir=lambda: 'skin.blacklanturn.preview', Monitor=lambda: SimpleNamespace(abortRequested=lambda: False), getCondVisibility=lambda _: False),
                          xbmcaddon=SimpleNamespace(Addon=lambda *a: None), xbmcvfs=SimpleNamespace(translatePath=lambda _: '/profile'),
-                         SkinStartupGate=lambda _: SimpleNamespace(tick=lambda *a: 'ready'), time=__import__('time'),
+                         SkinStartupGate=lambda started: SimpleNamespace(tick=lambda *a, **k: 'ready', started=started), time=__import__('time'),
                          sys=SimpleNamespace(argv=[], exc_info=sys.exc_info), PROFILE='/profile', ROOT=ROOT, STORE=Path('/profile'),
                          record=lambda *a, **k: None, monitor=SimpleNamespace(abortRequested=lambda:False),
                          run_live_review=lambda startup=None, early_home=None, monitor=None:run(startup))

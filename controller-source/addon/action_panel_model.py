@@ -10,7 +10,6 @@ GROUP_FOR.update({
  'coming_up':'discover',
  'shelf_tools':'discover',
  'streaming_services':'discover',
- 'jump_streaming_shelf':'discover',
  'where_to_watch':'discover',
 })
 DESCRIPTIONS.update({
@@ -27,7 +26,7 @@ DESCRIPTIONS.update({
 
 def build_panel(options,episode=False):
  actions=[{'id':key,'label':label,'description':DESCRIPTIONS.get(key,'')} for key,label in options if not(episode and key=='genre')]
- quick=[a for key in ('play','open_discovery','player','details','genre') for a in actions if a['id']==key]
+ quick=[a for key in ('play','open_discovery','player','details','genre','jump_streaming_shelf') for a in actions if a['id']==key]
  ids={a['id'] for a in quick};playback=[a for a in actions if a['id'] in ('default_player','normal_autoplay')];ids.update(a['id'] for a in playback);grouped={key:[] for key,_,_ in GROUPS}
  for action in actions:
   if action['id'] in ids:continue

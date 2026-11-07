@@ -2,6 +2,7 @@
 from collections import OrderedDict
 from contextlib import contextmanager
 from copy import deepcopy
+from functools import lru_cache
 from hashlib import sha256
 from pathlib import Path
 from urllib.parse import urlsplit,parse_qs,urlencode,unquote
@@ -82,11 +83,17 @@ def _item_path(path):
         return canonical if public_path(canonical,item=True) else ''
     except (TypeError,ValueError):return ''
 
-def helper_settings_identity(schema,get_setting):
-    """Read through Kodi's settings API, including tvOS's native settings store."""
-    try:ids=sorted({node.attrib['id'] for node in ElementTree.fromstring(schema).iter('setting') if node.attrib.get('id') and node.attrib.get('type')!='action'})
-    except (ElementTree.ParseError,TypeError) as exc:raise ValueError('Helper settings schema unavailable') from exc
+@lru_cache(maxsize=4)
+def _helper_setting_ids(schema):
+    ids=tuple(sorted({node.attrib['id'] for node in ElementTree.fromstring(schema).iter('setting')
+                      if node.attrib.get('id') and node.attrib.get('type')!='action'}))
     if not any('trakt' in key.lower() and any(word in key.lower() for word in ('user','token')) for key in ids):raise ValueError('Account settings schema unavailable')
+    return ids
+
+def helper_settings_identity(schema,get_setting):
+    """Reuse schema parsing, and always read current settings through Kodi's API."""
+    try:ids=_helper_setting_ids(bytes(schema) if isinstance(schema,(bytearray,memoryview)) else schema)
+    except (ElementTree.ParseError,TypeError) as exc:raise ValueError('Helper settings schema unavailable') from exc
     values={key:get_setting(key) for key in ids}
     return sha256(json.dumps(values,sort_keys=True,separators=(',',':')).encode('utf-8')).digest()
 
