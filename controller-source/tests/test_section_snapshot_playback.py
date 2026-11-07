@@ -74,7 +74,7 @@ class SectionSnapshotPlayback(unittest.TestCase):
   with tempfile.TemporaryDirectory() as folder:
    path=sections.route('discover','movie','&with_genres=18');state,_,_,_=sections.SectionDisplaySnapshots().state(folder,'Movies',lambda p:[]);state.anime_metadata=None
    folder_item=dict(playback.MOVIE,filetype='directory');next_item={'file':path+'&page=2','filetype':'directory','label':'Next page'}
-   state.snapshot_cache.put(path,[playback.MOVIE,folder_item,next_item]);retained,refresh=state.retained_row_items({'path':path})
+   state.snapshot_cache.put(path,[playback.MOVIE,folder_item,next_item],age=901);retained,refresh=state.retained_row_items({'path':path})
    self.assertTrue(refresh);self.assertEqual(retained[0].get(MARK),'account');self.assertNotIn(MARK,retained[1]);self.assertNotIn(MARK,retained[2])
    for scope_state in (None,SimpleNamespace(scope=None)):
     state.home_snapshot_cache=scope_state;retained,refresh=state.retained_row_items({'path':path});self.assertTrue(refresh);self.assertTrue(all(MARK not in item for item in retained))

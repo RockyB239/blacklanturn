@@ -173,6 +173,7 @@ class ReviewRegressions(unittest.TestCase):
   from types import MethodType
   with tempfile.TemporaryDirectory() as d:
    s,calls,controls,queue=SnapshotController().state(d,lambda path:[dict(ITEM,playcount=2,resume={'position':40,'total':100})]);s.section='Movies';s.mode='home'
+   s.snapshot_cache.put(P,[ITEM],age=901)
    s.title_preferences=m.TitlePreferences(Path(d)/'p')
    ui=ROOT/'title_feedback_ui.py'
    for name in ('prepare_title_row','raw_title_row'):

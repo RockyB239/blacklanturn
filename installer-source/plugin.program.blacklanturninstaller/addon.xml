@@ -1,5 +1,5 @@
 <?xml version='1.0' encoding='utf-8'?>
-<addon id="plugin.program.blacklanturninstaller" name="BlackLanturn Installer" version="1.0.56" provider-name="BlackLanturn">
+<addon id="plugin.program.blacklanturninstaller" name="BlackLanturn Installer" version="1.0.57" provider-name="BlackLanturn">
     <requires>
         <import addon="xbmc.python" version="3.0.1" />
         <import addon="script.module.requests" />
@@ -11,7 +11,7 @@
     <extension point="xbmc.addon.metadata">
         <summary lang="en">BlackLanturn Build Installer</summary>
         <description lang="en">BlackLanturn Installer provides build installation, maintenance, backups, and system management for BlackLanturn Kodi distributions.</description>
-        <news>1.0.56: Compatibility support for Umbrella 6.8.00.</news>
+        <news>1.0.57: Delivers Build 1.1.75 with simpler series actions and longer-lived public browsing caches through Update BlackLanturn.</news>
         <platform>all</platform>
         <license>GPL-3.0</license>
         <assets>

@@ -1,0 +1,27 @@
+{
+  "title": "BlackLanturn Build 1.1.75",
+  "summary": "Simpler series actions and 15-minute public browsing caches.",
+  "sections": [
+    {
+      "heading": "Title actions",
+      "bullets": [
+        "Browse episodes directly from series and season cards. Choose a player or source on an episode or movie.",
+        "Episode player defaults are available in Settings, Playback & sync.",
+        "Remove the duplicate Details action on the current Details page, clarify episode refresh, and refresh the selected related title in place."
+      ]
+    },
+    {
+      "heading": "Faster browsing",
+      "bullets": [
+        "Reuse saved regular Movies and Shows rows for 15 minutes before background refresh.",
+        "Trakt rows keep their 30-second freshness interval. Reload this list still requests fresh titles immediately."
+      ]
+    },
+    {
+      "heading": "Keep your setup",
+      "bullets": [
+        "Use Update BlackLanturn to retain accounts, playback settings, history, sources, collections and other installed add-ons."
+      ]
+    }
+  ]
+}

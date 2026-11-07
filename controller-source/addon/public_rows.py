@@ -16,6 +16,7 @@ MAX_ROWS=48
 MAX_ITEMS=80
 # Last successful display only; provider/session freshness is independent.
 MAX_AGE=30*24*3600
+BROWSE_FRESHNESS=15*60
 PUBLIC_LISTS=frozenset(('popular','top_rated','upcoming','now_playing','trending_day','trending_week','airing_today','on_the_air','discover','similar','recommendations','trakt_trending','trakt_popular'))
 PUBLIC_ITEMS=frozenset(('details','play','seasons','episodes','flatseasons'))
 
@@ -67,6 +68,12 @@ def public_path(path,item=False):
         if 'region' in query and not re.fullmatch('[A-Z]{2}',query['region'][0]):return False
         return True
     except (ValueError,TypeError):return False
+
+def public_browse_freshness(section,path):
+    if section in ('Movies','Shows') and public_path(path):
+        info=parse_qs(urlsplit(path).query).get('info',[''])[0]
+        if not info.startswith('trakt'):return BROWSE_FRESHNESS
+    return None
 
 def _item_path(path):
     if public_path(path,item=True):return path
@@ -201,12 +208,15 @@ class PublicRowSnapshots:
             if not 0<=self.clock()-row['time']<=self.max_age:self.rows.pop(path)
 
     def get(self,path):
+        return self.get_with_age(path)[0]
+
+    def get_with_age(self,path):
         with self.lock:
             self._prune()
             row=self.rows.get(path)
-            if row:return deepcopy(row['items'])
+            if row:return deepcopy(row['items']),self.clock()-row['time']
             archive=self._archive_store()
-            return archive.get(path) if archive is not None else None
+            return archive.get_with_age(path) if archive is not None else (None,None)
 
     def _encode(self,rows):
         return json.dumps({'version':self.format_version,'scope':self.scope,'rows':list(rows.values())},ensure_ascii=False,separators=(',',':'),allow_nan=False).encode('utf-8')
@@ -241,15 +251,16 @@ class PublicRowSnapshots:
                 self.rows.popitem(last=False);raw=self._encode(self.rows)
             self._write(raw);self.dirty=False
 
-    def put(self,path,files,revision=None):
-        if not self.path_allowed(path):return False
+    def put(self,path,files,revision=None,*,age=0):
+        if not self.path_allowed(path) or not _finite_number(age,maximum=self.max_age):return False
         try:
             items=self.sanitize_items(files)
             if not items and files!=[]:return False
             with self.lock:
                 if revision is not None and revision!=self.revision:return False
                 self._prune();rows=self.rows.copy();rows.pop(path,None);evicted=[]
-                if items:rows[path]={'path':path,'time':self.clock(),'items':items}
+                stamp=self.clock()-age
+                if items:rows[path]={'path':path,'time':stamp,'items':items}
                 while len(rows)>self.max_rows:evicted.append(rows.popitem(last=False)[1])
                 raw=self._encode(rows)
                 while len(raw)>self.max_bytes:
@@ -268,7 +279,7 @@ class PublicRowSnapshots:
                     # Upgrade legacy resident displays only as normal background
                     # publication evicts them; preserve their original age.
                     for row in evicted:archive.replace(row['path'],row['items'],stamp=row['time'])
-                    archive.replace(path,items or [])
+                    archive.replace(path,items or [],stamp=stamp)
                 return path in rows or files==[]
         except (OSError,TypeError,ValueError,RecursionError):return False
 

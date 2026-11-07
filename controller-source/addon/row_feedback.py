@@ -21,11 +21,16 @@ class RowResultCache:
                 self.bytes-=self.entries.pop(key)[1]
 
     def get(self,key):
+        return self.get_with_age(key)[0]
+
+    def get_with_age(self,key):
         with self.lock:
             self._prune()
-            if key not in self.entries or self.entries[key][0]<=self.clock():self.misses+=1;return None
+            now=self.clock()
+            entry=self.entries.get(key)
+            if entry is None or entry[0]<=now:self.misses+=1;return None,None
             self.hits+=1;self.entries.move_to_end(key)
-            return deepcopy(self.entries[key][2])
+            return deepcopy(entry[2]),now-entry[3]
 
     def get_stale(self,key):
         """Bounded session-only display reuse; callers must prove account ownership."""
@@ -46,7 +51,8 @@ class RowResultCache:
             if revision is not None and revision!=self.revision:return False
             self._prune()
             if key in self.entries:self.bytes-=self.entries.pop(key)[1]
-            self.entries[key]=(self.clock()+(self.ttl if ttl is None else ttl),size,saved)
+            now=self.clock()
+            self.entries[key]=(now+(self.ttl if ttl is None else ttl),size,saved,now)
             self.bytes+=size
             while len(self.entries)>self.max_rows or self.bytes>self.max_bytes:
                 self.bytes-=self.entries.popitem(last=False)[1][1]

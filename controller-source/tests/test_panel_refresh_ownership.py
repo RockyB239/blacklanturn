@@ -55,6 +55,31 @@ class PanelRefreshOwnership(unittest.TestCase):
   w.refresh_panel_list();j.pop()()
   self.assertEqual(saved[0][:3],(w.paths[0],raw,2))
   self.assertNotIn(('notice','List refreshed'),saved[0][3])
+ def test_public_reload_fetches_a_fresh_row_and_updates_the_saved_timestamp(self):
+  from pathlib import Path
+  from tempfile import TemporaryDirectory
+  from urllib.parse import parse_qs,urlsplit
+  from public_rows import PublicRowSnapshots
+  from row_feedback import RowResultCache
+  from test_public_row_snapshots import P,ITEM
+  w,c,e,j,ns,raw=self.state()
+  with TemporaryDirectory() as folder:
+   now=[1000]
+   w.paths[0]=P
+   w.snapshot_cache=PublicRowSnapshots(Path(folder)/'public.json','scope',clock=lambda:now[0],archive=True)
+   w.result_cache=RowResultCache(clock=lambda:now[0])
+   self.assertTrue(w.snapshot_cache.put(P,[ITEM]))
+   w.result_cache.put(P,[ITEM],ttl=900)
+   now[0]+=300
+   calls=[]
+   fresh=dict(ITEM,title='Refreshed')
+   ns.update(parse_qs=parse_qs,urlsplit=urlsplit,get_list=lambda path:calls.append(path) or [fresh])
+   w.refresh_panel_list();j.pop()()
+   self.assertEqual(calls,[P])
+   saved,age=w.snapshot_cache.get_with_age(P)
+   self.assertEqual(age,0);self.assertEqual(saved[0]['title'],'Refreshed')
+   self.assertIn(('notice','List refreshed'),e)
+
  def test_related_refresh_keeps_anchor_after_previous_card(self):
   w,c,e,j,ns,raw=self.state(related=True,previous=True);w.refresh_panel_list();j.pop()()
   self.assertIn(('notice','List refreshed'),e);self.assertEqual(c[3100].items[c[3100].position]['title'],'B')
@@ -97,3 +122,26 @@ class PanelRefreshOwnership(unittest.TestCase):
   w,c,e,j,ns,raw=self.state();run=self.metadata(w,ns);run(w,raw[1]);ns['get_list']=lambda p:[{'title':'fresh'}];reload=[];w.refresh_panel_list=lambda focus=None:reload.append(focus)
   with patch.dict(sys.modules,{'title_refresh':SimpleNamespace(refresh_title=lambda p:None)}):j.pop()()
   self.assertEqual(reload,[900]);self.assertTrue(any(x[0]=='update' and x[1]['title']=='fresh' for x in e))
+ def test_related_metadata_refresh_updates_selected_card_in_place_without_replacing_hero(self):
+  w,c,e,j,ns,raw=self.state(related=True,previous=True);w.selected=raw[0];w.title_related_raw=list(raw)
+  target=raw[1];position=c[3100].position
+  native=SimpleNamespace(getPath=lambda:target['file']);c[3100].getListItem=lambda p:native
+  rendered=[];ns['media_item']=lambda item,existing:rendered.append((item,existing))
+  ns['get_list']=lambda p:[{'title':'fresh'}]
+  self.metadata(w,ns)(w,target)
+  with patch.dict(sys.modules,{'title_refresh':SimpleNamespace(refresh_title=lambda p:None)}):j.pop()()
+  self.assertEqual(rendered,[(dict(target,title='fresh'),native)])
+  self.assertIs(w.selected,raw[0]);self.assertEqual(c[3100].position,position)
+  self.assertEqual(w.related[position]['title'],'fresh');self.assertEqual(w.title_related_raw[1]['title'],'fresh')
+  self.assertEqual(w.related[position+1],raw[2])
+  self.assertIn(('notice','Title information refreshed'),e)
+  self.assertFalse(any(x[0] in ('focus','update') for x in e))
+ def test_related_metadata_discards_result_after_selection_moves(self):
+  w,c,e,j,ns,raw=self.state(related=True);w.selected=raw[0]
+  fetch=[];ns['get_list']=lambda p:fetch.append(p) or [{'title':'fresh'}]
+  self.metadata(w,ns)(w,raw[1])
+  started=[]
+  def refresh(params):started.append(params);c[3100].position+=1
+  with patch.dict(sys.modules,{'title_refresh':SimpleNamespace(refresh_title=refresh)}):j.pop()()
+  self.assertEqual(len(started),1);self.assertEqual(fetch,[])
+  self.assertEqual(w.related,raw);self.assertIs(w.selected,raw[0])

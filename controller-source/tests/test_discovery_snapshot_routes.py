@@ -92,6 +92,7 @@ class DiscoverySnapshotRoutes(unittest.TestCase):
         with tempfile.TemporaryDirectory() as folder:
             state,calls,controls,queue=SnapshotController().state(folder,lambda p:[dict(ITEM,plot='Fresh synopsis',genre=['Mystery'])])
             state.section='Movies';state.mode='home';state.title_preferences=TitlePreferences(Path(folder)/'prefs.json')
+            state.snapshot_cache.put(P,[ITEM],age=901)
             source=Path(__file__).parents[1]/'addon/title_feedback_ui.py'
             for name in ('prepare_title_row','raw_title_row','hydrate_title_row'):
                 setattr(state,name,MethodType(extract(source,name,{'discovery_scope':discovery_scope},'TitleFeedback'),state))

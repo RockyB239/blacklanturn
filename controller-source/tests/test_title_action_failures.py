@@ -15,7 +15,7 @@ class TitleActionFailures(unittest.TestCase):
             item={'file':'plugin://plugin.video.themoviedb.helper/?info=play&tmdb_type=tv&tmdb_id=712&season=1&episode=4','title':'Episode'}
         def menu(options):
             return options.index(target) if target in options else -1
-        state=SimpleNamespace(row_states={0:'ready',1:'error'},getFocusId=lambda:focus,
+        state=SimpleNamespace(row_states={0:'ready',1:'error'},mode='home',getFocusId=lambda:focus,
             rows=[[item],[]],selected=item,getControl=lambda cid:SimpleNamespace(getSelectedPosition=lambda:0),stop_preview=lambda:None,
             config={'Saved':[]},rating_identity=lambda value:None,actions_open=False,
             refresh_watch_status=lambda **kw:calls.append(('refresh',kw)),

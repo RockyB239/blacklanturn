@@ -170,11 +170,15 @@ def initialize_addons():
     if clear_stale_preview(rpc):event('stale_trailer_released')
     event('existing_integrations_ready')
 
-def media_item(data,immutable=False,factory=None):
+def media_item(data,immutable=False,factory=None,*,existing=None):
     headline,episode_line=episode_heading(data)
     # Only the YouTube browser opts in: it replaces whole cards on refresh.
     # TMDb and personal extensions mutate displayed cards and retain GUI locks.
-    li=(factory or xbmcgui.ListItem)(label=episode_line or data.get('title') or data.get('label',''),path=data.get('file',''),offscreen=immutable)
+    label=episode_line or data.get('title') or data.get('label','')
+    if existing is None:
+        li=(factory or xbmcgui.ListItem)(label=label,path=data.get('file',''),offscreen=immutable)
+    else:
+        li=existing;li.setLabel(label)
     art=dict(data.get('art',{}))
     selected_art=card_artwork(data)
     art['landscape']=selected_art['image'] if selected_art['kind']=='landscape' else ''
@@ -714,12 +718,20 @@ class LiveReview(LibraryActions,RowCustomization,TitleFeedback,ShelfTools,YouTub
                 for item in files:
                     for field in ('playcount','resume','lastplayed','watched','watchedepisodes','resume_point','resumetime'):item.pop(field,None)
                 return files,True
-        files=snapshots.get(path) if snapshots is not None else None
+        from public_rows import public_browse_freshness
+        freshness=public_browse_freshness(getattr(self,'section',''),path)
+        def saved_display(store):
+            if store is None:return None,None
+            return store.get_with_age(path) if freshness else (store.get(path),None)
+        files,age=saved_display(snapshots)
         home=getattr(self,'home_snapshot_cache',None)
         shared_home=home is not None and self.section in ('Home','Movies','Shows')
         if shared_home and files is not None and filtered and needs_fill(path,files,first_page_keep(self,path,metadata.without_anime),size=first_page_minimum(definition)):files=None
-        if files is None and shared_home:files=home.get(path)
+        if files is None and shared_home:files,age=saved_display(home)
         if files is not None and filtered and needs_fill(path,files,first_page_keep(self,path,metadata.without_anime),size=first_page_minimum(definition)):return None,False
+        refresh=files is not None and (age is None or age>=freshness)
+        if files is not None and not refresh and home is not None and home.scope:
+            files=getattr(self,'hydrate_library_items',lambda items:items)(files)
         if files is not None and home is not None and home.scope:
             # Disk displays carry no resume. Resolve current exact-title progress
             # only if this card is explicitly played before normal hydration.
@@ -729,7 +741,7 @@ class LiveReview(LibraryActions,RowCustomization,TitleFeedback,ShelfTools,YouTub
                 query=parse_qs(urlsplit(item.get('file','')).query)
                 if item.get('filetype')!='directory' and query.get('info',[''])[0] in ('play','details') and (query.get('tmdb_type')==['movie'] or episode_identity(item)):
                     item[PENDING_SCOPE]=home.scope
-        return files,files is not None
+        return files,refresh
     def fill_discovery_page(self,path,files,current,refresh=False,publish=True,minimum=None):
         from filtered_pages import path_minimum
         if minimum is None:minimum=path_minimum(self,path)
@@ -748,7 +760,10 @@ class LiveReview(LibraryActions,RowCustomization,TitleFeedback,ShelfTools,YouTub
             return logical_files(raw,actual,raw_path)
         if upstream_path(provider_path(path))!=provider_path(path):files=fetch(provider_path(path))
         filled=fill_page(path,files,fetch,first_page_keep(self,path,metadata.without_anime),current=current,minimum=minimum)
-        if current():cache.put(key,filled,revision=revision)
+        from public_rows import public_browse_freshness
+        freshness=public_browse_freshness(getattr(self,'section',''),path)
+        trakt=parse_qs(urlsplit(path).query).get('info',[''])[0].startswith('trakt')
+        if current():cache.put(key,filled,revision=revision,ttl=30 if trakt else freshness)
         if publish:self.publish_cache_stats()
         return filled
     def cached_provider_list(self,path,revision,current):
@@ -818,18 +833,18 @@ class LiveReview(LibraryActions,RowCustomization,TitleFeedback,ShelfTools,YouTub
         snapshot_revision=snapshots.revision if snapshots is not None else None
         filtered_snapshot=(snapshots is not None and snapshots.path_allowed(path)
                        and getattr(self,'anime_metadata',None) is not None and should_exclude_anime(self,path))
-        def remember_snapshot_fill(files):
+        def remember_snapshot_fill(files,age=0):
             # A raw anime-heavy page is not a usable saved shelf. Publish only
             # the completed fill, before title preferences/ranking alter display.
             with self.preview_dispatch_lock:
                 if not current():raise PageCancelled('Row navigation changed')
                 if self.configure_row_snapshots():self.restart_pending_rows()
                 if not current():raise PageCancelled('Row configuration changed')
-                if any(snapshots is getattr(self,key,None) for key in ('snapshot_cache','home_snapshot_cache')):snapshots.put(path,files,revision=snapshot_revision)
+                if any(snapshots is getattr(self,key,None) for key in ('snapshot_cache','home_snapshot_cache')):snapshots.put(path,files,revision=snapshot_revision,age=age)
         if not definition.get('_snapshot_refresh') and getattr(self,'anime_metadata',None) is not None and should_exclude_anime(self,path):
-            filled=cache.get('filtered-v1:'+path)
+            filled,age=cache.get_with_age('filtered-v1:'+path)
             if filled is not None and not needs_fill(path,filled,first_page_keep(self,path,self.anime_metadata.without_anime),positioned=True,size=first_page_minimum(definition)):
-                if filtered_snapshot:remember_snapshot_fill(filled)
+                if filtered_snapshot:remember_snapshot_fill(filled,age)
                 self.publish_cache_stats();return filled
         if getattr(self,'anime_metadata',None) is not None and should_exclude_anime(self,path) and upstream_path(provider_path(path))!=provider_path(path):
             filled=self.fill_discovery_page(path,[],current,refresh=definition.get('_snapshot_refresh',False),minimum=first_page_minimum(definition))
@@ -868,7 +883,9 @@ class LiveReview(LibraryActions,RowCustomization,TitleFeedback,ShelfTools,YouTub
                 # retain only account-owned display fields. A failed/unfinished
                 # filtered fill must not replace the last successful display.
                 info=parse_qs(urlsplit(path).query).get('info',[''])[0]
-                cache.put(path,files,revision=revision,ttl=30 if info.startswith('trakt') else 120,
+                from public_rows import public_browse_freshness
+                freshness=public_browse_freshness(getattr(self,'section',''),path)
+                cache.put(path,files,revision=revision,ttl=30 if info.startswith('trakt') else (freshness or 120),
                           allow_empty=info.startswith('trakt') or definition.get('_explicit_streaming',False))
                 if not filtered_snapshot and revision==cache.revision and snapshots is not None and any(snapshots is getattr(self,key,None) for key in ('snapshot_cache','home_snapshot_cache')):snapshots.put(path,files,revision=snapshot_revision)
             if streaming is not None and current() and snapshot_owner is getattr(self,'snapshot_cache',None):
@@ -1190,6 +1207,7 @@ class LiveReview(LibraryActions,RowCustomization,TitleFeedback,ShelfTools,YouTub
 
     def show_row_window(self,offset,focus_slot=None):
         from filtered_pages import path_minimum
+        from public_rows import public_browse_freshness
         scope_changed=self.configure_row_snapshots()
         revision=self.result_cache.revision
         streaming=getattr(self,'streaming_shelf_view',lambda:False)()
@@ -1251,11 +1269,18 @@ class LiveReview(LibraryActions,RowCustomization,TitleFeedback,ShelfTools,YouTub
                 # return consume its deferred response. Only an unhydrated disk
                 # snapshot may use session data; explicit rows are already newer.
                 fresh=cached['files'] if cached.get('deferred') else self.result_cache.get(cached['path']) if cached.get('snapshot') and 'local_items' not in definitions[n] and cached['path'].startswith(TMDB) else None
+                refresh=cached.get('snapshot') or streaming
+                if (not cached.get('deferred') and fresh is None and cached.get('state')!='error'
+                        and cached['path']==definitions[n]['path'] and 'local_items' not in definitions[n]
+                        and public_browse_freshness(getattr(self,'section',''),cached['path'])):
+                    retained,refresh=self.retained_row_items(definitions[n])
+                    if retained is not None and not refresh:fresh=retained
+                    if retained is None:refresh=True
                 if streaming and not cached.get('deferred') and not fresh:
                     fresh=self.result_cache.get(cached['path']) or None
                     if fresh is None:
-                        saved,refresh=getattr(self,'retained_streaming_items',lambda path:(None,False))(cached['path'])
-                        if not refresh:fresh=saved
+                        saved,streaming_refresh=getattr(self,'retained_streaming_items',lambda path:(None,False))(cached['path'])
+                        if not streaming_refresh:fresh=saved
                 files=fresh if fresh is not None else cached['files']
                 anchor=cached['files'][cached['position']] if 0<=cached['position']<len(cached['files']) else None
                 position=restored_position(files,anchor,cached['position']) if fresh is not None and not cached.get('deferred') else cached['position']
@@ -1268,7 +1293,7 @@ class LiveReview(LibraryActions,RowCustomization,TitleFeedback,ShelfTools,YouTub
                         self.setProperty('notice',cached.get('message',''))
                         if n==0 and not files:self.setProperty('streamingRetryLabel','Retry shelf')
                     if cached.get('failed'):self.failed_paths[n]=copy.deepcopy(cached['failed'])
-                if (cached.get('snapshot') or streaming) and fresh is None and not (streaming and cached.get('state')=='error'):
+                if refresh and fresh is None and not (streaming and cached.get('state')=='error'):
                     self.snapshot_rows[n]=True
                     pending.append((n,dict(definitions[n],path=cached['path'],label=cached['label'],position=cached['position'],_snapshot_refresh=True)))
             else:
@@ -2114,8 +2139,8 @@ class LiveReview(LibraryActions,RowCustomization,TitleFeedback,ShelfTools,YouTub
                     self.focus_key=None;self.dwell=time.monotonic()
                     if owns_input() and (browse_state is not None or self.getFocusId()==focus) and focus in (101,102,103,105,106,600,900,901,3000,3100):self.setFocusId(focus)
         threading.Thread(target=work,name='BlackLanturnWatchRefresh',daemon=True).start()
-    def choose_playback_player(self,item,save_default=False):
-        kind=playback_kind(item)
+    def choose_playback_player(self,item,save_default=False,*,default_kind=None):
+        kind=default_kind if save_default and default_kind else playback_kind(item)
         if kind is None:return
         if not save_default and not choose_player_path(item):
             self.actions_open=True
@@ -2192,13 +2217,16 @@ class LiveReview(LibraryActions,RowCustomization,TitleFeedback,ShelfTools,YouTub
             discovery=discovery_result(item) if item else None
             command=trakt_command(item) if item and not discovery else None
             player_path=choose_player_path(item) if item and not discovery else None
-            player_available=bool(player_path or (item and not discovery and playback_kind(item)))
             if discovery:options.append(('open_discovery',discovery['button']))
             elif item:
                 saved=any(x.get('file')==item.get('file') for x in self.config['Saved'])
-                options.append(('play','Open' if item.get('filetype')=='directory' or item.get('type')=='addon' else 'Resume' if resume_options(item) else 'Play'))
-                if player_available:options.append(('player','Play using…'))
-                options.append(('details','Details'))
+                if item.get('filetype')=='directory' and playback_kind(item)=='episode':
+                    options.append(('browse_episodes','Browse episodes'))
+                else:
+                    options.append(('play','Open' if item.get('filetype')=='directory' or item.get('type')=='addon' else 'Resume' if resume_options(item) else 'Play'))
+                if player_path:options.append(('player','Play using…'))
+                if self.mode!='details' or (getattr(self,'selected',None) or {}).get('file')!=item.get('file'):
+                    options.append(('details','Details'))
                 if genre_available:options.append(('genre','Choose genre…'))
                 options.append(('local','Remove from My Stuff on this device' if saved else 'Save to My Stuff on this device'))
                 options.extend(getattr(self,'library_title_actions',lambda _:[])(item))
@@ -2214,7 +2242,7 @@ class LiveReview(LibraryActions,RowCustomization,TitleFeedback,ShelfTools,YouTub
                 options.extend(getattr(self,'title_feedback_actions',lambda _:[])(item))
                 if getattr(self,'youtube_home_visible',lambda:False)():options.append(('youtube_refresh','Refresh recommendations'))
                 if getattr(self,'source_session_label',lambda *a,**k: '')(item,refresh=True):options.append(('normal_autoplay','Return to normal autoplay'))
-                if player_available:options.append(('default_player','Set default player…'))
+                if player_path:options.append(('default_player','Set default player…'))
                 options.append(('refresh','Refresh watched status'))
             if failed:
                 streaming=getattr(self,'streaming_shelf_view',lambda:False)()
@@ -2261,6 +2289,12 @@ class LiveReview(LibraryActions,RowCustomization,TitleFeedback,ShelfTools,YouTub
         elif action=='settings':self.settings()
         elif action=='open_discovery':self.open_discovery(discovery)
         elif action=='play':self.update(item);self.onClick(101)
+        elif action=='browse_episodes':
+            self.actions_open=True
+            try:
+                self.update(item);self.browse_all_episodes()
+            finally:
+                self.dwell=time.monotonic();self.actions_open=False
         elif action=='sync_settings':self.run_setting('sync_settings')
         elif action=='details':self.details(item)
         elif action=='where_to_watch':self.where_to_watch(item)
@@ -2289,7 +2323,10 @@ class LiveReview(LibraryActions,RowCustomization,TitleFeedback,ShelfTools,YouTub
         if self.section!='YouTube' and valid_source(reload_path):options.append(('reload_list','Reload this list'))
         params=title_details_params(item) if item else {}
         if str(params.get('tmdb_id','')).isdigit() and params.get('tmdb_type') in ('movie','tv'):
-            options.append(('refresh_metadata','Check for new episodes' if params['tmdb_type']=='tv' else 'Refresh title information'))
+            label='Refresh title information'
+            if params['tmdb_type']=='tv':
+                label='Refresh episode information' if 'episode' in params else 'Check for new episodes'
+            options.append(('refresh_metadata',label))
         selected=choose_action_panel(options,item=item,section=self.section,config=self.config,episode=bool(getattr(self,'episode_browser_context',None) or (item and episode_identity(item))))
         return next((n for n,(key,_) in enumerate(options) if key==selected),-1)
     def refresh_panel_list(self,focus=None):
@@ -2330,6 +2367,12 @@ class LiveReview(LibraryActions,RowCustomization,TitleFeedback,ShelfTools,YouTub
                 if not current():return
                 streaming=getattr(self,'streaming_snapshot',lambda path:None)(path)
                 streaming_revision=streaming.revision if streaming is not None else None
+                from public_rows import public_browse_freshness
+                freshness=public_browse_freshness(getattr(self,'section',''),path) if not related else None
+                public=getattr(self,'snapshot_cache',None) if freshness else None
+                home=getattr(self,'home_snapshot_cache',None)
+                if public is not None and home is not None and home.path_allowed(path):public=home
+                public_revision=public.revision if public is not None else None
                 raw_files=files=get_list(provider_path(path))
                 if old and not files:raise RuntimeError('List is unavailable')
                 if not current():return
@@ -2357,11 +2400,15 @@ class LiveReview(LibraryActions,RowCustomization,TitleFeedback,ShelfTools,YouTub
                         ownership['records']=self.rows[slot]
                         if not current():return
                         cache=getattr(self,'result_cache',None)
-                        if cache is not None:cache.put(path,files,revision=cache.revision)
+                        if cache is not None:
+                            trakt=parse_qs(urlsplit(path).query).get('info',[''])[0].startswith('trakt')
+                            cache.put(path,files,revision=cache.revision,ttl=30 if trakt else freshness)
                         match=next((x for x in self.rows[slot] if item_key(x)==item_key(selected)),None)
                         if match:self.update(match)
                     if current():
                         if streaming is not None:streaming.put(path,raw_files,revision=streaming_revision)
+                        if public is not None and public in (getattr(self,'snapshot_cache',None),getattr(self,'home_snapshot_cache',None)):
+                            public.put(path,files,revision=public_revision)
                         self.setProperty('notice','List refreshed')
             except Exception:
                 if current():self.setProperty('notice','List refresh is unavailable; current titles and position were kept')
@@ -2381,18 +2428,27 @@ class LiveReview(LibraryActions,RowCustomization,TitleFeedback,ShelfTools,YouTub
             focus=self.getFocusId();mode=self.mode;slot=focus-900 if focus in (900,901) else getattr(self,'last_row',0)
             paths=getattr(self,'paths',[]);path=paths[slot] if 0<=slot<len(paths) else '';offset=getattr(self,'row_offset',0)
             owner=getattr(self,'related_owner',None)
+            related=mode=='details' and focus==3100
+            if related:
+                records=self.related;control=self.getControl(3100);position=control.getSelectedPosition()
+                related_path=self.related_path;request=self.related_request
             self.input_generation=getattr(self,'input_generation',0)+1;epoch=self.input_generation
             self.stop_preview();preview=getattr(self,'preview_generation',None)
             self.setProperty('notice','Refreshing title information…')
         def current():
-            paths=getattr(self,'paths',[])
-            return (self.alive and lifetime is getattr(self,'window_lifetime',None) and self.generation==generation
+            owns_window=(self.alive and lifetime is getattr(self,'window_lifetime',None) and self.generation==generation
                     and self.panel_refresh_token is token and getattr(self,'input_generation',0)==epoch
                     and getattr(self,'preview_generation',None)==preview and self.mode==mode
                     and not getattr(self,'actions_open',False) and not getattr(self,'settings_open',False)
-                    and (self.selected or {}).get('file')==key and getattr(self,'row_offset',0)==offset
-                    and (paths[slot] if 0<=slot<len(paths) else '')==path
                     and (mode!='details' or getattr(self,'related_owner',None) is owner))
+            if not owns_window:return False
+            if related:
+                return (self.related is records and self.related_request is request and self.related_path==related_path
+                        and self.getFocusId()==focus and control.getSelectedPosition()==position
+                        and 0<=position<len(records) and records[position].get('file')==key)
+            paths=getattr(self,'paths',[])
+            return ((self.selected or {}).get('file')==key and getattr(self,'row_offset',0)==offset
+                    and (paths[slot] if 0<=slot<len(paths) else '')==path)
         def work():
             completed=False
             try:
@@ -2404,7 +2460,20 @@ class LiveReview(LibraryActions,RowCustomization,TitleFeedback,ShelfTools,YouTub
                 if not found:raise RuntimeError('Title information is unavailable')
                 with self.preview_dispatch_lock:
                     if not current():return
-                    self.update(merge_title_details(item,found[0]))
+                    if related:
+                        card=control.getListItem(position)
+                        if card.getPath()!=key or not current():return
+                        updated=merge_title_details(records[position],found[0])
+                        media_item(updated,existing=card)
+                        records[position]=updated
+                        raw=getattr(self,'title_related_raw',None)
+                        if raw is not None:
+                            for index,record in enumerate(raw):
+                                if record.get('file')==key:
+                                    raw[index]=merge_title_details(record,found[0])
+                                    break
+                    else:
+                        self.update(merge_title_details(item,found[0]))
                     completed=True
                     if current():self.setProperty('notice','Title information refreshed')
             except Exception:
@@ -2961,6 +3030,8 @@ class LiveReview(LibraryActions,RowCustomization,TitleFeedback,ShelfTools,YouTub
             xbmcaddon.Addon(action[6:]).openSettings()
             if action=='addon:plugin.video.youtube':
                 self.refresh_preview_setup();self.refresh_youtube_connection(force=True);self.row_navigation()
+        elif action=='default_episode_player':
+            self.choose_playback_player(None,save_default=True,default_kind='episode')
         elif action=='sync_settings':
             previous=getattr(self,'actions_open',False);self.actions_open=True
             self.input_generation=getattr(self,'input_generation',0)+1;self.dwell=time.monotonic()

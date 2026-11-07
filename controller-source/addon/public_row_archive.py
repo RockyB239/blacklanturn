@@ -58,21 +58,27 @@ class PublicRowArchive:
         return count<=MAX_ROWS and total<=MAX_BYTES and largest<=MAX_ROW_BYTES
 
     def get(self,path):
+        return self.get_with_age(path)[0]
+
+    def get_with_age(self,path):
         from public_rows import MAX_AGE,public_path,_items,_finite_number
-        if not isinstance(path,str) or len(path)>MAX_PATH or not public_path(path):return None
+        if not isinstance(path,str) or len(path)>MAX_PATH or not public_path(path):return None,None
         try:
             c=self._connect()
-            if c is None:return None
+            if c is None:return None,None
             with closing(c):
-                if not self._budget(c):return None
+                if not self._budget(c):return None,None
                 row=c.execute('SELECT path,stamp,substr(payload,1,?) FROM rows WHERE path_hash=? AND scope=? AND version=?',(MAX_ROW_BYTES+1,sha256(path.encode()).hexdigest(),self.scope,VERSION)).fetchone()
-            if row is None or row[0]!=path or not _finite_number(row[1]) or not 0<=self.clock()-row[1]<=MAX_AGE:return None
+            if row is None or row[0]!=path or not _finite_number(row[1]):return None,None
+            age=self.clock()-row[1]
+            if not 0<=age<=MAX_AGE:return None,None
             raw=row[2]
-            if not isinstance(raw,bytes) or len(raw)>MAX_ROW_BYTES:return None
+            if not isinstance(raw,bytes) or len(raw)>MAX_ROW_BYTES:return None,None
             data=json.loads(raw)
-            if not isinstance(data,dict) or data.get('version')!=VERSION or data.get('scope')!=self.scope or data.get('path')!=path or data.get('time')!=row[1]:return None
-            return _items(data.get('items'))
-        except (OSError,sqlite3.Error,ValueError,TypeError,OverflowError,RecursionError):return None
+            if not isinstance(data,dict) or data.get('version')!=VERSION or data.get('scope')!=self.scope or data.get('path')!=path or data.get('time')!=row[1]:return None,None
+            items=_items(data.get('items'))
+            return (items,age) if items else (None,None)
+        except (OSError,sqlite3.Error,ValueError,TypeError,OverflowError,RecursionError):return None,None
 
     def replace(self,path,items,stamp=None):
         from public_rows import MAX_AGE,public_path,_finite_number

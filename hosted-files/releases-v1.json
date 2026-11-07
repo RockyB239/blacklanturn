@@ -2,6 +2,92 @@
   "schema": 1,
   "releases": [
     {
+      "id": "blacklanturn-general-1.1.75-r0",
+      "edition": "general",
+      "version": "1.1.75",
+      "revision": 0,
+      "title": "BlackLanturn Build 1.1.75",
+      "summary": "Simpler series actions and 15-minute public browsing caches.",
+      "sections": [
+        {
+          "heading": "Title actions",
+          "bullets": [
+            "Browse episodes directly from series and season cards. Choose a player or source on an episode or movie.",
+            "Episode player defaults are available in Settings, Playback & sync.",
+            "Remove the duplicate Details action on the current Details page, clarify episode refresh, and refresh the selected related title in place."
+          ]
+        },
+        {
+          "heading": "Faster browsing",
+          "bullets": [
+            "Reuse saved regular Movies and Shows rows for 15 minutes before background refresh.",
+            "Trakt rows keep their 30-second freshness interval. Reload this list still requests fresh titles immediately."
+          ]
+        },
+        {
+          "heading": "Keep your setup",
+          "bullets": [
+            "Use Update BlackLanturn to retain accounts, playback settings, history, sources, collections and other installed add-ons."
+          ]
+        }
+      ],
+      "files": {
+        "addons/plugin.program.blacklanturninstaller/addon.xml": "17769332542ebd0b61fe7d8c2e02302bfc58ce5be513a9525cd3a135e4976e9e",
+        "addons/script.blacklanturn.preview/action_panel.py": "88d29cc0c8fa097abc9c161abcbd0449261b5fa03e83e4c46038e975c2972730",
+        "addons/script.blacklanturn.preview/action_panel_model.py": "41f76ffb094b924bdaa701b0251c5383b995cbafa47907ee70f43b2ecafb1fcd",
+        "addons/script.blacklanturn.preview/addon.xml": "7635049dad773a5a64f8a12a28c06e989a5bd5653ca44887ed17a81c801478cd",
+        "addons/script.blacklanturn.preview/backend_core.py": "ccb7aefa5f01f6ac923a57aac2b6f6b1eac4c831b40fdd3c4d566d8d3c027681",
+        "addons/script.blacklanturn.preview/light_home_cards.py": "386d852604d60320cd79cf96867757c3e2d836d82f017c0f2c674ab7951c53d4",
+        "addons/script.blacklanturn.preview/live_review.py": "64c15093fbcb5e93decdf34a87f6721537a1056cf7750f392856477cb2cea6f9",
+        "addons/script.blacklanturn.preview/public_row_archive.py": "f57cbc2ad6a50a421970afe925a60abd7f6a5d9ddca20d1c34edac001e0cfd92",
+        "addons/script.blacklanturn.preview/public_rows.py": "fee94cb668ac10eb938a8d0e08ac657b9b47b218eee1cdddbae17936d4edd99f",
+        "addons/script.blacklanturn.preview/row_feedback.py": "f27b4e43caee2b3695871c376c9ebf8fee1e871a4c3aba4fefe3b1c7d46a4639"
+      }
+    },
+    {
+      "id": "blacklanturn-apple-1.1.75-r0",
+      "edition": "apple",
+      "version": "1.1.75",
+      "revision": 0,
+      "title": "BlackLanturn Build 1.1.75",
+      "summary": "Simpler series actions and 15-minute public browsing caches.",
+      "sections": [
+        {
+          "heading": "Title actions",
+          "bullets": [
+            "Browse episodes directly from series and season cards. Choose a player or source on an episode or movie.",
+            "Episode player defaults are available in Settings, Playback & sync.",
+            "Remove the duplicate Details action on the current Details page, clarify episode refresh, and refresh the selected related title in place."
+          ]
+        },
+        {
+          "heading": "Faster browsing",
+          "bullets": [
+            "Reuse saved regular Movies and Shows rows for 15 minutes before background refresh.",
+            "Trakt rows keep their 30-second freshness interval. Reload this list still requests fresh titles immediately."
+          ]
+        },
+        {
+          "heading": "Keep your setup",
+          "bullets": [
+            "Use Update BlackLanturn to retain accounts, playback settings, history, sources, collections and other installed add-ons."
+          ]
+        }
+      ],
+      "files": {
+        "addons/plugin.program.blacklanturninstaller/addon.xml": "17769332542ebd0b61fe7d8c2e02302bfc58ce5be513a9525cd3a135e4976e9e",
+        "addons/script.blacklanturn.preview/action_panel.py": "88d29cc0c8fa097abc9c161abcbd0449261b5fa03e83e4c46038e975c2972730",
+        "addons/script.blacklanturn.preview/action_panel_model.py": "41f76ffb094b924bdaa701b0251c5383b995cbafa47907ee70f43b2ecafb1fcd",
+        "addons/script.blacklanturn.preview/addon.xml": "7635049dad773a5a64f8a12a28c06e989a5bd5653ca44887ed17a81c801478cd",
+        "addons/script.blacklanturn.preview/backend_core.py": "ccb7aefa5f01f6ac923a57aac2b6f6b1eac4c831b40fdd3c4d566d8d3c027681",
+        "addons/script.blacklanturn.preview/light_home_cards.py": "386d852604d60320cd79cf96867757c3e2d836d82f017c0f2c674ab7951c53d4",
+        "addons/script.blacklanturn.preview/live_review.py": "64c15093fbcb5e93decdf34a87f6721537a1056cf7750f392856477cb2cea6f9",
+        "addons/script.blacklanturn.preview/public_row_archive.py": "f57cbc2ad6a50a421970afe925a60abd7f6a5d9ddca20d1c34edac001e0cfd92",
+        "addons/script.blacklanturn.preview/public_rows.py": "fee94cb668ac10eb938a8d0e08ac657b9b47b218eee1cdddbae17936d4edd99f",
+        "addons/script.blacklanturn.preview/row_feedback.py": "f27b4e43caee2b3695871c376c9ebf8fee1e871a4c3aba4fefe3b1c7d46a4639"
+      }
+    },
+    {
       "id": "blacklanturn-general-1.1.74-r0",
       "edition": "general",
       "version": "1.1.74",

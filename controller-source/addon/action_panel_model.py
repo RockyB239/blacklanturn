@@ -26,7 +26,7 @@ DESCRIPTIONS.update({
 
 def build_panel(options,episode=False):
  actions=[{'id':key,'label':label,'description':DESCRIPTIONS.get(key,'')} for key,label in options if not(episode and key=='genre')]
- quick=[a for key in ('play','open_discovery','player','details','genre','jump_streaming_shelf') for a in actions if a['id']==key]
+ quick=[a for key in ('play','browse_episodes','open_discovery','player','details','genre','jump_streaming_shelf') for a in actions if a['id']==key]
  ids={a['id'] for a in quick};playback=[a for a in actions if a['id'] in ('default_player','normal_autoplay')];ids.update(a['id'] for a in playback);grouped={key:[] for key,_,_ in GROUPS}
  for action in actions:
   if action['id'] in ids:continue
@@ -36,6 +36,7 @@ def build_panel(options,episode=False):
  grouped['refresh'].sort(key=lambda a:priority.get(a['id'],10))
  for action in actions:
   if action['id']=='refresh_metadata' and action['label']=='Check for new episodes':action['description']='Check this show for new seasons and episodes.'
+  if action['id']=='refresh_metadata' and action['label']=='Refresh episode information':action['description']='Update this episode’s information and artwork.'
  return {'quick':quick,'playback':playback,'groups':[{'id':key,'label':label,'icon':icon,'actions':grouped[key]} for key,label,icon in GROUPS if grouped[key]]}
 
 def panel_header(item,section=''):

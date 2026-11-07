@@ -33,7 +33,7 @@ class SectionDisplaySnapshots(unittest.TestCase):
   for section,kind in (('Shows','tv'),('Movies','movie')):
    with self.subTest(section=section),tempfile.TemporaryDirectory() as folder:
     paths=[route('trakt_recommendations',kind),route('trending_week',kind)]
-    store=HomeRowSnapshots(Path(folder)/'home.json','account')
+    store=HomeRowSnapshots(Path(folder)/'home.json','account',clock=lambda:time.time()-901)
     for path in paths:self.assertTrue(store.put(path,[title(1,kind)]))
     s,calls,controls,queue=self.state(folder,section,lambda path:[title(1,kind),title(2,kind)])
     s.set_rows([{'path':path,'label':str(n)} for n,path in enumerate(paths)])
@@ -86,6 +86,93 @@ class SectionDisplaySnapshots(unittest.TestCase):
     if visible:self.assertEqual(controls[900].items[0].properties['watchState'],'unknown')
     queue.pop(0)();self.assertEqual(calls,[path]);self.assertEqual(s.rows[0][0]['playcount'],2)
 
+ def test_regular_public_row_reuses_original_fetch_time_across_restarts(self):
+  path=route('discover',extra='&with_genres=18')
+  for age in (300,899,900):
+   with self.subTest(age=age),tempfile.TemporaryDirectory() as folder:
+    state,calls,_,queue=self.state(folder,'Shows',lambda _: [title(2)])
+    cache=PublicRowSnapshots(state.snapshot_cache.path,'scope',clock=lambda:1000,archive=True)
+    self.assertTrue(cache.put(path,[title(1)]))
+    state.snapshot_cache=PublicRowSnapshots(cache.path,'scope',clock=lambda:1000+age,archive=True)
+    before=cache.path.read_bytes()
+    state.set_rows([{'path':path,'label':'Drama'}])
+    self.assertEqual(labels(state.rows[0]),['1']);self.assertEqual(calls,[])
+    self.assertEqual(cache.path.read_bytes(),before,'A display hit must not renew the saved fetch time')
+    self.assertEqual(len(queue),int(age>=900))
+    if queue:queue.pop(0)();self.assertEqual(calls,[path])
+
+ def test_archived_regular_row_and_shared_trending_keep_original_age(self):
+  public=route('trending_day');shared=route('trending_week');trakt=route('trakt_recommendations')
+  with tempfile.TemporaryDirectory() as folder:
+   state,_,_,_=self.state(folder,'Shows',lambda _:[])
+   for age in (899,900):
+    cache=PublicRowSnapshots(state.snapshot_cache.path,'scope',clock=lambda:1000,archive=True)
+    self.assertTrue(cache.put(public,[title(1)]))
+    # Leave only the independently bounded archive record for this row.
+    cache.path.unlink()
+    state.snapshot_cache=PublicRowSnapshots(cache.path,'scope',clock=lambda:1000+age,archive=True)
+    home=HomeRowSnapshots(state.home_snapshot_cache.path,'account',clock=lambda:1000)
+    self.assertTrue(home.put(shared,[title(1)]));self.assertTrue(home.put(trakt,[title(1)]))
+    state.home_snapshot_cache=HomeRowSnapshots(home.path,'account',clock=lambda:1000+age)
+    for path in (public,shared,trakt):
+     files,refresh=state.retained_row_items({'path':path})
+     self.assertEqual(labels(files),['1'])
+     self.assertEqual(refresh,age>=900 or path==trakt)
+
+ def test_provider_session_freshness_uses_15_minutes_for_public_and_30_seconds_for_trakt(self):
+  from row_feedback import RowResultCache
+  path=route('trending_day');trakt=route('trakt_recommendations')
+  with tempfile.TemporaryDirectory() as folder:
+   state,_,_,_=self.state(folder,'Shows',lambda _: [title(1)])
+   now=[1000]
+   state.result_cache=RowResultCache(clock=lambda:now[0])
+   for route_path in (path,trakt):state.cached_row_items({'path':route_path,'label':'Row'})
+   now[0]+=29
+   self.assertIsNotNone(state.result_cache.get(trakt))
+   now[0]+=1
+   self.assertIsNone(state.result_cache.get(trakt))
+   now[0]=1899
+   self.assertIsNotNone(state.result_cache.get(path))
+   now[0]+=1
+   self.assertIsNone(state.result_cache.get(path))
+
+ def test_revisit_after_freshness_boundary_refreshes_without_resetting_selection(self):
+  path=route('trending_day')
+  other={'path':'','label':'Other','local_items':[{'file':'local'}]}
+  with tempfile.TemporaryDirectory() as folder:
+   state,calls,_,queue=self.state(folder,'Shows',lambda _: [title(2),title(1)])
+   now=[1000]
+   cache=PublicRowSnapshots(state.snapshot_cache.path,'scope',clock=lambda:now[0],archive=True)
+   self.assertTrue(cache.put(path,[title(1)]))
+   state.snapshot_cache=PublicRowSnapshots(cache.path,'scope',clock=lambda:now[0],archive=True)
+   state.hydrate_library_items=lambda items:[dict(item,playcount=2) for item in items]
+   state.set_rows([{'path':path,'label':'Trending'},other,other])
+   self.assertEqual(state.rows[0][0]['playcount'],2)
+   while queue:queue.pop(0)()
+   self.assertEqual(calls,[])
+   now[0]+=900
+   state.show_row_window(1,0);state.show_row_window(0,0)
+   self.assertEqual(labels(state.rows[0]),['1']);self.assertEqual(calls,[])
+   while queue:queue.pop(0)()
+   self.assertEqual(calls,[path]);self.assertEqual(labels(state.rows[0]),['1'])
+   state.show_row_window(1,0);state.show_row_window(0,0)
+   self.assertEqual(labels(state.rows[0]),['2','1'])
+
+ def test_persisting_an_already_filled_session_row_keeps_fetch_age(self):
+  from row_feedback import RowResultCache
+  path=route('discover',extra='&with_genres=18')
+  filled=[title(n) for n in range(1,21)]
+  with tempfile.TemporaryDirectory() as folder:
+   state,calls,_,_=self.state(folder,'Shows',lambda _:self.fail('A fresh fill must not fetch again'))
+   now=[1000]
+   state.result_cache=RowResultCache(clock=lambda:now[0])
+   state.snapshot_cache=PublicRowSnapshots(state.snapshot_cache.path,'scope',clock=lambda:now[0],archive=True)
+   state.result_cache.put('filtered-v1:'+path,filled,ttl=900)
+   now[0]+=899
+   self.assertEqual(labels(state.cached_row_items({'path':path,'label':'Drama'})),labels(filled))
+   self.assertEqual(state.snapshot_cache.get_with_age(path)[1],899)
+   self.assertEqual(calls,[])
+
  def test_completed_filtered_genre_persists_exact_order_next_cursor_and_raw_session_page(self):
   with tempfile.TemporaryDirectory() as folder:
    path=route('discover',extra='&with_genres=18');data=page_data(path)
@@ -94,7 +181,7 @@ class SectionDisplaySnapshots(unittest.TestCase):
    saved=PublicRowSnapshots(s.snapshot_cache.path,'scope').get(path);self.assertEqual(labels(saved),FILLED);self.assertEqual(saved[-1]['file'],path+'&page=2&bl_start=18')
    self.assertTrue(all('playcount' not in item and 'resume' not in item for item in saved))
    fresh,new_calls,_,queue=self.state(folder,'Shows',lambda p:self.fail('Completed display must paint first'));fresh.set_rows([{'path':path,'label':'Drama'}])
-   self.assertEqual(labels(fresh.rows[0]),FILLED);self.assertEqual(fresh.rows[0][-1]['_page_control'],'next');self.assertEqual(new_calls,[]);self.assertEqual(len(queue),1)
+   self.assertEqual(labels(fresh.rows[0]),FILLED);self.assertEqual(fresh.rows[0][-1]['_page_control'],'next');self.assertEqual(new_calls,[]);self.assertEqual(queue,[])
 
  def test_filtered_session_hit_persists_completed_public_display_without_more_requests(self):
   with tempfile.TemporaryDirectory() as folder:

@@ -5,11 +5,15 @@ from youtube_core import is_youtube,caption as youtube_caption
 from episode_ui import episode_card
 from search_ui import search_caption
 from watch_metadata import hydrate_watch_metadata
-def media_item(data,immutable=False,factory=None):
+def media_item(data,immutable=False,factory=None,*,existing=None):
     headline,episode_line=episode_heading(data)
     # Only the YouTube browser opts in: it replaces whole cards on refresh.
     # TMDb and personal extensions mutate displayed cards and retain GUI locks.
-    li=(factory or xbmcgui.ListItem)(label=episode_line or data.get('title') or data.get('label',''),path=data.get('file',''),offscreen=immutable)
+    label=episode_line or data.get('title') or data.get('label','')
+    if existing is None:
+        li=(factory or xbmcgui.ListItem)(label=label,path=data.get('file',''),offscreen=immutable)
+    else:
+        li=existing;li.setLabel(label)
     art=dict(data.get('art',{}))
     selected_art=card_artwork(data)
     art['landscape']=selected_art['image'] if selected_art['kind']=='landscape' else ''
