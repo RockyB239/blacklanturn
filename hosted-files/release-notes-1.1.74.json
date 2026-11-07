@@ -1,0 +1,13 @@
+{
+  "title": "BlackLanturn Build 1.1.74",
+  "summary": "Faster saved shelves and Kodi language support for built-in browsing labels.",
+  "sections": [
+    {
+      "heading": "Browsing",
+      "bullets": [
+        "Open recently visited shelves from saved titles and artwork references while updates load in the background.",
+        "Built-in shelf labels use the Kodi interface language where a translation is available."
+      ]
+    }
+  ]
+}
