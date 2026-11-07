@@ -6,6 +6,7 @@ from navigation_core import default_icon
 ROOT=Path(__file__).resolve().parent
 class GenrePicker(xbmcgui.WindowXMLDialog):
     def onInit(self):
+        from discovery_core import localized_page_label
         from icon_packs import icon_path
         from shelf_tools import STREAMING_GENRE_ID
         self.result=None
@@ -14,7 +15,7 @@ class GenrePicker(xbmcgui.WindowXMLDialog):
         self.setProperty('section','Browse '+self.section)
         items=[]
         for page in self.choices:
-            item=xbmcgui.ListItem(label=page['label'])
+            item=xbmcgui.ListItem(label=localized_page_label(page['id'],page['label']))
             if getattr(self,'observe',None):item.setProperty('genreLookaheadId',page['id'])
             aliases={'Streaming Services':'services','All':'collections','Action & Adventure':'adventure','Sci-Fi & Fantasy':'science-fiction','Westerns':'western'}
             icon=aliases.get(page['label']) or default_icon(page['label'],{'kind':'page'})

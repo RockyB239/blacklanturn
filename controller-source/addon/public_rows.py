@@ -15,7 +15,7 @@ MAX_BYTES=2*1024*1024
 MAX_ROWS=48
 MAX_ITEMS=80
 # Last successful display only; provider/session freshness is independent.
-MAX_AGE=24*3600
+MAX_AGE=30*24*3600
 PUBLIC_LISTS=frozenset(('popular','top_rated','upcoming','now_playing','trending_day','trending_week','airing_today','on_the_air','discover','similar','recommendations','trakt_trending','trakt_popular'))
 PUBLIC_ITEMS=frozenset(('details','play','seasons','episodes','flatseasons'))
 

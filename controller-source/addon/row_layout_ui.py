@@ -53,6 +53,7 @@ class RowCustomization:
         return page_rows(self.config,section)
     def customize_rows(self,current_only=False):
         import xbmcgui
+        from discovery_core import localized_shelf_label
         self.actions_open=True;self.input_generation=getattr(self,'input_generation',0)+1;self.dwell=time.monotonic();changed=False
         section=self.section;tab=getattr(self,'youtube_tab','home')
         try:
@@ -71,7 +72,7 @@ class RowCustomization:
                 rows=store.rows(scope,definitions,include_hidden=True)
                 names=[]
                 for row in rows:
-                    hidden,pinned=store.flags(scope,row);names.append(row.get('label','Row')+('  ·  Pinned' if pinned else '')+('  ·  Hidden' if hidden else ''))
+                    hidden,pinned=store.flags(scope,row);names.append(localized_shelf_label(section,row)+('  ·  Pinned' if pinned else '')+('  ·  Hidden' if hidden else ''))
                 chosen=xbmcgui.Dialog().select(section+(' · '+tab.title() if section=='YouTube' else '')+' rows',names+['Restore default arrangement'],preselect=min(position,len(names)))
                 if chosen<0:break
                 position=chosen
@@ -81,7 +82,7 @@ class RowCustomization:
                             store.reset(scope);changed=True
                         continue
                     row=rows[chosen];hidden,pinned=store.flags(scope,row)
-                    choice=xbmcgui.Dialog().select(row.get('label','Row'),['Move up','Move down','Unpin row' if pinned else 'Pin to top','Show row' if hidden else 'Hide row'])
+                    choice=xbmcgui.Dialog().select(localized_shelf_label(section,row),['Move up','Move down','Unpin row' if pinned else 'Pin to top','Show row' if hidden else 'Hide row'])
                     if choice<0:continue
                     action=('up','down','unpin' if pinned else 'pin','show' if hidden else 'hide')[choice]
                     if store.change(scope,definitions,row,action):changed=True

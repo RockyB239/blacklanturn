@@ -7,7 +7,7 @@ spec=importlib.util.spec_from_file_location('umbrella_build',ROOT/'tools/build_r
 P='addons/plugin.video.umbrella/';PROGRESS=ROOT/'compatibility/current-addons'
 class UmbrellaBuildContract(unittest.TestCase):
  def test_latest_installer_release_metadata_is35(self):
-  self.assertEqual(E.parse(SOURCE/'addon.xml').getroot().get('version'),'1.0.55')
+  self.assertEqual(E.parse(SOURCE/'addon.xml').getroot().get('version'),'1.0.56')
  def test_official_full_tree_overlay_preserves_nonprovider_data(self):
   apply=getattr(BUILD,'apply_umbrella',None);self.assertTrue(callable(apply),'Missing pinned current Umbrella overlay')
   data={P+'obsolete.py':b'obsolete90','userdata/addon_data/plugin.video.umbrella/settings.xml':b'private preferences','addons/other/code.py':b'untouched'}

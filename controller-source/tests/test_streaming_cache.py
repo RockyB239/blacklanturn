@@ -40,8 +40,40 @@ class StreamingRowsTests(unittest.TestCase):
         self.assertEqual(fresh[1]['file'], NEXT)
         self.assertIsNone(self.store().get(ROW.replace('US', 'GB')))
         self.assertIsNone(self.store(scope='other-settings').get(ROW))
-        self.now += 120
+        self.now += 899
+        self.assertIsNotNone(self.store().get(ROW))
+        self.now += 1
         self.assertIsNone(self.store().get(ROW))
+
+    def test_expired_provider_result_keeps_display_and_exact_art_across_restart(self):
+        artwork = 'image://https%3a%2f%2fimage.tmdb.org%2ft%2fp%2fw500%2fposter.jpg/'
+        card = {'file': MOVIE, 'title': 'Last good result', 'filetype': 'file',
+                'art': {'poster': artwork}, 'playcount': 2}
+        self.assertTrue(self.store().put(ROW, [card]))
+        self.now += 3 * 86400
+        reopened = self.store()
+        self.assertIsNone(reopened.get(ROW))
+        display, refresh = reopened.display(ROW)
+        self.assertTrue(refresh)
+        self.assertEqual(display[0]['art']['poster'], artwork)
+        self.assertNotIn('playcount', display[0])
+        self.assertEqual(reopened.display(ROW.replace('US', 'GB')), (None, False))
+        self.assertEqual(self.store(scope='different').display(ROW), (None, False))
+        self.now += 28 * 86400
+        self.assertEqual(self.store().display(ROW), (None, False))
+
+    def test_expired_rows_are_bounded_and_empty_does_not_overwrite_last_good(self):
+        card = {'file': MOVIE, 'title': 'Last good result', 'filetype': 'file'}
+        store = self.store()
+        for provider in range(350, 385):
+            self.assertTrue(store.put(ROW.replace('=350', f'={provider}'), [card]))
+        self.assertIsNone(store.display(ROW)[0])
+        latest = ROW.replace('=350', '=384')
+        self.now += 901
+        self.assertFalse(store.put(latest, []))
+        self.assertEqual(store.display(latest)[0][0]['title'], 'Last good result')
+        self.assertLessEqual(store.path.stat().st_size, 2 * 1024 * 1024)
+        self.assertLessEqual(len(store.rows), 32)
 
     def test_fail_closed_for_non_streaming_routes_and_bad_payloads(self):
         for path in (NEXT, MOVIE, ROW + '&token=secret', ROW.replace('350', '350%2C8')):
@@ -80,7 +112,7 @@ class StreamingRowsTests(unittest.TestCase):
         self.now += 10
         self.assertFalse(store.put_warmed(ROW, [speculative], revision=store.revision))
         self.assertEqual(store.get(ROW)[0]['label'], current['label'])
-        self.now += 110
+        self.now += 890
         self.assertIsNone(store.get(ROW))
 
     def test_streaming_directory_requires_an_explicit_files_array(self):
@@ -284,10 +316,59 @@ class StreamingRowsTests(unittest.TestCase):
             state, calls, controls, queue = SnapshotController().state(folder, lambda path: [])
             seen = []
             cards = [{'file': MOVIE, 'title': 'Cached title', 'filetype': 'file'}]
-            state.retained_streaming_items = lambda path: seen.append(path) or cards if path == ROW else None
+            state.retained_streaming_items = lambda path: (seen.append(path) or cards, False) if path == ROW else (None, False)
             state.set_rows([{'label': 'Service', 'path': ROW}])
             self.assertEqual([item['title'] for item in state.rows[0]], ['Cached title'])
             self.assertEqual(seen, [ROW])
             for worker in queue:
                 worker()
             self.assertEqual(calls, [])
+
+
+    def test_aged_streaming_display_binds_before_the_fetch_and_keeps_cards_on_failure(self):
+        from test_snapshot_controller import SnapshotController
+        from settled_row_refresh import drain_refreshes
+        from types import SimpleNamespace
+
+        for response in ('empty', 'error', 'updated'):
+            with self.subTest(response=response), tempfile.TemporaryDirectory() as folder:
+                artwork = 'https://image.tmdb.org/t/p/w500/saved.jpg'
+                saved = {'file': MOVIE, 'title': 'Saved title', 'filetype': 'file',
+                         'art': {'poster': artwork}}
+                fresh = dict(saved, playcount=2)
+                def provider(path):
+                    if response == 'error':
+                        raise ValueError('Provider offline')
+                    return [fresh] if response == 'updated' else []
+
+                now = [2000000]
+                store = StreamingRows(Path(folder), 'scope', 'titles', clock=lambda: now[0])
+                self.assertTrue(store.put(ROW, [saved]))
+                now[0] += 3 * 86400
+                reopened = StreamingRows(Path(folder), 'scope', 'titles', clock=lambda: now[0])
+                state, calls, controls, queue = SnapshotController().state(folder, provider)
+                controls[611] = type(controls[101])()
+                state.section = 'Movies'
+                state.defer_public_refresh = True
+                state.dwell = 0
+                state.player = SimpleNamespace(isPlaying=lambda: False)
+                state.streaming_snapshot = lambda path: reopened if path == ROW else None
+                state.retained_streaming_items = reopened.display
+                state.result_cache.put(ROW, [], allow_empty=True)
+                state.set_rows([{'label': 'Service', 'path': ROW, '_explicit_streaming': True}])
+                self.assertEqual(state.rows[0][0]['art']['poster'], artwork)
+                self.assertEqual(state.getProperty('row0'), 'Service')
+                self.assertEqual(calls, [])
+                self.assertEqual(queue, [])
+                card = controls[900].items[0]
+                deadline = state.deferred_public_refresh['created'] + 1
+                self.assertTrue(drain_refreshes(state, now=deadline))
+                self.assertFalse(state.row_window_busy)
+                queue.pop(0)()
+                self.assertEqual(calls, [ROW])
+                self.assertEqual(state.getFocusId(), 900)
+                self.assertIs(controls[900].items[0], card)
+                self.assertEqual(state.getProperty('row0'), 'Service')
+                self.assertEqual(reopened.display(ROW)[1], response != 'updated')
+                if response == 'updated':
+                    self.assertEqual(state.rows[0][0]['playcount'], 2)

@@ -1,5 +1,6 @@
 import copy,sys,unittest
 from pathlib import Path
+from types import SimpleNamespace
 sys.path.insert(0,str(Path(__file__).parents[1]/"addon"))
 try:from discovery_order import Selector
 except ModuleNotFoundError:Selector=None
@@ -24,6 +25,15 @@ class SelectorTests(unittest.TestCase):
   s=Selector();files=[item(n) for n in range(20)];first=s.choose('p','r','page',files,{'enabled':True});s.choose('p','other','page',files[4:]+[item(30)],{'enabled':True})
   fresh=copy.deepcopy(files);fresh[0]['playcount']=9
   out=s.choose('p','r','page',list(reversed(fresh)),{'enabled':True});self.assertEqual([x['file'] for x in out],[x['file'] for x in first]);self.assertEqual(out[0]['playcount'],9)
+ def test_locale_change_keeps_frozen_shelf_order(self):
+  from discovery_order import order_discovery_row
+  path='plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=movie'
+  row={'label':'Recommended for you','path':path,'discovery_order':{'enabled':True}}
+  window=SimpleNamespace(section='Movies',mode='home',snapshot_cache=SimpleNamespace(scope='same'),page_definitions=[row],paths=[path])
+  files=[item(n) for n in range(1,21)]
+  first=order_discovery_row(window,0,files)
+  window.page_definitions=[dict(row,label='Recommandé pour vous',_canonical_label=row['label'])]
+  self.assertEqual(order_discovery_row(window,0,list(reversed(files))),first)
  def test_next_control_remains_last(self):
   s=Selector();nextitem={'label':'Next','filetype':'directory','file':'plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=movie&page=2'}
   out=s.choose('p','r','page',[item(1),nextitem],{'enabled':True});self.assertEqual(out[-1],nextitem)

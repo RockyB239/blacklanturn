@@ -557,6 +557,7 @@ class LiveReview(LibraryActions,RowCustomization,TitleFeedback,ShelfTools,YouTub
             self.save();self.refresh_navigation()
             event('sidebar_editor_saved',count=len(self.config['Sidebar']))
     def choose_destination(self):
+        from discovery_core import localized_page_label
         group=xbmcgui.Dialog().select('Sidebar destination',['BlackLanturn page','Genre or category page','Video add-on or folder','Kodi section'])
         if group<0:return None
         if group==0:
@@ -565,7 +566,7 @@ class LiveReview(LibraryActions,RowCustomization,TitleFeedback,ShelfTools,YouTub
         elif group==1:
             pages=[p for g in ('Genres','Categories') for p in self.config.get(g,[])]
             if not pages:xbmcgui.Dialog().ok('No pages yet','Create a genre or category page first.');return None
-            chosen=xbmcgui.Dialog().select('Page',[p['label']+'  ·  '+p.get('section','Both') for p in pages])
+            chosen=xbmcgui.Dialog().select('Page',[localized_page_label(p['id'],p['label'])+'  ·  '+p.get('section','Both') for p in pages])
             if chosen>=0:
                 destination={'kind':'page','page_id':pages[chosen]['id']};label=pages[chosen]['label']
                 return {'label':label,'icon':default_icon(label,destination),'destination':destination}
@@ -589,13 +590,14 @@ class LiveReview(LibraryActions,RowCustomization,TitleFeedback,ShelfTools,YouTub
                 return {'label':label,'icon':default_icon(label,destination),'destination':destination}
         return None
     def load_navigation_page(self,route):
+        from discovery_core import localized_page_label
         self.setProperty('filmographyBrowser','false')
         self.search_state=None;self.search_origin=None;self.discovery_stack=[];self.setProperty('searchBrowser','false')
         self.episode_browser_context=None
         self.setProperty('episodeBrowser','false')
         self.setProperty('captionRows','false')
         self.section=route['section'];self.person_context=None;self.mode='home';self.active_page=route['page_id']
-        self.setProperty('page','home');self.setProperty('scroll','top');self.setProperty('eyebrow',self.section.upper()+' / '+route['label'].upper());self.load_browse_sources()
+        self.setProperty('page','home');self.setProperty('scroll','top');self.setProperty('eyebrow',self.section.upper()+' / '+localized_page_label(route['page_id'],route['label']).upper());self.load_browse_sources()
         self.set_rows(route['rows'])
     def activate_navigation(self,entry):
         if entry.get('fixed_action'):
@@ -638,10 +640,18 @@ class LiveReview(LibraryActions,RowCustomization,TitleFeedback,ShelfTools,YouTub
             self.set_rows(my_stuff_rows(self.config['Saved'],tmdb)+getattr(self,'personal_rows',lambda:[])());return
         self.set_rows(page_rows(self.config,self.section))
     def set_rows(self,definitions):
+        from discovery_core import display_page_rows
         self.shelf_visit_badges={}
         self.setProperty('youtubeCategoryFolder','false')
         if hasattr(self,'arrange_rows'):definitions=self.arrange_rows(definitions)
-        self.page_definitions=list(definitions);self.row_offset=0;self.row_cache={};self.window_ready=[False,False]
+        scope=getattr(self,'active_page',None)
+        section=getattr(self,'section',None)
+        if ((scope is None and section in ('Home','Movies','Shows','My Stuff','Add-ons') or section=='Add-ons')
+                and not getattr(self,'discovery_stack',None)
+                and not getattr(self,'search_state',None) and not getattr(self,'episode_browser_context',None)):
+            scope=section
+        self.page_definitions=display_page_rows(scope,definitions)
+        self.row_offset=0;self.row_cache={};self.window_ready=[False,False]
         self.setProperty('streamingAlternateLabel','')
         self.show_row_window(0,0)
     def publish_cache_stats(self):
@@ -688,10 +698,11 @@ class LiveReview(LibraryActions,RowCustomization,TitleFeedback,ShelfTools,YouTub
             files=self.result_cache.get('filtered-v1:'+path)
             if files is not None and not needs_fill(path,files,first_page_keep(self,path,metadata.without_anime),positioned=True,size=first_page_minimum(definition)):return files,False
         files=self.result_cache.get(path)
+        if not files:
+            saved,refresh=getattr(self,'retained_streaming_items',lambda path:(None,False))(path)
+            if saved is not None:return saved,refresh
         if files is not None:
             return (None,False) if filtered and needs_fill(path,files,first_page_keep(self,path,metadata.without_anime),size=first_page_minimum(definition)) else (files,False)
-        saved=getattr(self,'retained_streaming_items',lambda path:None)(path)
-        if saved is not None:return saved,False
         snapshots=getattr(self,'snapshot_cache',None)
         # Freshness is still 30 seconds for Trakt. Only current-account session data
         # may paint while the normal owned worker refreshes it. Other private rows
@@ -762,8 +773,9 @@ class LiveReview(LibraryActions,RowCustomization,TitleFeedback,ShelfTools,YouTub
 
     def retained_streaming_items(self,path):
         streaming=self.streaming_snapshot(path)
-        saved=streaming.get(path) if streaming is not None else None
-        if saved is None:return None
+        if streaming is None:return None,False
+        saved,refresh=streaming.display(path)
+        if saved is None:return None,False
         if streaming.mode=='titles':
             from local_watch import hydrate_local
             from home_progress import PENDING_SCOPE
@@ -774,8 +786,8 @@ class LiveReview(LibraryActions,RowCustomization,TitleFeedback,ShelfTools,YouTub
                 if home is not None and home.scope and item.get('filetype')=='file' and playback_kind(item)=='movie':
                     item[PENDING_SCOPE]=home.scope
             saved=SERIES_STATUS.enrich(saved)
-        event('streaming_cache_hit',kind=streaming.mode,count=len(saved))
-        return saved
+        event('streaming_cache_hit',kind=streaming.mode,count=len(saved),refresh=refresh)
+        return saved,refresh
 
     def cached_row_items(self,definition,expected_revision=None,owner_current=lambda:True):
         path=definition.get('path','')
@@ -848,6 +860,10 @@ class LiveReview(LibraryActions,RowCustomization,TitleFeedback,ShelfTools,YouTub
                 if not current():raise PageCancelled('Row navigation changed')
                 if self.configure_row_snapshots():self.restart_pending_rows()
                 if not current():raise PageCancelled('Row configuration changed')
+                # A passive refresh may not replace a saved streaming shelf
+                # with a transient empty response. Cold loads still qualify empties.
+                if not files and streaming is not None and streaming.mode=='titles' and definition.get('_snapshot_refresh') and not definition.get('_streaming_retry'):
+                    return None
                 # Most personal rows stay session-only. Shared browse routes may
                 # retain only account-owned display fields. A failed/unfinished
                 # filtered fill must not replace the last successful display.
@@ -922,7 +938,7 @@ class LiveReview(LibraryActions,RowCustomization,TitleFeedback,ShelfTools,YouTub
         def cached(path):
             if not owned() or active() or xbmc.Monitor().abortRequested() or xbmc.Player().isPlaying():return True
             streaming=self.streaming_snapshot(path)
-            return cache.get(path) is not None or (streaming is not None and streaming.get(path) is not None)
+            return cache.get(path) is not None or (streaming is not None and streaming.display(path)[0] is not None)
         def fetch(path):
             if not owned():return None
             event('streaming_lookahead_started')
@@ -1074,8 +1090,10 @@ class LiveReview(LibraryActions,RowCustomization,TitleFeedback,ShelfTools,YouTub
                 time.sleep(.05)
             else:return None
             try:
-                saved=self.retained_streaming_items(path)
-                if saved is not None:return saved
+                streaming=self.streaming_snapshot(path)
+                if streaming is not None:
+                    saved,_=streaming.display(path)
+                    if saved is not None:return saved
                 files=get_list(path)
                 with lock:
                     if not current():return None
@@ -1221,9 +1239,10 @@ class LiveReview(LibraryActions,RowCustomization,TitleFeedback,ShelfTools,YouTub
                 continue
             if streaming and n==1 and not (cached and (cached.get('files') or cached.get('state')=='error')):
                 definition=definitions[n]
-                retained,_=self.retained_row_items(definition) if layout is not None else (None,False)
+                retained,refresh=self.retained_row_items(definition) if layout is not None else (None,False)
                 self.paths[n]=definition['path'] if retained else '';self.histories[n]=PageHistory()
                 self.apply_row(n,retained or [],definition['label'] if retained else '',update_selected=False)
+                if refresh:self.snapshot_rows[n]=True
                 if layout is None:self.setProperty('row1',definition['label'])
                 continue
             if cached and cached.get('files') is not None:
@@ -1232,9 +1251,11 @@ class LiveReview(LibraryActions,RowCustomization,TitleFeedback,ShelfTools,YouTub
                 # return consume its deferred response. Only an unhydrated disk
                 # snapshot may use session data; explicit rows are already newer.
                 fresh=cached['files'] if cached.get('deferred') else self.result_cache.get(cached['path']) if cached.get('snapshot') and 'local_items' not in definitions[n] and cached['path'].startswith(TMDB) else None
-                if streaming and fresh is None:
-                    fresh=self.result_cache.get(cached['path'])
-                    if fresh is None:fresh=getattr(self,'retained_streaming_items',lambda path:None)(cached['path'])
+                if streaming and not cached.get('deferred') and not fresh:
+                    fresh=self.result_cache.get(cached['path']) or None
+                    if fresh is None:
+                        saved,refresh=getattr(self,'retained_streaming_items',lambda path:(None,False))(cached['path'])
+                        if not refresh:fresh=saved
                 files=fresh if fresh is not None else cached['files']
                 anchor=cached['files'][cached['position']] if 0<=cached['position']<len(cached['files']) else None
                 position=restored_position(files,anchor,cached['position']) if fresh is not None and not cached.get('deferred') else cached['position']
@@ -1296,10 +1317,12 @@ class LiveReview(LibraryActions,RowCustomization,TitleFeedback,ShelfTools,YouTub
             from settled_row_refresh import defer_refreshes
             pending=defer_refreshes(self,pending,focus_slot)
             foreground=False
-            if pending and all(definition.get('_explicit_streaming') for _,definition in pending):
+            passive_streaming=bool(pending) and all(definition.get('_explicit_streaming') and definition.get('_snapshot_refresh') and not definition.get('_streaming_retry') for _,definition in pending)
+            if pending and not passive_streaming and all(definition.get('_explicit_streaming') for _,definition in pending):
                 from streaming_cache import streaming_route
                 foreground=all(streaming_route(definition['path']) is not None for _,definition in pending)
-            self.row_window_busy=bool(pending)
+            self.row_window_busy=bool(pending) and not passive_streaming
+            if not pending and not getattr(self,'pending_sidebar_return',False):return
             def current(n,definition):
                 return (self.alive and generation==self.generation and revision==self.result_cache.revision
                         and serial==self.row_request_serial and self.paths[n]==definition['path']
@@ -1313,6 +1336,7 @@ class LiveReview(LibraryActions,RowCustomization,TitleFeedback,ShelfTools,YouTub
                                 files=self.cached_row_items(definition,expected_revision=revision,owner_current=lambda n=n,definition=definition:current(n,definition))
                             with self.preview_dispatch_lock:
                                 if current(n,definition):
+                                    if files is None:continue
                                     if definition.get('_streaming_retry'):self.failed_paths.pop(n,None)
                                     if definition.get('_explicit_streaming') and not definition.get('_snapshot_refresh'):
                                         getattr(self,'note_streaming_catalog',lambda definition,files:None)(definition,files)
@@ -1338,6 +1362,9 @@ class LiveReview(LibraryActions,RowCustomization,TitleFeedback,ShelfTools,YouTub
                             with self.preview_dispatch_lock:
                                 if current(n,definition):
                                     retained=bool(self.rows[n]) if definition.get('_snapshot_refresh') else False
+                                    if retained and definition.get('_explicit_streaming') and not definition.get('_streaming_retry'):
+                                        event('streaming_background_refresh_error',row=n,error_type=type(exc).__name__)
+                                        continue
                                     if not retained:self.apply_row(n,[],definition['label'])
                                     self.failed_paths[n]={'path':definition['path'],'label':definition['label'],'back':True,'position':definition.get('position',0)}
                                     layout=getattr(self,'streaming_layout',lambda:None)()
@@ -1558,10 +1585,11 @@ class LiveReview(LibraryActions,RowCustomization,TitleFeedback,ShelfTools,YouTub
             self.setProperty('row1',definition['label']+' · Loading…')
             self.setProperty('rowState1','loading')
             self.setProperty('rowMessage1',row_message(definition['label'],'loading'))
-        retained,_=self.retained_row_items(definition)
+        retained,refresh=self.retained_row_items(definition)
         if retained is not None:
             if layout is not None and not retained:layout.mark_empty(definition['path'])
             self.apply_row(1,retained,definition['label'],update_selected=False)
+            if refresh:self.snapshot_rows[1]=True
             if not prefetch:self.settle_streaming_shelf()
         else:self.request_row_loads([(1,definition)],prefetch=prefetch)
         return True
@@ -1647,7 +1675,7 @@ class LiveReview(LibraryActions,RowCustomization,TitleFeedback,ShelfTools,YouTub
         def current():
             return (owns_view() and self.result_cache.revision==revision
                     and getattr(self,'input_generation',0)==epoch and not self.actions_open)
-        def finish(files):
+        def finish(files,refresh=False):
             with self.preview_dispatch_lock:
                 if not current():return
                 index=next((i for i,row in enumerate(definitions) if row is definition),None)
@@ -1662,11 +1690,11 @@ class LiveReview(LibraryActions,RowCustomization,TitleFeedback,ShelfTools,YouTub
                 layout.explicit_path=path
                 if not self.row_cache.get(index,{}).get('files'):
                     self.row_cache[index]={'path':path,'files':files,'label':label,'position':0,
-                                           'history':PageHistory(),'deferred':True,'revision':revision}
+                                           'history':PageHistory(),'snapshot':refresh,'deferred':not refresh,'revision':revision}
                 self.last_row=0;self.show_row_window(index,0)
-        files,_=self.retained_row_items(definition)
+        files,refresh=self.retained_row_items(definition)
         if files is not None:
-            finish(files)
+            finish(files,refresh)
             return
         self.setProperty('notice',loading)
         def work():
@@ -2748,10 +2776,12 @@ class LiveReview(LibraryActions,RowCustomization,TitleFeedback,ShelfTools,YouTub
         if choice<0:return
         section=sections[choice]
         rows=self.config[section]
-        self.edit_rows(rows,section);self.load_section()
-    def edit_rows(self,rows,title):
+        self.edit_rows(rows,section,section);self.load_section()
+    def edit_rows(self,rows,title,page_id=None):
+        from discovery_core import localized_shelf_label
         while self.alive:
-            choice=xbmcgui.Dialog().select(title+' rows',[r['label']+('  ·  Hidden' if not r.get('enabled',True) else '') for r in rows]+['Add row'])
+            labels=[localized_shelf_label(page_id,row) for row in rows]
+            choice=xbmcgui.Dialog().select(title+' rows',[label+('  ·  Hidden' if not row.get('enabled',True) else '') for label,row in zip(labels,rows)]+['Add row'])
             if choice<0:return
             if choice==len(rows):
                 source=self.choose_source()
@@ -2759,13 +2789,14 @@ class LiveReview(LibraryActions,RowCustomization,TitleFeedback,ShelfTools,YouTub
                 name=xbmcgui.Dialog().input('Row name',defaultt=source['label'])
                 if name:source['label']=name;source['enabled']=True;rows.append(source)
             else:
-                action=xbmcgui.Dialog().select(rows[choice]['label'],['Change source','Rename','Move up','Move down','Hide row' if rows[choice].get('enabled',True) else 'Show row','Remove row'])
+                label=labels[choice]
+                action=xbmcgui.Dialog().select(label,['Change source','Rename','Move up','Move down','Hide row' if rows[choice].get('enabled',True) else 'Show row','Remove row'])
                 if action==0:
                     source=self.choose_source()
                     if source:source['label']=rows[choice]['label'];source['enabled']=rows[choice].get('enabled',True);rows[choice]=source
                 elif action==1:
-                    name=xbmcgui.Dialog().input('Row name',defaultt=rows[choice]['label'])
-                    if name:rows[choice]['label']=name
+                    name=xbmcgui.Dialog().input('Row name',defaultt=label)
+                    if name and name!=label:rows[choice]['label']=name
                 elif action in (2,3):
                     target=choice+(-1 if action==2 else 1)
                     if 0<=target<len(rows):rows[choice],rows[target]=rows[target],rows[choice]
@@ -2773,9 +2804,10 @@ class LiveReview(LibraryActions,RowCustomization,TitleFeedback,ShelfTools,YouTub
                 elif action==5:rows.pop(choice)
             self.save()
     def categories(self,edit=False,collection='Categories'):
+        from discovery_core import localized_page_label
         cats=self.config[collection]
         while self.alive:
-            choice=xbmcgui.Dialog().select('Configure '+collection,[c['label']+'  ·  '+c.get('section','Both')+('  ·  Hidden' if not c.get('enabled',True) else '') for c in cats]+['Add page'])
+            choice=xbmcgui.Dialog().select('Configure '+collection,[localized_page_label(c['id'],c['label'])+'  ·  '+c.get('section','Both')+('  ·  Hidden' if not c.get('enabled',True) else '') for c in cats]+['Add page'])
             if choice<0:break
             if choice==len(cats):
                 name=xbmcgui.Dialog().input('Page name')
@@ -2786,11 +2818,12 @@ class LiveReview(LibraryActions,RowCustomization,TitleFeedback,ShelfTools,YouTub
                 page={'id':uuid4().hex,'label':name,'section':['Movies','Shows','Both'][section],'enabled':True,'rows':[]};cats.append(page);self.save();self.edit_rows(page['rows'],name)
             else:
                 page=cats[choice]
-                action=xbmcgui.Dialog().select(page['label'],['Manage rows','Rename','Show page under','Move up','Move down','Hide page' if page.get('enabled',True) else 'Show page','Remove page'])
-                if action==0:self.edit_rows(page['rows'],page['label'])
+                label=localized_page_label(page['id'],page['label'])
+                action=xbmcgui.Dialog().select(label,['Manage rows','Rename','Show page under','Move up','Move down','Hide page' if page.get('enabled',True) else 'Show page','Remove page'])
+                if action==0:self.edit_rows(page['rows'],label,page['id'])
                 elif action==1:
-                    name=xbmcgui.Dialog().input('Page name',defaultt=page['label'])
-                    if name:page['label']=name
+                    name=xbmcgui.Dialog().input('Page name',defaultt=label)
+                    if name and name!=label:page['label']=name
                 elif action==2:
                     section=xbmcgui.Dialog().select('Show page under',['Movies','Shows','Both'],preselect=['Movies','Shows','Both'].index(page.get('section','Both')))
                     if section>=0:page['section']=['Movies','Shows','Both'][section]
@@ -2802,16 +2835,17 @@ class LiveReview(LibraryActions,RowCustomization,TitleFeedback,ShelfTools,YouTub
                 self.save()
         self.load_section()
     def load_browse_sources(self):
+        from discovery_core import localized_page_label, localized_shelf_label
         if self.section=='YouTube':self.populate_youtube_tabs();return
         self.browse_sources=collection_pages(self.config,self.section) if self.section in ('Movies','Shows') else [{'id':'addons-'+str(n),'label':row['label'],'rows':[row]} for n,row in enumerate(self.config.get('Add-ons',[])) if row.get('enabled',True)] if self.section=='Add-ons' else []
         c=self.getControl(600);c.reset()
         self.setProperty('genreChooser','true' if self.section in ('Movies','Shows') else 'false')
         if self.section in ('Movies','Shows'):
-            current=next((p['label'] for p in self.browse_sources if p['id']==self.active_page),'All')
+            current=next((localized_page_label(p['id'],p['label']) for p in self.browse_sources if p['id']==self.active_page),'All')
             item=xbmcgui.ListItem(label='Genre · '+current)
             item.setProperty('genreChooser','true');item.setProperty('active','true');c.addItems([item])
         else:
-            c.addItems([xbmcgui.ListItem(label='All')]+[xbmcgui.ListItem(label=x['label']) for x in self.browse_sources])
+            c.addItems([xbmcgui.ListItem(label='All')]+[xbmcgui.ListItem(label=localized_shelf_label('Add-ons',x['rows'][0])) for x in self.browse_sources])
             c.getListItem(0).setProperty('active','true')
         self.setProperty('browseFilters','true' if self.browse_sources else 'false')
         self.getControl(900).controlUp(self.getControl(600 if self.browse_sources or getattr(self,'search_state',None) else 101))
@@ -2843,6 +2877,7 @@ class LiveReview(LibraryActions,RowCustomization,TitleFeedback,ShelfTools,YouTub
         self.browse_streaming_services(tmdb)
 
     def browse_source(self):
+        from discovery_core import localized_page_label, localized_shelf_label
         if self.section=='YouTube':self.select_youtube_tab();return
         if self.section in ('Movies','Shows'):
             self.actions_open=True;self.stop_preview()
@@ -2867,7 +2902,8 @@ class LiveReview(LibraryActions,RowCustomization,TitleFeedback,ShelfTools,YouTub
         if self.section in ('Movies','Shows'):self.load_browse_sources()
         else:
             for n in range(len(self.browse_sources)+1):self.getControl(600).getListItem(n).setProperty('active','true' if n==index else 'false')
-        self.setProperty('eyebrow',self.section.upper()+' / '+source['label'].upper());self.set_rows(source['rows'] if self.section=='Add-ons' else page_rows(self.config,self.section,self.active_page));self.setFocusId(600)
+        label=localized_shelf_label('Add-ons',source['rows'][0]) if self.section=='Add-ons' else localized_page_label(source['id'],source['label'])
+        self.setProperty('eyebrow',self.section.upper()+' / '+label.upper());self.set_rows(source['rows'] if self.section=='Add-ons' else page_rows(self.config,self.section,self.active_page));self.setFocusId(600)
         event('browse_source_selected',section=self.section,label=source['label'],rows=len(self.page_definitions))
     def genres(self):
         kind='tv' if self.section=='Shows' else 'movie'

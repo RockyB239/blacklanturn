@@ -58,7 +58,7 @@ class PublicRowArchive:
         return count<=MAX_ROWS and total<=MAX_BYTES and largest<=MAX_ROW_BYTES
 
     def get(self,path):
-        from public_rows import public_path,_items,_finite_number
+        from public_rows import MAX_AGE,public_path,_items,_finite_number
         if not isinstance(path,str) or len(path)>MAX_PATH or not public_path(path):return None
         try:
             c=self._connect()
@@ -66,7 +66,7 @@ class PublicRowArchive:
             with closing(c):
                 if not self._budget(c):return None
                 row=c.execute('SELECT path,stamp,substr(payload,1,?) FROM rows WHERE path_hash=? AND scope=? AND version=?',(MAX_ROW_BYTES+1,sha256(path.encode()).hexdigest(),self.scope,VERSION)).fetchone()
-            if row is None or row[0]!=path or not _finite_number(row[1]) or not 0<=self.clock()-row[1]<=24*3600:return None
+            if row is None or row[0]!=path or not _finite_number(row[1]) or not 0<=self.clock()-row[1]<=MAX_AGE:return None
             raw=row[2]
             if not isinstance(raw,bytes) or len(raw)>MAX_ROW_BYTES:return None
             data=json.loads(raw)
@@ -75,12 +75,12 @@ class PublicRowArchive:
         except (OSError,sqlite3.Error,ValueError,TypeError,OverflowError,RecursionError):return None
 
     def replace(self,path,items,stamp=None):
-        from public_rows import public_path,_finite_number
+        from public_rows import MAX_AGE,public_path,_finite_number
         if not isinstance(path,str) or len(path)>MAX_PATH or not public_path(path):return False
         try:
             now=self.clock()
             if stamp is None:stamp=now
-            if not _finite_number(now) or not _finite_number(stamp) or not 0<=now-stamp<=24*3600:return False
+            if not _finite_number(now) or not _finite_number(stamp) or not 0<=now-stamp<=MAX_AGE:return False
             raw=json.dumps({'version':VERSION,'scope':self.scope,'path':path,'time':stamp,'items':items},ensure_ascii=False,separators=(',',':'),allow_nan=False).encode('utf-8')
             keep=bool(items) and len(raw)<=MAX_ROW_BYTES
             if not keep and not self.path.exists():return True
@@ -89,7 +89,7 @@ class PublicRowArchive:
                 c.execute('BEGIN IMMEDIATE')
                 # A format/size violation cannot be trusted as retained history.
                 if not self._budget(c):c.execute('DELETE FROM rows')
-                c.execute('DELETE FROM rows WHERE scope<>? OR version<>? OR stamp>? OR stamp<?',(self.scope,VERSION,now,now-24*3600))
+                c.execute('DELETE FROM rows WHERE scope<>? OR version<>? OR stamp>? OR stamp<?',(self.scope,VERSION,now,now-MAX_AGE))
                 key=sha256(path.encode()).hexdigest();c.execute('DELETE FROM rows WHERE path_hash=?',(key,))
                 if keep:
                     sequence=c.execute('SELECT COALESCE(MAX(sequence),0)+1 FROM rows').fetchone()[0]

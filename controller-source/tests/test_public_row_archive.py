@@ -54,7 +54,7 @@ class ArchiveTests(unittest.TestCase):
   with tempfile.TemporaryDirectory() as f:
    s=self.store(f);s.put(P,[ITEM]);s.path.unlink()
    self.assertIsNone(PublicRowSnapshots(s.path,'new',clock=lambda:1000,archive=True).get(P))
-   self.assertIsNone(self.store(f,clock=lambda:87401).get(P));self.assertIsNone(self.store(f,clock=lambda:999).get(P))
+   self.assertIsNone(self.store(f,clock=lambda:1000+31*86400).get(P));self.assertIsNone(self.store(f,clock=lambda:999).get(P))
    self.database(f).write_bytes(b'invalid sqlite');self.assertIsNone(self.store(f).get(P))
  def test_tampered_path_status_and_oversized_blob_fail_closed(self):
   with tempfile.TemporaryDirectory() as f:
@@ -123,7 +123,9 @@ class LegacyResidentRetention(unittest.TestCase):
    with sqlite3.connect(target.with_name('rows.archive.sqlite3')) as c:
     old=c.execute('SELECT stamp,payload FROM rows WHERE path=?',(P+'&page=1',)).fetchone()
    self.assertEqual(old[0],1000);self.assertEqual(json.loads(old[1])['time'],1000)
-   later=PublicRowSnapshots(target,'scope',clock=lambda:87401,archive=True)
+   days_old=PublicRowSnapshots(target,'scope',clock=lambda:1000+3*86400,archive=True)
+   self.assertEqual(days_old.get(P+'&page=1')[0]['title'],'Legacy 1')
+   later=PublicRowSnapshots(target,'scope',clock=lambda:1000+30*86400+1,archive=True)
    self.assertIsNone(later.get(P+'&page=1'));self.assertEqual(later.get(P+'&page=4')[0]['title'],'New display')
  def test_byte_eviction_retains_legacy_display_without_archive_access_on_reads(self):
   with tempfile.TemporaryDirectory() as f:

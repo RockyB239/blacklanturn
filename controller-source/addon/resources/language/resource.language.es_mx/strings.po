@@ -1,0 +1,844 @@
+# BlackLanturn Preview Controller shelf labels
+msgid ""
+msgstr ""
+"Project-Id-Version: script.blacklanturn.preview\n"
+"Language: es_mx\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+msgctxt "#32000"
+msgid "Classic Favourites"
+msgstr "Favoritos clásicos"
+
+msgctxt "#32001"
+msgid "Modern Favourites"
+msgstr "Favoritos modernos"
+
+msgctxt "#32002"
+msgid "2020s Favourites"
+msgstr "Favoritos de los años 2020"
+
+msgctxt "#32003"
+msgid "Action"
+msgstr "Acción"
+
+msgctxt "#32004"
+msgid "Action & Adventure"
+msgstr "Acción y aventura"
+
+msgctxt "#32005"
+msgid "Adventure"
+msgstr "Aventura"
+
+msgctxt "#32006"
+msgid "Alien encounters"
+msgstr "Encuentros extraterrestres"
+
+msgctxt "#32007"
+msgid "Animated adventures"
+msgstr "Aventuras animadas"
+
+msgctxt "#32008"
+msgid "Animation"
+msgstr "Animación"
+
+msgctxt "#32009"
+msgid "Animation for grown-ups"
+msgstr "Animación para adultos"
+
+msgctxt "#32010"
+msgid "Anime films"
+msgstr "Películas de anime"
+
+msgctxt "#32011"
+msgid "Anime series"
+msgstr "Series de anime"
+
+msgctxt "#32012"
+msgid "Artificial intelligence"
+msgstr "Inteligencia artificial"
+
+msgctxt "#32013"
+msgid "Based on real lives"
+msgstr "Basado en vidas reales"
+
+msgctxt "#32014"
+msgid "British"
+msgstr "Británico"
+
+msgctxt "#32015"
+msgid "British stand-up"
+msgstr "Monólogos británicos"
+
+msgctxt "#32016"
+msgid "Buddy comedies"
+msgstr "Comedias de colegas"
+
+msgctxt "#32017"
+msgid "Classic TV"
+msgstr "Clásicos de la televisión"
+
+msgctxt "#32018"
+msgid "Classic Westerns"
+msgstr "Wésterns clásicos"
+
+msgctxt "#32019"
+msgid "Classic series"
+msgstr "Series clásicas"
+
+msgctxt "#32020"
+msgid "Classic sets"
+msgstr "Monólogos clásicos"
+
+msgctxt "#32021"
+msgid "Classic stand-up series"
+msgstr "Series clásicas de monólogos"
+
+msgctxt "#32022"
+msgid "Classics worth revisiting"
+msgstr "Clásicos para volver a ver"
+
+msgctxt "#32023"
+msgid "Coming of age"
+msgstr "Historias sobre el paso a la edad adulta"
+
+msgctxt "#32024"
+msgid "Competitions & roast battles"
+msgstr "Concursos y duelos de humor"
+
+msgctxt "#32025"
+msgid "Conspiracies & cover-ups"
+msgstr "Conspiraciones y encubrimientos"
+
+msgctxt "#32026"
+msgid "Conspiracies & secrets"
+msgstr "Conspiraciones y secretos"
+
+msgctxt "#32027"
+msgid "Continue watching — episodes"
+msgstr "Seguir viendo — episodios"
+
+msgctxt "#32028"
+msgid "Continue watching — movies"
+msgstr "Seguir viendo — películas"
+
+msgctxt "#32029"
+msgid "Cooking & food"
+msgstr "Cocina y gastronomía"
+
+msgctxt "#32030"
+msgid "Creature Features"
+msgstr "Películas de monstruos"
+
+msgctxt "#32031"
+msgid "Crime"
+msgstr "Crimen"
+
+msgctxt "#32032"
+msgid "Crime thrillers"
+msgstr "Thrillers policíacos"
+
+msgctxt "#32033"
+msgid "Dark comedy & satire"
+msgstr "Humor negro y sátira"
+
+msgctxt "#32034"
+msgid "Dark fantasy"
+msgstr "Fantasía oscura"
+
+msgctxt "#32035"
+msgid "Dating & relationships"
+msgstr "Citas y relaciones"
+
+msgctxt "#32036"
+msgid "Documentaries"
+msgstr "Documentales"
+
+msgctxt "#32037"
+msgid "Dystopian futures"
+msgstr "Futuros distópicos"
+
+msgctxt "#32038"
+msgid "Fairy-tale worlds"
+msgstr "Mundos de cuento de hadas"
+
+msgctxt "#32039"
+msgid "Family animation"
+msgstr "Animación para toda la familia"
+
+msgctxt "#32040"
+msgid "Family comedies"
+msgstr "Comedias familiares"
+
+msgctxt "#32041"
+msgid "Family stories"
+msgstr "Historias familiares"
+
+msgctxt "#32042"
+msgid "Fantasy"
+msgstr "Fantasía"
+
+msgctxt "#32043"
+msgid "French"
+msgstr "Francés"
+
+msgctxt "#32044"
+msgid "French-language stand-up"
+msgstr "Monólogos en francés"
+
+msgctxt "#32045"
+msgid "From Spain"
+msgstr "De España"
+
+msgctxt "#32046"
+msgid "Frontier stories"
+msgstr "Historias de la frontera"
+
+msgctxt "#32047"
+msgid "Gangs & organized crime"
+msgstr "Bandas y crimen organizado"
+
+msgctxt "#32048"
+msgid "German"
+msgstr "Alemán"
+
+msgctxt "#32049"
+msgid "Hauntings & possession"
+msgstr "Fantasmas y posesiones"
+
+msgctxt "#32050"
+msgid "Heists"
+msgstr "Robos a gran escala"
+
+msgctxt "#32051"
+msgid "Heists & getaways"
+msgstr "Robos y huidas"
+
+msgctxt "#32052"
+msgid "Historical adventures"
+msgstr "Aventuras históricas"
+
+msgctxt "#32053"
+msgid "History"
+msgstr "Historia"
+
+msgctxt "#32054"
+msgid "Homes & renovations"
+msgstr "Casas y remodelaciones"
+
+msgctxt "#32055"
+msgid "Horror"
+msgstr "Terror"
+
+msgctxt "#32056"
+msgid "Horror anthologies"
+msgstr "Antologías de terror"
+
+msgctxt "#32057"
+msgid "Indian"
+msgstr "Indio"
+
+msgctxt "#32058"
+msgid "International"
+msgstr "Internacional"
+
+msgctxt "#32059"
+msgid "Investigations & detectives"
+msgstr "Investigaciones y detectives"
+
+msgctxt "#32060"
+msgid "Japanese"
+msgstr "Japonés"
+
+msgctxt "#32061"
+msgid "Kids & family animation"
+msgstr "Animación infantil y familiar"
+
+msgctxt "#32062"
+msgid "Korean"
+msgstr "Coreano"
+
+msgctxt "#32063"
+msgid "Landmark documentaries"
+msgstr "Documentales imprescindibles"
+
+msgctxt "#32064"
+msgid "Latin American"
+msgstr "Latinoamericano"
+
+msgctxt "#32065"
+msgid "Live sets & showcases"
+msgstr "Actuaciones y galas en directo"
+
+msgctxt "#32066"
+msgid "Magic & fantasy worlds"
+msgstr "Magia y mundos fantásticos"
+
+msgctxt "#32067"
+msgid "Martial arts"
+msgstr "Artes marciales"
+
+msgctxt "#32068"
+msgid "Medical drama"
+msgstr "Drama médico"
+
+msgctxt "#32069"
+msgid "Missing persons"
+msgstr "Personas desaparecidas"
+
+msgctxt "#32070"
+msgid "Modern Westerns"
+msgstr "Wésterns modernos"
+
+msgctxt "#32071"
+msgid "More to discover"
+msgstr "Más por descubrir"
+
+msgctxt "#32072"
+msgid "Music & musicians"
+msgstr "Música y músicos"
+
+msgctxt "#32073"
+msgid "Mystery"
+msgstr "Misterio"
+
+msgctxt "#32074"
+msgid "Myths & legends"
+msgstr "Mitos y leyendas"
+
+msgctxt "#32075"
+msgid "Nature & the environment"
+msgstr "Naturaleza y medio ambiente"
+
+msgctxt "#32076"
+msgid "New documentary series"
+msgstr "Nuevas series documentales"
+
+msgctxt "#32077"
+msgid "New international series"
+msgstr "Nuevas series internacionales"
+
+msgctxt "#32078"
+msgid "New series"
+msgstr "Nuevas series"
+
+msgctxt "#32079"
+msgid "Next episodes"
+msgstr "Próximos episodios"
+
+msgctxt "#32080"
+msgid "Nordic"
+msgstr "Nórdico"
+
+msgctxt "#32081"
+msgid "Outlaws & gunslingers"
+msgstr "Forajidos y pistoleros"
+
+msgctxt "#32082"
+msgid "Period & historical drama"
+msgstr "Drama de época e histórico"
+
+msgctxt "#32083"
+msgid "Period drama"
+msgstr "Drama de época"
+
+msgctxt "#32084"
+msgid "Pirates & high-seas adventures"
+msgstr "Piratas y aventuras en alta mar"
+
+msgctxt "#32085"
+msgid "Political drama"
+msgstr "Drama político"
+
+msgctxt "#32086"
+msgid "Psychological horror"
+msgstr "Terror psicológico"
+
+msgctxt "#32087"
+msgid "Psychological thrillers"
+msgstr "Thrillers psicológicos"
+
+msgctxt "#32088"
+msgid "Reality"
+msgstr "Telerrealidad"
+
+msgctxt "#32089"
+msgid "Recent documentaries"
+msgstr "Documentales recientes"
+
+msgctxt "#32090"
+msgid "Recent international releases"
+msgstr "Estrenos internacionales recientes"
+
+msgctxt "#32091"
+msgid "Recent reality series"
+msgstr "Series recientes de telerrealidad"
+
+msgctxt "#32092"
+msgid "Recent releases"
+msgstr "Estrenos recientes"
+
+msgctxt "#32093"
+msgid "Recent specials"
+msgstr "Especiales recientes"
+
+msgctxt "#32094"
+msgid "Recent stand-up series"
+msgstr "Series recientes de monólogos"
+
+msgctxt "#32095"
+msgid "Recent standouts"
+msgstr "Títulos recientes destacados"
+
+msgctxt "#32096"
+msgid "Recently released"
+msgstr "Recién estrenado"
+
+msgctxt "#32097"
+msgid "Recently watched — movies"
+msgstr "Visto recientemente — películas"
+
+msgctxt "#32098"
+msgid "Recently watched — shows"
+msgstr "Visto recientemente — series"
+
+msgctxt "#32099"
+msgid "Recommended for you"
+msgstr "Recomendado para ti"
+
+msgctxt "#32100"
+msgid "Revenge & rescue"
+msgstr "Venganza y rescate"
+
+msgctxt "#32101"
+msgid "Romantic comedies"
+msgstr "Comedias románticas"
+
+msgctxt "#32102"
+msgid "Sci-Fi"
+msgstr "Ciencia ficción"
+
+msgctxt "#32103"
+msgid "Sci-Fi & Fantasy"
+msgstr "Ciencia ficción y fantasía"
+
+msgctxt "#32104"
+msgid "Serial killers"
+msgstr "Asesinos en serie"
+
+msgctxt "#32105"
+msgid "Serial-killer dramas"
+msgstr "Dramas sobre asesinos en serie"
+
+msgctxt "#32106"
+msgid "Sketch comedy"
+msgstr "Comedia de sketches"
+
+msgctxt "#32107"
+msgid "Slashers"
+msgstr "Terror slasher"
+
+msgctxt "#32108"
+msgid "Space adventures"
+msgstr "Aventuras espaciales"
+
+msgctxt "#32109"
+msgid "Space exploration"
+msgstr "Exploración espacial"
+
+msgctxt "#32110"
+msgid "Spaghetti Westerns"
+msgstr "Spaghetti westerns"
+
+msgctxt "#32111"
+msgid "Spies & covert operations"
+msgstr "Espías y operaciones encubiertas"
+
+msgctxt "#32112"
+msgid "Sports stories"
+msgstr "Historias deportivas"
+
+msgctxt "#32113"
+msgid "Stand-up"
+msgstr "Monólogos"
+
+msgctxt "#32114"
+msgid "Stand-up & comedy showcases"
+msgstr "Monólogos y espectáculos de comedia"
+
+msgctxt "#32115"
+msgid "Stand-up from the 2000s"
+msgstr "Monólogos de los años 2000"
+
+msgctxt "#32116"
+msgid "Stand-up from the 2010s"
+msgstr "Monólogos de los años 2010"
+
+msgctxt "#32117"
+msgid "Stand-up specials"
+msgstr "Especiales de monólogos"
+
+msgctxt "#32118"
+msgid "Stop-motion"
+msgstr "Animación fotograma a fotograma"
+
+msgctxt "#32119"
+msgid "Strange & unexplained"
+msgstr "Fenómenos extraños e inexplicables"
+
+msgctxt "#32120"
+msgid "Superheroes"
+msgstr "Superhéroes"
+
+msgctxt "#32121"
+msgid "Superheroes & extraordinary powers"
+msgstr "Superhéroes y poderes extraordinarios"
+
+msgctxt "#32122"
+msgid "Supernatural mysteries"
+msgstr "Misterios sobrenaturales"
+
+msgctxt "#32123"
+msgid "Survival adventures"
+msgstr "Aventuras de supervivencia"
+
+msgctxt "#32124"
+msgid "Survival journeys"
+msgstr "Viajes de supervivencia"
+
+msgctxt "#32125"
+msgid "Survival thrillers"
+msgstr "Thrillers de supervivencia"
+
+msgctxt "#32126"
+msgid "Swords & sorcery"
+msgstr "Espada y brujería"
+
+msgctxt "#32127"
+msgid "Talent & competition"
+msgstr "Talento y competición"
+
+msgctxt "#32128"
+msgid "Thriller"
+msgstr "Thriller"
+
+msgctxt "#32129"
+msgid "Thrillers"
+msgstr "Thrillers"
+
+msgctxt "#32130"
+msgid "Time travel"
+msgstr "Viajes en el tiempo"
+
+msgctxt "#32131"
+msgid "Top rated"
+msgstr "Mejor valorados"
+
+msgctxt "#32132"
+msgid "Trakt"
+msgstr "Trakt"
+
+msgctxt "#32133"
+msgid "Treasure hunts"
+msgstr "Búsquedas del tesoro"
+
+msgctxt "#32134"
+msgid "Trending this week"
+msgstr "Tendencias de la semana"
+
+msgctxt "#32135"
+msgid "True crime"
+msgstr "Crímenes reales"
+
+msgctxt "#32136"
+msgid "True-crime series"
+msgstr "Series sobre crímenes reales"
+
+msgctxt "#32137"
+msgid "Watchlist — movies"
+msgstr "Lista de seguimiento — películas"
+
+msgctxt "#32138"
+msgid "Watchlist — shows"
+msgstr "Lista de seguimiento — series"
+
+msgctxt "#32139"
+msgid "Westerns"
+msgstr "Wésterns"
+
+msgctxt "#32140"
+msgid "Whodunits & murder mysteries"
+msgstr "Misterios de asesinato"
+
+msgctxt "#32141"
+msgid "Workplace comedies"
+msgstr "Comedias de oficina"
+
+msgctxt "#32142"
+msgid "World classics"
+msgstr "Clásicos del mundo"
+
+msgctxt "#32143"
+msgid "Zombie outbreaks"
+msgstr "Brotes zombis"
+
+msgctxt "#32144"
+msgid "Anime Action"
+msgstr "Anime de acción"
+
+msgctxt "#32145"
+msgid "Anime Sci-Fi"
+msgstr "Anime de ciencia ficción"
+
+msgctxt "#32146"
+msgid "Anime Sci-Fi & Fantasy"
+msgstr "Anime de ciencia ficción y fantasía"
+
+msgctxt "#32147"
+msgid "Arabic-Language Comedy"
+msgstr "Comedia en árabe"
+
+msgctxt "#32148"
+msgid "Arabic-Language Drama"
+msgstr "Drama en árabe"
+
+msgctxt "#32149"
+msgid "Ballet & Dance"
+msgstr "Ballet y danza"
+
+msgctxt "#32150"
+msgid "Bengali-Language Comedy"
+msgstr "Comedia en bengalí"
+
+msgctxt "#32151"
+msgid "Bengali-Language Drama"
+msgstr "Drama en bengalí"
+
+msgctxt "#32152"
+msgid "British Crime"
+msgstr "Policíaco británico"
+
+msgctxt "#32153"
+msgid "British Mysteries"
+msgstr "Misterios británicos"
+
+msgctxt "#32154"
+msgid "Browse All Movies"
+msgstr "Ver todas las películas"
+
+msgctxt "#32155"
+msgid "Browse All Shows"
+msgstr "Ver todas las series"
+
+msgctxt "#32156"
+msgid "Chinese-Language Comedy"
+msgstr "Comedia en chino"
+
+msgctxt "#32157"
+msgid "Chinese-Language Drama"
+msgstr "Drama en chino"
+
+msgctxt "#32158"
+msgid "Classic Anime Before 2000"
+msgstr "Anime clásico anterior al 2000"
+
+msgctxt "#32159"
+msgid "Classics Before 1990"
+msgstr "Clásicos anteriores a 1990"
+
+msgctxt "#32160"
+msgid "Combat Sports"
+msgstr "Deportes de combate"
+
+msgctxt "#32161"
+msgid "Concerts"
+msgstr "Conciertos"
+
+msgctxt "#32162"
+msgid "Continue watching · episodes"
+msgstr "Seguir viendo · episodios"
+
+msgctxt "#32163"
+msgid "Continue watching · movies"
+msgstr "Seguir viendo · películas"
+
+msgctxt "#32164"
+msgid "Cooking"
+msgstr "Cocina"
+
+msgctxt "#32165"
+msgid "Faith & Family"
+msgstr "Fe y familia"
+
+msgctxt "#32166"
+msgid "Family"
+msgstr "Familiar"
+
+msgctxt "#32167"
+msgid "Family Adventures"
+msgstr "Aventuras familiares"
+
+msgctxt "#32168"
+msgid "Film Noir"
+msgstr "Cine negro"
+
+msgctxt "#32169"
+msgid "Food & Travel"
+msgstr "Gastronomía y viajes"
+
+msgctxt "#32170"
+msgid "German-Language Comedy"
+msgstr "Comedia en alemán"
+
+msgctxt "#32171"
+msgid "German-Language Drama"
+msgstr "Drama en alemán"
+
+msgctxt "#32172"
+msgid "Kids"
+msgstr "Infantil"
+
+msgctxt "#32173"
+msgid "Korean-Language Comedy"
+msgstr "Comedia en coreano"
+
+msgctxt "#32174"
+msgid "Korean-Language Drama"
+msgstr "Drama en coreano"
+
+msgctxt "#32175"
+msgid "Learning & Nature"
+msgstr "Aprendizaje y naturaleza"
+
+msgctxt "#32176"
+msgid "Movies this week"
+msgstr "Películas de esta semana"
+
+msgctxt "#32177"
+msgid "Music"
+msgstr "Música"
+
+msgctxt "#32178"
+msgid "Nature & Wildlife"
+msgstr "Naturaleza y vida silvestre"
+
+msgctxt "#32179"
+msgid "Outdoor Sports"
+msgstr "Deportes al aire libre"
+
+msgctxt "#32180"
+msgid "Popular"
+msgstr "Popular"
+
+msgctxt "#32181"
+msgid "Recent Releases"
+msgstr "Estrenos recientes"
+
+msgctxt "#32182"
+msgid "Recommended movies"
+msgstr "Películas recomendadas"
+
+msgctxt "#32183"
+msgid "Recommended shows"
+msgstr "Series recomendadas"
+
+msgctxt "#32184"
+msgid "Saved on this device"
+msgstr "Guardado en este dispositivo"
+
+msgctxt "#32185"
+msgid "Shows this week"
+msgstr "Series de esta semana"
+
+msgctxt "#32186"
+msgid "Soap"
+msgstr "Telenovelas"
+
+msgctxt "#32187"
+msgid "Space & Science"
+msgstr "Espacio y ciencia"
+
+msgctxt "#32188"
+msgid "Spanish-Language Comedy"
+msgstr "Comedia en español"
+
+msgctxt "#32189"
+msgid "Spanish-Language Drama"
+msgstr "Drama en español"
+
+msgctxt "#32190"
+msgid "Sports Documentaries"
+msgstr "Documentales deportivos"
+
+msgctxt "#32191"
+msgid "Stage Performances"
+msgstr "Espectáculos escénicos"
+
+msgctxt "#32192"
+msgid "Supernatural"
+msgstr "Sobrenatural"
+
+msgctxt "#32193"
+msgid "Supernatural Horror"
+msgstr "Terror sobrenatural"
+
+msgctxt "#32194"
+msgid "Tamil-Language Comedy"
+msgstr "Comedia en tamil"
+
+msgctxt "#32195"
+msgid "Tamil-Language Drama"
+msgstr "Drama en tamil"
+
+msgctxt "#32196"
+msgid "Telugu-Language Comedy"
+msgstr "Comedia en télugu"
+
+msgctxt "#32197"
+msgid "Telugu-Language Drama"
+msgstr "Drama en télugu"
+
+msgctxt "#32198"
+msgid "Trakt Watchlist · Movies"
+msgstr "Lista de Trakt · películas"
+
+msgctxt "#32199"
+msgid "Trakt Watchlist · Shows"
+msgstr "Lista de Trakt · series"
+
+msgctxt "#32200"
+msgid "Trending movies"
+msgstr "Películas en tendencia"
+
+msgctxt "#32201"
+msgid "Trending shows"
+msgstr "Series en tendencia"
+
+msgctxt "#32202"
+msgid "True Crime"
+msgstr "Crímenes reales"
+
+msgctxt "#32203"
+msgid "War"
+msgstr "Bélico"
+
+msgctxt "#32204"
+msgid "War & Politics"
+msgstr "Guerra y política"
+
+msgctxt "#32205"
+msgid "Western"
+msgstr "Wéstern"
+
+msgctxt "#32206"
+msgid "World Cinema"
+msgstr "Cine mundial"
+
+msgctxt "#32207"
+msgid "World War II Documentaries"
+msgstr "Documentales sobre la Segunda Guerra Mundial"
+
+msgctxt "#32208"
+msgid "Yoga & Fitness"
+msgstr "Yoga y entrenamiento"

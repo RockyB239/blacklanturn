@@ -53,6 +53,13 @@ class ServiceFocusController179(unittest.TestCase):
         now=[1000.];owner=self.owner(now);owner.result_cache.put(NETFLIX,[{'file':'fresh'}]);calls=[]
         request,_,_=self.prepare(owner,lambda path:calls.append(path))
         request.observe(NETFLIX);self.settle(request);self.assertEqual(calls,[])
+    def test_retained_older_service_does_not_fetch_until_its_shelf_is_opened(self):
+        now=[1000.];owner=self.owner(now);calls=[]
+        owner.streaming_snapshot=lambda path:SimpleNamespace(display=lambda key:([{'file':'saved'}],True))
+        request,_,_=self.prepare(owner,lambda path:calls.append(path))
+        request.observe(NETFLIX);self.settle(request)
+        self.assertEqual(calls,[])
+
     def test_browse_hands_exact_selected_request_to_existing_row_handoff(self):
         request=StreamingLookahead(lambda path:None);request.path=NETFLIX
         owner=SimpleNamespace(section='Movies',actions_open=False,alive=True,generation=1,result_cache=SimpleNamespace(revision=0),stop_preview=lambda:None,configure_row_snapshots=lambda:False,retained_row_items=lambda d:([{'file':NETFLIX}],False),prepare_streaming_lookahead=lambda:(request,owner.result_cache,0),last_row=0,discovery_stack=[{}])

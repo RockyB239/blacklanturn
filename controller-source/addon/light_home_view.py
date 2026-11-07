@@ -46,13 +46,14 @@ class LightweightHome(xbmcgui.WindowXML):
             from light_home_cards import media_item
             from browse_controls import page_cards
             from live_core import PageHistory
+        from discovery_localization import display_page_rows
         record=self._early['record'];prefs=self._early['preferences']
         for key,value in record['properties'].items():self.setProperty(key,value)
         startup=getattr(self,'startup_home',None)
         if startup:self.setProperty('startupOwner',startup.owner)
         self.setProperty('nav','closed')
         self._heroes={};self._early_rows=[]
-        for n,row in enumerate(record['rows']):
+        for n,row in enumerate(display_page_rows('Home',record['rows'])):
             if projected:
                 files,cards=projected[n]
                 native_items=[replay_card(card) for card in cards]
@@ -128,7 +129,7 @@ class LightweightHome(xbmcgui.WindowXML):
                 self._intent.cancel();controller.adopt({});self.controller=controller;controller.defer_startup_workers=False;controller.onInit();return
             from live_core import PageHistory
             rows=self._early['record']['rows'];paths=[row['path'] for row in rows]
-            state=dict(rows=self._early_rows,paths=paths,histories=[PageHistory(),PageHistory()],selected=self._selected,last_row=self._last_row,return_focus=900+self._last_row,page_definitions=definitions,row_offset=0,row_cache={},window_ready=[True,True],row_labels={n:row['label'] for n,row in enumerate(rows)},row_states={0:'ready',1:'ready'},snapshot_rows={0:True,1:True},startup_idle=self.getFocusId()==5,nav=self._nav,nav_width_requested=350 if self._nav else 82,nav_width_applied=350 if self._nav else 82,title_preferences=self._early['preferences'],title_raw_rows={n:(paths[n],rows[n]['items']) for n in range(2)},title_empty_rows={},focus_key=(self.getFocusId(),self.getControl(self.getFocusId()).getSelectedPosition() if self.getFocusId() in (900,901) else 0))
+            state=dict(rows=self._early_rows,paths=paths,histories=[PageHistory(),PageHistory()],selected=self._selected,last_row=self._last_row,return_focus=900+self._last_row,page_definitions=definitions,row_offset=0,row_cache={},window_ready=[True,True],row_labels={n:definitions[n]['label'] for n in range(len(rows))},row_states={0:'ready',1:'ready'},snapshot_rows={0:True,1:True},startup_idle=self.getFocusId()==5,nav=self._nav,nav_width_requested=350 if self._nav else 82,nav_width_applied=350 if self._nav else 82,title_preferences=self._early['preferences'],title_raw_rows={n:(paths[n],rows[n]['items']) for n in range(2)},title_empty_rows={},focus_key=(self.getFocusId(),self.getControl(self.getFocusId()).getSelectedPosition() if self.getFocusId() in (900,901) else 0))
             controller.adopt(state);controller.defer_startup_workers=False;self.controller=controller;controller.row_navigation()
             self.setProperty('lightHome','attached')
             adopted_generation=controller.generation;adopted_paths=tuple(controller.paths);adopted_definitions=[dict(row) for row in controller.page_definitions[:2]]

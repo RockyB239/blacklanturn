@@ -7,6 +7,8 @@ from adaptive_services import candidate_filters, preview_ids, qualify_preview
 from streaming_cache import _query, streaming_route
 from browse_controls import is_next_page
 
+BASE_LABELS = ('Popular', 'Recent Releases', 'Browse All Movies', 'Browse All Shows')
+
 GENRES = (
     ('Action', '28', '10759'),
     ('Comedy', '35', '35'),
@@ -95,7 +97,7 @@ class StreamingShelfLayout:
                 genres = (genres,)
             counts.update(aliases.get(name, name) for name in genres)
         start = 1 + self.specialty_count
-        rows[start:] = sorted(rows[start:], key=lambda row: -counts[row['label']])
+        rows[start:] = sorted(rows[start:], key=lambda row: -counts[row.get('_canonical_label', row['label'])])
 
 
 def warm_shelves(rows, layout, load, current, lock=None, *, on_confirmed=None):
@@ -137,9 +139,10 @@ def service_shelves(name, path, *, adaptive=False, region_name=None):
         query = '&' + urlencode(filters) if filters else ''
         return {'label': label, 'path': path + query, '_explicit_streaming': True}
 
+    popular, recent, all_movies, all_shows = BASE_LABELS
     rows = [
-        row('Popular'),
-        row('Recent Releases', sort_by=date + '.desc', **{date + '.gte': 't-365', date + '.lte': 't-0'}),
+        row(popular),
+        row(recent, sort_by=date + '.desc', **{date + '.gte': 't-365', date + '.lte': 't-0'}),
     ]
     rows.extend(row(label, with_genres=movie_id if movie else show_id)
                 for label, movie_id, show_id in GENRES)
@@ -153,9 +156,11 @@ def service_shelves(name, path, *, adaptive=False, region_name=None):
             unique.setdefault(entry['path'], entry)
         rows[1:] = unique.values()
         layout = StreamingShelfLayout(path, len(specialties))
-        rows[0].update(label='Browse All Movies' if movie else 'Browse All Shows', _streaming_layout=layout)
+        rows[0].update(label=all_movies if movie else all_shows, _streaming_layout=layout)
         layout.candidates = {entry['path'] for entry in rows[1:]}
         country = fields['watch_region']
         name = name.removesuffix(' · ' + country)
         name += ' · ' + (region_name or country)
+    from discovery_localization import display_streaming_rows
+    display_streaming_rows(rows)
     return {'heading': name + ' / TMDB & JUSTWATCH', 'button': 'Browse titles', 'rows': rows, 'hide_captions': True}

@@ -4,9 +4,9 @@ ROOT=Path(__file__).resolve().parents[1]
 class UpdateNotesRelease(unittest.TestCase):
  def test_current_versions_and_exact_state_module(self):
   addon=ROOT/'controller-source/addon'
-  self.assertEqual(E.parse(addon/'addon.xml').getroot().get('version'),'0.1.135')
+  self.assertEqual(E.parse(addon/'addon.xml').getroot().get('version'),'0.1.137')
   source=ROOT/'installer-source/plugin.program.blacklanturninstaller'
-  self.assertEqual(E.parse(source/'addon.xml').getroot().get('version'),'1.0.55')
+  self.assertEqual(E.parse(source/'addon.xml').getroot().get('version'),'1.0.56')
   # Accepted startup code defers only tempfile's import into write_state.
   # Every remaining statement must stay identical across the two state owners.
   import ast

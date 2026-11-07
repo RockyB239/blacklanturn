@@ -239,7 +239,7 @@ class RegionalServicesIntegration(unittest.TestCase):
             state, calls, controls, queue = SnapshotController().state(folder, data.__getitem__)
             controls[611] = type(controls[101])()
             state.owned_preview = state.actions_open = False
-            state.retained_streaming_items = lambda _: None
+            state.retained_streaming_items = lambda _, **kwargs: (None, False)
             state.streaming_snapshot = lambda _: None
             state.streaming_layout = lambda: state.page_definitions[0]['_streaming_layout']
             state.warm_streaming_shelves = MethodType(
@@ -284,7 +284,7 @@ class RegionalServicesIntegration(unittest.TestCase):
             state, calls, controls, queue = SnapshotController().state(folder, lambda p: baseline if p == path else candidate)
             controls[611] = type(controls[101])()
             state.owned_preview = state.actions_open = False
-            state.retained_streaming_items = lambda _: None
+            state.retained_streaming_items = lambda _, **kwargs: (None, False)
             state.streaming_snapshot = lambda _: None
             state.streaming_layout = lambda: state.page_definitions[0]['_streaming_layout']
 
@@ -345,7 +345,7 @@ class RegionalServicesIntegration(unittest.TestCase):
             state.streaming_layout = lambda: state.page_definitions[0]['_streaming_layout']
             store = StreamingRows(Path(folder), 'scope', 'titles', clock=lambda: now[0])
             state.streaming_snapshot = lambda _: store
-            state.retained_streaming_items = store.get
+            state.retained_streaming_items = store.display
             state.warm_streaming_shelves = MethodType(
                 live_method('warm_streaming_shelves', get_list=lambda p: calls.append(p) or fresh[p]), state)
             state.set_rows(rows)
@@ -357,7 +357,7 @@ class RegionalServicesIntegration(unittest.TestCase):
             self.assertCountEqual(calls, [row['path'] for row in rows])
             reopened = StreamingRows(Path(folder), 'scope', 'titles', clock=lambda: now[0])
             state.result_cache.clear()
-            state.retained_streaming_items = reopened.get
+            state.retained_streaming_items = reopened.display
             for target in (first, second):
                 files, refresh = state.retained_row_items({'path': target})
                 self.assertEqual([item['file'] for item in files or []], [item['file'] for item in fresh[target]])
@@ -366,8 +366,10 @@ class RegionalServicesIntegration(unittest.TestCase):
             for target in (empty, duplicate, third):
                 self.assertIsNone(reopened.get(target))
             self.assertIsNone(StreamingRows(Path(folder), 'different-scope', 'titles', clock=lambda: now[0]).get(first))
-            now[0] += 120
-            self.assertEqual(state.retained_row_items({'path': first}), (None, False))
+            now[0] += 900
+            stale, refresh = state.retained_row_items({'path': first})
+            self.assertTrue(refresh)
+            self.assertEqual([item['file'] for item in stale], [item['file'] for item in fresh[first]])
             self.assertCountEqual(calls, [row['path'] for row in rows])
 
     def test_jump_lists_cold_shelves_and_opens_only_the_selected_one(self):

@@ -4,18 +4,20 @@ from unittest.mock import patch
 sys.path.insert(0,str(Path(__file__).parents[1]/'addon'))
 import public_rows
 from test_public_row_snapshots import ITEM,P
+NOW=4_000_000
+EARLIEST=NOW-public_rows.MAX_AGE
 class SnapshotEfficiency(unittest.TestCase):
  def test_ineligible_timestamp_never_inspects_card_contents(self):
-  for stamp in (13599,100001,-1,None,"bad",float('inf'),True):
+  for stamp in (EARLIEST-1,NOW+1,-1,None,"bad",float('inf'),True):
    with self.subTest(stamp=stamp),tempfile.TemporaryDirectory() as folder:
     path=Path(folder)/'rows';path.write_text(json.dumps({'version':2,'scope':'s','rows':[{'path':P,'time':stamp,'items':[ITEM]}]}))
-    with patch.object(public_rows.PublicRowSnapshots,'sanitize_items',return_value=None) as inspect:store=public_rows.PublicRowSnapshots(path,'s',clock=lambda:100000)
+    with patch.object(public_rows.PublicRowSnapshots,'sanitize_items',return_value=None) as inspect:store=public_rows.PublicRowSnapshots(path,'s',clock=lambda:NOW)
     self.assertEqual(inspect.call_count,0);self.assertIsNone(store.get(P))
  def test_exact_age_boundaries_keep_artwork_without_watch_state(self):
-  for stamp,kept in ((13600,True),(100000,True),(13599,False),(100001,False)):
+  for stamp,kept in ((EARLIEST,True),(NOW,True),(EARLIEST-1,False),(NOW+1,False)):
    with self.subTest(stamp=stamp),tempfile.TemporaryDirectory() as folder:
     path=Path(folder)/'rows';path.write_text(json.dumps({'version':2,'scope':'s','rows':[{'path':P,'time':stamp,'items':[ITEM]}]}))
-    value=public_rows.PublicRowSnapshots(path,'s',clock=lambda:100000).get(P);self.assertEqual(value is not None,kept)
+    value=public_rows.PublicRowSnapshots(path,'s',clock=lambda:NOW).get(P);self.assertEqual(value is not None,kept)
     if kept:self.assertEqual(value[0]['art'],ITEM['art']);self.assertNotIn('playcount',value[0])
  def test_shared_artwork_validated_once_per_batch(self):
   image='image://https%3a%2f%2fimage.tmdb.org%2ft%2fp%2fw500%2fposter.jpg/';files=[dict(ITEM,art={key:image for key in ('thumb','poster','fanart','landscape','tvshow.poster')},thumbnail=image) for _ in range(40)]

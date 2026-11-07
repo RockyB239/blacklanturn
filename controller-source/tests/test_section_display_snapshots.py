@@ -76,8 +76,8 @@ class SectionDisplaySnapshots(unittest.TestCase):
     queue.pop(0)();self.assertEqual(calls,[path]);self.assertEqual(labels(s.rows[0]),['2']);self.assertIsNone(s.snapshot_cache.get(path))
     if boundary not in ('account','expired'):self.assertIsNone(s.home_snapshot_cache.get(path))
 
- def test_public_display_survives_twenty_four_hours_but_refreshes_and_expires_after_bound(self):
-  for age,visible in ((901,True),(86399,True),(86400,True),(86401,False),(-1,False)):
+ def test_public_display_survives_thirty_days_but_refreshes_and_expires_after_bound(self):
+  for age,visible in ((901,True),(86401,True),(30*86400,True),(30*86400+1,False),(-1,False)):
    with self.subTest(age=age),tempfile.TemporaryDirectory() as folder:
     path=route('discover',extra='&with_genres=18');s,calls,controls,queue=self.state(folder,'Shows',lambda p:[title(1)])
     cache=PublicRowSnapshots(Path(folder)/'snapshot.json','scope',clock=lambda:1000);cache.put(path,[title(1)])

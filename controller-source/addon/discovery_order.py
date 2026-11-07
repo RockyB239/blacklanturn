@@ -118,6 +118,7 @@ def order_discovery_row(window,slot,files):
         selector=Selector();window.discovery_order_selector=selector;window.discovery_order_scope=scope
     # Changing an individual recipe cannot reuse its previous frozen order.
     import json
-    row=json.dumps([index,definition.get('label',''),definition.get('path',''),policy],sort_keys=True,separators=(',',':'))
+    label=definition.get('_canonical_label',definition.get('label',''))
+    row=json.dumps([index,label,definition.get('path',''),policy],sort_keys=True,separators=(',',':'))
     namespace=window.section+':'+str(getattr(window,'active_page',None) or 'All')
     return selector.choose(namespace,row,path,files,policy)

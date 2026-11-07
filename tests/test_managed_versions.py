@@ -165,7 +165,8 @@ class ManagedVersions(unittest.TestCase):
         for key, raw in candidates.items():
             self.assertEqual(data['addons/' + key], raw)
             aid, rel = key.split('/', 1)
-            self.assertEqual(self.managed()._digest(aid, rel, raw), self.policy['source_adapters'][key]['upstream_sha256'])
+            self.assertEqual(self.managed()._digest(aid, rel, raw), next(v['upstream_sha256'] for v in self.m._adapter_variants(self.policy['source_adapters'][key])
+                             if v['upstream_version'] == '6.7.99'))
             self.assertEqual(self.managed()._digest(aid, rel, raw + b'foreign'), hashlib.sha256(raw + b'foreign').hexdigest())
         before = dict(data)
         with self.assertRaises(ValueError): apply(data, dict(candidates, **{next(iter(candidates)):b'foreign'}))

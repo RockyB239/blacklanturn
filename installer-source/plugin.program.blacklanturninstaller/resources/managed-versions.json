@@ -83,6 +83,12 @@
         "managed_version": "1:6.7.92+blacklanturn.1",
         "upstream_sha256": "29f0d70e7ee0555c374ce76592c6108b71613867f15b1d44365508fce3c96b3e",
         "managed_sha256": "9251deb93dcf377a021ba1238548e06bc625c11580cd5ea5259a7a96f823c3a4"
+      },
+      {
+        "upstream_version": "6.8.00",
+        "managed_version": "1:6.8.00+blacklanturn.1",
+        "upstream_sha256": "879343065f8c9a515fa76dfabb8faa7c375047ca9b0ae179cbbaae2f0f771b5e",
+        "managed_sha256": "a9c36fee5509e46619376f9161879b63a310491b1649326252b0122e6427caf4"
       }
     ],
     "script.module.jurialmunkey": [
@@ -122,10 +128,15 @@
   },
   "source_adapters": {
     "plugin.video.umbrella/resources/lib/modules/control.py": {
-      "upstream_version": "6.7.99",
-      "upstream_sha256": "aa4735f09be1bab2a3f0b35575b2e9ab9529432f2a09987d9abb599124fcbfc1",
-      "managed_sha256": "d37613b798eb0264680935fbad471e80f0dcbf1b97adb75a685f2972e6aef4a9",
+      "upstream_version": "6.8.00",
+      "upstream_sha256": "f0bf8b18d1019e6fc9c38bfb56eaeb37b7b0c2e90ebdcf33d42e12b7f548a29d",
+      "managed_sha256": "8876a6c19edb387e2ca5ffea8a6b3bb13d39d769f3adf0b64b82bd6ed7488b95",
       "legacy_variants": [
+        {
+          "upstream_version": "6.7.99",
+          "upstream_sha256": "aa4735f09be1bab2a3f0b35575b2e9ab9529432f2a09987d9abb599124fcbfc1",
+          "managed_sha256": "d37613b798eb0264680935fbad471e80f0dcbf1b97adb75a685f2972e6aef4a9"
+        },
         {
           "upstream_version": "6.7.98",
           "upstream_sha256": "3b742abd6915ddd9f6b66bebf29b6aceecd0b78e68e43e273b8937a76cb07dcd",
@@ -144,10 +155,15 @@
       ]
     },
     "plugin.video.umbrella/resources/lib/database/cache.py": {
-      "upstream_version": "6.7.99",
-      "upstream_sha256": "8c636d1fd6ec3a21ca8e39aa9fd24b2c7009a13898ef5c5bc09d08785de4b2ce",
-      "managed_sha256": "dc88ab7ce38e02681d04d0e566be323ea58d8fbaabc7408ca397ecd446fcbb22",
+      "upstream_version": "6.8.00",
+      "upstream_sha256": "0c986b0f9e12a3c1797b462777386f24700af0fa0f76067996299a91027434fa",
+      "managed_sha256": "28548645af695efd7c14fad693d2f4949cf1291a43adeedf6577fff29b7ea49b",
       "legacy_variants": [
+        {
+          "upstream_version": "6.7.99",
+          "upstream_sha256": "8c636d1fd6ec3a21ca8e39aa9fd24b2c7009a13898ef5c5bc09d08785de4b2ce",
+          "managed_sha256": "dc88ab7ce38e02681d04d0e566be323ea58d8fbaabc7408ca397ecd446fcbb22"
+        },
         {
           "upstream_version": "6.7.98",
           "upstream_sha256": "8c636d1fd6ec3a21ca8e39aa9fd24b2c7009a13898ef5c5bc09d08785de4b2ce",
@@ -183,5 +199,8 @@
         "managed_sha256": "6a71daa3d59c19f7fa32170bb786b0aad28a311988bd55f06dcd1143258de254"
       }
     ]
+  },
+  "umbrella_installer_minimum": {
+    "6.8.00": "1.0.56"
   }
 }

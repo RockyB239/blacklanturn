@@ -1,0 +1,20 @@
+# BlackLanturn Preview Controller shelf labels
+msgid ""
+msgstr ""
+"Project-Id-Version: script.blacklanturn.preview\n"
+"Language: mn_mn\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+msgctxt "#32000"
+msgid "Classic Favourites"
+msgstr "Сонгодог дуртай бүтээлүүд"
+
+msgctxt "#32001"
+msgid "Modern Favourites"
+msgstr "Орчин үеийн дуртай бүтээлүүд"
+
+msgctxt "#32002"
+msgid "2020s Favourites"
+msgstr "2020-иод оны дуртай бүтээлүүд"

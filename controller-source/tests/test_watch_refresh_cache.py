@@ -118,9 +118,11 @@ class WatchRefreshCache(unittest.TestCase):
             self.assertIsNone(HomeRowSnapshots(home.path,'other-account',clock=lambda:now[0]).get(H))
             self.assertFalse(home.archive_enabled)
             now[0]+=1
+            self.assertIsNone(home.get(H))
+            self.assertIsNotNone(public.get(P))
+            now[0]=1000+30*86400+1
             self.assertIsNone(public.get(P))
             self.assertIsNone(public.get(P+'&page='+str(public.max_rows+2)))
-            self.assertIsNone(home.get(H))
 
     def test_running_and_queued_pre_refresh_workers_cannot_repopulate_caches(self):
         with tempfile.TemporaryDirectory() as folder:

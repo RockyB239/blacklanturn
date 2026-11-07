@@ -87,12 +87,12 @@ def save_home_display(owner,store,root):
                     or cache.scope!=provider_scope or getattr(owner,'generation',None)!=generation):return False
             rows=[];projection=HeroProjection(owner)
             for n,definition in enumerate(owner.page_definitions[:2]):
-                if set(definition)-{'label','path','enabled'} or not home_path(definition.get('path')):return False
+                if set(definition)-{'label','_canonical_label','path','enabled'} or not home_path(definition.get('path')):return False
                 raw=_items(copy.deepcopy(owner.raw_title_row(n)),path_filter=home_item_path,max_items=40)
                 if not raw:return False
                 from browse_controls import is_next_page,page_card
                 heroes=[projection.render(owner,page_card('next',item['file']) if is_next_page(item,definition['path']) else item) for item in raw]
-                rows.append({'label':definition['label'],'path':definition['path'],'items':raw,'heroes':heroes})
+                rows.append({'label':definition.get('_canonical_label',definition['label']),'path':definition['path'],'items':raw,'heroes':heroes})
             from icon_packs import icon_path,selected_pack
             from navigation_core import status_settings,sidebar_layout
             sidebar=[{'id':entry['id'],'label':entry['label'],'icon':icon_path(root,entry['icon'],selected_pack(owner.config))} for entry in owner.navigation_items]
@@ -133,8 +133,8 @@ def validated_record(path,scope):
 
 def adoption_definitions(config,arrange,record):
     """Rebuild the complete live catalogue, matching only its visible saved pair."""
-    from discovery_core import page_rows
+    from discovery_core import display_page_rows, page_rows
     definitions=list(arrange(page_rows(config,'Home')))
     visible=record['rows']
     if len(definitions)<2 or any((definition.get('label'),definition.get('path'))!=(row['label'],row['path']) for definition,row in zip(definitions[:2],visible)):return None
-    return definitions
+    return display_page_rows('Home',definitions)

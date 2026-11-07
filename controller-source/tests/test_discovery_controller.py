@@ -1,7 +1,8 @@
 """Exercise the actual Kodi controller methods with small native-API substitutes."""
-import ast,os,sys,threading,unittest,copy
+import ast,os,sys,threading,unittest,copy,json,re
 from pathlib import Path
 from types import SimpleNamespace,MethodType
+from unittest.mock import patch
 from urllib.parse import parse_qs,urlsplit
 sys.path.insert(0,str(Path(__file__).parents[1]/'addon'))
 from live_core import PageHistory,row_items,my_stuff_rows,show_identity
@@ -9,6 +10,7 @@ from discovery_core import window_shift
 from episode_ui import episode_item
 from youtube_core import resume_allowed,automatic_preview
 from row_feedback import trim_row_cache,row_message
+from row_layout import row_key
 from search_ui import discovery_result,best_matches,clear_search_selection,entity_kind
 from filtered_pages import provider_path,upstream_path,needs_fill,first_page_minimum,first_page_keep
 SOURCE=Path(os.environ.get('BL_CONTROLLER_SOURCE',str(Path(__file__).parents[1]/'addon/live_review.py')))
@@ -39,6 +41,143 @@ def methods(names,namespace):
   namespace["show_row_window"]=with_cache(namespace["show_row_window"],namespace)
  return namespace
 class DiscoveryController(unittest.TestCase):
+ def favorite_pages(self):
+  catalog=Path(__file__).parents[2]/'installer-source/plugin.program.blacklanturninstaller/resources/discovery-lineup.json'
+  pages=json.loads(catalog.read_text(encoding='utf-8'))['defaults']['Categories']
+  return {p['id']:p for p in pages if p['id'] in ('8af7d252f2941013','b5b141525ce1d467','bl-movies-standup')}
+
+ def kodi_addon_language(self, locale):
+  root=Path(__file__).parents[1]/'addon/resources/language'
+  strings={}
+  for language in ('en_gb',locale):
+   path=root/('resource.language.'+language)/'strings.po'
+   if path.exists():
+    entries=re.findall(r'^msgctxt "#(\d+)"\nmsgid (.+)\nmsgstr (.+)$',path.read_text(encoding='utf-8'),re.M)
+    strings.update({int(key):json.loads(source if language=='en_gb' else translated)
+                    for key,source,translated in entries if language=='en_gb' or json.loads(translated)})
+  def addon(addon_id):
+   self.assertEqual(addon_id,'script.blacklanturn.preview')
+   return SimpleNamespace(getLocalizedString=lambda key:strings.get(key,''))
+  core={1037:'Complementos de vídeo',1043:'Complementos de programas',19676:'Drama'} if locale=='es_es' else {}
+  return patch.dict(sys.modules,{'xbmcaddon':SimpleNamespace(Addon=addon),
+                                 'xbmc':SimpleNamespace(getLocalizedString=lambda key:core.get(key,''))})
+
+ def test_favorites_default_shelves_use_kodi_language_in_cold_and_warm_rows(self):
+  pages=self.favorite_pages()
+  self.assertEqual(len(pages),3)
+  for locale,modern,classic,decade in (
+   ('en_gb','Modern Favourites','Classic Favourites','2020s Favourites'),
+   ('en_us','Modern Favorites','Classic Favorites','2020s Favorites'),
+   ('es_es','Favoritos modernos','Favoritos clásicos','Favoritos de los años 2020'),
+   ('ja_jp','近年の人気作品','往年の人気作品','2020年代の人気作品'),
+   ('unknown','Modern Favourites','Classic Favourites','2020s Favourites'),
+  ):
+   for page in pages.values():
+    with self.subTest(locale=locale,page=page['id']):
+     rows=page['rows'];before=copy.deepcopy(rows)
+     state,calls,_=self.state()
+     state.load_browse_sources=lambda:None
+     route={'page_id':page['id'],'label':page['label'],'section':page['section'],'rows':rows}
+     with self.kodi_addon_language(locale):
+      methods(['load_navigation_page'],{})['load_navigation_page'](state,route)
+      standup_2010s='Monólogos de los años 2010' if locale=='es_es' else 'Stand-up from the 2010s'
+      expected=[decade,standup_2010s] if page['id']=='bl-movies-standup' else [modern,classic]
+      self.assertEqual(state.getProperty('row1'),expected[0])
+      self.assertTrue(state.shift_rows(1,1))
+      self.assertEqual(state.getProperty('row1'),expected[1])
+      self.assertTrue(state.shift_rows(-1,0))
+      self.assertEqual(state.getProperty('row1'),expected[0])
+      self.assertTrue(state.shift_rows(1,1))
+      self.assertEqual(state.getProperty('row1'),expected[1])
+     self.assertEqual(calls,[r['path'] for r in rows[:3]])
+     self.assertEqual(rows,before)
+     self.assertEqual([row_key(row) for row in state.page_definitions],[row_key(row) for row in rows])
+
+ def test_favorites_custom_shelf_names_are_kept(self):
+  page=self.favorite_pages()['8af7d252f2941013'];default=page['rows'][2]
+  custom=[dict(default,label='My classic favourites'),dict(default,path=default['path']+'&with_genres=18')]
+  state,_,_=self.state();state.active_page=page['id']
+  with self.kodi_addon_language('es_es'):
+   state.set_rows(custom)
+   self.assertEqual(state.getProperty('row0'),'My classic favourites')
+   self.assertEqual(state.getProperty('row1'),'Classic favourites')
+   state.active_page='user-created-page';state.set_rows([default])
+   self.assertEqual(state.getProperty('row0'),'Classic favourites')
+
+ def test_favorites_editor_shows_localized_label_without_storing_it(self):
+  page=self.favorite_pages()['8af7d252f2941013'];rows=copy.deepcopy(page['rows'])
+  choices=iter([2,1,2,1,-1]);menu_calls=[];inputs=[];names=iter(['Favoritos clásicos','Clásicos de casa'])
+  def select(heading,options):
+   menu_calls.append((heading,options));return next(choices)
+  def edit(_title,defaultt):
+   inputs.append(defaultt);return next(names)
+  saves=[];state=SimpleNamespace(alive=True,save=lambda:saves.append(copy.deepcopy(rows)))
+  dialog=SimpleNamespace(select=select,input=edit)
+  editor=methods(['edit_rows'],{'xbmcgui':SimpleNamespace(Dialog=lambda:dialog)})['edit_rows']
+  with self.kodi_addon_language('es_es'):
+   editor(state,rows,page['label'],page['id'])
+  self.assertIn('Favoritos clásicos',menu_calls[0][1])
+  self.assertEqual(inputs,['Favoritos clásicos','Favoritos clásicos'])
+  self.assertEqual(saves[0],page['rows'])
+  self.assertEqual(rows[2],dict(page['rows'][2],label='Clásicos de casa'))
+
+ def test_static_discovery_roots_and_pages_are_localized_by_default_identity(self):
+  path=Path(__file__).parents[2]/'installer-source/plugin.program.blacklanturninstaller/resources/discovery-lineup.json'
+  catalog=json.loads(path.read_text(encoding='utf-8'))['defaults']
+  movies=catalog['Movies']; action=catalog['Genres'][0]
+  renamed=dict(action,label='My Action'); custom=dict(movies[0],path=movies[0]['path']+'&test=owner')
+  state,calls,_=self.state();state.section='Movies';state.active_page=None
+  state.load_browse_sources=lambda:None
+  load_page=methods(['load_navigation_page'],{})['load_navigation_page']
+  with self.kodi_addon_language('fr_fr'):
+   state.set_rows([movies[0],custom])
+   self.assertEqual(state.getProperty('row0'),'Recommandé pour vous')
+   self.assertEqual(state.getProperty('row1'),movies[0]['label'])
+   self.assertEqual([row_key(r) for r in state.page_definitions],[row_key(r) for r in (movies[0],custom)])
+  with self.kodi_addon_language('es_es'):
+   load_page(state,dict(action,page_id=action['id']))
+   self.assertEqual(state.getProperty('eyebrow'),'MOVIES / ACCIÓN')
+   self.assertEqual(state.getProperty('row0'),'Estrenos recientes')
+   self.assertEqual(state.getProperty('row1'),'Espías y operaciones encubiertas')
+   load_page(state,dict(renamed,page_id=action['id']))
+   self.assertEqual(state.getProperty('eyebrow'),'MOVIES / MY ACTION')
+  self.assertEqual(calls[:2],[movies[0]['path'],custom['path']])
+
+ def test_localized_home_adopts_existing_canonical_display_record(self):
+  from light_home_model import adoption_definitions
+  base='plugin://plugin.video.themoviedb.helper/?info=trakt_recommendations&tmdb_type='
+  rows=[{'label':label,'path':base+kind+'&nextpage=true&widget=true'} for label,kind in
+        (('Recommended shows','tv'),('Recommended movies','movie'))]
+  config={'Home':copy.deepcopy(rows)};record={'rows':copy.deepcopy(rows)}
+  with self.kodi_addon_language('es_es'):
+   definitions=adoption_definitions(config,list,record)
+  self.assertEqual([r['label'] for r in definitions],['Series recomendadas','Películas recomendadas'])
+  self.assertEqual([row_key(r) for r in definitions],[row_key(r) for r in rows])
+  self.assertEqual(config['Home'],rows)
+  self.assertEqual(record['rows'],rows)
+
+ def test_my_stuff_collection_matching_builtin_name_remains_owner_labeled(self):
+  from discovery_localization import display_page_rows
+  default={'label':'Saved on this device','path':'','local_items':[]}
+  owner=dict(default,id='personal-collection')
+  with self.kodi_addon_language('es_es'):
+   display=display_page_rows('My Stuff',[default,owner])
+  self.assertEqual([r['label'] for r in display],['Guardado en este dispositivo','Saved on this device'])
+
+ def test_localized_streaming_names_keep_canonical_adaptive_ranking(self):
+  from streaming_shelves import service_shelves
+  path='plugin://plugin.video.themoviedb.helper/?info=discover&tmdb_type=movie&with_watch_providers=999999&watch_region=US&with_id=true&nextpage=true&widget=false'
+  with self.kodi_addon_language('es_es'):
+   result=service_shelves('Brand name',path,adaptive=True)
+  rows=result['rows'];layout=rows[0]['_streaming_layout']
+  layout.baseline=[{'genre':['Drama','Horror']}]
+  layout.order(rows)
+  self.assertEqual(result['heading'],'Brand name · US / TMDB & JUSTWATCH')
+  self.assertEqual(rows[0]['label'],'Ver todas las películas')
+  self.assertEqual(rows[1]['label'],'Drama')
+  self.assertEqual(rows[2]['label'],'Terror')
+  self.assertTrue(rows[2]['path'].endswith('&with_genres=27'))
+
  def test_my_stuff_scrolls_to_local_saves_and_back_without_extra_provider_calls(self):
   saved=[{'file':'saved-title','resume':{'position':25,'total':100}}]
   s,calls,controls=self.state();s.section='My Stuff';s.adaptive_browsing=True

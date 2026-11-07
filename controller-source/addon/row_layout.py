@@ -11,7 +11,7 @@ def row_key(row):
         identity='youtube-category\0'+str(row.get('label','')).strip().casefold()
     else:
         u=urlsplit(path);q=urlencode(sorted((k,v) for k,v in parse_qsl(u.query,keep_blank_values=True) if k not in ('cacheonly','reload','update_listing')))
-        identity=u._replace(query=q).geturl()+'\0'+str(row.get('label',''))
+        identity=u._replace(query=q).geturl()+'\0'+str(row.get('_canonical_label',row.get('label','')))
     return hashlib.sha256(identity.encode()).hexdigest()
 
 class RowLayouts:

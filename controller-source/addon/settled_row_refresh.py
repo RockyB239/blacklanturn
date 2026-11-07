@@ -22,13 +22,18 @@ def defer_refreshes(owner,pending,focus_slot=None,now=None):
     home=getattr(owner,'home_snapshot_cache',None);delayed=[];immediate=[]
     for n,definition in pending:
         path=definition.get('path','')
+        streaming=False
+        if definition.get('_explicit_streaming'):
+            from streaming_cache import streaming_title_route
+            streaming=streaming_title_route(path)
         eligible=(definition.get('_snapshot_refresh') and not definition.get('_settled_refresh')
-                  and public_path(path) and not (home is not None and home.path_allowed(path)))
+                  and not definition.get('_streaming_retry')
+                  and (streaming or (public_path(path) and not (home is not None and home.path_allowed(path)))))
         (delayed if eligible else immediate).append((n,definition))
     if delayed:
         owner.deferred_public_refresh={'pending':delayed,'focus':focus_slot,'created':time.monotonic() if now is None else now,
             'generation':owner.generation,'revision':owner.result_cache.revision,'serial':owner.row_request_serial,
-            'paths':tuple(owner.paths),'tokens':{n:getattr(owner,'path_tokens',{}).get(n,0) for n,_ in delayed},
+            'paths':{n:owner.paths[n] for n,_ in delayed},'tokens':{n:getattr(owner,'path_tokens',{}).get(n,0) for n,_ in delayed},
             'lifetime':getattr(owner,'window_lifetime',None)}
     return immediate
 
@@ -36,7 +41,7 @@ def drain_refreshes(owner,now=None,dialog=lambda:0):
     saved=getattr(owner,'deferred_public_refresh',None)
     if saved is None:return False
     def current():return (getattr(owner,'alive',False) and owner.generation==saved['generation'] and owner.result_cache.revision==saved['revision']
-             and owner.row_request_serial==saved['serial'] and tuple(owner.paths)==saved['paths']
+             and owner.row_request_serial==saved['serial'] and all(owner.paths[n]==path for n,path in saved['paths'].items())
              and getattr(owner,'window_lifetime',None) is saved['lifetime']
              and all(getattr(owner,'path_tokens',{}).get(n,0)==token for n,token in saved['tokens'].items())
              and getattr(owner,'section','') in ('Movies','Shows') and getattr(owner,'mode','')=='home')

@@ -1,8 +1,9 @@
-"""Short-lived streaming availability snapshots, loaded only on demand."""
+"""Bounded streaming display snapshots, loaded only on demand."""
+from copy import deepcopy
 import re
 from urllib.parse import parse_qs, urlsplit
 
-from public_rows import PublicRowSnapshots, _item_path, _items
+from public_rows import MAX_AGE, PublicRowSnapshots, _item_path, _items
 
 
 def _query(path):
@@ -89,7 +90,11 @@ class StreamingRows(PublicRowSnapshots):
 
     def __init__(self, directory, scope, mode, **kwargs):
         self.mode = mode
-        self.max_age = 300 if mode == 'catalog' else 120
+        self.fresh_age = 300 if mode == 'catalog' else 15 * 60
+        self.max_age = self.fresh_age if mode == 'catalog' else MAX_AGE
+        if mode == 'titles':
+            self.max_rows = 32
+            self.max_bytes = 2 * 1024 * 1024
         super().__init__(directory / ('streaming-' + mode + '.json'), scope, **kwargs)
 
     @classmethod
@@ -135,13 +140,21 @@ class StreamingRows(PublicRowSnapshots):
                     return False
         return True
 
-    def get(self, path):
+    def display(self, path, *, fresh_only=False):
+        """Read the last successful row without advancing its refresh deadline."""
         with self.lock:
+            self._prune()
             row = self.rows.get(path)
-            if row and self.clock() - row['time'] >= self.max_age:
-                self.rows.pop(path)
-            files = super().get(path)
-            return files if files and self._matches(path, files) else None
+            if row is None:
+                return None, False
+            refresh = self.clock() - row['time'] >= self.fresh_age
+            if refresh and (fresh_only or self.mode == 'catalog'):
+                return None, False
+            files = row['items']
+            return (deepcopy(files), refresh) if self._matches(path, files) else (None, False)
+
+    def get(self, path):
+        return self.display(path, fresh_only=True)[0]
 
     def put(self, path, files, revision=None):
         return bool(files and self._matches(path, files) and super().put(path, files, revision=revision))
@@ -149,7 +162,7 @@ class StreamingRows(PublicRowSnapshots):
     def put_warmed(self, path, files, revision):
         with self.lock:
             existing = self.rows.get(path)
-            if existing and 0 <= self.clock() - existing['time'] < self.max_age:
+            if existing and 0 <= self.clock() - existing['time'] < self.fresh_age:
                 return False
             return self.put(path, files, revision=revision)
 

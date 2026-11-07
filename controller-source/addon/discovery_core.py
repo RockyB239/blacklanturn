@@ -1,6 +1,7 @@
 """Owner-configured discovery pages, with lossless legacy migration."""
 from copy import deepcopy
 from hashlib import sha256
+from discovery_localization import display_page_rows, localized_page_label, localized_shelf_label
 from live_core import valid_source
 
 def migrate_pages(config):
