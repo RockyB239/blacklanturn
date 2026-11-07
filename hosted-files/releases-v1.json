@@ -2,6 +2,88 @@
   "schema": 1,
   "releases": [
     {
+      "id": "blacklanturn-general-1.1.72-r0",
+      "edition": "general",
+      "version": "1.1.72",
+      "revision": 0,
+      "title": "BlackLanturn Build 1.1.72",
+      "summary": "Faster Fire TV Home and easier browsing across streaming services.",
+      "sections": [
+        {
+          "heading": "Home on Fire TV",
+          "bullets": [
+            "Show the first Home rows from saved artwork and cards for the current account and layout.",
+            "Use normal Home loading when saved cards are unavailable and refresh the rows after startup."
+          ]
+        },
+        {
+          "heading": "Streaming services",
+          "bullets": [
+            "Show Jump to row before browsing every shelf and load the selected shelf directly.",
+            "Reuse recently prepared shelves when the region and filters match."
+          ]
+        }
+      ],
+      "files": {
+        "addons/script.blacklanturn.preview/action_panel.py": "acc9d4d973242afa43ba6994ab74ff13470fbede78471abfa85e0794f4396b54",
+        "addons/script.blacklanturn.preview/action_panel_model.py": "102823a3a33b4478e8f4e7cafe43975f6439b3a7a725dad7c1b319e237befc7d",
+        "addons/script.blacklanturn.preview/addon.xml": "abb15156cbe464bd20183b9c46f75157c6cd102ccc06000c6078160a0e0dd069",
+        "addons/script.blacklanturn.preview/default.py": "0477376f86f86f3e55ce8898accc82e0224ed1976c2bdeb54495e4f50436e2e3",
+        "addons/script.blacklanturn.preview/light_home_bootstrap.py": "a26fa0d150647226af761e8d523e7d3742fe9e300a12f0805a1a7e286562d9a9",
+        "addons/script.blacklanturn.preview/light_home_cards.py": "e8b6c3232237727bc739ddf7c3b2fcbc320ce2175c8c9319a3cb82529666e80b",
+        "addons/script.blacklanturn.preview/light_home_fast.py": "7ed930f1e08937d0f2c18be72c4ed7a609b6e9f0f3a5723cde80ecf254074ab0",
+        "addons/script.blacklanturn.preview/light_home_model.py": "c6e4c41a51c4e8c66ffdd8f657df49ba258bcfdcf1badcb225615c4177a5af36",
+        "addons/script.blacklanturn.preview/light_home_view.py": "02dbc0a31ed231a3eea6e38dabbce4fd6251237a031e0c8b6e8b7baa4fd99bbb",
+        "addons/script.blacklanturn.preview/live_review.py": "493201f034590ae0eff388a5ebb9970fb27d9f49b364303c7469aec302f4b542",
+        "addons/script.blacklanturn.preview/live_runtime.py": "4f63dd662d825432c21688cbfe1d46d8413e0582530f87ec0de188475ad92070",
+        "addons/script.blacklanturn.preview/provider_work.py": "f91e53d539086b707e6a3da464a4a7f5bf904805459c27df41703d64da700a54",
+        "addons/script.blacklanturn.preview/public_rows.py": "3960911ccf8d3362e670b2b9f5b942da9bdd9556359cb6f621f05bc9000755ac",
+        "addons/script.blacklanturn.preview/streaming_cache.py": "a4e5e4f71275e43e20aa6bb9c364a32fe9e64d46d5a9a99f4144df61a81d21d7",
+        "addons/script.blacklanturn.preview/streaming_shelves.py": "40cd100930ee53c132773514d3a2108620ad3467873125267ebb633dc52d482d"
+      }
+    },
+    {
+      "id": "blacklanturn-apple-1.1.72-r0",
+      "edition": "apple",
+      "version": "1.1.72",
+      "revision": 0,
+      "title": "BlackLanturn Build 1.1.72",
+      "summary": "Faster Fire TV Home and easier browsing across streaming services.",
+      "sections": [
+        {
+          "heading": "Home on Fire TV",
+          "bullets": [
+            "Show the first Home rows from saved artwork and cards for the current account and layout.",
+            "Use normal Home loading when saved cards are unavailable and refresh the rows after startup."
+          ]
+        },
+        {
+          "heading": "Streaming services",
+          "bullets": [
+            "Show Jump to row before browsing every shelf and load the selected shelf directly.",
+            "Reuse recently prepared shelves when the region and filters match."
+          ]
+        }
+      ],
+      "files": {
+        "addons/script.blacklanturn.preview/action_panel.py": "acc9d4d973242afa43ba6994ab74ff13470fbede78471abfa85e0794f4396b54",
+        "addons/script.blacklanturn.preview/action_panel_model.py": "102823a3a33b4478e8f4e7cafe43975f6439b3a7a725dad7c1b319e237befc7d",
+        "addons/script.blacklanturn.preview/addon.xml": "abb15156cbe464bd20183b9c46f75157c6cd102ccc06000c6078160a0e0dd069",
+        "addons/script.blacklanturn.preview/default.py": "0477376f86f86f3e55ce8898accc82e0224ed1976c2bdeb54495e4f50436e2e3",
+        "addons/script.blacklanturn.preview/light_home_bootstrap.py": "a26fa0d150647226af761e8d523e7d3742fe9e300a12f0805a1a7e286562d9a9",
+        "addons/script.blacklanturn.preview/light_home_cards.py": "e8b6c3232237727bc739ddf7c3b2fcbc320ce2175c8c9319a3cb82529666e80b",
+        "addons/script.blacklanturn.preview/light_home_fast.py": "7ed930f1e08937d0f2c18be72c4ed7a609b6e9f0f3a5723cde80ecf254074ab0",
+        "addons/script.blacklanturn.preview/light_home_model.py": "c6e4c41a51c4e8c66ffdd8f657df49ba258bcfdcf1badcb225615c4177a5af36",
+        "addons/script.blacklanturn.preview/light_home_view.py": "02dbc0a31ed231a3eea6e38dabbce4fd6251237a031e0c8b6e8b7baa4fd99bbb",
+        "addons/script.blacklanturn.preview/live_review.py": "493201f034590ae0eff388a5ebb9970fb27d9f49b364303c7469aec302f4b542",
+        "addons/script.blacklanturn.preview/live_runtime.py": "4f63dd662d825432c21688cbfe1d46d8413e0582530f87ec0de188475ad92070",
+        "addons/script.blacklanturn.preview/provider_work.py": "f91e53d539086b707e6a3da464a4a7f5bf904805459c27df41703d64da700a54",
+        "addons/script.blacklanturn.preview/public_rows.py": "3960911ccf8d3362e670b2b9f5b942da9bdd9556359cb6f621f05bc9000755ac",
+        "addons/script.blacklanturn.preview/streaming_cache.py": "a4e5e4f71275e43e20aa6bb9c364a32fe9e64d46d5a9a99f4144df61a81d21d7",
+        "addons/script.blacklanturn.preview/streaming_shelves.py": "40cd100930ee53c132773514d3a2108620ad3467873125267ebb633dc52d482d"
+      }
+    },
+    {
       "id": "blacklanturn-general-1.1.67-r0",
       "edition": "general",
       "version": "1.1.67",

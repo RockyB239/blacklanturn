@@ -1,0 +1,20 @@
+{
+  "title": "BlackLanturn Build 1.1.72",
+  "summary": "Faster Fire TV Home and easier browsing across streaming services.",
+  "sections": [
+    {
+      "heading": "Home on Fire TV",
+      "bullets": [
+        "Show the first Home rows from saved artwork and cards for the current account and layout.",
+        "Use normal Home loading when saved cards are unavailable and refresh the rows after startup."
+      ]
+    },
+    {
+      "heading": "Streaming services",
+      "bullets": [
+        "Show Jump to row before browsing every shelf and load the selected shelf directly.",
+        "Reuse recently prepared shelves when the region and filters match."
+      ]
+    }
+  ]
+}
